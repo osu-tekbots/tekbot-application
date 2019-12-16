@@ -96,7 +96,7 @@ if ($loggedIn) {
     
     // Employee only
     if (isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee') {
-        $buttons['Employee'] = 'pages/employeeEquipment.php';
+        $buttons['Employee'] = 'pages/employeeInterface.php';
     }
 }
 
