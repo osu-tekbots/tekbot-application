@@ -21,16 +21,16 @@ include_once PUBLIC_FILES . '/modules/header.php';
 <br><br><br>
 <div class="container">
 <div class="row">
-    <div class="col-sm-4">
+    <div class="col">
         <br>
         <hr class="my-4">
         <h4 class="text-center">Student Login</h4>
-        <p class="text-center">*Logging in this method does not allow you to create projects*</p>
         <a class="login" href="auth/index.php?provider=onid" style="text-decoration:none;">
             <button id="onidBtn" class="btn btn-lg btn-warning btn-block text-uppercase" type="submit">
                 <i class="fas fa-book mr-2"></i> Student Login (ONID)
             </button>
         </a>
+        <!--
         <hr class="my-4">
         <h4 class="text-center">Project Proposer Login</h4>
         <a class="login" href="auth/index.php?provider=google" style="text-decoration:none;">
@@ -39,6 +39,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </button>
         </a>
         <br/>
+        -->
         <!--
         <a class="login" href="auth/index.php?provider=microsoft" style="text-decoration:none;">
             <button id="microsoftBtn" class="btn btn-lg btn-success btn-block text-uppercase" type="submit">
@@ -56,6 +57,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 		-->
         <hr class="my-4">
     </div>
+    <!--
 	<div class="col-sm-8">
         <center>
             <br>
@@ -63,6 +65,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             <br/>
         </center>
 	</div>
+    -->
 </div>
 </div>
 

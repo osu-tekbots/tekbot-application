@@ -123,38 +123,106 @@ function renderAdminReviewPanel($project, $categories) {
 
  function renderEmployeeSidebar() {
      echo'
-
+    <br><br>
      <!-- Sidebar -->
      <ul class="sidebar navbar-nav">
-         <li class="nav-item dropdown">
-            <br>
+        <li class="nav-item dropdown">
              <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                 <i class="fas fa-fw fa-folder"></i>
-                 <span>Equipment Checkout</span>
+                <i class="fas fa-fw fa-tools"></i>
+                <span>Equipment Checkout</span>
              </a>
              <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                 <h6 class="dropdown-header">Handout:</h6>
-                 <a class="dropdown-item" href="pages/employeeEquipment.php">Equipment Handout</a>
+                 <h6 class="dropdown-header">Reserved/Checked Out:</h6>
+                 <a class="dropdown-item" href="pages/employeeEquipment.php">Checkout Equipment</a>
                  <div class="dropdown-divider"></div>
                  <h6 class="dropdown-header">Adjust Content:</h6>
                  <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
                  <a class="dropdown-item" href="blank.html">Info</a>
              </div>
-         </li>
+        </li>
 
+        <li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-hand-rock"></i>
+            <span>Kit Handout</span>
+         </a>
+         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+             <h6 class="dropdown-header">Handout:</h6>
+             <a class="dropdown-item" href="pages/employeeKitHandout.php">Kit Handout</a>
+             <div class="dropdown-divider"></div>
+             <h6 class="dropdown-header">View:</h6>
+             <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
+             <a class="dropdown-item" href="blank.html">Info</a>
+         </div>
+        </li>
 
-             
-
-         <li class="nav-item">
-             <a class="nav-link" href="pages/adminFees.php">
-                 <i class="fas fa-fw fa-chart-area"></i>
-                 <span>Fees</span></a>
-         </li>
-         <li class="nav-item">
-             <a class="nav-link" href="pages/adminUser.php">
-                 <i class="fas fa-fw fa-table"></i>
-                 <span>Users</span></a>
-         </li>
+        
+        <li class="nav-item">
+            <a class="nav-link" href="pages/adminFees.php">
+                <i class="fas fa-fw fa-dollar-sign"></i>
+                <span>Fees</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="pages/adminUser.php">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li class="nav-item">
+        <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/Inventory/index.php">
+            <i class="fas fa-fw fa-pallet"></i>
+            <span>Inventory</span>
+        </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/3dprinter.php">
+                <i class="fas fa-fw fa-print"></i>
+                <span>3D Printing</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/lasercutter.php">
+                <i class="fas fa-fw fa-cut"></i>
+                <span>Laser Cutting</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://trello.com/b/XUktYdsk/tekbots/">
+                <i class="fab fa-fw fa-trello"></i>
+                <span>Trello</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/labs/index.php">
+                <i class="fas fa-fw fa-ticket-alt"></i>
+                <span>Lab Tickets</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/lockers/index.php">
+                <i class="fas fa-fw fa-door-closed"></i>
+                <span>Locker Checkout</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://secure.touchnet.net/sso/login?service=https%3A%2F%2Fsecure.touchnet.net%2Fcentral%2F%3Fcmmserviceurltoken%3D9a7e7cf6-986d-4f2e-841d-11232a37763a">
+                <i class="fas fa-fw fa-network-wired"></i>
+                <span>TouchNet</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">
+                <i class="fas fa-fw fa-store"></i>
+                <span>OSU Marketplace</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
+                <i class="fas fa-fw fa-kaaba"></i>
+                <span>HWeekend</span>
+            </a>
+        </li>
 
      </ul>
 

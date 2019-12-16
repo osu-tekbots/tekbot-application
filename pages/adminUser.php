@@ -99,7 +99,7 @@ foreach ($users as $user){
 
 			<div class="container-fluid">
 				<?php 
-					renderEmployeeBreadcrumb('Users', 'View');
+					renderEmployeeBreadcrumb('Employee', 'Users');
 					
 					if (empty($users)){
 						echo "

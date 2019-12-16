@@ -58,7 +58,7 @@ $equipments = $dao->getAdminEquipment();
 
 				<!-- Breadcrumbs-->
 				<?php
-					renderEmployeeBreadcrumb("Employee", "Browse");
+					renderEmployeeBreadcrumb("Employee", "Edit Equipment");
 				?>
 					<button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button" data-toggle="modal"
 					data-target="#newEquipmentModal" id="openNewEquipmentModalBtn">Create New Equipment</button>

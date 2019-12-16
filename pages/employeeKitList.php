@@ -173,7 +173,7 @@ foreach ($checkedoutEquipment as $c){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Equipment Checkout');
+                    renderEmployeeBreadcrumb('Equipment', 'Checkout');
 
 		
 				echo "
