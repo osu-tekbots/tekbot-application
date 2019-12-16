@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS tekbotFees;
+DROP TABLE IF EXISTS tekbotFeeType;
+DROP TABLE IF EXISTS tekbotCheckout;
+DROP TABLE IF EXISTS tekbotCheckoutStatus;
+DROP TABLE IF EXISTS tekbotEquipmentImage;
+DROP TABLE IF EXISTS tekbotEquipment;
+DROP TABLE IF EXISTS tekbotEquipmentStatus;
+DROP TABLE IF EXISTS tekbotEquipmentHealth;
+DROP TABLE IF EXISTS tekbotEquipmentCategory;
+DROP TABLE IF EXISTS tekbotUser;
+DROP TABLE IF EXISTS tekbotUserAccessLevel; 

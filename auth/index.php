@@ -63,13 +63,13 @@ if ($provider) {
 }
 
 // If we get to this point, we have authenticated successfully. Redirect back to the appropriate page.
-switch ($_SESSION['accessLevel']) {
+switch ($_SESSION['userAccessLevel']) {
     case 'Student':
-        $redirect = $configManager->getBaseUrl() . 'pages/browseProjects.php';
+        $redirect = $configManager->getBaseUrl() . 'pages/myProfile.php';
         break;
 
-    case 'Proposer':
-        $redirect = $configManager->getBaseUrl() . 'pages/myProjects.php';
+    case 'Employee':
+        $redirect = $configManager->getBaseUrl() . 'pages/employeeInterface.php';
         break;
 
     case 'Admin':

@@ -3,8 +3,7 @@ include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 use Model\User;
-use Model\UserAuthProvider;
-use Model\UserType;
+use Model\UserAccessLevel;
 
 /**
  * Uses ONID to authenticate the user. 
@@ -17,29 +16,28 @@ use Model\UserType;
 function authenticateStudent() {
     global $dbConn, $logger;
 
-    include_once PUBLIC_FILES . '/lib/shared/auth/onid.php';
+    include_once PUBLIC_FILES . '/auth/onidfunctions.php';
     $onid = authenticateWithONID();
 
     $dao = new UsersDao($dbConn, $logger);
 
-    $u = $dao->getUserByOnid($onid);
+    $u = $dao->getUserByONID($onid);
     if ($u) {
-        $_SESSION['userID'] = $u->getId();
-        $_SESSION['accessLevel'] = $u->getType()->getName();
+        $_SESSION['userID'] = $u->getUserID();
+        $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = false;
     } else {
         $u = new User();
-        $u->setAuthProvider(new UserAuthProvider(UserAuthProvider::ONID, 'ONID'))
-            ->setType(new UserType(UserType::STUDENT, 'Student'))
-            ->setOnid($onid)
-            ->setFirstName($_SESSION['auth']['firstName'])
-            ->setLastName($_SESSION['auth']['lastName'])
-            ->setEmail($_SESSION['auth']['email']);
+        $u->setAccessLevelID(new UserAccessLevel(UserAccessLevel::STUDENT, 'Student'));
+        $u->setOnid($onid);
+        $u->setFirstName($_SESSION['auth']['firstName']);
+        $u->setLastName($_SESSION['auth']['lastName']);
+        $u->setEmail($_SESSION['auth']['email']);
         $ok = $dao->addNewUser($u);
         // TODO: handle error
 
-        $_SESSION['userID'] = $u->getId();
-        $_SESSION['accessLevel'] = $u->getType()->getName();
+        $_SESSION['userID'] = $u->getUserID();
+        $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = true;
     }
     return true;

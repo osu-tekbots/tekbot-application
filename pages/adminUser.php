@@ -1,178 +1,194 @@
 <?php
 include_once '../bootstrap.php';
 
+use DataAccess\EquipmentDao;
+use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentReservationDao;
 use DataAccess\UsersDao;
+use Model\UserAccessLevel;
+use Util\Security;
 
-session_start();
+if (!session_id()) {
+    session_start();
+}
 
+// Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isAdmin = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['accessLevel']) && $_SESSION['accessLevel'] == 'Admin';
+$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
+	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
 
-allowIf($isAdmin);
+allowIf($isEmployee, 'index.php');
 
-$usersDao = new UsersDao($dbConn, $logger);
 
-$title = 'Admin User Control';
+$title = 'Employee Users View';
 $css = array(
-    'assets/css/sb-admin.css'
+	'assets/css/sb-admin.css',
+	'assets/css/admin.css',
+	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
 );
 $js = array(
-    'assets/js/jquery.tableedit.js'
+    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
 );
+
 include_once PUBLIC_FILES . '/modules/header.php';
+include_once PUBLIC_FILES . '/modules/employee.php';
+include_once PUBLIC_FILES . '/modules/renderBrowse.php';
+
+// Handout Modal Functionality
+include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
+
+$equipmentDao = new EquipmentDao($dbConn, $logger);
+$userDao = new UsersDao($dbConn, $logger);
+
+$users = $userDao->getAllUsers();
+$userHTML = '';
+foreach ($users as $user){
+	$userID = $user->getUserID();
+	$email = Security::HtmlEntitiesEncode($user->getEmail());
+	$name = Security::HtmlEntitiesEncode($user->getFirstName()) 
+	. ' ' 
+	. Security::HtmlEntitiesEncode($user->getLastName());
+	$phone = Security::HtmlEntitiesEncode($user->getPhone());
+	$onid =  Security::HtmlEntitiesEncode($user->getOnid());
+	$accessLevelID = $user->getAccessLevelID()->getId();
+	if ($accessLevelID == UserAccessLevel::EMPLOYEE){
+		$userTypeBtn = "<button class='btn btn-sm btn-success btn-user-type' data-id='$userID' data-admin='true' 
+		data-toggle='tooltip' data-placement='right' title='Demote to Student'>
+		Employee
+		</button>";
+	} else {
+		$userTypeBtn = "
+		<button class='btn btn-sm btn-light btn-user-type' data-id='$userID' data-admin='false' 
+            data-toggle='tooltip' data-placement='right' title='Promote to Employee'>
+            Student
+        </button>
+		";
+	}
+
+	$userHTML .= "
+	<tr>
+		<td>$name</td>
+		<td>$email</td>
+		<td>$onid</td>
+		<td>$phone</td>
+		<td>$userTypeBtn</td>
+	</tr>
+	
+	";
+
+}
+
+
+
+
+
+
 ?>
 <br/>
 <div id="page-top">
 
 	<div id="wrapper">
 
-	<!-- Sidebar -->
-	<ul class="sidebar navbar-nav">
-		<li class="nav-item">
-			<a class="nav-link" href="pages/adminInterface.php">
-				<i class="fas fa-fw fa-tachometer-alt"></i>
-				<span>Dashboard</span>
-			</a>
-		</li>
+	<?php 
+		// Located inside /modules/employee.php
+		renderEmployeeSidebar();
+	?>
 
-		<li class="nav-item">
-			<a class="nav-link" href="pages/adminProject.php">
-				<i class="fas fa-fw fa-chart-area"></i>
-				<span>Projects</span></a>
-		</li>
-		<li class="nav-item active">
-			<a class="nav-link" href="pages/adminUser.php">
-				<i class="fas fa-fw fa-table"></i>
-				<span>Users</span></a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="pages/adminApplication.php">
-				<i class="fas fa-fw fa-file-invoice"></i>
-				<span>Applications</span></a>
-		</li>
-	</ul>
+		<div class="admin-content" id="content-wrapper">
 
-	<div id="content-wrapper">
+			<div class="container-fluid">
+				<?php 
+					renderEmployeeBreadcrumb('Users', 'View');
+					
+					if (empty($users)){
+						echo "
+						<h4>Unable to find any users</h4>
+						";
+					} else {
+						echo"
+						
+						<div class='admin-paper'>
+						<h3>Current Users</h3>
+						<p><strong>IMPORTANT</strong>: Do not give anyone the employee type unless they are currently working at TekBots.
+						</p>
+						<table class='table' id='currentUsers'>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Email</th>
+								<th>Onid</th>
+								<th>Phone</th>
+								<th>Type</th>
+							</tr>
+						</thead>
+						<tbody>
+							$userHTML
+						</tbody>
+						</table>
+						<script>
+							$('#currentUsers').DataTable();
+						</script>
+					</div>
+						
+						
+						
+						
+						
+						
+						
+						
+						";
+					}
 
-		<div class="container-fluid">
-
-			<!-- Breadcrumbs-->
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item">
-					<a>Users</a>
-				</li>
-				<li class="breadcrumb-item active">Overview</li>
-			</ol>
-
-
-			<h2>Users Table</h2>
-			<h6>*Columns colored orange are editable (click on cell)*</h6>
-	<div class="search-table-outter wrapper">
-	<table id="data_table" class="search-table inner scrolltable">
-		<thead>
-			<tr>
-				<th bgcolor="#FFA500">Last Name <i class="fas fa-edit"></i></th>
-				<th bgcolor="#FFA500">First Name <i class="fas fa-edit"></i></th>
-				<th bgcolor="#FFA500">Email <i class="fas fa-edit"></i></th>
-				<th bgcolor="#FFA500">ONID <i class="fas fa-edit"></i></th>
-				<th bgcolor="#FFA500">Access Level <i class="fas fa-edit"></th>
-				<th bgcolor="#66C2E0">User ID</th>
-				<th bgcolor="#FFA500">Phone <i class="fas fa-edit"></i></th>
-				<th bgcolor="#66C2E0">Salutation</th>
-				<th bgcolor="#FFA500">Affiliation <i class="fas fa-edit"></i></th>
-				<th bgcolor="#FFA500">Major <i class="fas fa-edit"></th>
-				<th bgcolor="#66C2E0">Auth Provider</th>
 				
-				<?php
-				//<th bgcolor="#FFA500">project_assigned <i class="fas fa-edit"></th>
+
+	
+	
 				?>
-			</tr>
-		</thead>
-		<tbody>
 
 
-		<?php
-		$users = $usersDao->getAllUsers();
-		foreach ($users as $u) {
-			$uLastName = $u->getLastName();
-			$uFirstName = $u->getFirstName();
-			$uEmail = $u->getEmail();
-			$uOnid = $u->getOnid();
-			$uType = $u->getType()->getName();
-			$uId = $u->getId();
-			$uPhone = $u->getPhone();
-		    $uSalutation = $u->getSalutation()->getName();
-		    $uAffiliation = $u->getAffiliation();
-		    $uMajor = $u->getMajor();
-		    $uAuthProvider = $u->getAuthProvider()->getName();
 
-		    // TODO: project assigned?
 
-		    echo "
-			<tr id='$uId'>
-				<td>$uLastName</td>
-				<td>$uFirstName</td>
-				<td>$uEmail</td>
-				<td>$uOnid</td>
-				<td>$uType</td>
-				<td>$uId</td>
-				<td>$uPhone</td>
-				<td>$uSalutation</td>
-				<td>$uAffiliation</td>
-				<td>$uMajor</td>
-				<td>$uAuthProvider</td>
-		
-			</tr>
-			";
-		}
-		?>
-	 </tbody>
-	</table>
-	</div>
-
-		 </div>
+			</div>
+		</div>
 	</div>
 </div>
 
-</div>
-
-<script type="text/javascript">
-
-$(document).ready(function(){
-	$('#data_table').Tabledit({
-		url: 'modules/live_edit.php',
-		editmethod: 'post',
-		// Class for row when ajax request fails
-		dangerClass: 'danger',
-		// Class for row when save changes
-		successClass: 'table-success',
-		deleteButton: false,
-		autoFocus: false,
-		editButton: false,
-		columns: {
-		  identifier: [5, 'u_id'],
-		  editable: [[1, 'u_fname'], [0, 'u_lname'], [3, 'u_onid'], [6, 'u_phone'], [9, 'u_major'], [4, 'u_ut_id', '{"1": "Student", "2": "Proposer", "3": "Admin"}'], [11, 'project_assigned'], [8, 'u_affiliation'], [2, 'u_email'] ]
-		},
-		hideIdentifier: false,
-		// Executed when the ajax request is completed
-		onSuccess: function () {
-			snackbar("Entry Successfully Updated!", type = 'success');
-			return;
-		},
-		onFail: function () {
-			snackbar("Ajax Request Error", type = 'error');
-			return;
-		}
-
-		
-
-	});
-});
+<script>
+/**
+ * Handles a click on the user type button in the admin user table to promote/demote a user to/from admin status.
+ */
+function onUserTypeClick() {
+    $btn = $(this);
+    let uid = $btn.data('id');
+    let isAdmin = $btn.data('admin');
+	let willBeAdmin = !isAdmin;
+    let body = {
+        uid,
+        action: 'updateUserType',
+        admin: willBeAdmin
+    };
+    api.post('/users.php', body).then(res => {
+        snackbar(res.message, 'success');
+        $btn.data('admin', willBeAdmin);
+        if(willBeAdmin) {
+            $btn.removeClass('btn-light').addClass('btn-success');
+            $btn.text('Employee');
+            //$btn.tooltip('hide').attr('data-original-title', 'Demote to Student').tooltip('show');
+        } else {
+            $btn.removeClass('btn-success').addClass('btn-light');
+            $btn.text('Student');
+            //$btn.tooltip('hide').attr('data-original-title', 'Promote to Employee').tooltip('show');
+        }
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}
+$('.btn-user-type').click(onUserTypeClick);
 
 </script>
 
 <?php 
-include_once PUBLIC_FILES . '/modules/footer.php';
+include_once PUBLIC_FILES . '/modules/footer.php' ; 
 ?>

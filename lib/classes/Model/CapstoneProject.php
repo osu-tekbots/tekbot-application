@@ -107,7 +107,7 @@ class CapstoneProject {
             $this->setCop(new CapstoneProjectCop());
             $this->setNdaIp(new CapstoneProjectNDAIP());
             $this->setStatus( new CapstoneProjectStatus());
-            $this->setDateCreated(new \DateTime()); //No idea why there is a '\' here... Don 7/29/2019
+            $this->setDateCreated(new \DateTime()); 
             $this->setIsHidden(true);
             $this->setIsArchived(false);
         }

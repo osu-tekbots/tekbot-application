@@ -1,0 +1,116 @@
+/*
+CSS for the slideshow elements on the view projects pages of the project showcase website. Adapted from the W3 Schools
+tutorial at https://www.w3schools.com/howto/howto_js_slideshow.asp
+*/
+/* Slideshow container */
+.slideshow-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0px;
+}
+
+/* Hide the images by default */
+.slide {
+    display: none;
+    align-self: center;
+    justify-self: center;
+}
+
+.slide img {
+    max-width: 100%;
+    height: 400px;
+    max-height: 400px;
+}
+
+/* Next & previous buttons */
+.prev,
+.next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    padding: 16px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 3px;
+    user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+    right: -30px;
+}
+
+.prev {
+    left: -30px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+    background-color: rgba(223, 217, 217, 0.8);
+}
+
+/* Caption text */
+.text {
+    color: #f2f2f2;
+    font-size: 15px;
+    padding: 8px 12px;
+    position: absolute;
+    bottom: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+.dot-container {
+    text-align: center;
+    margin: 10px 0px;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.active,
+.dot:hover {
+    background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 0.5s;
+    animation-name: fade;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes fade {
+    from {
+        opacity: 0.4;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade {
+    from {
+        opacity: 0.4;
+    }
+    to {
+        opacity: 1;
+    }
+}

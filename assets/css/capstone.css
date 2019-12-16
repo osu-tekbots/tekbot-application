@@ -28,9 +28,56 @@
 
 
 body{
-  font-family: 'Abel', 'sans-serif';
-  font-weight: 300;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-weight: 400;
+  line-height: 1.5
 }
+/* Style tab links */
+.tablink {
+  background-color: #555;
+  color: white;
+  float: left;
+  border: 1px solid white;
+  border-bottom: none;
+  outline: none;
+  cursor: pointer;
+  padding: 25px 16px;
+  font-size: 25px;
+  width: 25%;
+}
+
+.stickytabs {
+  width: 100%;
+  position: fixed;
+  z-index: 999;
+}
+
+.input {
+  white-space: pre-wrap;
+}
+
+p {
+  white-space: pre-wrap;
+}
+
+.tablink:first-of-type{
+  border-left: none;
+}
+
+.tablink:last-of-type{
+  border-right: none;
+}
+
+.tablink:hover {
+  background-color: #777;
+}
+
+/* Style the tab content (and add height:100% for full page content) */
+.tabcontent {
+  display: none;
+  height: 100%;
+}
+
 
 main {
   padding-top: 60px;
@@ -43,16 +90,6 @@ h1,h2,h3,h4,h5,h6{
 button h6{
 	font-family: 'Abel';
 	margin: 3px;
-}
-
-.btn-outline-primary{
-  color: #D73F09;
-  border-color: #D73F09;
-}
-
-.btn-outline-primary:hover{
-  background-color: #D73F09;
-
 }
 
 .websiteTitle{
@@ -122,10 +159,6 @@ a:hover{
 	margin: 5px;
 }
 
-.capstone-nav-btn:hover {
-  background-color: #D73F09;
-  border: 1px solid #D73F09;
-}
 
 .admin-btn{
 	margin: 15px;
@@ -185,12 +218,6 @@ a:hover{
 
 .card-signin .card-body {
   padding: 2rem;
-}
-
-.card {
-  height: 600px;
-  overflow: none;
-  line-height: normal;
 }
 
 .form-signin {
@@ -609,6 +636,36 @@ header.light {
   padding: 10px;
   font-size: 20px;
 }
+
+.equipmentPreviewImage {
+  height: 200px;
+  width: 200px;
+}
+
+.textColumn {
+  padding-left: 0px;
+}
+
+.equipmentName {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.equipmentItemOutline{
+  border-radius: 20px;
+  padding: 20px;
+  margin: 28px;
+  border: 1px solid black;
+  
+}
+
+.equipmentStatusHealth{
+  margin-bottom:0px;
+  margin-top:5px;
+  display:inline-block;
+}
+
 /*
 CSS Styling for header content -END-
 Project Showcase (Now Capstone)
@@ -620,3 +677,81 @@ Oregon State University
 }
 
 /********************************/
+
+
+/*
+CSS FOR laserCutting.php animation
+*/
+
+.laserAnimation {
+  display: flex;
+  margin: auto;
+  padding-left: 35%;
+  position: relative;
+  text-align: center;
+  transform: translateZ(0);
+  transform-style: preserve-3d;
+}
+
+.laserAnimation .text {
+  font-family: sans-serif;
+  font-weight: 400;
+  font-size: calc(20vw / var(--word-total) );
+  line-height: 1.0;
+}
+
+.laserAnimation .write .word {
+  color: hsl(0, 0%, 80%);
+  text-shadow: 0 0 0.1em currentColor;
+  transform-style: preserve-3d;
+  animation: write linear both;
+}
+
+.laserAnimation .laser {
+  padding-left: 35%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* To avoid the blur getting masked by the clip-path we had to duplicate the element */
+  filter: blur(4px) contrast(10);
+  pointer-events: none;
+}
+
+.laserAnimation .laser .word {
+  display: inline-block;
+}
+
+.laserAnimation .laser .word {
+  color: hsl(0, 100%, 75%);
+  text-shadow: 0 0 0.1em currentColor;
+  transform: translateZ(5px);
+  animation: laser linear both;
+}
+
+.laserAnimation .write .word,
+.laserAnimation .laser .word {
+  animation-duration: 4s;
+  animation-delay: calc(0.3s + var(--word-index) * 160ms);
+  animation-iteration-count: infinite;
+}
+
+.laserAnimation:hover .word,
+.laserAnimation:hover .word {
+  animation-play-state: paused;
+}
+
+/* .laserAnimation .text .word,
+.laserAnimation .text .word::before {
+  animation-play-state: paused;
+  animation-delay: -0.4s;
+} */
+
+@keyframes write {
+  from, 30% { clip-path: polygon(-20% 0%, -15% 0%, -15% 100%, -20% 100%) }
+  70%, to { clip-path: polygon(-15% 0%, 120% 0%, 120% 100%, -15% 100%) }
+}
+
+@keyframes laser {
+  from, 30% { clip-path: polygon(-20% 0%, -15% 0%, -15% 100%, -20% 100%) }
+  70%, to { clip-path: polygon(115% 0%, 120% 0%, 120% 100%, 115% 100%) }
+}

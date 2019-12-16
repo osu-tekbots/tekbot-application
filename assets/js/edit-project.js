@@ -200,7 +200,7 @@ function onSubmitForApprovalClick() {
 $('#submitForApprovalBtn').on('click', onSubmitForApprovalClick);
 
 $('#keywordsInput').autocomplete({
-    source: availableTags
+    
 });
 
 /**

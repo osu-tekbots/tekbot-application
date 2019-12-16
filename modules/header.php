@@ -16,7 +16,7 @@ if (!session_id()) {
 $baseUrl = $configManager->getBaseUrl();
 $image_dir = 'http://eecs.oregonstate.edu/capstone/submission/';
 
-$title = isset($title) ? $title : 'Senior Design Capstone | OSU';
+$title = isset($title) ? $title : 'TekBots | OSU';
 
 // JavaScript to include in the page. If you provide a JS reference as an associative array, the keys are the
 // atributes of the <script> tag. If it is a string, the string is assumed to be the src.
@@ -37,6 +37,7 @@ $js = array_merge(
         'assets/js/jquery.canvasjs.min.js',
         'assets/js/image-picker.min.js',
         'assets/shared/js/api.js',
+        'assets/js/splitting.min.js',
         'assets/shared/js/snackbar.js'
     ), $js
 );
@@ -62,6 +63,8 @@ $css = array_merge(
         'assets/css/image-picker.css',
         'assets/css/capstone.css',
         'assets/shared/css/snackbar.css',
+        'assets/css/splitting.css',
+        'assets/css/splitting-cells.css',
         array(
             'media' => 'screen and (max-width: 768px)', 
             'href' => 'assets/css/capstoneMobile.css'
@@ -76,27 +79,32 @@ $loggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
 // Setup the buttons to use in the header
 // All users
 $buttons = array(
-    'Browse Projects' => 'pages/browseProjects.php'
+    'Browse Equipment' => 'pages/browseEquipment.php'
 );
 // Signed in users
 if ($loggedIn) {
     //Proposer or Admin only
-	if (isset($_SESSION['accessLevel']) && (($_SESSION['accessLevel'] == 'Proposer') || ($_SESSION['accessLevel'] == 'Admin'))) {
+	if (isset($_SESSION['userAccessLevel']) && (($_SESSION['userAccessLevel'] == 'Proposer') || ($_SESSION['userAccessLevel'] == 'Admin'))) {
         $buttons['My Projects'] = 'pages/myProjects.php';
     }
 	
 	//All user types can view these pages
-    $buttons['My Applications'] = 'pages/myApplications.php';
+    //$buttons['My Applications'] = 'pages/myApplications.php';
     $buttons['My Profile'] = 'pages/myProfile.php';
+
+    //$buttons['My Fees'] = 'pages/feesOwed.php';
     
-    // Admin only
-    if (isset($_SESSION['accessLevel']) && $_SESSION['accessLevel'] == 'Admin') {
-        $buttons['Admin'] = 'pages/adminInterface.php';
+    // Employee only
+    if (isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee') {
+        $buttons['Employee'] = 'pages/employeeEquipment.php';
     }
 }
 
 // All users
 $buttons['Info'] = 'pages/info.php';
+
+//$buttons['Laser Cutting'] = 'pages/laserCutting.php';
+
 if ($loggedIn) {
     $buttons['Logout'] = 'pages/logout.php';
 } else {
@@ -151,7 +159,7 @@ if ($loggedIn) {
         <a class="header-main-link" href="">
             <div class="logo">
                 <img class="logo" src="assets/img/osu-logo-orange.png" />
-                <h1><span id="projectPrefix">Senior </span>Capstone </h1>
+                <h1><span id="projectPrefix">TEKBOTS </span> </h1>
             </div>
         </a>
         <nav class="navigation">

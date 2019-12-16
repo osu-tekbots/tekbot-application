@@ -54,3 +54,4 @@ function renderNewApplicationModal($project) {
 		</script>
 	";
 }
+?>

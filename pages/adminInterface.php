@@ -7,10 +7,10 @@ session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isAdmin = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['accessLevel']) && $_SESSION['accessLevel'] == 'Admin';
+$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
+	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin';
 
-allowIf($isAdmin);
+allowIf($isEmployee);
 
 $projectsDao = new CapstoneProjectsDao($dbConn, $logger);
 
