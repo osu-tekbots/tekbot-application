@@ -69,7 +69,7 @@ class EquipmentCheckout {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setCheckoutID($id);
-            $this->getStatusID(new EquipmentCheckoutStatus());
+            $this->setStatusID(new EquipmentCheckoutStatus());
             $this->setDateCreated(new \DateTime());
         } else {
             $this->setCheckoutID($id);

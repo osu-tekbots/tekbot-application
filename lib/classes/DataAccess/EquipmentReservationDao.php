@@ -64,6 +64,37 @@ class EquipmentReservationDao {
     }
 
     /**
+     * Fetches active equipment for admin.
+     *
+     * @return \Model\EquipmentReservation[]|boolean an array of projects on success, false otherwise
+     */
+    public function getActiveReservations() {
+        try {
+            $sql = '
+            SELECT * 
+            FROM equipment_reservation, user, equipment, user_access_level
+            WHERE equipment_reservation.equipment_id = equipment.equipment_id
+                AND equipment_reservation.user_id = user.user_id
+                AND user.access_level_id = user_access_level.user_access_level_id
+                AND equipment_reservation.is_active = 1
+                
+            ';
+            $results = $this->conn->query($sql);
+
+            $reservations = array();
+            foreach ($results as $row) {
+                $reservation = self::ExtractReservationFromRow($row, true);
+                $reservations[] = $reservation;
+            }
+           
+            return $reservations;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get admin reservations: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches the equipment reservation with the provided ID
      *
      * @param string $id
