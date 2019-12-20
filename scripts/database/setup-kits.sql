@@ -24,3 +24,6 @@ CREATE TABLE IF NOT EXISTS kit_enrollment (
     FOREIGN KEY (kit_status_id) REFERENCES kit_enrollment_status(id)
 
 );
+
+INSERT INTO kit_enrollment_status (id, status_name) VALUES 
+    (1, 'Ready'), (2, 'Handed Out'), (3, 'Refunded');

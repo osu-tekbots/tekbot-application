@@ -1,0 +1,60 @@
+.switch {
+    align-content: center;
+    padding-left: 15%;
+}
+
+.enrollment {
+    padding-bottom: 25px;
+}
+
+.termText {
+    font-size: 20px;
+}
+
+.switch label {
+    float: left;
+    display: block;
+    font-size: 14px;
+    line-height: 28px;
+    color: #979696;
+    cursor: pointer;
+    transition: 0.5s color;
+  }
+  .switch label:first-of-type {
+    color: #4d4d4d;
+  }
+  .switch label:hover {
+    color: #dfb865 !important;
+  }
+  .switch .knob {
+    float: left;
+    width: 62px;
+    height: 28px;
+    margin: 0 10px;
+    border-radius: 14px;
+    background: #fff;
+    position: relative;
+  }
+  .switch .knob:after {
+    content: "";
+    background: #dfb865;
+    width: 22px;
+    height: 22px;
+    border-radius: 100%;
+    position: absolute;
+    left: 4px;
+    top: 3px;
+    display: block;
+    transition: 0.5s left;
+  }
+  .switch.on label:first-of-type {
+    color: #979696;
+  }
+  .switch.on label:last-of-type {
+    color: #4d4d4d;
+  }
+  .switch.on .knob:after {
+    left: 36px;
+    transition: 0.5s left;
+  }
+  

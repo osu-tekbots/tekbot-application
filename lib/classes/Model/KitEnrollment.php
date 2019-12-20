@@ -48,7 +48,7 @@ class KitEnrollment {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
 			$this->setKitEnrollmentID($id);
-			$this->setKitStatus($this->getStatusID(new KitEnrollmentStatus()))
+			$this->setKitStatusID($this->getKitStatusID(new KitEnrollmentStatus()));
 			$this->setDateCreated(new \DateTime());
         } else {
             $this->setKitEnrollmentID($id);
@@ -125,6 +125,10 @@ class KitEnrollment {
 
 	public function getDateCreated(){
 		return $this->dateCreated;
+	}
+
+	public function setDateCreated($dateCreated){
+		$this->dateCreated = $dateCreated;
 	}
 
 

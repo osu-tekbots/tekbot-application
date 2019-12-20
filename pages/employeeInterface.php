@@ -25,8 +25,8 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 	<div id="wrapper">
 
-		<?php 
-		renderEmployeeSidebar();
+		<?php
+			renderEmployeeSidebar();
 		?>
 
 		<div id="content-wrapper">

@@ -13,6 +13,7 @@ if (!session_id()) {
     session_start();
 }
 
+
 $baseUrl = $configManager->getBaseUrl();
 $image_dir = 'http://eecs.oregonstate.edu/capstone/submission/';
 

@@ -60,6 +60,37 @@ class KitEnrollmentDao {
     }
 
     /**
+     * Fetches the kit enrollments with the provided student ID
+     *
+     * @param string $id
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
+    public function getKitEnrollmentsForUser($id) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.osu_id = :id
+            
+            ';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+            
+            $kits = array();
+            foreach ($results as $row) {
+                $kit = self::ExtractKitFromRow($row);
+                $kits[] = $kit;
+            }
+           
+            return $kits;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch kit with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches kits for admin.
      *
      * @return \Model\KitEnrollment[]|boolean an array of projects on success, false otherwise
@@ -79,7 +110,7 @@ class KitEnrollmentDao {
                 $kits[] = $kit;
             }
            
-            return $checkouts;
+            return $kits;
         } catch (\Exception $e) {
             $this->logger->error("Failed to get admin checkouts: " . $e->getMessage());
             return false;
@@ -95,7 +126,7 @@ class KitEnrollmentDao {
     public function addNewKitEnrollment($kit) {
         try {
             $sql = '
-            INSERT INTO equipment_checkout VALUES (
+            INSERT INTO kit_enrollment VALUES (
                 :id,
                 :name,
                 :osuid,
@@ -142,8 +173,8 @@ class KitEnrollmentDao {
                 course_code = :course,
                 term_id = :term,
                 kit_status_id = :statusid,
-                date_updated = :dupdated,
-            WHERE kit_id = :id
+                date_updated = :dupdated
+            WHERE kit_id = :id;
             ';
             $params = array(
                 ':id' => $kit->getKitEnrollmentID(),

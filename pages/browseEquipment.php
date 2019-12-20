@@ -71,6 +71,8 @@ foreach ($equipments as $e){
 <br /><br />
 <div class="container-fluid">
         <?php
+        $version = phpversion();
+        print $version;
         echo "
         <div class='admin-paper'>
         <h1>Equipment Rentals</h1>

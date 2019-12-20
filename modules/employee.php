@@ -112,6 +112,22 @@ function renderAdminReviewPanel($project, $categories) {
     ";
 }
 
+// Checks if the entry for student ID is valid
+function isValidStudentID($sid){
+    $ID = trim($sid);
+    if (!$ID) {
+        return 0;
+    }
+    if (strlen($ID) != 9){
+        return 0;
+    }
+    if (!is_numeric($ID)){
+        return 0;
+    }
+
+    return 1;
+}
+
 
 /**
  * Renders the HTML for the panel that displays options for reviewing a capstone project to admins.
@@ -152,6 +168,7 @@ function renderAdminReviewPanel($project, $categories) {
              <div class="dropdown-divider"></div>
              <h6 class="dropdown-header">View:</h6>
              <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
+             <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
              <a class="dropdown-item" href="blank.html">Info</a>
          </div>
         </li>
@@ -169,6 +186,12 @@ function renderAdminReviewPanel($project, $categories) {
                 <span>Users</span>
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="pages/adminPrinter.php">
+                <i class="fas fa-fw fa-print"></i>
+                <span>3D Printing</span>
+            </a>
+         </li>
         <li class="nav-item">
         <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/Inventory/index.php">
             <i class="fas fa-fw fa-pallet"></i>
