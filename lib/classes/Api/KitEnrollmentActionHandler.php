@@ -189,13 +189,56 @@ class KitEnrollmentActionHandler extends ActionHandler {
         ));
     }
 
+     /**
+     * Creates a new enrollment single entry in the database.
+     *
+     * @return void
+     */
+    public function handleCreateSingleEnrollment() {
+        // Ensure all the requred parameters are present
+        $body = $this->requestBody;
+        $osuID = $body['idnumber'];
+        $term = $body['term'];
+        $name = $body['lfm'];
+        $onid = $body['onid'];
+        $course = $body['course'];
+
+        $kit = new KitEnrollment();
+        $kit->setOsuID($osuID);
+        $kit->setTermID($term);
+        $kit->setKitStatusID(KitEnrollmentStatus::READY);
+        $kit->setOnid($onid);
+        $kit->setFirstMiddleLastName($name);
+        $kit->setCourseCode($course);
+
+        $ok = $this->kitEnrollmentDao->addNewKitEnrollment($kit);
+        if (!$ok){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Unable to add kit"));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully added kit',
+            array('id' => $kit->getOsuID())
+        ));
+    }
+
     /**
      * Sets is_public to true for equipment
      *
      * @return void
      */
-    public function handleMakePublicEquipment() {
-        
+    public function handleShowKitsRemaining() {
+        $this->requireParam('termID');
+        $body = $this->requestBody;
+        $kits = getKitEnrollmentsByTerm($body['termID']);
+        if (empty($kits)){
+            $this->respond(new Response(Response::NOT_FOUND, "No kit enrollments found"));
+        }
+
+        $ece272 = 0;
+
+        $this->respond($kits);
     }
 
     /**
@@ -333,8 +376,8 @@ class KitEnrollmentActionHandler extends ActionHandler {
             case 'updateHandoutKitEnrollments':
                 $this->handleHandoutKitEnrollment();
 
-            case 'makeEquipmentHidden':
-                $this->handleMakeHiddenEquipment();
+            case 'createSingleKitEnrollment':
+                $this->handleCreateSingleEnrollment();
 
             case 'makeEquipmentShown':
                 $this->handleShowEquipment();

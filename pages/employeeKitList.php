@@ -11,6 +11,7 @@ if (!session_id()) {
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
+include_once PUBLIC_FILES . '/modules/renderTermData.php';
 
 $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
 	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
@@ -50,7 +51,7 @@ foreach ($kits as $k){
 		$dUpdated = $k->getDateUpdated();
 		$dCreated = $k->getDateCreated();
 		$name = $k->getFirstMiddleLastName();
-       
+		$term = term2string($termID);
 	
 
 
@@ -61,7 +62,7 @@ foreach ($kits as $k){
 		<td>$onid</td>
 		<td>$name</td>
 		<td>$courseCode</td>
-		<td>$termID</td>
+		<td>$term</td>
 		<td>$status</td>
 	</tr>
 	";

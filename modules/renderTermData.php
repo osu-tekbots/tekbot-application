@@ -153,7 +153,8 @@ function term2string($term){
 // Renders the course list dropdown 
 function renderCourseNames(){
     echo '
-    <select class="form-control">
+    <select name="course" class="form-control">
+        <option value=""></option> 
         <option value="ECE 272">ECE 272</option>
         <option value="ECE111-010">ECE111-010</option>
         <option value="ECE111-020">ECE111-020</option>
@@ -161,9 +162,13 @@ function renderCourseNames(){
         <option value="ECE375">ECE375</option>
         <option value="ECE473">ECE473</option>
         <option value="ECE573">ECE573</option>
-    </select>
+        </select>
     ';
 }
+
+function renderTermEnrollmentDetails($term){
+    
+} 
 
 
 

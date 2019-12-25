@@ -63,8 +63,7 @@ $test = "";
                 ?>
     <div class="row">
 <?php 
-    //$result = TermData::generateAccessToken();
-    //print_r($result);
+    // Grabs current term data using OSU Term API within modules/termData.php
     $currentTerm = getCurrentTermId();
 
     if (isset($_REQUEST['studentid']) && isset($_REQUEST['action'])){
@@ -79,7 +78,7 @@ $test = "";
         echo '
         <div class="col-sm-6">
         <div class="jumbotron primaryColor seethrough"><center>
-            <h2 class="kitFont"><b>Add Student To Course</h2></b><i>text</i></center><br>
+            <h2 class="kitFont"><b>Add Kit For Student</h2></b><i>Adds course kit for the specified student</i></center><br>
                 <form id="formAddCourse">
                 <h5><b>ID Number:</b></h5>
                 <i>(ex: 932XXXXXX)</i>
@@ -90,13 +89,14 @@ $test = "";
                 <h5><b>ONID:</b></h5>
                 <i>(ex: namt)</i>
                 <input class="form-control" type="text" name="onid" value="'.$onid.'"><br>
+                <input style="display:none;" name="term" value="'.$currentTerm.'">
                 <h5><b>Course Name:</b></h5>
-                <i>(ex: ECE341)</i>
                 ';
                 
                 renderCourseNames();
+
                 echo'<br><br>
-                <center><input type="submit" value="Submit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
+                <center><input type="button" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                 
         
             
@@ -115,9 +115,10 @@ $test = "";
 
             $studentid = $_REQUEST['studentid'];
             $kitList = $kitEnrollmentDao->getKitEnrollmentsForUser($studentid);
-            // Check if student exists
+            // Check if there are kits for student
             if (!empty($kitList)){
                 $switchList = "";
+                $refundedList = "";
                 foreach($kitList as $k){
                     $name = $k->getFirstMiddleLastName();
                     $onid = $k->getOnid();
@@ -139,13 +140,20 @@ $test = "";
                         <div class="knob"></div>
                         <label>Handed Out</label>
                         </div> <div class="termText">
-                        '.$courseName.' - '.$termID.'
+                        '.$courseName.' - '.term2string($termID).'
                         </div>
+                        </div>
+                        ';
+                    } else if ($kitStatus == KitEnrollmentStatus::REFUNDED){
+                        // Show all refunded kits
+                        $refundedList .= '
+                        <div class="termText">
+                        '.$courseName.' - '.term2string($termID).'
                         </div>
                         ';
                     }
                 }
-                // Student kit found
+                // Student found but not registered for any classes
                 echo '
                 <div class="col-sm-6">
                 <div class="jumbotron primaryColor seethrough"><center>
@@ -158,7 +166,7 @@ $test = "";
                         <ol>
                             <li>Make sure that the ID was entered correctly.</li>
                             <li>Confirm that the student is registered in the class. This can be done by asking to see the student\'s schedule, etc.</li>
-                            <li>If the student is in the class, click "Add Course" and fill out the provided form.</li>
+                            <li>If the student is in the class, click "Add Kit" and fill out the provided form.</li>
                         </ol>
 
                             ';
@@ -173,15 +181,26 @@ $test = "";
                         <input style="display:none" name="name" value="'.$name.'">
                         <input style="display:none" name="onid" value="'.$onid.'">
                         <input style="display:none" name="action" value="addStudent">
-                        <input type="submit" value="Add Course" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
+                        <input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
                         </form>
+                        ';
+                        if (!empty($refundedList)){
+                            echo '
+                            <br><br>
+                            <center>
+                            <h4>Refunded Kits</h4>
+                            '.$refundedList.'
+                            </center>
+                            ';
+                        }
+                echo '
                 </div>
             </div>
                 
                 ';
                 
             } else {
-                // Student is not registered for any classes, lets add
+                // Student is not found for the following ID
                 echo '
                 <div class="col-sm-6">
                 <div class="jumbotron primaryColor seethrough"><center>
@@ -190,13 +209,13 @@ $test = "";
                         <ol>
                             <li>Make sure that the ID was entered correctly.</li>
                             <li>Confirm that the student is registered in the class. This can be done by asking to see the student\'s schedule, etc.</li>
-                            <li>If the student is in the class, click "Add Course" and fill out the provided form.</li>
+                            <li>If the student is in the class, click "Add Kit" and fill out the provided form.</li>
                         </ol>
                         <br>
                         <form autocomplete="off" action="pages/employeeKitHandout.php" method="get">
                             <input style="display:none" name="studentid" value="'.$studentid.'">
                             <input style="display:none" name="action" value="addStudent">
-                        <center><input type="submit" value="Add Course" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
+                        <center><input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                         </form>
               
                 </div>
@@ -206,14 +225,15 @@ $test = "";
             }
             
         } else {
+            // Page similar to original page to enter user ID - There was an error so red border around input
             echo '
             <div class="col-sm-6">
                 <div class="jumbotron primaryColor seethrough"><center>
                     <h2 class="kitFont"><b>Enter ID Number</h2></b><i>(ex: 932XXXXXX)</i></center><br><br>
                     <form autocomplete="off" name="idnumber" action="pages/employeeKitHandout.php" method="get">
-                        <input type="text" class="form-control" autofocus="" name="studentid" style="border:1px solid red;" id="studentid">
+                        <input type="text" class="form-control" autofocus="" name="studentid" style="border:1px solid red;" id="studentidinput">
                         <br><center>
-                        <input type="submit" class="btn btn-lg btn-primary"></center>
+                        <input id="studentidsubmit" type="submit" class="btn btn-lg btn-primary"></center>
                     </form>
                 </div>
             </div>
@@ -222,15 +242,16 @@ $test = "";
         }
 
     } else {
+        // Original page to enter user ID
         echo '
     <div class="col-sm-6">
         <div class="jumbotron primaryColor seethrough"><center>
             <h2 class="kitFont"><b>Enter ID Number</h2></b><i>(ex: 932XXXXXX)</i></center><br><br>
             <form autocomplete="off" name="idnumber" action="pages/employeeKitHandout.php" method="get">
                 
-                <input type="text" class="form-control" autofocus="" name="studentid" id="studentid">
+                <input type="text" class="form-control" autofocus="" name="studentid" id="studentidinput">
                 <br><center>
-                <input type="submit" class="btn btn-lg btn-primary"></center>
+                <input id="studentidsubmit" type="submit" class="btn btn-lg btn-primary"></center>
             </form>
         </div>
     </div>
@@ -241,17 +262,44 @@ $test = "";
 
 ?>
  <div class="col-sm">
-            <div class="jumbotron primaryColor seethrough" style="font-weight:bold;font-size:large;">
-            <h3 class="kitFont"><b>Remaining Kits:</b></h3><div style="height:300px;overflow:auto;">
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">ECE 272
-                    <span class="badge badge-primary badge-pill" style="background-color:yellow;">
-                    <font color="black">13</font></span>
-                </li>
-            </ul>
-            </br>
-            </div>
+    <div class="jumbotron primaryColor seethrough" style="font-weight:bold;font-size:large;">
+    <h3 class="kitFont"><b>Remaining Kits for 
+    <?php  
+    echo (term2string($currentTerm));    
+    ?>:</b></h3><div style="height:300px;overflow:auto;">
+    <ul class="list-group">
+    <?php 
+    $termKits = $kitEnrollmentDao->getKitEnrollmentsByTerm($currentTerm);
+    $readyArray = [];
+    foreach ($termKits as $k){
+        if ($k->getKitStatusID()->getId() == KitEnrollmentStatus::READY){
+            array_push($readyArray, $k->getCourseCode());
+        } 
+    }
+    $numValues = array_count_values($readyArray);
+    foreach($numValues as $key => $value){
+        echo '
+        <li class="list-group-item d-flex justify-content-between align-items-center">'.$key.'
+            <span class="badge badge-primary badge-pill" style="background-color:yellow;">
+            <font color="black">'.$value.'</font></span>
+        </li>
+        
+        ';
+       
+    }
+    ?>
+
+
+
+
+
+    </ul>
+
+
+    </br>
+    </div>
 </div>
+
 </div>
 
 
