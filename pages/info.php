@@ -1,270 +1,150 @@
 <?php
 include_once '../bootstrap.php';
 
+use DataAccess\FaqDao;
+use Util\Security;
+
 $title = 'TekBot FAQ';
 $css = array(
 	'assets/css/homepage.css'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
+$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
+	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
+
+$FaqDao = new FaqDao($dbConn, $logger);
+$FAQs = $FaqDao->getAllFaqs();
 ?>
-<br>
-<div class="stickytabs">
-	<button class="tablink" onclick="openPage('Store', this, 'red')" id="defaultOpen">General Store</button>
-	<button class="tablink" onclick="openPage('Services', this, 'green')">Laser Cuts & 3D Prints</button>
-	<button class="tablink" onclick="openPage('Equipment', this, 'blue')">Equipment Checkout</button>
+<br><br>
+
+
+ <!-- Filter Form -->
+ <div class="form-group container" id="filter-form">
+ <?php 
+	if ($isEmployee){
+		echo '
+		<a class="btn btn-primary btn-lg" href="pages/editFaq.php">Add new FAQ</a>
+		<br><br>
+		';
+	}
+?>
+    <label for="filter">
+    Search for a Question
+  </label>
+    <input id="filter" type="text" class="form-control noEnterSubmit" placeholder="Enter a keyword or phrase" />
+    <small>
+    <span id="filter-help-block" class="help-block">
+      No filter applied.
+    </span>
+  </small>
+  </div>
+
+<?php 
+if (!empty($FAQs)){
+	$count = 1;
+	echo '<div class="panel-group searchable container" id="accordion" role="tablist" aria-multiselectable="true">';
+	foreach ($FAQs as $f){
+		echo '
+		<div class="panel panel-primary">
+		<div class="panel-heading" role="tab" id="heading'.$count.'">
+		  <h4 class="panel-title">
+		  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse'.$count.'" aria-expanded="false" aria-controls="collapse'.$count.'">
+			';
+
+			
+		echo '['.$f->getCategory().'] '. $f->getQuestion().'
+		
+		  </a>
+		  ';
+		  if ($isEmployee){
+			echo '<a style="color:blue" href="./pages/editFaq.php?id='.$f->getFaqID().'">Edit</a>';
+		}
+		echo '
+		</h4>
+		</div>
+		<div id="collapse'.$count.'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading'.$count.'">
+		  <div class="panel-body">
+			'.$f->getAnswer().'
+		  </div>
+		</div>
+	  </div>
+		
+		';
+		$count++;
+	}
+	echo '
+	</div>
 </div>
-	<br>
-    
-	<!-- ***** FAQ Start ***** -->
-	<div class="content-wrapper" id="Store">
-          <section class="faq-section">
-          <div class="container">
-               <div class="row">
-          
-          <div class="col-md-10 offset-md-1">
-               <div class="faq-title text-center pb-3">
-                    <h2>Store FAQ</h2>
-               </div>
-          </div>
+	';
 
-		<div class="col-md-12 offset-md">
-			<div class="faq" id="accordion">
-
-
-			   	<div class="card">
-					<div class="card-header" id="faqHeading-1">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-1">
-							<span class="badge">1</span>My Question?
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>Body information</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-			</div>
-		</div>
-	</div>	
-	</div>
-	</section>
-	</div>
-
-
-	<div class="content-wrapper" id="Services">
-          <section class="faq-section">
-          <div class="container">
-               <div class="row">
-          
-          <div class="col-md-10 offset-md-1">
-
-               <div class="faq-title text-center pb-3">
-                    <h2>Laser Cut & 3D Print FAQ</h2>
-               </div>
-          </div>
-          <div class="col-md-12 offset-md">
-               <div class="faq" id="accordion">
-
-
-			   	<div class="card">
-					<div class="card-header" id="faqHeading-1">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-1">
-							<span class="badge">1</span>My Question?
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>Body information</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-			</div>
-		</div>
-	</div>
-	</div>
-	</section>
-	</div>
-
-	<div class="content-wrapper" id="Equipment">
-          <section class="faq-section">
-          <div class="container">
-               <div class="row">
-          
-          <div class="col-md-10 offset-md-1">
-
-               <div class="faq-title text-center pb-3">
-                    <h2>Laser Cut & 3D Print FAQ</h2>
-               </div>
-          </div>
-          <div class="col-md-12 offset-md">
-               <div class="faq" id="accordion">
-
-
-			   	<div class="card">
-					<div class="card-header" id="faqHeading-1">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-1">
-							<span class="badge">1</span>My Question?
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>Body information</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-
-				<div class="card">
-					<div class="card-header" id="faqHeading-'.$faqnumber.'">
-						<div class="mb-0">
-						<h5 class="faq-title" data-toggle="collapse" data-target="#faqCollapse-'.$faqnumber.'" data-aria-expanded="true" data-aria-controls="faqCollapse-'.$faqnumber.'">
-							<span class="badge">'.$faqnumber.'</span>'.$faqquestion.'
-						</h5>
-						</div>
-					</div>
-					<div id="faqCollapse-'.$faqnumber.'" class="collapse" aria-labelledby="faqHeading-'.$faqnumber.'" data-parent="#accordion">
-						<div class="card-body">
-						<p>'.$faqcurrent.'</p>
-						</div>
-					</div>
-				</div>
-
-
-			</div>
-		</div>
-		</div>
-	</div>
-	</section>
-	</div>
-
-
-
-<script defer type="text/javascript">
-
-function openPage(pageName, elmnt, color) {
-	// Hide all elements with class="tabcontent" by default */
-	var i, tabcontent, tablinks;
-	tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	// Remove the background color of all tablinks/buttons
-	tablinks = document.getElementsByClassName("tablink");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].style.backgroundColor = "";
-	}
-
-	// Show the specific tab content
-	document.getElementById(pageName).style.display = "block";
-
-	// Add the specific color to the button used to open the tab content
-	elmnt.style.backgroundColor = color;
 }
 
-// Get the element with id="defaultOpen" and click on it
-document.getElementById("defaultOpen").click();
+?>
+  
 
 
+
+<script>
+$(document).ready(function() {
+
+(function($) {
+  
+  var $form = $('#filter-form');
+  var $helpBlock = $("#filter-help-block");
+  
+  //Watch for user typing to refresh the filter
+  $('#filter').keyup(function() {
+	var filter = $(this).val();
+	$form.removeClass("has-success has-error");
+	
+	if (filter == "") {
+	  $helpBlock.text("No filter applied.")
+	  $('.searchable .panel').show();
+	} else {
+	  //Close any open panels
+	  $('.collapse.in').removeClass('in');
+	  
+	  //Hide questions, will show result later
+	  $('.searchable .panel').hide();
+
+	  var regex = new RegExp(filter, 'i');
+
+	  var filterResult = $('.searchable .panel').filter(function() {
+		return regex.test($(this).text());
+	  })
+
+	  if (filterResult) {
+		if (filterResult.length != 0) {
+		  $form.addClass("has-success");
+		  $helpBlock.text(filterResult.length + " question(s) found.");
+		  filterResult.show();
+		} else {
+		  $form.addClass("has-error").removeClass("has-success");
+		  $helpBlock.text("No questions found.");
+		}
+
+	  } else {
+		$form.addClass("has-error").removeClass("has-success");
+		$helpBlock.text("No questions found.");
+	  }
+	}
+  })
+
+}($));
+});
+
+//
+//  This function disables the enter button
+//  because we're using a form element to filter, if a user
+//  pressed enter, it would 'submit' a form and reload the page
+//  Probably not needed here on Codepen, but necessary elsewhere
+// 
+$('.noEnterSubmit').keypress(function(e) {
+if (e.which == 13) e.preventDefault();
+});
 </script>
 
 <?php 
-include PUBLIC_FILES . '/modules/newProjectModal.php';
+
 include_once PUBLIC_FILES . '/modules/footer.php'; 
 ?>

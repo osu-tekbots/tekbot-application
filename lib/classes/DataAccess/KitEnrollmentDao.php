@@ -90,16 +90,81 @@ class KitEnrollmentDao {
         }
     }
 
-    public function getKitEnrollmentsByTerm($termID) {
+    /**
+     * Fetches the kit enrollments with the provided onid
+     *
+     * @param string $id
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
+    public function getKitEnrollmentsCountForUser($onid) {
+        try {
+            $sql = '
+            SELECT COUNT(*) 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.kit_status_id = :status
+            AND kit_enrollment.onid = :onid 
+            
+            ';
+            $params = array(
+                            ':onid' => $onid,
+                            ':status' => KitEnrollmentStatus::READY
+                            );
+            $results = $this->conn->query($sql, $params);
+            
+            foreach ($results as $row) {
+               return $row['COUNT(*)'];
+            }
+           
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch kit count with onid '$onid': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getRemainingKitEnrollmentsByTerm($termID) {
         try {
             $sql = '
             SELECT * 
             FROM kit_enrollment, kit_enrollment_status
             WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
             AND kit_enrollment.term_id = :term
+            AND kit_enrollment.kit_status_id = :status
             
             ';
-            $params = array(':term' => $termID);
+            $params = array(
+                ':term' => $termID,
+                ':status' => KitEnrollmentStatus::READY
+            );
+            $results = $this->conn->query($sql, $params);
+            
+            $kits = array();
+            foreach ($results as $row) {
+                $kit = self::ExtractKitFromRow($row);
+                $kits[] = $kit;
+            }
+           
+            return $kits;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch kit with course code '$course': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getDistributedKitEnrollmentsByTerm($termID) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.term_id = :term
+            AND kit_enrollment.kit_status_id = :status
+            
+            ';
+            $params = array(
+                ':term' => $termID,
+                ':status' => KitEnrollmentStatus::PICKED_UP
+            );
             $results = $this->conn->query($sql, $params);
             
             $kits = array();
@@ -138,6 +203,33 @@ class KitEnrollmentDao {
             return $kits;
         } catch (\Exception $e) {
             $this->logger->error("Failed to get admin checkouts: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches non-checkedout kit count for admin.
+     *
+     * @return \Model\KitEnrollment[]|boolean an array of projects on success, false otherwise
+     */
+    public function getRemainingKitsCountForAdmin() {
+        try {
+            $sql = '
+            SELECT COUNT(*) 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.kit_status_id = :status
+            ';
+            $params = array(':status' => KitEnrollmentStatus::READY);
+            $results = $this->conn->query($sql, $params);
+
+            
+            foreach ($results as $row) {
+                return $row['COUNT(*)'];   
+            }
+           
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get admin count: " . $e->getMessage());
             return false;
         }
     }

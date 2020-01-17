@@ -26,6 +26,137 @@
   font-style: normal;
 }
 
+/* panels */
+.panel {
+  background-color: white;
+  color:#003B5C;
+  -webkit-border-radius: .3rem;
+  -moz-border-radius: .3rem;
+  -ms-border-radius: .3rem;
+  border-radius: .3rem;
+  margin: 1%;
+}
+
+.panel-primary {
+  background-color: inherit!important;
+}
+
+.panel-body {
+  color: #006A8E;
+}
+.panel > h2, .panel > ul {
+  margin: 1rem;
+}
+
+.dashboard {
+  background-color: #C6DAE7;
+}
+
+/* forms */
+form input, form textarea, form select {
+  width: 100%;
+  display: block;
+  border: solid 1px #dde;
+  padding: .5em;
+}
+form input:after, form textarea:after, form select:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+form input[type=checkbox], form input[type=radio] {
+  display: inline;
+  width: auto;
+}
+form label, form legend {
+  display: block;
+  margin: 1em 0 .5em;
+}
+form input[type=submit] {
+  background: turquoise;
+  border: none;
+  border-bottom: solid 4px #21ccbb;
+  padding: .7em 3em;
+  margin: 1em 0;
+  color: white;
+  text-shadow: 0 -1px 0 #21ccbb;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: inline-block;
+  width: auto;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  -ms-border-radius: .5em;
+  border-radius: .5em;
+}
+form input[type=submit]:hover {
+  background: khaki;
+  border: none;
+  border-bottom: solid 4px #eadc5f;
+  padding: .7em 3em;
+  margin: 1em 0;
+  color: white;
+  text-shadow: 0 -1px 0 #eadc5f;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: inline-block;
+  width: auto;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  -ms-border-radius: .5em;
+  border-radius: .5em;
+}
+
+.panel {
+  margin: 2% 0 0 2%;
+  float: left;
+  width: 96%;
+}
+.panel:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.box, .onethird, .twothirds {
+  padding: 1rem;
+}
+
+.onethird {
+  width: 33.333%;
+  float: left;
+}
+
+.twothirds {
+  width: 66%;
+  float: left;
+}
+
+footer[role=contentinfo] {
+  clear: both;
+  margin-left: 200px;
+}
+}
+@media screen and (min-width: 900px) {
+footer[role=contentinfo] {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0px;
+  margin: 0;
+}
+
+.panel {
+  width: 47%;
+  clear: none;
+}
+.panel.important {
+  width: 96%;
+}
+.panel.secondary {
+  width: 23%;
+}
+}
 
 body{
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -34,7 +165,7 @@ body{
 }
 /* Style tab links */
 .tablink {
-  background-color: #555;
+  background-color: #FFB500;
   color: white;
   float: left;
   border: 1px solid white;
@@ -69,7 +200,7 @@ p {
 }
 
 .tablink:hover {
-  background-color: #777;
+  background-color: #A7ACA2;
 }
 
 /* Style the tab content (and add height:100% for full page content) */

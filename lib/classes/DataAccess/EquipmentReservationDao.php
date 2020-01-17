@@ -156,6 +156,34 @@ class EquipmentReservationDao {
         }
     }
 
+        /**
+     * Fetches reserved equipment count for admin.
+     *
+     * @return \Model\EquipmentReservation[]|boolean an array of projects on success, false otherwise
+     */
+    public function getReservationCountForAdmin() {
+        try {
+            $sql = '
+            SELECT COUNT(*) 
+            FROM equipment_reservation, user, equipment, user_access_level
+            WHERE equipment_reservation.equipment_id = equipment.equipment_id
+                AND equipment_reservation.user_id = user.user_id
+                AND user.access_level_id = user_access_level.user_access_level_id
+                AND is_active = 1
+                
+            ';
+            $results = $this->conn->query($sql);
+
+            foreach ($results as $row) {
+                return $row['COUNT(*)'];
+            }
+           
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get admin reservations count: " . $e->getMessage());
+            return false;
+        }
+    }
+
 
     public function getEquipmentAvailableStatus($equipmentID){
         try {

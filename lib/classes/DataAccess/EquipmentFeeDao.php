@@ -138,6 +138,31 @@ class EquipmentFeeDao {
     }
 
     /**
+     * Fetches fees count associated with a user.
+     *
+     * @param string $userID the ID of the user whose projects to fetch
+     * @return \Model\FeesOwed[]|boolean an array of projects on success, false otherwise
+     */
+    public function getPendingAdminFeesCount() {
+        try {
+            $sql = '
+            SELECT COUNT(*) 
+            FROM equipment_fee 
+            WHERE is_pending = 1
+            ';
+            $results = $this->conn->query($sql);
+
+            foreach ($results as $row) {
+                return $row['COUNT(*)'];
+            }
+           
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get fees count for admin: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Adds a equipment fee entry into the database.
      *
      * @param \Model\FeesOwed $fee the equipment to add

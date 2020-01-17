@@ -58,6 +58,7 @@ $reservedEquipment = $reservationDao->getReservationsForUser($uID);
 $checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
 $checkoutFeeHTML = '';
 
+$checkoutFeeCount = 0;
 foreach ($checkoutFees as $f){
     $checkoutID = $f->getCheckoutID();
     $checkout = $checkoutDao->getCheckout($checkoutID);
@@ -67,7 +68,11 @@ foreach ($checkoutFees as $f){
     $feeID = $f->getFeeID();
 
     $isPending = $f->getIsPending();
-    $isPaid = $f->getIsPaid();
+	$isPaid = $f->getIsPaid();
+	// Makes sure fee is not pending or paid
+	if ($isPending == FALSE && $isPaid == FALSE){
+		$checkoutFeeCount++;
+	}
     renderViewCheckoutModal($checkout);
 
     renderPayFeeModal($f);
@@ -83,7 +88,7 @@ foreach ($checkoutFees as $f){
     </tr>
     ";
 }
-
+$reservedEquipmentCount = 0;
 $reservedHTML = '';
 $listNumber = 0;
 if ($reservedEquipment){
@@ -107,6 +112,7 @@ if ($reservedEquipment){
 				//$handoutButton = createReservationHandoutButton($reservationID, $listNumber, $userID, $equipmentID);
 				$cancelButton = createReservationCancelButton($reservationID, $listNumber);
 				$tableIDName = "activeReservation$listNumber";
+				$reservedEquipmentCount++;
 			}
 			else {
 				$active = "Expired";
@@ -134,6 +140,8 @@ if ($reservedEquipment){
 	$reservedHTML = "";
 }
 
+$checkedOutEquipmentLateCount = 0;
+$checkedoutEquipmentCount = 0;
 $checkoutHTML = '';
 $listNumber = 0;
 if ($checkedoutEquipment){
@@ -156,7 +164,9 @@ if ($checkedoutEquipment){
 		$equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
 		$equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
 
-
+		if ($statusID == "Late"){
+			$checkedOutEquipmentLateCount++;
+		}
 
 		if ($statusID == "Returned" || $statusID == "Returned Late"){
 			// If equipment has been returned
@@ -167,6 +177,7 @@ if ($checkedoutEquipment){
 			//TODO: View Checkout button
 		} else {
 			//renderEquipmentReturnModal($c);
+			$checkedoutEquipmentCount++;
 			$returnButton = "";
 			$assignFeeButton = "";
 			//TODO: Extend checkout button
@@ -190,21 +201,130 @@ if ($checkedoutEquipment){
 	$checkoutHTML = "";
 }
 
+
 ?>
+
 <br>
 <div class="stickytabs">
-	<button class="tablink" onclick="openPage('Profile', this, 'red')">Profile</button>
-	<button class="tablink" onclick="openPage('Fees', this, 'green')">My Fees</button>
-	<button class="tablink" onclick="openPage('Equipment', this, 'blue')" id="defaultOpen">Equipment Reservations</button>
+	<button class="tablink" onclick="openPage('Dashboard', this, '#A7ACA2')" id="defaultOpen">Dashboard</button>
+	<button class="tablink" onclick="openPage('Profile', this, '#A7ACA2')">Profile</button>
+	<button class="tablink" onclick="openPage('Fees', this, '#A7ACA2')">My Fees</button>
+	<button class="tablink" onclick="openPage('Equipment', this, '#A7ACA2')">Equipment Reservations</button>
+</div>
+
+<div id="Dashboard" class="tabcontent">
+	<br><br><br><br>
+	<section class="panel dashboard">
+    <h2>Dashboard </h2>
+	<ul>
+		<?php 
+		// If we have actionable items, show the action required
+		$actionStyle = "style='color:red'";
+		$dashboardText = "";
+		if ($checkoutFeeCount != 0){
+			$dashboardText .= 
+			"
+			<li $actionStyle>You have unpaid equipment checkout fees!  Pay them as soon as possible.</li>
+			";
+		}
+		if ($reservedEquipmentCount != 0){
+			$dashboardText .=
+			"
+			<li $actionStyle>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.</li>
+			";
+		}
+		if ($checkedOutEquipmentLateCount != 0){
+			$dashboardText .= "
+			<li $actionStyle>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!</li>
+			";
+		}
+		if ($checkedoutEquipmentCount != 0){
+			$dashboardText .= "
+			<li>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</li>
+			";
+		}
+
+		if (empty($dashboardText)){
+			$dashboardText = "<li style='list-style-type:none;'>No Pending Items. Have a good day!</li>";
+		}
+		echo $dashboardText;
+		?>
+		
+
+    </ul>
+  </section>
+  <!--
+  <section class="panel">
+    <h2>Posts</h2>
+    <ul>
+      <li><b>2458 </b>Published Posts</li>
+      <li><b>18</b> Drafts.</li>
+      <li>Most popular post: <b>This is a post title</b>.</li>
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Chart</h2>
+    <ul>
+      <li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>
+      <li>Aliquam tincidunt mauris eu risus.</li>
+      <li>Vestibulum auctor dapibus neque.</li>
+    </ul>
+  </section>
+
+  <section class="panel important">
+    <h2>My Profile</h2>
+    <form action="#">
+      <div class="twothirds">
+        <label for="name">Text Input:</label>
+        <input type="text" name="name" id="name" placeholder="John Smith" />
+
+        <label for="textarea">Textarea:</label>
+        <textarea cols="40" rows="8" name="textarea" id="textarea"></textarea>
+
+      </div>
+      <div class="onethird">
+        <legend>Radio Button Choice</legend>
+
+        <label for="radio-choice-1">
+          <input type="radio" name="radio-choice" id="radio-choice-1" value="choice-1" /> Choice 1
+        </label>
+
+        <label for="radio-choice-2">
+          <input type="radio" name="radio-choice" id="radio-choice-2" value="choice-2" /> Choice 2
+        </label>
+
+
+        <label for="select-choice">Select Dropdown Choice:</label>
+        <select name="select-choice" id="select-choice">
+          <option value="Choice 1">Choice 1</option>
+          <option value="Choice 2">Choice 2</option>
+          <option value="Choice 3">Choice 3</option>
+        </select>
+
+
+        <div>
+          <label for="checkbox">
+            <input type="checkbox" name="checkbox" id="checkbox" /> Checkbox
+          </label>
+        </div>
+
+        <div>
+          <input type="submit" value="Submit" />
+        </div>
+      </div>
+    </form>
+  </section>
+  -->
+
+
+
 </div>
 
 <div id="Profile" class="tabcontent">
 <form id="formUserProfile">
 	<input type="hidden" name="uid" value="<?php echo $_SESSION['userID']; ?>" />
-	<div class="jumbotron jumbotron-fluid">
-		<br><br>
-		<h2>My Profile</h2>
-		<hr class="my-4">
+	<div class="">
+		<br><br><br><br><br>
 		<div class="container bootstrap snippets">
 			<div class="row">
 				<div class="col-sm-6">
@@ -419,7 +539,6 @@ echo "
 	?>
 
 </div>
-
 
 <script defer type="text/javascript">
 

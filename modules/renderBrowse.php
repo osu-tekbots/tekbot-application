@@ -28,6 +28,7 @@ function renderEmployeeEquipmentList($equipments) {
         }
         $location = Security::HtmlEntitiesEncode($e->getLocation());
         $health = $e->getHealthID()->getName();
+        
         renderEmployeeEquipmentItem($equipmentID, $name, $location, $health);
        
     }

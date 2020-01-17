@@ -212,7 +212,7 @@ class EquipmentRentalMailer extends Mailer {
     You have checked out an equipment!
     ---------------------------
     Equipment ID: $equipmentID
-    Contract Duration: $contractID days
+    Contract Duration: $contractID day(s)
     ---------------------------
 
     To view the exact date and time your checkout out ends, view it at this link: $link

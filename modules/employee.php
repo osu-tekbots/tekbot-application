@@ -138,6 +138,7 @@ function isValidStudentID($sid){
  */
 
  function renderEmployeeSidebar() {
+
      echo'
     <br><br>
      <!-- Sidebar -->
@@ -145,7 +146,7 @@ function isValidStudentID($sid){
         <li class="nav-item dropdown">
              <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-tools"></i>
-                <span>Equipment Checkout</span>
+                <span>Equipment</span>
              </a>
              <div class="dropdown-menu" aria-labelledby="pagesDropdown">
                  <h6 class="dropdown-header">Reserved/Checked Out:</h6>
@@ -173,7 +174,7 @@ function isValidStudentID($sid){
          </div>
         </li>
 
-        
+
         <li class="nav-item">
             <a class="nav-link" href="pages/adminFees.php">
                 <i class="fas fa-fw fa-dollar-sign"></i>
@@ -251,6 +252,7 @@ function isValidStudentID($sid){
 
 
      ';
+    
 
  }
 

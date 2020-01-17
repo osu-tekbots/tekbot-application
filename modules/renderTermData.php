@@ -6,7 +6,7 @@ function generateAccessToken(){
     curl_setopt($ch, CURLOPT_URL, 'https://api.oregonstate.edu/oauth2/token');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, "client_id=&client_secret=&grant_type=client_credentials");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, "client_id=qiAZ7Z1l7NyWkXp2ofEpD3AfDRguywAL&client_secret=zqNQ45X71sERxS2Z&grant_type=client_credentials");
     
     $headers = array();
     $headers[] = 'Content-Type: application/x-www-form-urlencoded;charset=utf-8';
@@ -156,6 +156,7 @@ function renderCourseNames(){
     <select name="course" class="form-control">
         <option value=""></option> 
         <option value="ECE 272">ECE 272</option>
+        <option value="ENGR202-001">ENGR202-001</option>
         <option value="ECE111-010">ECE111-010</option>
         <option value="ECE111-020">ECE111-020</option>
         <option value="ECE341">ECE341</option>

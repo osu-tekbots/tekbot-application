@@ -329,12 +329,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update fee'));
         }
 
+        /*
         $userID = $equipmentFee->getUserID();
 
         // Send email
         $user = $this->UsersDao->getUserByID($userID);
         $this->mailer->sendPaidEquipmentFeesEmail($user, $equipmentFee);
-
+        */
+        
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully submitted fee payment'

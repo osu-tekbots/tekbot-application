@@ -20,8 +20,9 @@ include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 $dao = new EquipmentDao($dbConn, $logger);
 $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
 $isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
+$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
+    && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
 $equipments = $dao->getBrowsableEquipment();
-
 $equipmentItemHTML = "";
 foreach ($equipments as $e){
     $equipmentID = $e->getEquipmentID();
@@ -36,6 +37,12 @@ foreach ($equipments as $e){
     }
 
     $viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
+    $editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
+    if ($isEmployee){
+        $actions = "$viewButton $editButton";
+    } else {
+        $actions = "$viewButton";
+    }
     $isAvailable = $equipmentReservationDao->getEquipmentAvailableStatus($equipmentID);
     if ($isAvailable){
         $status = "Available";
@@ -62,7 +69,7 @@ foreach ($equipments as $e){
         <td>$description</td>
         <td>$health</td>
         <td>$status</td>
-        <td>$viewButton</td>
+        <td>$actions</td>
     </tr>
   
     ";
@@ -71,8 +78,6 @@ foreach ($equipments as $e){
 <br /><br />
 <div class="container-fluid">
         <?php
-        $version = phpversion();
-        print $version;
         echo "
         <div class='admin-paper'>
         <h1>Equipment Rentals</h1>

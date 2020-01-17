@@ -1,7 +1,13 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\CapstoneProjectsDao;
+use DataAccess\UsersDao;
+use DataAccess\EquipmentFeeDao;
+use DataAccess\EquipmentDao;
+use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentReservationDao;
+use DataAccess\KitEnrollmentDao;
+use Util\Security;
 
 session_start();
 
@@ -12,10 +18,29 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 
 allowIf($isEmployee);
 
+$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
+$equipmentDao = new EquipmentDao($dbConn, $logger);
+$checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
+$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
+
+
+$remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
+$equipmentReservationCount = $reservationDao->getReservationCountForAdmin();
+$equipmentFeeCount =  $checkoutFeeDao->getPendingAdminFeesCount();
+
+$dashboardText = "";
+
+if ($equipmentReservationCount != 0){
+	$dashboardText .= "<li>There are $equipmentReservationCount active equipment reservations.  Students will be coming in soon to pick up the item.</li>";
+}
+if ($equipmentFeeCount != 0){
+	$dashboardText .= "<li style='color: red;'>There are $equipmentFeeCount pending fees! Click <a href='./pages/adminFees.php'>here</a> to verify them.</li>";
+}
 
 $title = 'Employee Interface';
 $css = array(
-    'assets/css/sb-admin.css'
+	'assets/css/sb-admin.css'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
@@ -33,91 +58,19 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 			<div class="container-fluid">
 
-				<!-- Breadcrumbs-->
-				<ol class="breadcrumb">
-					<li class="breadcrumb-item">
-						<a>Dashboard</a>
-					</li>
-					<li class="breadcrumb-item active">Overview</li>
-				</ol>
+				<section class="panel dashboard">
+    				<h2>Dashboard </h2>
+					<ul>
+					<?php 
+					echo $dashboardText;
+					?>
+					</ul>
+ 				 </section>
 
-				<?php
-				$stats = 1;
-				$pendingProjects = 1;
-				$pendingCategories = 1;
 
-				// TODO: ask about email here
-				// if ($pendingProjects == 5 || $pendingCategories == 5){
-				// 	notifyAdminEmail($pendingProjects, $pendingCategories);
-				// }
-				?>
-				<!-- Icon Cards-->
-				<div class="row">
-					<div class="col-xl-3 col-sm-6 mb-3">
-						<div class="card text-white bg-danger o-hidden h-100">
-							<div class="card-body">
-								<div class="card-body-icon">
-									<i class="fas fa-thumbs-up"></i>
-								</div>
-								<div class="mr-5"><?php echo($pendingProjects)?> PENDING projects!</div>
-							</div>
-							<a class="card-footer text-white clearfix small z-1" href="pages/adminProject.php">
-								<span class="float-left">View Details</span>
-								<span class="float-right">
-									<i class="fas fa-angle-right"></i>
-								</span>
-							</a>
-						</div>
-					</div>
-					<div class="col-xl-3 col-sm-6 mb-3">
-						<div class="card text-white bg-warning o-hidden h-100">
-							<div class="card-body">
-								<div class="card-body-icon">
-									<i class="fas fa-fw fa-list"></i>
-								</div>
-								<div class="mr-5"><?php echo($pendingCategories); ?> Projects Need Categories</div>
-							</div>
-							<a class="card-footer text-white clearfix small z-1" href="pages/adminProject.php">
-								<span class="float-left">View Details</span>
-								<span class="float-right">
-									<i class="fas fa-angle-right"></i>
-								</span>
-							</a>
-						</div>
-					</div>
-					<div class="col-xl-3 col-sm-6 mb-3">
-						<div class="card text-white bg-success o-hidden h-100">
-							<div class="card-body">
-								<div class="card-body-icon">
-									<i class="fas fa-fw fa-shopping-cart"></i>
-								</div>
-								<div class="mr-5">Browse Projects</div>
-							</div>
-							<a class="card-footer text-white clearfix small z-1" href="pages/adminProject.php">
-								<span class="float-left">View Details</span>
-								<span class="float-right">
-									<i class="fas fa-angle-right"></i>
-								</span>
-							</a>
-						</div>
-					</div>
-					<div class="col-xl-3 col-sm-6 mb-3">
-						<div class="card text-white bg-primary o-hidden h-100">
-							<div class="card-body">
-								<div class="card-body-icon">
-									<i class="fas fa-users"></i>
-								</div>
-								<div class="mr-5">Users Table</div>
-							</div>
-							<a class="card-footer text-white clearfix small z-1" href="pages/adminUser.php">
-								<span class="float-left">View Details</span>
-								<span class="float-right">
-									<i class="fas fa-angle-right"></i>
-								</span>
-							</a>
-						</div>
-					</div>
-				</div>
+
+
+
 
 
 			</div>

@@ -63,6 +63,38 @@ class EquipmentCheckoutDao {
         }
     }
 
+     /**
+     * Fetches the count of checkouts for a specified user
+     *
+     * @param string $userID the ID of the user whose projects to fetch
+     * @return int on success 
+     */
+    public function getCheckoutCountForUser($userID) {
+        try {
+            $sql = '
+            SELECT COUNT(*) 
+            FROM equipment_checkout, equipment_checkout_status, user, equipment_reservation, contract, user_access_level  
+            WHERE checkout_status_id = equipment_checkout_status.id
+                AND equipment_checkout.user_id = user.user_id 
+                AND user.access_level_id = user_access_level.user_access_level_id
+                AND equipment_checkout.contract_id = contract.contract_id 
+                AND reservation_id = eqreservation_id
+                AND equipment_checkout.user_id = :uid
+            ';
+            $params = array(':uid' => $userID);
+            $results = $this->conn->query($sql, $params);
+
+            foreach ($results as $row) {
+                return $row['COUNT(*)'];
+            }
+           // $results[0] = $row;
+            //return $row['COUNT(*)'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkout counts for user '$userID': " . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Fetches the equipment checkout with the provided ID
      *
@@ -102,6 +134,38 @@ class EquipmentCheckoutDao {
      * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
      */
     public function getCheckoutsForAdmin() {
+        try {
+            $sql = '
+            SELECT * 
+            FROM equipment_checkout, equipment_checkout_status, user, user_access_level, equipment_reservation, contract 
+            WHERE equipment_checkout.user_id = user.user_id 
+                AND equipment_checkout.contract_id = contract.contract_id 
+                AND user.access_level_id = user_access_level.user_access_level_id
+                AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
+                AND reservation_id = eqreservation_id
+
+            ';
+            $results = $this->conn->query($sql);
+
+            $checkouts = array();
+            foreach ($results as $row) {
+                $checkout = self::ExtractCheckoutFromRow($row, true);
+                $checkouts[] = $checkout;
+            }
+           
+            return $checkouts;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get admin checkouts: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches checked out equipment count for admin.
+     *
+     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     */
+    public function getCheckoutCountForAdmin() {
         try {
             $sql = '
             SELECT * 

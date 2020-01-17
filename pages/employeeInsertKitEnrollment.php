@@ -50,11 +50,11 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 			</div>
             <br><br><br><br>
             <div id="tableContainer" class='admin-paper' style="display:none">
-				<h3>Are these correct? Select Term: 
+				<h3>Are these correct? Select Term:
 				<select id="termSelect">
 					<option></option>
-					<option value="1">Term 1</option>
-					<option value="2">Term 2</option>
+					<option value="202002">Winter 2020</option>
+				
 				</select> <button class="validJsonButton" id="validEntry">Yes, Upload to DB</button><button class="invalidJsonButton" onClick="window.location.reload();">No</button></h3>
 					<table class='table' id='kitEnrollments'>
 					<caption>List Check</caption>

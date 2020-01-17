@@ -263,24 +263,32 @@ $test = "";
 ?>
  <div class="col-sm">
     <div class="jumbotron primaryColor seethrough" style="font-weight:bold;font-size:large;">
-    <h3 class="kitFont"><b>Remaining Kits for 
-    <?php  
-    echo (term2string($currentTerm));    
-    ?>:</b></h3><div style="height:300px;overflow:auto;">
+    <?php 
+    echo "<h2>".(term2string($currentTerm))."</h2>";    
+   
+    ?>
+    <br>
+    <h4 class="kitFont"><b>Remaining Kits:
+    </b></h4><div>
     <ul class="list-group">
     <?php 
-    $termKits = $kitEnrollmentDao->getKitEnrollmentsByTerm($currentTerm);
+    $termKits = $kitEnrollmentDao->getRemainingKitEnrollmentsByTerm($currentTerm);
     $readyArray = [];
     foreach ($termKits as $k){
-        if ($k->getKitStatusID()->getId() == KitEnrollmentStatus::READY){
             array_push($readyArray, $k->getCourseCode());
-        } 
     }
     $numValues = array_count_values($readyArray);
     foreach($numValues as $key => $value){
+        if ($value >= 60) {
+            $color = "green";
+        } else if ($value >= 30) {
+            $color = "yellow";
+        } else {
+            $color = "red";
+        }
         echo '
         <li class="list-group-item d-flex justify-content-between align-items-center">'.$key.'
-            <span class="badge badge-primary badge-pill" style="background-color:yellow;">
+            <span class="badge badge-primary badge-pill" style="background-color:'.$color.';">
             <font color="black">'.$value.'</font></span>
         </li>
         
@@ -288,12 +296,37 @@ $test = "";
        
     }
     ?>
-
-
-
-
-
+      </ul>
+      </div>
+    
+    <br><br>
+    <h4 class="kitFont"><b>Distributed Kits:</b></h4><div style="overflow:auto;">
+    <ul class="list-group">
+    <?php 
+    $termKits = $kitEnrollmentDao->getDistributedKitEnrollmentsByTerm($currentTerm);
+    $readyArray = [];
+    foreach ($termKits as $k){
+            array_push($readyArray, $k->getCourseCode());
+    }
+    $numValues = array_count_values($readyArray);
+    foreach($numValues as $key => $value){
+        echo '
+        <li class="list-group-item d-flex justify-content-between align-items-center">'.$key.'
+            <span class="badge badge-primary badge-pill">
+            <font color="black">'.$value.'</font></span>
+        </li>
+        
+        ';
+       
+    }
+    ?>
     </ul>
+
+
+
+
+
+  
 
 
     </br>
