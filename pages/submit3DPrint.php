@@ -110,13 +110,13 @@ TO DO: Use bootstrap div dividing in order to format page.
 		echo '<table id="printerTable">'; 
 		echo '<tr>';
 		echo '<td></td>';
-		echo '<td>' . "<b> Printer Name </b>" . '</td>';
-		echo '<td>' . "<b> Description </b>" . '</td>';
-		echo '<td>' . "<b> Location </b>" . '</td>';
+		echo '<td><b> Printer Name </b></td>';
+		echo '<td><b> Description </b></td>';
+		echo '<td><b> Location </b></td>';
 		echo '</tr>';
 		foreach ($printers as $p) {
 			echo '<tr>';
-			echo '<td>' . '<button>Edit<button/> <button >Remove<button/>'. '</td>'; //FIXME: Add ids to the buttons (unique)
+			echo '<td>' . '<button id="edit' . $p->getPrinterId() . '">Edit</button> <button id="remove' . $p->getPrinterId() . '">Remove</button>'. '</td>';
 			echo '<td>' . '<input id="printerName' . $p->getPrinterId() . '" value="' . $p->getPrinterName() . '"></input>'. '</td>';
 			echo '<td>' . '<input id="printerDescription' . $p->getPrinterId() . '" value="' . $p->getDescription() . '"></input>'. '</td>';
 			echo '<td>' . '<input id="printerLocation' . $p->getPrinterId() . '" value="' . $p->getLocation() . '"></input>'. '</td>';
@@ -124,10 +124,10 @@ TO DO: Use bootstrap div dividing in order to format page.
 		
 	}
 	echo '<tr>';
-	echo '<td>' . '<button id="addButt">Add<button/>'. '</td>'; //FIXME: Add ids to the buttons (unique)
-	echo '<td>' . '<input id="addPrinterName"></input>'. '</td>';
-	echo '<td>' . '<input id="addPrinterDescription'. '"></input>'. '</td>'; //refactor
-	echo '<td>' . '<input id="addPrinterLocation"></input>'. '</td>';
+	echo '<td><button id="addButt">Add</button></td>'; 
+	echo '<td><input id="addPrinterName"></input></td>';
+	echo '<td><input id="addPrinterDescription"></input></td>';
+	echo '<td><input id="addPrinterLocation"></input></td>';
 	echo '</tr>';
 
 		echo '</table>';	
@@ -141,6 +141,7 @@ TO DO: Use bootstrap div dividing in order to format page.
 		}
 		else
 		{
+			//IS NOT WORKING!!
 			let printName = $("#addPrinterName").val();
 			let printDescription = $("#addPrinterDescription").val();
 			let data = {
