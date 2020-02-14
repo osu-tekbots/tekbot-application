@@ -122,15 +122,15 @@ class PrinterActionHandler extends ActionHandler {
 
         $printFee = new PrintFee();
 
-        $printFee->setPrintFeeId($body['print_fee_id'])
-        $printFee->setPrintJobId($body['print_job_id'])
-        $printFee->setUserId($body['user_id'])
-        $printFee->setCustomerNotes($body['customer_notes'])
-        $printFee->setDateCreated($body['date_created'])
-        $printFee->setPaymentInfo($body['payment_info'])
-        $printFee->setIs_pending($body['is_pending'])
-        $printFee->setIs_paid($body['is_paid'])
-        $printFee->setDate_updated(new \DateTime())
+        $printFee->setPrintFeeId($body['print_fee_id']);
+        $printFee->setPrintJobId($body['print_job_id']);
+        $printFee->setUserId($body['user_id']);
+        $printFee->setCustomerNotes($body['customer_notes']);
+        $printFee->setDateCreated($body['date_created']);
+        $printFee->setPaymentInfo($body['payment_info']);
+        $printFee->setIs_pending($body['is_pending']);
+        $printFee->setIs_paid($body['is_paid']);
+        $printFee->setDate_updated(new \DateTime());
 
         //AddNewPrinterFee not implemented
         $ok = $this->printFeeDao->addNewPrinterFee($printFee);
@@ -152,7 +152,43 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSavePrintFee() {
-		//MARK: Implement this function, reference function above
+        //MARK: Implement this function, reference function above
+
+        $printFeeID = $this->getFromBody('print_fee_id');
+        $printJobID = $this->getFromBody('print_job_id');
+        $userID = $this->getFromBody('user_id');
+        $customerNotes = $this->getFromBody('customer_notes');
+        $dateCreated = $this->getFromBody('date_created');
+        $paymentInfo = $this->getFromBody('payment_info');
+        $isPending = $this->getFromBody('is_pending');
+        $isPaid = $this->getFromBody('is_paid');
+
+        //Dao function to be implemented
+        $printFee = $this->printerFeeDao->getPrinterFeeByID($printFeeID);
+        if (empty($printFee)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
+        }
+        
+        $printFee->setPrintFeeId($body['print_fee_id'])
+        $printFee->setPrintJobId($body['print_job_id'])
+        $printFee->setUserId($body['user_id'])
+        $printFee->setCustomerNotes($body['customer_notes'])
+        $printFee->setDateCreated($body['date_created'])
+        $printFee->setPaymentInfo($body['payment_info'])
+        $printFee->setIs_pending($body['is_pending'])
+        $printFee->setIs_paid($body['is_paid'])
+        $printFee->setDate_updated(new \DateTime())
+
+        //Dao not implemented
+        $ok = $this->printerFeeDao->updatePrintFee($printFee);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print fee'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved print fee'
+        ));
     }
 
 
@@ -184,7 +220,9 @@ class PrinterActionHandler extends ActionHandler {
             case 'createprintfee':
                 $this->handleCreatePrintFee();
 			//MARK: Add save print fee and function for it
-			
+            case 'saveprintfee':
+                $this->handleSavePrintFee();
+            
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }
