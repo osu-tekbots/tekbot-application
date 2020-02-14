@@ -14,9 +14,6 @@ use DataAccess\QueryUtils;
  */
 class PrinterActionHandler extends ActionHandler {
 
-
-    // private $printFeeDao;
-
     /** @var \DataAccess\printerDao */
     private $printerDao;
     /** @var \Email\ProjectMailer */
@@ -39,7 +36,6 @@ class PrinterActionHandler extends ActionHandler {
         //$this->mailer = $mailer;
         $this->config = $config;
 
-        // $this->printFeeDao = $printFeeDao;
     }
 
     /**
@@ -104,56 +100,25 @@ class PrinterActionHandler extends ActionHandler {
     }
 
 
-    // /**
-    //  * Creates a new print fee entry in the database.
-    //  *
-    //  * @return void
-    //  */
-    // public function handleCreatePrintFee() {
-    //     //MARK: Implmenet this function, reference function above
-    //     $this->requireParam('print_fee_id');
-    //     $this->requireParam('print_job_id');
-    //     $this->requireParam('user_id');
-    //     $this->requireParam('date_created');
-    //     $this->requireParam('is_pending');
-    //     $this->requireParam('is_paid');
-
-    //     $body = $this->requestBody;
-
-    //     $printFee = new PrintFee();
-
-    //     $printFee->setPrintFeeId($body['print_fee_id'])
-    //     $printFee->setPrintJobId($body['print_job_id'])
-    //     $printFee->setUserId($body['user_id'])
-    //     $printFee->setCustomerNotes($body['customer_notes'])
-    //     $printFee->setDateCreated($body['date_created'])
-    //     $printFee->setPaymentInfo($body['payment_info'])
-    //     $printFee->setIs_pending($body['is_pending'])
-    //     $printFee->setIs_paid($body['is_paid'])
-    //     $printFee->setDate_updated(new \DateTime())
-
-    //     //AddNewPrinterFee not implemented
-    //     $ok = $this->printFeeDao->addNewPrinterFee($printFee);
-    //     if (!$ok) {
-    //         $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer'));
-    //     }
-
-    //     $this->respond(new Response(
-    //         Response::CREATED, 
-    //         'Successfully created new printer resource', 
-    //         array('id' => $printerFee->getPrintFeeId())
-    //     ));
-    // }
+    /**
+     * Creates a new print fee entry in the database.
+     *
+     * @return void
+     */
+    public function handleCreatePrintFee() {
+        //MARK: Implmenet this function, reference function above
+        
+    }
 
 
-    // /**
-    //  * Updates fields editable from the user interface in a printer entry in the database.
-    //  *
-    //  * @return void
-    //  */
-    // public function handleSavePrintFee() {
-	// 	//MARK: Implement this function, reference function above
-    // }
+    /**
+     * Updates fields editable from the user interface in a printer entry in the database.
+     *
+     * @return void
+     */
+    public function handleSavePrintFee() {
+		//MARK: Implement this function, reference function above
+    }
 
 
  
@@ -181,8 +146,7 @@ class PrinterActionHandler extends ActionHandler {
                 $this->handleSavePrinter();
 			
 			// //MARK: Add create print fee and function for it
-            // case 'createprintfee':
-            //     $this->handleCreatePrintFee();
+ 
 			// //MARK: Add save print fee and function for it
 			
             default:
