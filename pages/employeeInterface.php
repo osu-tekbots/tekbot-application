@@ -42,10 +42,14 @@ $title = 'Employee Interface';
 $css = array(
 	'assets/css/sb-admin.css'
 );
+
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
+
 ?>
 <br/>
+
+
 <div id="page-top">
 
 	<div id="wrapper">
@@ -57,26 +61,20 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 		<div id="content-wrapper">
 
 			<div class="container-fluid">
-
-				<section class="panel dashboard">
-    				<h2>Dashboard </h2>
-					<ul>
-					<?php 
-					echo $dashboardText;
-					?>
-					</ul>
- 				 </section>
-
-
-
-
-
-
-
+			<section class="panel dashboard">
+    		<h2>Dashboard </h2>
+				<ul>
+				<?php 
+				echo $dashboardText;
+				?>
+				</ul>
+			</section>
+			
 			</div>
 		</div>
 	</div>
 </div>
+
 
 <script>
 

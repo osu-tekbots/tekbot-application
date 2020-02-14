@@ -265,6 +265,46 @@ class EquipmentRentalMailer extends Mailer {
         return $this->sendEmail($user->getEmail(), $subject, $message);
     }
 
+        
+    public function sendEquipmentLateEmail($checkout, $user, $equipmentName) {
+        $pickupTime = $checkout->getPickupTime();
+        $latestPickupTime = $checkout->getDeadlineTime();
+        $contractName = $checkout->getContractID();
+
+        $email = Security::HtmlEntitiesEncode($user->getEmail());
+        $name = Security::HtmlEntitiesEncode($user->getFirstName()) 
+        . ' ' 
+        . Security::HtmlEntitiesEncode($user->getLastName());
+
+        $dt = $checkout->getDeadlineTime();
+        $timestamp = strtotime($dt);
+       
+        $subject = "Equipment Needs To Be Returned!";
+
+        $message = "
+    Dear $name,
+
+    Our system has indicated that you currently have an equipment checked out that has passed your deadline time.
+
+    To prevent incremental late fees, or a charge to your student account, please return the item as soon as possible to KEC 1110 (10AM - 1PM).
+
+    ---- Checkout Details ----
+    Equipment: $equipmentName
+
+    Contract Duration: $contractName *Weekends are accounted for, holidays are not*
+
+    Picked Up Time: $pickupTime 
+
+    Deadline Time: $latestPickupTime
+    ---------------------------
+
+    If you believe this email was sent in error, either come to KEC 1110 (10AM - 1PM) or respond to this email.
+
+    ";
+
+        return $this->sendEmail($email, $subject, $message);
+    }
+
 
     /**
      * Sends a confirmation email to the proposer after the have submitted their project.

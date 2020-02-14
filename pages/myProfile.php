@@ -464,7 +464,7 @@ echo "
 			<thead>
 				<tr>
 					<th>Reservation Time</th>
-					<th>Deadline Time</th>
+					<th>Expiration Time</th>
 					<th>Equipment</th>
 					<th>Status</th>
 					<th>Actions</th>

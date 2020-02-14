@@ -74,7 +74,6 @@ class QueryUtils {
 
         return false;
         
-
     }
 
 }

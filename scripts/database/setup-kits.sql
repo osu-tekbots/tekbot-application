@@ -1,5 +1,5 @@
 --
--- User Tables
+-- Kit Checkout
 -- Setup Script Order: 1
 --
 CREATE TABLE IF NOT EXISTS kit_enrollment_status (

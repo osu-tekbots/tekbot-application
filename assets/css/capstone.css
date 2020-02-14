@@ -674,6 +674,8 @@ div.student {
 }
 
 
+
+
 /*
 CSS Styling for header content
 Project Showcase (Now Capstone)
@@ -795,6 +797,21 @@ header.light {
   margin-bottom:0px;
   margin-top:5px;
   display:inline-block;
+}
+
+#table_detail tr:hover
+{
+ background-color:#F2F2F2;
+}
+
+.clickableRow:hover
+{
+ background-color:#F2F2F2;
+}
+
+#table_detail .hidden_row
+{
+ display:none;
 }
 
 /*

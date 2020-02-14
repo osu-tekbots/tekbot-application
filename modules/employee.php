@@ -192,7 +192,13 @@ function isValidStudentID($sid){
                 <i class="fas fa-fw fa-print"></i>
                 <span>3D Printing</span>
             </a>
-         </li>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="pages/adminClasses.php">
+                <i class="fas fa-fw fa-users-cog"></i>
+                <span>Classes & Groups</span>
+            </a>
+        </li>
         <li class="nav-item">
         <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/Inventory/index.php">
             <i class="fas fa-fw fa-pallet"></i>

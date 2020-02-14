@@ -30,6 +30,8 @@ class IdGenerator {
         return $token;
     }
 
+    
+
     /**
      * Generates a random number within the provided range. The number will be cryptographically strong.
      *
