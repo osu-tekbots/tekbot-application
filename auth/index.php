@@ -73,7 +73,7 @@ switch ($_SESSION['userAccessLevel']) {
         break;
 
     case 'Admin':
-        $redirect = $configManager->getBaseUrl() . 'pages/adminInterface.php';
+        $redirect = $configManager->getBaseUrl() . 'pages/employeeInterface.php';
         break;
 
     default:

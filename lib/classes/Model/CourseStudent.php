@@ -8,7 +8,11 @@ class CourseStudent {
     private $courseStudentID;
     private $courseGroupID;
     private $onid;
-    private $userID;
+	private $userID;
+	
+	// Variables to pull in courseGroup and course
+	private $course;
+	private $courseGroup;
     
     
     public function __construct($id = null) {
@@ -53,6 +57,22 @@ class CourseStudent {
 
 	public function setUserID($userID){
 		$this->userID = $userID;
+	}
+
+	public function getCourse(){
+		return $this->course;
+	}
+
+	public function setCourse($course){
+		$this->course = $course;
+	}
+
+	public function getCourseGroup(){
+		return $this->courseGroup;
+	}
+
+	public function setCourseGroup($courseGroup){
+		$this->courseGroup = $courseGroup;
 	}
 
     

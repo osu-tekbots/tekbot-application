@@ -176,25 +176,25 @@ function isValidStudentID($sid){
 
 
         <li class="nav-item">
-            <a class="nav-link" href="pages/adminFees.php">
+            <a class="nav-link" href="pages/employeeFees.php">
                 <i class="fas fa-fw fa-dollar-sign"></i>
                 <span>Fees</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="pages/adminUser.php">
+            <a class="nav-link" href="pages/employeeUser.php">
                 <i class="fas fa-fw fa-users"></i>
                 <span>Users</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="pages/adminPrinter.php">
+            <a class="nav-link" href="pages/employeePrinter.php">
                 <i class="fas fa-fw fa-print"></i>
                 <span>3D Printing</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="pages/adminClasses.php">
+            <a class="nav-link" href="pages/employeeClasses.php">
                 <i class="fas fa-fw fa-users-cog"></i>
                 <span>Classes & Groups</span>
             </a>

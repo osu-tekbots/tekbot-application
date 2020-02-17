@@ -52,6 +52,44 @@ class CoursePrintAllowanceDao {
         }
     }
 
+    public function getGroupCourseStudentView(){
+        try {
+            $sql = 'SELECT * FROM StudentGroupCourseView';
+           
+            $results = $this->conn->query($sql);
+
+            $courseStudents = array();
+            foreach ($results as $row) {
+                $courseStudent = self::ExtractStudentViewFromRow($row);
+                $courseStudents[] = $courseStudent;
+            }
+
+            return $courseStudents;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch course students: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAdminCourseStudent() {
+        try {
+            $sql = 'SELECT * FROM course_student';
+           
+            $results = $this->conn->query($sql);
+
+            $courseStudents = array();
+            foreach ($results as $row) {
+                $courseStudent = self::ExtractStudentGroupFromRow($row);
+                $courseStudents[] = $courseStudent;
+            }
+
+            return $courseStudents;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch course students: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getGroupsForSpecificCourse($id) {
         try {
             $sql = '
@@ -123,6 +161,24 @@ class CoursePrintAllowanceDao {
             return self::ExtractCourseGroupFromRow($results[0]);
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch course group with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getStudentsFromAllowanceIDView($id){
+        try {
+            $sql = 'SELECT * FROM StudentGroupCourseView WHERE allowance_id = :id';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+            $courseStudents = array();
+            foreach ($results as $row) {
+                $courseStudent = self::ExtractStudentViewFromRow($row);
+                $courseStudents[] = $courseStudent;
+            }
+
+            return $courseStudents;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch students with allowance id: $id: " . $e->getMessage());
             return false;
         }
     }
@@ -321,6 +377,18 @@ class CoursePrintAllowanceDao {
         $student->setUserID($row['user_id']);
        
         return $student;
+    }
+
+    public static function ExtractStudentViewFromRow($row){
+        $student = new CourseStudent($row['course_student_id']);
+        $student->setCourseGroupID($row['course_group_id']);
+        $student->setOnid($row['onid']);
+        $student->setUserID($row['user_id']);
+        $student->setCourseGroup(self::ExtractCourseGroupFromRow($row));
+        $student->setCourse(self::ExtractCoursePrintAllowanceFromRow($row));
+       
+        return $student;
+
     }
 
 
