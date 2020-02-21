@@ -14,6 +14,8 @@ use DataAccess\QueryUtils;
  */
 class PrinterActionHandler extends ActionHandler {
 
+
+    private $printFeeDao;
     /** @var \DataAccess\printerDao */
     private $printerDao;
     /** @var \Email\ProjectMailer */
@@ -30,12 +32,14 @@ class PrinterActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($printerDao, $config, $logger) {
+    public function __construct($printerDao, $printFeeDao, $config, $logger) {
         parent::__construct($logger);
         $this->printerDao = $printerDao;
         //$this->mailer = $mailer;
         $this->config = $config;
 
+
+        $this->printFeeDao = $printFeeDao;
     }
 
     /**
@@ -107,7 +111,39 @@ class PrinterActionHandler extends ActionHandler {
      */
     public function handleCreatePrintFee() {
         //MARK: Implmenet this function, reference function above
-        
+
+        $this->requireParam('print_fee_id');
+        $this->requireParam('print_job_id');
+        $this->requireParam('user_id');
+        $this->requireParam('date_created');
+        $this->requireParam('is_pending');
+        $this->requireParam('is_paid');
+
+        $body = $this->requestBody;
+
+        $printFee = new PrintFee();
+
+        $printFee->setPrintFeeId($body['print_fee_id']);
+        $printFee->setPrintJobId($body['print_job_id']);
+        $printFee->setUserId($body['user_id']);
+        $printFee->setCustomerNotes($body['customer_notes']);
+        $printFee->setDateCreated($body['date_created']);
+        $printFee->setPaymentInfo($body['payment_info']);
+        $printFee->setIs_pending($body['is_pending']);
+        $printFee->setIs_paid($body['is_paid']);
+        $printFee->setDate_updated(new \DateTime());
+
+        //AddNewPrinterFee not implemented
+        $ok = $this->printFeeDao->addNewPrinterFee($printFee);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new printer resource', 
+            array('id' => $printerFee->getPrintFeeId())
+        ));
     }
 
 
@@ -117,10 +153,45 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSavePrintFee() {
-		//MARK: Implement this function, reference function above
+
+        //MARK: Implement this function, reference function above
+
+        $printFeeID = $this->getFromBody('print_fee_id');
+        $printJobID = $this->getFromBody('print_job_id');
+        $userID = $this->getFromBody('user_id');
+        $customerNotes = $this->getFromBody('customer_notes');
+        $dateCreated = $this->getFromBody('date_created');
+        $paymentInfo = $this->getFromBody('payment_info');
+        $isPending = $this->getFromBody('is_pending');
+        $isPaid = $this->getFromBody('is_paid');
+
+        //Dao function to be implemented
+        $printFee = $this->printerFeeDao->getPrinterFeeByID($printFeeID);
+        if (empty($printFee)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
+        }
+        
+        $printFee->setPrintFeeId($body['print_fee_id'])
+        $printFee->setPrintJobId($body['print_job_id'])
+        $printFee->setUserId($body['user_id'])
+        $printFee->setCustomerNotes($body['customer_notes'])
+        $printFee->setDateCreated($body['date_created'])
+        $printFee->setPaymentInfo($body['payment_info'])
+        $printFee->setIs_pending($body['is_pending'])
+        $printFee->setIs_paid($body['is_paid'])
+        $printFee->setDate_updated(new \DateTime())
+
+        //Dao not implemented
+        $ok = $this->printerFeeDao->updatePrintFee($printFee);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print fee'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved print fee'
+        ));
     }
-
-
 
     /**
      * Creates a new printer job in the database.
@@ -185,10 +256,14 @@ class PrinterActionHandler extends ActionHandler {
 			case 'submit3dprint':
 				$this->handleCreatePrintJob();
 			
-			// //MARK: Add create print fee and function for it
- 
-			// //MARK: Add save print fee and function for it
-			
+
+			//MARK: Add create print fee and function for it
+            case 'createprintfee':
+                $this->handleCreatePrintFee();
+			//MARK: Add save print fee and function for it
+            case 'saveprintfee':
+                $this->handleSavePrintFee();
+            
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }
