@@ -47,7 +47,7 @@ foreach ($students as $student){
 	$courseGroup = $student->getCourseGroup();
 	$groupID = $courseGroup->getCourseGroupID();
 	$groupName = $courseGroup->getGroupName();
-	$termCode = $courseGroup->getTermCode();
+	$termCode = $courseGroup->getAcademicYear();
 	$groupExpiration = $courseGroup->getDateExpiration();
 	$groupCreated = $courseGroup->getDateCreated();
 

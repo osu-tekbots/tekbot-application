@@ -7,6 +7,8 @@ class VoucherCode {
 
     private $voucherID;
     private $dateUsed;
+    private $userID;
+    private $dateCreated;
     
     
     public function __construct($id = null) {
@@ -23,7 +25,7 @@ class VoucherCode {
      * Getters and Setters
      */
 
-	public function getVoucherID(){
+    public function getVoucherID(){
 		return $this->voucherID;
 	}
 
@@ -37,6 +39,22 @@ class VoucherCode {
 
 	public function setDateUsed($dateUsed){
 		$this->dateUsed = $dateUsed;
+	}
+
+	public function getUserID(){
+		return $this->userID;
+	}
+
+	public function setUserID($userID){
+		$this->userID = $userID;
+	}
+
+	public function getDateCreated(){
+		return $this->dateCreated;
+	}
+
+	public function setDateCreated($dateCreated){
+		$this->dateCreated = $dateCreated;
 	}
 
 	

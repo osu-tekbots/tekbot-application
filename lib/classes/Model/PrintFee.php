@@ -12,10 +12,11 @@ class PrintFee {
 	private $userId;
 	private $customerNotes;
 	private $dateCreated;
+	private $amount;
 	private $paymentInfo;
-	private $is_pending;
-	private $is_paid;
-	private $date_updated;
+	private $isPending;
+	private $isPaid;
+	private $dateUpdated;
 
     /**
      * Creates a new instance of an equipment reservation.
@@ -74,6 +75,14 @@ class PrintFee {
 		$this->dateCreated = $dateCreated;
 	}
 
+	public function getAmount(){
+		return $this->amount;
+	}
+
+	public function setAmount($amount){
+		$this->amount = $amount;
+	}
+
 	public function getPaymentInfo(){
 		return $this->paymentInfo;
 	}
@@ -82,28 +91,28 @@ class PrintFee {
 		$this->paymentInfo = $paymentInfo;
 	}
 
-	public function getIs_pending(){
-		return $this->is_pending;
+	public function getIsPending(){
+		return $this->isPending;
 	}
 
-	public function setIs_pending($is_pending){
-		$this->is_pending = $is_pending;
+	public function setIsPending($isPending){
+		$this->isPending = $isPending;
 	}
 
-	public function getIs_paid(){
-		return $this->is_paid;
+	public function getIsPaid(){
+		return $this->isPaid;
 	}
 
-	public function setIs_paid($is_paid){
-		$this->is_paid = $is_paid;
+	public function setIsPaid($isPaid){
+		$this->isPaid = $isPaid;
 	}
 
-	public function getDate_updated(){
-		return $this->date_updated;
+	public function getDateUpdated(){
+		return $this->dateUpdated;
 	}
 
-	public function setDate_updated($date_updated){
-		$this->date_updated = $date_updated;
+	public function setDateUpdated($dateUpdated){
+		$this->dateUpdated = $dateUpdated;
 	}
 }
 ?>

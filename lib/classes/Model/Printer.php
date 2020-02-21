@@ -25,7 +25,7 @@ class Printer {
         } else {
             $this->setPrinterId($id);
         }
-    }
+    } 
 
     /**
      * Getters and Setters

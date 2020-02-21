@@ -6,6 +6,7 @@ use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
 use DataAccess\UsersDao;
 use DataAccess\EquipmentFeeDao;
+use DataAccess\PrinterFeeDao;
 use Model\UserAccessLevel;
 use Model\EquipmentFee;
 use Util\Security;
@@ -23,7 +24,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Users View';
+$title = 'Employee Fees';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -43,9 +44,11 @@ include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 $equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
+$printFeeDao = new PrinterFeeDao($dbConn, $logger);
 
 $equipmentFees = $equipmentFeeDao->getAdminFees();
-$equipmentFeeHTML = '';
+$printerFees = $printFeeDao->getAdminFees();
+$feeHTML = '';
 foreach ($equipmentFees as $fee){
 	$feeID = $fee->getFeeID();
 	$checkoutID = $fee->getCheckoutID();
@@ -57,6 +60,7 @@ foreach ($equipmentFees as $fee){
 	$isPaid = $fee->getIsPaid();
 	$isPending = $fee->getIsPending();
 	$dateCreated = $fee->getDateCreated();
+	$dateUpdated = $fee->getDateUpdated();
 
 	$email = Security::HtmlEntitiesEncode($user->getEmail());
 	$name = Security::HtmlEntitiesEncode($user->getFirstName()) 
@@ -83,7 +87,7 @@ foreach ($equipmentFees as $fee){
 	
 
 
-	$equipmentFeeHTML .= "
+	$feeHTML .= "
 	<tr>
 	
 		<td>$name</td>
@@ -96,6 +100,59 @@ foreach ($equipmentFees as $fee){
 	
 	";
 
+}
+
+foreach ($printerFees as $fee){
+	$feeID = $fee->getPrintFeeId();
+	//$checkoutID = $fee->getCheckoutID();
+	//getPrintJobId
+	//$checkout = $equipmentCheckoutDao->getCheckout($checkoutID);
+	$userID = $fee->getUserId();
+	$user = $userDao->getUserByID($userID);
+	$feeNotes = $fee->getCustomerNotes();
+	$feeAmount = $fee->getAmount();
+	$isPaid = $fee->getIsPaid();
+	$isPending = $fee->getIsPending();
+	$dateCreated = $fee->getDateCreated();
+	//getPaymentInfo
+	$dateUpdated = $fee->getDateUpdated();
+
+	$email = Security::HtmlEntitiesEncode($user->getEmail());
+	$name = Security::HtmlEntitiesEncode($user->getFirstName()) 
+	. ' ' 
+	. Security::HtmlEntitiesEncode($user->getLastName());
+
+	if ($isPaid){
+		$status = 'Complete';
+		// No action
+		$button = '';
+	}
+	else if ($isPending){
+		$status = 'Awaiting Approval';
+
+		// Approve or decline with notes modal
+	}
+	else {
+		$status = 'Waiting For Payment';
+		// Email reminder 
+		$button = '';
+	}
+
+	
+
+
+	$feeHTML .= "
+	<tr>
+	
+		<td>$name</td>
+		<td>Print View</td>
+		<td>$feeAmount</td>
+		<td>$feeNotes</td>
+		<td>$status</td>
+		<td>Actions</td>
+	</tr>
+	
+	";
 }
 
 
@@ -123,15 +180,15 @@ foreach ($equipmentFees as $fee){
 						echo"
 						
 						<div class='admin-paper'>
-						<h3>Checkout Fees</h3>
-						<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!
-						</p>
+						<h3>Fees</h3>
+						<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
+						<p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
 						<table class='table' id='checkoutFees'>
 						<caption>Fees Relating to Equipment Checkout</caption>
 						<thead>
 							<tr>
 								<th>Name</th>
-								<th>Checkout</th>
+								<th>Transaction</th>
 								<th>Amount($)</th>
 								<th>Notes</th>
 								<th>Status</th>
@@ -139,7 +196,7 @@ foreach ($equipmentFees as $fee){
 							</tr>
 						</thead>
 						<tbody>
-							$equipmentFeeHTML
+							$feeHTML
 						</tbody>
 						</table>
 						<script>

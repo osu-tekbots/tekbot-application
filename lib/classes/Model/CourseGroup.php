@@ -8,7 +8,7 @@ class CourseGroup {
     private $courseGroupID;
     private $groupName;
 	private $allowanceID;
-	private $termCode;
+	private $academicYear;
     private $dateExpiration;
     private $dateCreated;
     
@@ -52,12 +52,12 @@ class CourseGroup {
 	}
 
 
-	public function getTermCode(){
-		return $this->termCode;
+	public function getAcademicYear(){
+		return $this->academicYear;
 	}
 
-	public function setTermCode($termCode){
-		$this->termCode = $termCode;
+	public function setAcademicYear($academicYear){
+		$this->academicYear = $academicYear;
 	}
 
 	public function getDateExpiration(){

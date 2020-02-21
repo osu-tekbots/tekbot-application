@@ -32,23 +32,23 @@ include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
 $coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
-$courses = $coursePrintAllowanceDao->getAdminCoursePrintAllowance();
-$equipmentFeeHTML = '';
-$courseClassesHTML = '';
-foreach ($courses as $course){
-    $allowanceID = $course->getAllowanceID();
-    $courseName = $course->getCourseName();
-    $allowed3dPrints = $course->getNumberAllowedPrints();
-    $allowedLaserCuts = $course->getNumberAllowedCuts();
+$vouchers = $coursePrintAllowanceDao->getAdminVoucherCodes();
+$voucherCodeHTML = '';
+
+foreach ($vouchers as $voucher){
+    $voucherID = $voucher->getVoucherID();
+    $date_used = $voucher->getDateUsed();
+    $user_id = $voucher->getUserID();
+    $date_created = $voucher->getDateCreated();
 
 
-	$courseClassesHTML .= "
-	<tr id='$allowanceID' class='clickableRow'>
+	$voucherCodeHTML .= "
+	<tr id='$voucherID'>
 	
-		<td>$allowanceID</td>
-		<td>$courseName</td>
-		<td>$allowed3dPrints</td>
-		<td>$allowedLaserCuts</td>
+		<td>$voucherID</td>
+		<td>$date_used</td>
+		<td>$user_id</td>
+		<td>$date_created</td>
 
 	</tr>
 	
@@ -76,28 +76,54 @@ foreach ($courses as $course){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Classes');
+                    renderEmployeeBreadcrumb('Employee', 'Vouchers');
                     
-                    echo "
+					echo "
+						<div class='admin-paper'>
+							<button id='generateAdditionalVouchers' class='btn btn-primary'>Generate additional voucher codes</button>
+							<div id='confirmAdditionalVouchers' style='display:none'>
+								<h4 style='display: inline-block'>How Many?</h4>&nbsp;&nbsp;
+								<select id='voucherAmount'>
+								";
+								for ($i = 1; $i < 26; $i++){
+									echo "
+										<option value='$i'>$i</option>
+									";
+								}
+					echo "
+								</select>
+								&nbsp;&nbsp;
+								<button id='confirmCreate' class='btn btn-primary'>Confirm</button>
+								&nbsp;&nbsp;
+								<button id='cancelCreate' class='btn btn-danger'>Cancel</button>
+							</div>
+							
+							<div id='generatedVoucherCodes' style='display:none'><br><br><textarea id='generatedVoucherCodesText' readonly></textarea></div>
+						</div>
        
                         <div class='admin-paper'>
 						<h3>Print/Cut Vouchers!</h3>
-						<table class='table' id='checkoutFees'>
+						<table class='table' id='voucherTable'>
 						<caption>Vouchers that can be used for a free cut or print</caption>
 						<thead>
 							<tr>
-								<th>ID</th>
-								<th>Course Name</th>
-								<th>3D Prints</th>
-								<th>Laser Cuts</th>
+								<th>Voucher Code</th>
+								<th>Date Used</th>
+								<th>User ID</th>
+								<th>Date Created</th>
 							</tr>
 						</thead>
 						<tbody>
-							$courseClassesHTML
+							$voucherCodeHTML
 						</tbody>
 						</table>
 						<script>
-							$('#checkoutFees').DataTable();
+							$('#voucherTable').DataTable(
+								{
+									aaSorting: [[3, 'desc']]
+								}
+
+							);
 						</script>
 					</div>
 						
@@ -123,21 +149,48 @@ foreach ($courses as $course){
 
 <script>
 
-// When clicking on a row, it will redirect to show the groups within that course
+// Hiding and showing functionality for prompting to generate new codes
 
-$('.clickableRow').click(function () {
-   var id = $(this).attr("id");
-   var url = "pages/employeeClassGroups.php?id=" + id;
-   window.location.href = url;
+$("#generateAdditionalVouchers").click(function() {
+	$("#confirmAdditionalVouchers").css("display", "block");
+	$(this).css("display", "none");
+	$("#generatedVoucherCodes").css("display", "none");
+});
+
+$("#cancelCreate").click(function() {
+	$("#generateAdditionalVouchers").css("display", "block");
+	$("#confirmAdditionalVouchers").css("display", "none");
 });
 
 
-/*
-function show_hide_row(row)
-{
- $("#"+row).toggle();
+function addNewVouchers() {
+	num = $("#voucherAmount").val();
+
+	let body = {
+        action: 'addVoucherCodes',
+        num: num
+    };
+
+	api.post('/printcutgroups.php', body)
+	.then(res => {
+		$("#generatedVoucherCodesText").html(res.message);
+		$('#generatedVoucherCodesText').attr('rows', num);
+		$("#generatedVoucherCodes").css("display", "block");
+		snackbar('Successfully generated vouchers', 'success');
+		$("#generateAdditionalVouchers").css("display", "block");
+		$("#confirmAdditionalVouchers").css("display", "none");
+		
+    }).catch(err => {
+        snackbar(err.message, 'error');
+	});
+	
 }
-*/
+
+$("#confirmCreate").click(function() {
+	addNewVouchers();
+});
+
+
 </script>
 
 <?php 

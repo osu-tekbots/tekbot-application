@@ -200,6 +200,12 @@ function isValidStudentID($sid){
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="pages/employeeVouchers.php">
+                <i class="fas fa-fw fa-ticket-alt"></i>
+                <span>Cut/Print Vouchers</span>
+            </a>
+        </li>
+        <li class="nav-item">
         <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/Inventory/index.php">
             <i class="fas fa-fw fa-pallet"></i>
             <span>Inventory</span>

@@ -7,7 +7,7 @@ include_once '../bootstrap.php';
 
 use Api\Response;
 use DataAccess\PrinterDao;
-use Api\printerActionHandler;
+use Api\PrinterActionHandler;
 use Email\ProjectMailer;
 
 session_start();

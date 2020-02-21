@@ -5,6 +5,7 @@ namespace DataAccess;
 use Model\CoursePrintAllowance;
 use Model\CourseGroup;
 use Model\CourseStudent;
+use Model\VoucherCode;
 
 
 
@@ -86,6 +87,25 @@ class CoursePrintAllowanceDao {
             return $courseStudents;
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch course students: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAdminVoucherCodes() {
+        try {
+            $sql = 'SELECT * FROM voucher_code';
+           
+            $results = $this->conn->query($sql);
+
+            $voucherCodes = array();
+            foreach ($results as $row) {
+                $voucherCode = self::ExtractVoucherFromRow($row);
+                $voucherCodes[] = $voucherCode;
+            }
+
+            return $voucherCodes;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch voucher codes: " . $e->getMessage());
             return false;
         }
     }
@@ -240,7 +260,7 @@ class CoursePrintAllowanceDao {
             UPDATE course_group SET
                 group_name = :name,
                 allowance_id = :a_id,
-                term_code = :term_code,
+                academic_year = :a_year,
                 date_expiration = :d_expiration,
                 date_created = :d_created
             WHERE course_group_id = :id
@@ -249,7 +269,7 @@ class CoursePrintAllowanceDao {
                 ':id' => $courseGroup->getCourseGroupID(),
                 ':name' => $courseGroup->getGroupName(),
                 ':a_id' => $courseGroup->getAllowanceID(),
-                ':term_code' => $courseGroup->getTermCode(),
+                ':a_year' => $courseGroup->getAcademicYear(),
                 ':d_expiration' => QueryUtils::FormatDate($courseGroup->getDateExpiration()),
                 ':d_created' => QueryUtils::FormatDate($courseGroup->getDateCreated())
             );
@@ -301,7 +321,7 @@ class CoursePrintAllowanceDao {
                 :id,
                 :name,
                 :a_id,
-                :t_code,
+                :a_year,
                 :dexpired,
                 :dcreated
             )';
@@ -309,7 +329,7 @@ class CoursePrintAllowanceDao {
                 ':id' => $courseGroup->getCourseGroupID(),
                 ':name' => $courseGroup->getGroupName(),
                 ':a_id' => $courseGroup->getAllowanceID(),
-                ':t_code' => $courseGroup->getTermCode(),
+                ':a_year' => $courseGroup->getAcademicYear(),
                 ':dexpired' => $courseGroup->getDateExpiration(),
                 ':dcreated' => $courseGroup->getDateCreated()
             );
@@ -349,6 +369,33 @@ class CoursePrintAllowanceDao {
         }
     }
 
+    public function addNewVoucherCode($voucher) {
+        try {
+            $sql = '
+            INSERT INTO voucher_code  
+            (
+                voucher_id, date_used, user_id, date_created
+            ) VALUES (
+                :vid,
+                :dt_used,
+                :uid,
+                :dt_created
+            )';
+            $params = array(
+                ':vid' => $voucher->getVoucherID(),
+                ':dt_used' => $voucher->getDateUsed(),
+                ':uid' => $voucher->getUserID(),
+                ':dt_created' => QueryUtils::FormatDate($voucher->getDateCreated())
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new voucher: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     /* Extract using models */
 
     public static function ExtractCoursePrintAllowanceFromRow($row) {
@@ -363,7 +410,7 @@ class CoursePrintAllowanceDao {
         $courseGroup = new CourseGroup($row['course_group_id']);
         $courseGroup->setGroupName($row['group_name']);
         $courseGroup->setAllowanceID($row['allowance_id']);
-        $courseGroup->setTermCode($row['term_code']);
+        $courseGroup->setAcademicYear($row['academic_year']);
         $courseGroup->setDateExpiration($row['date_expiration']);
         $courseGroup->setDateCreated($row['date_created']);
        
@@ -388,7 +435,16 @@ class CoursePrintAllowanceDao {
         $student->setCourse(self::ExtractCoursePrintAllowanceFromRow($row));
        
         return $student;
+    }
 
+    public static function ExtractVoucherFromRow($row){
+        $voucher = new VoucherCode($row['voucher_id']);
+        $voucher->setVoucherID($row['voucher_id']);
+        $voucher->setDateUsed($row['date_used']);
+        $voucher->setUserID($row['user_id']);
+        $voucher->setDateCreated($row['date_created']);
+       
+        return $voucher;
     }
 
 

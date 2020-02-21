@@ -61,7 +61,7 @@ class PrinterActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully created new printer resource', 
-            array('id' => $printer->getprinterID())
+            array('id' => $printer->getPrinterID())
         ));
     }
 
@@ -121,6 +121,42 @@ class PrinterActionHandler extends ActionHandler {
     }
 
 
+
+    /**
+     * Creates a new printer job in the database.
+     *
+     * @return void
+     */
+    public function handleCreatePrintJob() {
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new printer resource', 
+            array('id' => 100)
+        ));
+		
+        // Ensure all the requred parameters are present
+		/*
+        $this->requireParam('title');
+
+
+        $printer = new Printer();
+        $printer->setPrinterName($body['title']);
+		$printer->setDescription($body['description']);
+        $printer->setDateCreated(new \DateTime());
+
+        $ok = $this->printerDao->addNewPrinter($printer);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new printer resource', 
+            array('id' => $printer->getprinterID())
+        ));
+		*/
+    }
  
 
     /**
@@ -136,6 +172,7 @@ class PrinterActionHandler extends ActionHandler {
         // Make sure the action parameter exists
         $action = $this->getFromBody('action');
 
+/*
         // Call the correct handler based on the action
         switch ($action) {
 
@@ -144,6 +181,9 @@ class PrinterActionHandler extends ActionHandler {
 
             case 'saveprinter':
                 $this->handleSavePrinter();
+				
+			case 'submit3dprint':
+				$this->handleCreatePrintJob();
 			
 			// //MARK: Add create print fee and function for it
  
@@ -152,6 +192,7 @@ class PrinterActionHandler extends ActionHandler {
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }
+		*/
     }
 
     private function getAbsoluteLinkTo($path) {
