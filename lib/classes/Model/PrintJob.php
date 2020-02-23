@@ -39,8 +39,8 @@ class PrintJob {
     public function __construct($id = null) {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
-            $this->getPrintJobID($id);
-			$this->getDateCreated(new \DateTime());
+            $this->setPrintJobID($id);
+			$this->setDateCreated(new \DateTime());
         } else {
             $this->setPrintJobID($id);
         }

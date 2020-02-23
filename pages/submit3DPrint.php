@@ -94,62 +94,6 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 </script>
 
 
-<?php
-/*
-		echo '<table id="printerTable">'; 
-		echo '<tr>';
-		echo '<td></td>';
-		echo '<td><b> Printer Name </b></td>';
-		echo '<td><b> Description </b></td>';
-		echo '<td><b> Location </b></td>';
-		echo '</tr>';
-		foreach ($printers as $p) {
-			echo '<tr>';
-			echo '<td>' . '<button id="edit' . $p->getPrinterId() . '">Edit</button> <button id="remove' . $p->getPrinterId() . '">Remove</button>'. '</td>';
-			echo '<td>' . '<input id="printerName' . $p->getPrinterId() . '" value="' . $p->getPrinterName() . '"></input>'. '</td>';
-			echo '<td>' . '<input id="printerDescription' . $p->getPrinterId() . '" value="' . $p->getDescription() . '"></input>'. '</td>';
-			echo '<td>' . '<input id="printerLocation' . $p->getPrinterId() . '" value="' . $p->getLocation() . '"></input>'. '</td>';
-			echo '</tr>';
-		
-	}
-	echo '<tr>';
-	echo '<td><button id="addButt">Add</button></td>'; 
-	echo '<td><input id="addPrinterName"></input></td>';
-	echo '<td><input id="addPrinterDescription"></input></td>';
-	echo '<td><input id="addPrinterLocation"></input></td>';
-	echo '</tr>';
-
-		echo '</table>';	
-*/
-?>
-
-<script type="text/javascript">
-/*
-	$("#addButt").click(function(){
-		if($("#addPrinterName").val() == "")
-		{
-			alert("Printer must have a name!");
-		}
-		else
-		{
-			//IS NOT WORKING!!
-			let printName = $("#addPrinterName").val();
-			let printDescription = $("#addPrinterDescription").val();
-			let data = {
-				action: 'createprinter',
-				title: printName,
-				description: printDescription
-			}
-			api.post('/printer.php', data).then(res => {
-             snackbar(res.message, 'success');
-         }).catch(err => {
-             snackbar(err.message, 'error');
-         });
-		}
-
-	});
-	*/
-</script>
 <script>
 /*
 	$(document).ready(function () {
@@ -190,6 +134,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<p>If you would like to pay via credit card, please submit your file with this form and enter 'Credit Card' in the account code field. We will reply with instructions on how to submit payment.</p>
 			<p class="text-danger">NOTE We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p>
 		-->
+
 	<div class="row">  
 		<div class="col-sm-6">
 			Email:<br/>
@@ -319,21 +264,20 @@ window.onload = function(){
 $('#submit3DPrintBtn').on('click', function () {
 	// Capture the data we need
 	let data = {
-		action: 'submit3dprint'
-		/*,
+		action: 'submit3dprint',
 		email: $('#emailInput').val(),
 		firstName: $('#firstNameInput').val(),
 		lastName: $('#lastNameInput').val(),
 		userId: $('#userIDInput').val(),
 		material: $('#materialSelect').val(),
-		fileName: $('#uploadFileInput').val(),*/
-	};
+		fileName: $('#uploadFileInput').val()
+	}; 
 	
 	
 	// Send our request to the API endpoint
 	api.post('/printers.php', data).then(res => {
-		alert(res);
-		window.location.replace('pages/submit3DPrint.php');
+		snackbar(res.message, 'success');
+		//window.location.replace('pages/submit3DPrint.php');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});

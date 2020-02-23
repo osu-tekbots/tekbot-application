@@ -7,6 +7,7 @@ include_once '../bootstrap.php';
 
 use Api\Response;
 use DataAccess\PrinterDao;
+use DataAccess\PrinterFeeDao;
 use Api\PrinterActionHandler;
 use Email\ProjectMailer;
 
@@ -14,8 +15,9 @@ session_start();
 
 // Setup our data access and handler classes
 $printerDao = new PrinterDao($dbConn, $logger);
+$printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 //$mailer = new ProjectMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
-$handler = new PrinterActionHandler($printerDao, $configManager, $logger);
+$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $configManager, $logger);
 
 // Authorize the request
 if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {

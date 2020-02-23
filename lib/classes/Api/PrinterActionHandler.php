@@ -50,12 +50,13 @@ class PrinterActionHandler extends ActionHandler {
     public function handleCreatePrinter() {
         // Ensure all the requred parameters are present
         $this->requireParam('title');
-
+        $body = $this->requestBody;
 
         $printer = new Printer();
+
         $printer->setPrinterName($body['title']);
-		$printer->setDescription($body['description']);
-        $printer->setDateCreated(new \DateTime());
+        $printer->setDescription($body['description']);
+        $printer->setLocation($body['location']);
 
         $ok = $this->printerDao->addNewPrinter($printer);
         if (!$ok) {
@@ -171,15 +172,15 @@ class PrinterActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
         }
         
-        $printFee->setPrintFeeId($body['print_fee_id'])
-        $printFee->setPrintJobId($body['print_job_id'])
-        $printFee->setUserId($body['user_id'])
-        $printFee->setCustomerNotes($body['customer_notes'])
-        $printFee->setDateCreated($body['date_created'])
-        $printFee->setPaymentInfo($body['payment_info'])
-        $printFee->setIs_pending($body['is_pending'])
-        $printFee->setIs_paid($body['is_paid'])
-        $printFee->setDate_updated(new \DateTime())
+        $printFee->setPrintFeeId($body['print_fee_id']);
+        $printFee->setPrintJobId($body['print_job_id']);
+        $printFee->setUserId($body['user_id']);
+        $printFee->setCustomerNotes($body['customer_notes']);
+        $printFee->setDateCreated($body['date_created']);
+        $printFee->setPaymentInfo($body['payment_info']);
+        $printFee->setIs_pending($body['is_pending']);
+        $printFee->setIs_paid($body['is_paid']);
+        $printFee->setDate_updated(new \DateTime());
 
         //Dao not implemented
         $ok = $this->printerFeeDao->updatePrintFee($printFee);
@@ -200,33 +201,46 @@ class PrinterActionHandler extends ActionHandler {
      */
     public function handleCreatePrintJob() {
 
-        $this->respond(new Response(
-            Response::CREATED, 
-            'Successfully created new printer resource', 
-            array('id' => 100)
-        ));
+		$body = $this->requestBody;
 		
-        // Ensure all the requred parameters are present
-		/*
-        $this->requireParam('title');
+		$this->requireParam('email');
+        $this->requireParam('firstName');
+        $this->requireParam('lastName');
+        $this->requireParam('userId');
+        $this->requireParam('material');
+        $this->requireParam('fileName');
+		
+		//Print Job ID and Date Created attributes are assigned in constructor
+		$printJob = new PrintJob();
+		
+        $printJob->setUserID($body['']);
+		$printJob->setPrintTypeID($body['']);
+		$printJob->setPrinterId($body['']);
+		$printJob->setDbFileName($body['']);
+		$printJob->setStlFileName($body['']);
+		$printJob->setPaymentMethod($body['']);
+		$printJob->setCourseGroupId($body['']);
+		$printJob->setVoucherCode($body['']);
+		$printJob->setValidPrintCheck($body['']);
+		$printJob->setUserConfirmCheck($body['']);
+		$printJob->setCompletePrintDate($body['']);
+		$printJob->setEmployeeNotes($body['']);
+		$printJob->setMessageGroupId($body['']);
+		$printJob->setPendingCustomerResponse($body['']);
+		$printJob->setDateUpdated($body['']);
+		
 
-
-        $printer = new Printer();
-        $printer->setPrinterName($body['title']);
-		$printer->setDescription($body['description']);
-        $printer->setDateCreated(new \DateTime());
-
-        $ok = $this->printerDao->addNewPrinter($printer);
+        $ok = $this->printerDao->addNewPrintJob($PrintJob);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new print job'));
         }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully created new printer resource', 
-            array('id' => $printer->getprinterID())
+            'Successfully submitted print job', 
+            array('id' => $printjob->getPrintJobID())
         ));
-		*/
+		
     }
  
 
@@ -243,7 +257,7 @@ class PrinterActionHandler extends ActionHandler {
         // Make sure the action parameter exists
         $action = $this->getFromBody('action');
 
-/*
+
         // Call the correct handler based on the action
         switch ($action) {
 
@@ -267,7 +281,7 @@ class PrinterActionHandler extends ActionHandler {
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }
-		*/
+		
     }
 
     private function getAbsoluteLinkTo($path) {

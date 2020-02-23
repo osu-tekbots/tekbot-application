@@ -189,6 +189,115 @@ class PrinterDao {
     }
 
 
+    public function addNewPrintJob($printer) {
+        try {
+            $sql = '
+            INSERT INTO 3d_jobs (
+                3d_job_id,
+                user_id,
+                3dprinter_id,
+                3dprinter_type_id,
+                db_filename,
+                stl_file_name,
+                payment_method,
+                course_group_id,
+                voucher_code,
+                date_created,
+                valid_print_date,
+                user_confirm_date,
+                complete_print_date,
+                employee_notes,
+                message_group_id,
+                pending_customer_response,
+                date_updated
+            )
+            VALUES (
+                :3d_job_id,
+                :user_id,
+                :3dprinter_id,
+                :3dprinter_type_id,
+                :db_filename,
+                :stl_file_name,
+                :payment_method,
+                :course_group_id,
+                :voucher_code,
+                :date_created,
+                :valid_print_date,
+                :user_confirm_date,
+                :complete_print_date,
+                :employee_notes,
+                :message_group_id,
+                :pending_customer_response,
+                :date_updated
+            )
+            ';
+            $params = array(
+                ':3d_job_id' => $printer->getPrintJobID(),
+                ':user_id' => $printer->getUserID(),
+                ':3dprinter_id' => $printer->getPrintTypeID(),
+                ':3dprinter_type_id' => $printer->getPrinterId(),
+                ':db_filename' => $printer->getDbFileName(),
+                ':stl_file_name' => $printer->getStlFileName(),
+                ':payment_method' => $printer->getPaymentMethod(),
+                ':course_group_id' => $printer->getCourseGroupId(),
+                ':voucher_code' => $printer->getVoucherCode(),
+                ':date_created' => $printer->getDateCreated(),
+                ':valid_print_date' => $printer->getValidPrintCheck(),
+                ':user_confirm_date' => $printer->getUserConfirmCheck(),
+                ':complete_print_date' => $printer->getCompletePrintDate(),
+                ':employee_notes' => $printer->getEmployeeNotes(),
+                ':message_group_id' => $printer->getMessageGroupId(),
+                ':pending_customer_response' => $printer->getPendingCustomerResponse(),
+                ':date_updated' => $printer->getDateUpdated()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function addNewPrintTypes($printer) {
+        try {
+            $sql = '
+            INSERT INTO 3d_print_type (
+                3dprint_type_name,
+                print_type_description,
+                3dprinter_id,
+                head_size,
+                3dprinter_precision,
+                build_plate_size,
+                cost_per_gram
+            )
+            VALUES (
+                :name,
+                :description,
+                :printId,
+                :head,
+                :precision,
+                :plateSize,
+                :cost
+
+            )
+            ';
+            $params = array(
+                ':name' => $printer->getPrinterName(),
+                ':description' => $printer->getDescription(),
+                ':printId' => $printer->getPrinterId(),
+                ':head' => $printer->getHeadSize(),
+                ':precision' => $printer->getPrecision(),
+                ':plateSize' => $printer->getBuildPlateSize(),
+                ':cost' => $printer->getCostPerGram()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function addNewPrinter($printer) {
         try {
             $sql = '
@@ -215,7 +324,6 @@ class PrinterDao {
             return false;
         }
     }
-    
 
     /**
      * Extracts information about an image for a equipment from a row in a database result set.
@@ -226,11 +334,13 @@ class PrinterDao {
      * @return \Model\EquipmentImage the image extracted from the information
      */
     public static function ExtractPrintTypeFromRow($row) {
-        $printType = new PrinterType($row['print_type_id']);
-        $printType->setPrintTypeName($row['name']);
-        $printType->setPrinterId(self::ExtractPrinterFromRow($row));
+        $printType = new PrintType($row['3dprinter_type_id']);
+        $printType->setPrintTypeName($row['3dprint_type_name']);
+        // Cannot get setPrinterID to work
+        // $printType->setPrinterId(self::ExtractPrinterFromRow($row));
+        // $printType->setPrinterId($row['3dprinter_id']);
         $printType->setHeadSize($row['head_size']);
-		$printType->setPrecision($row['precision']);
+		$printType->setPrecision($row['3dprinter_precision']);
         $printType->setBuildPlateSize($row['build_plate_size']);
         $printType->setCostPerGram($row['cost_per_gram']);
         return $printType;

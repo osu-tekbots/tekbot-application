@@ -2,7 +2,7 @@
 
 namespace Model;
 
-use Model/Printer;
+use Model\Printer;
 
 /**
  * Data structure representing a Print Type
@@ -27,7 +27,7 @@ class PrintType {
         if ($id == null) {
  
         } else {
-            $this->setPrintType($id);
+            $this->setPrintTypeId($id);
         }
     }
 
