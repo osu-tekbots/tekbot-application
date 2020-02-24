@@ -16,6 +16,7 @@ class PrintType {
 	private $precision;
 	private $buildPlateSize;
 	private $costPerGram;
+	private $description;
 
     /**
      * Creates a new instance of an equipment reservation.
@@ -86,6 +87,14 @@ class PrintType {
 
 	public function setCostPerGram($CostPerGram){
 		$this->costPerGram = $CostPerGram;
+	}
+
+	public function getDescription(){
+		return $this->description;
+	}
+
+	public function setDescription($description){
+		$this->description = $description;
 	}
 	
 }

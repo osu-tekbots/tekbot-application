@@ -136,12 +136,7 @@ class PrinterDao {
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
 
-            $printTypes = array();
-            foreach ($results as $row) {
-                $printType = self::ExtractPrintTypeFromRow($row);
-                $printTypes[] = $printType;
-            }
-            return $printTypes;
+			return self::ExtractPrintTypeFromRow($results[0]);
         } catch (\Exception $e) {
             $this->logger->error('Failed to get any printers: ' . $e->getMessage());
             return false;
@@ -158,35 +153,22 @@ class PrinterDao {
             SELECT * FROM `3d_printers`
             WHERE 3d_printers.3dprinter_id = :id
             ';
-            $params = array('id:' => $id);
+            $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
 
-            $printers = array();
-            foreach ($results as $row) {
-                $printer = self::ExtractPrinterFromRow($row);
-                $printers[] = $printer;
-            }
-            return $printers;
+            // foreach ($results as $row) {
+            //     $printer = self::ExtractPrinterFromRow($row);
+            //     $printers[] = $printer;
+            // }
+            return self::ExtractPrinterFromRow($results[0]);
+
+            // return $printers[0];
         } catch (\Exception $e) {
             $this->logger->error('Failed to get any printers: ' . $e->getMessage());
             return false;
         }
     }
 
-
-    /**
-     * Creates a new Equipment object using information from the database row
-     *
-     * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
-     */
-    public static function ExtractPrinterFromRow($row) {
-        $printer = new Printer($row['3dprinter_id']);
-        $printer->setPrinterName($row['3dprinter_name']);
-        $printer->setDescription($row['description']);
-        $printer->setLocation($row['location']);
-        return $printer;
-    }
 
 
     public function addNewPrintJob($printer) {
@@ -325,6 +307,90 @@ class PrinterDao {
         }
     }
 
+    public function updatePrinter($printer) {
+        try {
+            $sql = '
+            UPDATE 3d_printers SET
+                3dprinter_name = :name,
+                description = :desc,
+                location = :loc
+            WHERE 3dprinter_id = :id
+            ';
+            $params = array(
+                ':id' => $printer->getPrinterId(),
+                ':name' => $printer->getPrinterName(),
+                ':desc' => $printer->getDescription(),
+                ':loc' => $printer->getLocation()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+				
+	public function updatePrintType($printType) {
+        try {
+            $sql = '
+            UPDATE 3d_print_type SET
+                3dprint_type_name = :name,
+                print_type_description = :description,
+                3dprinter_id = :printer_id,
+                head_size = :head_size,
+                3dprinter_precision = :precision,
+                build_plate_size = :build_plate_size,
+				cost_per_gram = :cost_per_gram
+            WHERE 3dprinter_type_id = :id
+            ';
+            $params = array(
+                ':id' => $printType->getPrintTypeId(),
+                ':name' => $printType->getPrintTypeName(),
+                ':printer_id' => $printType->getPrinterId(),
+                ':head_size' => $printType->getHeadSize(),
+				':precision' => $printType->getPrecision(),
+				':build_plate_size' => $printType->getBuildPlateSize(),
+				':cost_per_gram' => $printType->getCostPerGram(),
+				':description' => $printType->getDescription()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new print type: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Creates a new Equipment object using information from the database row
+     *
+     * @param mixed[] $row the row in the database from which information is to be extracted
+     * @return \Model\Equipment
+     */
+    public static function ExtractPrinterFromRow($row, $printerInRow = false) {
+        $printer = new Printer($row['3dprinter_id']);
+        
+		if(isset($row['3dprinter_name'])){
+			$printer->setPrinterName($row['3dprinter_name']);
+		}
+		if(isset($row['description'])){
+			$printer->setDescription($row['description']);
+		}
+		if(isset($row['location'])){
+			$printer->setLocation($row['location']);
+		}
+       
+        return $printer;
+    }
+    public static function ExtractEquipmentHealthFromRow($row, $equipmentInRow = false) {
+        $id = $equipmentInRow ? 'health_name' : 'health_id';
+        $name = isset($row['health_name']) ? $row['health_name'] : null;
+        return new EquipmentHealth($row[$id], $name);
+    }
+
+
     /**
      * Extracts information about an image for a equipment from a row in a database result set.
      * 
@@ -336,9 +402,10 @@ class PrinterDao {
     public static function ExtractPrintTypeFromRow($row) {
         $printType = new PrintType($row['3dprinter_type_id']);
         $printType->setPrintTypeName($row['3dprint_type_name']);
-        // Cannot get setPrinterID to work
-        // $printType->setPrinterId(self::ExtractPrinterFromRow($row));
-        // $printType->setPrinterId($row['3dprinter_id']);
+        $printType->setDescription($row['print_type_description']);
+        //Cannot get setPrinterID to work
+        $printType->setPrinterId(self::ExtractPrinterFromRow($row, true));
+        //$printType->setPrinterId($row['3dprinter_id']);
         $printType->setHeadSize($row['head_size']);
 		$printType->setPrecision($row['3dprinter_precision']);
         $printType->setBuildPlateSize($row['build_plate_size']);

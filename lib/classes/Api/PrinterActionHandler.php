@@ -77,13 +77,14 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSavePrinter() {
+
         $id = $this->getFromBody('printerId');
         $name = $this->getFromBody('printerName');
         $description = $this->getFromBody('description');
 		$location = $this->getFromBody('location');
-    
-      
+         
         $printer = $this->printerDao->getPrinterByID($id);
+   
         if (empty($printer)){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain printer from ID'));
         }
@@ -92,7 +93,6 @@ class PrinterActionHandler extends ActionHandler {
         $printer->setDescription($description);
         $printer->setLocation($location);
 
-		//check
         $ok = $this->printerDao->updatePrinter($printer);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save printer'));
@@ -103,6 +103,7 @@ class PrinterActionHandler extends ActionHandler {
             'Successfully saved printer'
         ));
     }
+	
 
 
     /**
@@ -149,14 +150,14 @@ class PrinterActionHandler extends ActionHandler {
 
 
     /**
-     * Updates fields editable from the user interface in a printer entry in the database.
+     * Updates fields editable from the user interface in a print fee entry in the database.
      *
      * @return void
      */
     public function handleSavePrintFee() {
-
-        //MARK: Implement this function, reference function above
-
+		
+		$body = $this->requestBody;
+		
         $printFeeID = $this->getFromBody('print_fee_id');
         $printJobID = $this->getFromBody('print_job_id');
         $userID = $this->getFromBody('user_id');
@@ -212,7 +213,7 @@ class PrinterActionHandler extends ActionHandler {
 		
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
-		
+		  
         $printJob->setUserID($body['']);
 		$printJob->setPrintTypeID($body['']);
 		$printJob->setPrinterId($body['']);
@@ -242,6 +243,85 @@ class PrinterActionHandler extends ActionHandler {
         ));
 		
     }
+	
+	
+	    /**
+     * Updates fields editable from the user interface in a print job entry in the database.
+     *
+     * @return void
+     */
+    public function handleSavePrintJob() {
+
+        $printJobId = $this->getFromBody('print_job_id');
+		//Add more
+		
+        //Dao function to be implemented
+        $printFee = $this->printerFeeDao->getPrintJobsByID($printJobId);
+        if (empty($printFee)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
+        }
+        
+        $printFee->setPrintFeeId($body['print_fee_id']);
+        $printFee->setPrintJobId($body['print_job_id']);
+        $printFee->setUserId($body['user_id']);
+        $printFee->setCustomerNotes($body['customer_notes']);
+        $printFee->setDateCreated($body['date_created']);
+        $printFee->setPaymentInfo($body['payment_info']);
+        $printFee->setIs_pending($body['is_pending']);
+        $printFee->setIs_paid($body['is_paid']);
+        $printFee->setDate_updated(new \DateTime());
+
+        //Dao not implemented
+        $ok = $this->printerFeeDao->updatePrintFee($printFee);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print fee'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved print fee'
+        ));
+    }
+	
+	
+	public function handleCreatePrintType(){
+		
+	}
+	
+	public function handleSavePrintType(){
+		$id = $this->getFromBody('id');
+		$name = $this->getFromBody('name');
+		$description = $this->getFromBody('description');
+		$printerId = $this->getFromBody('printerId');
+		$headSize = $this->getFromBody('head');
+		$precision = $this->getFromBody('precision');
+		$buildPlateSize = $this->getFromBody('build');
+		$costPerGram = $this->getFromBody('cost');
+         
+        $printType = $this->printerDao->getPrintTypesByID($id);
+   
+        if (empty($printType)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print type from ID'));
+        }
+
+		$printType->setPrintTypeName($name);
+        $printType->setDescription($description);
+        $printType->setPrinterId($this->printerDao->getPrinterByID($printerId));
+        $printType->setHeadSize($headSize);
+        $printType->setPrecision($precision);
+        $printType->setBuildPlateSize($buildPlateSize);
+        $printType->setCostPerGram($costPerGram);
+
+        $ok = $this->printerDao->updatePrintType($printType);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print type'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved print type'
+        ));
+	}
  
 
     /**
@@ -263,20 +343,29 @@ class PrinterActionHandler extends ActionHandler {
 
             case 'createprinter':
                 $this->handleCreatePrinter();
-
             case 'saveprinter':
                 $this->handleSavePrinter();
+			//case 'removeprinter':
+			//	$this->handleRemovePrinter();
 				
-			case 'submit3dprint':
+			case 'createprintjob':
 				$this->handleCreatePrintJob();
+			case 'saveprintjob':
+				$this->handleSavePrintJob();
+			//case 'removeprintjob':
+			//	$this->handleRemovePrintJob();
 			
+			case 'createprinttype':
+				$this->handleCreatePrintType();
+			case 'saveprinttype':
+				$this->handleSavePrintType();
 
-			//MARK: Add create print fee and function for it
             case 'createprintfee':
                 $this->handleCreatePrintFee();
-			//MARK: Add save print fee and function for it
             case 'saveprintfee':
                 $this->handleSavePrintFee();
+			//case 'removeprintfee':
+			//	$this->handleRemovePrintFee();
             
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));

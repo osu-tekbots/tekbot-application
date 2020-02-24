@@ -82,11 +82,12 @@ $printTypes = $printerDao->getPrintTypes();
 				echo '<td>' . "<b> Location </b>" . '</td>';
 				echo '</tr>';
 				foreach ($printers as $p) {
+					$printerID = $p->getPrinterId();
 					echo '<tr>';
-					echo '<td>' . '<button id=editButton' . $p->getPrinterId() . '>Edit</button> <button id=removeButton' . $p->getPrinterId() . '>Remove</button>'.'</td>'; 
-					echo '<td>' . '<input id="printerName' . $p->getPrinterId() . '" value="' . $p->getPrinterName() . '"></input>'. '</td>';
-					echo '<td>' . '<input id="printerDescription' . $p->getPrinterId() . '" value="' . $p->getDescription() . '"></input>'. '</td>';
-					echo '<td>' . '<input id="printerLocation' . $p->getPrinterId() . '" value="' . $p->getLocation() . '"></input>'. '</td>';
+					echo '<td>' . '<button id="editButton' . $printerID . '" onClick="editPrinter(' . $printerID . ')">Edit</button> <button id="removeButton' . $printerID . '" onClick="removePrinter(' . $printerID . ')">Remove</button>'.'</td>'; 
+					echo '<td>' . '<input id="printerName' . $printerID . '" value="' . $p->getPrinterName() . '"></input>'. '</td>';
+					echo '<td>' . '<input id="printerDescription' . $printerID . '" value="' . $p->getDescription() . '"></input>'. '</td>';
+					echo '<td>' . '<input id="printerLocation' . $printerID . '" value="' . $p->getLocation() . '"></input>'. '</td>';
 					echo '</tr>';
 				
 			}
@@ -103,6 +104,63 @@ $printTypes = $printerDao->getPrintTypes();
 				";
 				?>
 
+		<!-- Printer table handler -->
+<script>
+
+function removePrinter(printerID) {
+	alert(printerID);
+}
+
+function editPrinter(printerID) {
+	let printName = $("#printerName" + printerID).val();
+	let printDesc = $("#printerDescription" + printerID).val();
+	let printLoc = $("#printerLocation" + printerID).val();
+	// alert(printName + printDesc + printLoc).val();
+	let data = {
+		action: 'saveprinter',
+		printerId: printerID,
+		printerName: printName,
+		description: printDesc,
+		location: printLoc
+	};
+	api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+}
+
+$("#addPrinterButt").click(function(){
+	if($("#addPrinterName").val() == "")
+	{
+		alert("Printer must have a name!");
+	}
+	else
+	{
+		let printName = $("#addPrinterName").val();
+		let printDescription = $("#addPrinterDescription").val();
+		let printLocation = $("#addPrinterLocation").val();
+		let data = {
+			action: 'createprinter',
+			title: printName,
+			description: printDescription,
+			location: printLocation
+		}
+		api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+	}
+});
+</script>
+
 
 <?php
 	echo "
@@ -113,23 +171,49 @@ $printTypes = $printerDao->getPrintTypes();
 	echo '<tr>';
 	echo '<td></td>';
 	echo '<td>' . "<b> Print Type Name </b>" . '</td>';
+	echo '<td>' . "<b> Printer </b>" . '</td>';
 	echo '<td>' . "<b> Description </b>" . '</td>';
 	echo '<td>' . "<b> Head Size </b>" . '</td>';
 	echo '<td>' . "<b> Precision </b>" . '</td>';
 	echo '<td>' . "<b> Build Plate Size </b>" . '</td>';
 	echo '<td>' . "<b> Cost Per Gram </b>" . '</td>';
 	echo '</tr>';
+
+
+	// echo $printers[0]->getPrinterId();
+
+
 	foreach ($printTypes as $p) {
+
+		$printTypeID = $p->getPrintTypeId();
+		$printerID = $p->getPrinterId();
+		$selectPrinter = $printerDao->getPrinterByID($printerID);
+
+
+
+
 		echo '<tr>';
-		echo '<td>' . '<button id=editButton' . $p->getPrintTypeId() . '>Edit</button> <button id=removeButton' . $p->getPrintTypeId() . '>Remove</button>'.'</td>'; 
-		echo '<td>' . '<input id="printTypeName' . $p->getPrintTypeId() . '" value="' . $p->getPrintTypeName() . '"></input>'. '</td>';
-		// description not part of Model yet
-		echo '<td>' . '<input id="printTypeDescription' . $p->getPrintTypeId() . '" value=""></input>'. '</td>';
-		echo '<td>' . '<input id="headSize' . $p->getPrintTypeId() . '" value="' . $p->getHeadSize() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="precision' . $p->getPrintTypeId() . '" value="' . $p->getPrecision() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="buildSize' . $p->getPrintTypeId() . '" value="' . $p->getBuildPlateSize() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="costPerGram' . $p->getPrintTypeId() . '" value="' . $p->getCostPerGram() . '"></input>'. '</td>';
+		echo '<td>' . '<button id="editButton' . $printTypeID . '" onClick="editPrintType(' . $printTypeID . ')">Edit</button> <button id="removeButton' . $printTypeID . '" onClick="removePrintType(' . $printTypeID . ')">Remove</button>'.'</td>'; 
+		echo '<td>' . '<input id="printTypeName' . $printTypeID . '" value="' . $p->getPrintTypeName() . '"></input>'. '</td>';
+
+		echo '<td><select id="printerSelect' . $printTypeID . '">';
+		echo '<option value="' . $selectPrinter->getPrinterId() . '">' . $selectPrinter->getPrinterName() . '</option>';
+		foreach ($printers as $printer) {
+			if($printer->getPrinterId() != $selectPrinter->getPrinterId())
+			{
+				echo '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
+			}
+		}
+	
+		echo "</select></td>";
+
+		echo '<td>' . '<input id="printTypeDescription' . $printTypeID . '" value="' . $p->getDescription() . '"></input>'. '</td>';
+		echo '<td>' . '<input id="headSize' . $printTypeID . '" value="' . $p->getHeadSize() . '"></input>'. '</td>';
+		echo '<td>' . '<input id="precision' . $printTypeID . '" value="' . $p->getPrecision() . '"></input>'. '</td>';
+		echo '<td>' . '<input id="buildSize' . $printTypeID . '" value="' . $p->getBuildPlateSize() . '"></input>'. '</td>';
+		echo '<td>' . '<input id="costPerGram' . $printTypeID . '" value="' . $p->getCostPerGram() . '"></input>'. '</td>';
 		echo '</tr>';
+
 
 		// Note: Printer ID is not working in the ExtractFromRow for PrintTypes in DAO
 
@@ -137,6 +221,12 @@ $printTypes = $printerDao->getPrintTypes();
 	echo '<tr>';
 	echo '<td>' . '<button id="addPrintTypeButt">Add</button>'. '</td>';
 	echo '<td>' . '<input id="addPrintTypeName"></input>'. '</td>';
+	echo '<td><select id="addPrintTypePrinterSelect">';
+	foreach ($printers as $printer) {
+		echo '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
+	}
+
+	echo "</select></td>";
 	echo '<td>' . '<input id="addPrintTypeDescription'. '"></input>'. '</td>'; //refactor
 	echo '<td>' . '<input id="addPrintTypeHeadSize"></input>'. '</td>';
 	echo '<td>' . '<input id="addPrintTypePrecision"></input>'. '</td>';
@@ -153,34 +243,70 @@ $printTypes = $printerDao->getPrintTypes();
 	</div>
 </div>
 
-<!-- TODO: Ask Symon how to grab each edit and remove button for script -->
-<!-- Adding printer table handler -->
+
+<!-- Print Types Table Handler -->
 <script>
-	$("#addPrinterButt").click(function(){
-		if($("#addPrinterName").val() == "")
-		{
-			alert("Printer must have a name!");
+
+function removePrintType(printTypeID) {
+	alert(printTypeID);
+}
+
+function editPrintType(printTypeID) {
+	let printerId = $("#printerSelect" + printTypeID).val();
+	let printName = $("#printTypeName" + printTypeID).val();
+	let printDesc = $("#printTypeDescription" + printTypeID).val();
+	let printHead = $("#headSize" + printTypeID).val();
+	let precision = $("#precision" + printTypeID).val();
+	let buildSize = $("#buildSize" + printTypeID).val();
+	let cost = $("#costPerGram" + printTypeID).val();
+	// alert(printName + printDesc + printHead + precision + buildSize + cost).val();
+	let data = {
+		action: 'saveprinttype',
+		id: printTypeID,
+		printerId: printerId,
+		name: printName,
+		description: printDesc,
+		head: printHead,
+		precision: precision,
+		build: buildSize,
+		cost: cost
+	};
+	api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+}
+
+$("#").click(function(){
+	if($("#addPrinterName").val() == "")
+	{
+		alert("Printer must have a name!");
+	}
+	else
+	{
+		let printName = $("#addPrinterName").val();
+		let printDescription = $("#addPrinterDescription").val();
+		let printLocation = $("#addPrinterLocation").val();
+		let data = {
+			action: 'addPrintType',
+			title: printName,
+			description: printDescription,
+			location: printLocation
 		}
-		else
-		{
-			let printName = $("#addPrinterName").val();
-			let printDescription = $("#addPrinterDescription").val();
-			let printLocation = $("#addPrinterLocation").val();
-			let data = {
-				action: 'createprinter',
-				title: printName,
-				description: printDescription,
-				location: printLocation
-			}
-			api.post('/printers.php', data).then(res => {
-             snackbar(res.message, 'success');
-			//  Insert delay for reload
-			 location.reload();
-         }).catch(err => {
-             snackbar(err.message, 'error');
-         });
-		}
-	});
+		api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+	}
+});
 </script>
 
 

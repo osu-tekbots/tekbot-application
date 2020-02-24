@@ -264,7 +264,7 @@ window.onload = function(){
 $('#submit3DPrintBtn').on('click', function () {
 	// Capture the data we need
 	let data = {
-		action: 'submit3dprint',
+		action: 'createprintjob',
 		email: $('#emailInput').val(),
 		firstName: $('#firstNameInput').val(),
 		lastName: $('#lastNameInput').val(),
