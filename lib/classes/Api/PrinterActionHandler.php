@@ -103,6 +103,46 @@ class PrinterActionHandler extends ActionHandler {
             'Successfully saved printer'
         ));
     }
+
+    // This returns the information to be stored within the view print modal
+    public function handleGeneratePrintModal() {
+
+        $id = $this->getFromBody('printID');
+         
+        $print = $this->printerDao->getPrintJobsByID($id);
+   
+        if (empty($print)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+
+        $title = "Print Modal";
+        $buttons = "<button type='button' class='btn btn-secondary' data-dismiss='modal'>Close</button>";
+        
+
+        $modalBody = "
+        <!-- Modal Header -->
+        <div class='modal-header'>
+            <h4 class='modal-title'>$title</h4>
+            <button type='button' class='close' data-dismiss='modal'>&times;</button>
+        </div>
+
+        <!-- Modal body -->
+		<div class='modal-body'>
+        </div>
+
+        <!-- Modal footer -->
+        <div class='modal-footer'>
+        $buttons
+        </div>
+        ";
+
+ 
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved printer'
+        ));
+    }
 	
 
 
@@ -214,6 +254,7 @@ class PrinterActionHandler extends ActionHandler {
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
 		  
+		//FIXME: Fill out once you do client side
         $printJob->setUserID($body['']);
 		$printJob->setPrintTypeID($body['']);
 		$printJob->setPrinterId($body['']);
@@ -231,7 +272,7 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setDateUpdated($body['']);
 		
 
-        $ok = $this->printerDao->addNewPrintJob($PrintJob);
+        $ok = $this->printerDao->addNewPrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new print job'));
         }
@@ -252,34 +293,57 @@ class PrinterActionHandler extends ActionHandler {
      */
     public function handleSavePrintJob() {
 
-        $printJobId = $this->getFromBody('print_job_id');
-		//Add more
+		$body = $this->requestBody;
 		
-        //Dao function to be implemented
-        $printFee = $this->printerFeeDao->getPrintJobsByID($printJobId);
-        if (empty($printFee)){
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
-        }
-        
-        $printFee->setPrintFeeId($body['print_fee_id']);
-        $printFee->setPrintJobId($body['print_job_id']);
-        $printFee->setUserId($body['user_id']);
-        $printFee->setCustomerNotes($body['customer_notes']);
-        $printFee->setDateCreated($body['date_created']);
-        $printFee->setPaymentInfo($body['payment_info']);
-        $printFee->setIs_pending($body['is_pending']);
-        $printFee->setIs_paid($body['is_paid']);
-        $printFee->setDate_updated(new \DateTime());
+		//FIXME: Fill out once you do client side
+        $printJobId = $this->getFromBody('print_job_id');
+		$userId = $this->getFromBody();
+		$printTypeId = $this->getFromBody('');
+		$printerId = $this->getFromBody('');
+		$dbFileName = $this->getFromBody('');
+		$stlFileName = $this->getFromBody('');
+		$paymentMethod = $this->getFromBody('');
+		$courseGroupId = $this->getFromBody('');
+		$voucherCode = $this->getFromBody('');
+		$validPrintCheck = $this->getFromBody('');
+		$userConfirmCheck = $this->getFromBody('');
+		$completePrintDate = $this->getFromBody('');
+		$employeeNotes = $this->getFromBody('');
+		$messageGroupId = $this->getFromBody('');
+		$pendingCustomerResponse = $this->getFromBody('');
+		$dateUpdated = $this->getFromBody('');
 
-        //Dao not implemented
-        $ok = $this->printerFeeDao->updatePrintFee($printFee);
+		//Print Job ID and Date Created attributes are assigned in constructor
+		$printJob = new PrintJob($printJobId);
+		
+		if (empty($printJob)){
+			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+		}
+		  
+        $printJob->setUserID($userId);
+		$printJob->setPrintTypeID($printTypeId);
+		$printJob->setPrinterId($printerId);
+		$printJob->setDbFileName($dbFileName);
+		$printJob->setStlFileName($stlFileName);
+		$printJob->setPaymentMethod($paymentMethod);
+		$printJob->setCourseGroupId($courseGroupId);
+		$printJob->setVoucherCode($voucherCode);
+		$printJob->setValidPrintCheck($validPrintCheck);
+		$printJob->setUserConfirmCheck($userConfirmCheck);
+		$printJob->setCompletePrintDate($completePrintDate);
+		$printJob->setEmployeeNotes($employeeNotes);
+		$printJob->setMessageGroupId($messageGroupId);
+		$printJob->setPendingCustomerResponse($pendingCustomerResponse);
+		$printJob->setDateUpdated($dateUpdated);
+
+        $ok = $this->printerFeeDao->updatePrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print fee'));
         }
 
         $this->respond(new Response(
             Response::OK,
-            'Successfully saved print fee'
+            'Successfully saved print job'
         ));
     }
 	
@@ -346,7 +410,9 @@ class PrinterActionHandler extends ActionHandler {
             case 'saveprinter':
                 $this->handleSavePrinter();
 			//case 'removeprinter':
-			//	$this->handleRemovePrinter();
+            //	$this->handleRemovePrinter();
+            case 'renderprintmodal':
+                $this->handleGeneratePrintModal();
 				
 			case 'createprintjob':
 				$this->handleCreatePrintJob();

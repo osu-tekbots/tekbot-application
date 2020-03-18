@@ -44,7 +44,7 @@ class PrintType {
 	}
 	public function getPrintTypeName(){
 		return $this->printTypeName;
-	}
+	} 
 
 	public function setPrintTypeName($PrintTypeName){
 		$this->printTypeName = $PrintTypeName;

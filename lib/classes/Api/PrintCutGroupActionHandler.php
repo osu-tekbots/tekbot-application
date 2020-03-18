@@ -2,6 +2,7 @@
 // Updated 11/5/2019
 namespace Api;
 use Model\VoucherCode;
+use Model\CoursePrintAllowance;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
@@ -110,6 +111,71 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
     }
 
+    /*
+    *   Handles the adding of a new course
+    *   
+    */
+    public function handleAddCourse() {
+        // Ensure the required parameters exist
+        $this->requireParam('courseName');
+        $this->requireParam('numberallowedprints');
+        $this->requireParam('numberallowedcuts');
+
+        $body = $this->requestBody;
+
+        
+
+        // TODO: If it isn't found, send a NOT_FOUND back to the client
+        $course = new CoursePrintAllowance();
+        $course->setCourseName($body['courseName']);
+        $course->setNumberAllowedPrints($body['numberallowedprints']);
+        $course->setNumberAllowedCuts($body['numberallowedcuts']);
+
+
+        $ok = $this->dao->addNewCoursePrintAllowance($course);
+
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add new course'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully added course'));
+
+    }
+
+    /*
+    *   Handles the adding of a new group within a course
+    *   
+    */
+    public function handleAddCourseGroup() {
+        // Ensure the required parameters exist
+        $this->requireParam('groupName');
+        $this->requireParam('allowanceID');
+        $this->requireParam('academicYear');
+        $this->requireParam('dateExpired');
+        $this->requireParam('dateCreated');
+        
+
+        $body = $this->requestBody;
+
+        // TODO: If it isn't found, send a NOT_FOUND back to the client
+        $course = new CoursePrintAllowance();
+        $course->setCourseName($body['courseName']);
+        $course->setNumberAllowedPrints($body['numberallowedprints']);
+        $course->setNumberAllowedCuts($body['numberallowedcuts']);
+
+
+        $ok = $this->dao->addNewCoursePrintAllowance($course);
+
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add new course'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully added course'));
+
+    }
+
+
+
 
     /**
      * Handles the HTTP request on the API resource. 
@@ -135,6 +201,9 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
             case 'addVoucherCodes':
                 $this->handleAddVoucherCodes();
+
+            case 'addCourse':
+                $this->handleAddCourse();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on cut print group resource'));

@@ -14,6 +14,7 @@ class PrintFee {
 	private $dateCreated;
 	private $amount;
 	private $paymentInfo;
+	private $isVerified;
 	private $isPending;
 	private $isPaid;
 	private $dateUpdated;
@@ -89,6 +90,14 @@ class PrintFee {
 
 	public function setPaymentInfo($paymentInfo){
 		$this->paymentInfo = $paymentInfo;
+	}
+	
+	public function getIsVerified(){
+		return $this->isVerified;
+	}
+
+	public function setIsVerified($isVerified){
+		$this->isVerified = $isVerified;
 	}
 
 	public function getIsPending(){

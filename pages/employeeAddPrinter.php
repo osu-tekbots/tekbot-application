@@ -72,36 +72,56 @@ $printTypes = $printerDao->getPrintTypes();
 
 		
 				echo "
-				<div class='admin-paper'>
+				<div class='admin-paper' style='overflow-x:scroll'>
 				";
-				echo '<table id="printerTable">'; 
-				echo '<tr>';
-				echo '<td></td>';
-				echo '<td>' . "<b> Printer Name </b>" . '</td>';
-				echo '<td>' . "<b> Description </b>" . '</td>';
-				echo '<td>' . "<b> Location </b>" . '</td>';
-				echo '</tr>';
+
+
+				$printerHTML = "";
+
 				foreach ($printers as $p) {
 					$printerID = $p->getPrinterId();
-					echo '<tr>';
-					echo '<td>' . '<button id="editButton' . $printerID . '" onClick="editPrinter(' . $printerID . ')">Edit</button> <button id="removeButton' . $printerID . '" onClick="removePrinter(' . $printerID . ')">Remove</button>'.'</td>'; 
-					echo '<td>' . '<input id="printerName' . $printerID . '" value="' . $p->getPrinterName() . '"></input>'. '</td>';
-					echo '<td>' . '<input id="printerDescription' . $printerID . '" value="' . $p->getDescription() . '"></input>'. '</td>';
-					echo '<td>' . '<input id="printerLocation' . $printerID . '" value="' . $p->getLocation() . '"></input>'. '</td>';
-					echo '</tr>';
-				
-			}
-			echo '<tr>';
-			echo '<td>' . '<button id="addPrinterButt">Add</button>'. '</td>';
-			echo '<td>' . '<input id="addPrinterName"></input>'. '</td>';
-			echo '<td>' . '<input id="addPrinterDescription'. '"></input>'. '</td>'; //refactor
-			echo '<td>' . '<input id="addPrinterLocation"></input>'. '</td>';
-			echo '</tr>';
-		
-				echo '</table>';
-				echo"</div>
-				
-				";
+					$printerName = $p->getPrinterName();
+					$printerDesc = $p->getDescription();
+					$printerLoc = $p->getLocation();
+					$editPrinterBtn = "<button id='editButton$printerID' onClick='editPrinter($printerID)'>Edit</button>";
+					$rmvPrinterBtn = "<button id='removeButton$printerID' onClick='removePrinter($printerID)'>Remove</button>"; 
+					$printerHTML .= "
+					<tr>
+					
+						<td>$editPrinterBtn $rmvPrinterBtn</td>
+						<td><input id='printerName$printerID' value='$printerName'></td>
+						<td><input id='printerDescription$printerID' value='$printerDesc'></td>
+						<td><input id='printerLocation$printerID' value='$printerLoc'></td>
+					</tr>
+					
+					";
+				}
+
+
+				echo"
+						
+						<div class='admin-paper'>
+						<h3>Fees</h3>
+						<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
+						<p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
+						<table class='table' id='checkoutFees'>
+						<caption>Fees Relating to Equipment Checkout</caption>
+						<thead>
+							<tr>
+								<th></th>
+								<th>Name</th>
+								<th>Description</th>
+								<th>Location</th>
+							</tr>
+						</thead>
+						<tbody>
+							$printerHTML
+						</tbody>
+						</table>
+						<script>
+							$('#checkoutFees').DataTable();
+						</script>
+					</div>";
 				?>
 
 		<!-- Printer table handler -->
@@ -163,79 +183,94 @@ $("#addPrinterButt").click(function(){
 
 
 <?php
-	echo "
-	<div class='admin-paper'>
-	";
 
-	echo '<table id="printTypesTable">'; 
-	echo '<tr>';
-	echo '<td></td>';
-	echo '<td>' . "<b> Print Type Name </b>" . '</td>';
-	echo '<td>' . "<b> Printer </b>" . '</td>';
-	echo '<td>' . "<b> Description </b>" . '</td>';
-	echo '<td>' . "<b> Head Size </b>" . '</td>';
-	echo '<td>' . "<b> Precision </b>" . '</td>';
-	echo '<td>' . "<b> Build Plate Size </b>" . '</td>';
-	echo '<td>' . "<b> Cost Per Gram </b>" . '</td>';
-	echo '</tr>';
-
-
-	// echo $printers[0]->getPrinterId();
-
+	$printTypeHTML = "";
 
 	foreach ($printTypes as $p) {
-
 		$printTypeID = $p->getPrintTypeId();
 		$printerID = $p->getPrinterId();
 		$selectPrinter = $printerDao->getPrinterByID($printerID);
+		$selectedPrinterID = $selectPrinter->getPrinterId();
+		$selectedPrinterName = $selectPrinter->getPrinterName();
+		$printTypeName = $p->getPrintTypeName();
+		$description = $p->getDescription();
+		$headSize = $p->getHeadSize();
+		$precision = $p->getPrecision();
+		$plateSize = $p->getBuildPlateSize();
+		$cost = $p->getCostPerGram();
 
+		$printTypeHTML .= "
+		<tr>
+		<td><button id='editButton$printTypeID' onClick='editPrintType($printTypeID)'>Edit</button> <button id='removeButton$printTypeID' onClick='removePrintType($printTypeID)'>Remove</button>
+		<td><input id='printTypeName$printTypeID' value='$printTypeName'></td>
+		<td><select id='printerSelect$printTypeID'>
+		<option value='$selectedPrinterID'>$selectedPrinterName</option>
+		";
 
-
-
-		echo '<tr>';
-		echo '<td>' . '<button id="editButton' . $printTypeID . '" onClick="editPrintType(' . $printTypeID . ')">Edit</button> <button id="removeButton' . $printTypeID . '" onClick="removePrintType(' . $printTypeID . ')">Remove</button>'.'</td>'; 
-		echo '<td>' . '<input id="printTypeName' . $printTypeID . '" value="' . $p->getPrintTypeName() . '"></input>'. '</td>';
-
-		echo '<td><select id="printerSelect' . $printTypeID . '">';
-		echo '<option value="' . $selectPrinter->getPrinterId() . '">' . $selectPrinter->getPrinterName() . '</option>';
 		foreach ($printers as $printer) {
-			if($printer->getPrinterId() != $selectPrinter->getPrinterId())
-			{
-				echo '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
-			}
+			if($printer->getPrinterId() != $selectedPrinterID) {
+				$printTypeHTML .= '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';				
+			}			
 		}
-	
-		echo "</select></td>";
-
-		echo '<td>' . '<input id="printTypeDescription' . $printTypeID . '" value="' . $p->getDescription() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="headSize' . $printTypeID . '" value="' . $p->getHeadSize() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="precision' . $printTypeID . '" value="' . $p->getPrecision() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="buildSize' . $printTypeID . '" value="' . $p->getBuildPlateSize() . '"></input>'. '</td>';
-		echo '<td>' . '<input id="costPerGram' . $printTypeID . '" value="' . $p->getCostPerGram() . '"></input>'. '</td>';
-		echo '</tr>';
-
-
-		// Note: Printer ID is not working in the ExtractFromRow for PrintTypes in DAO
-
+		
+		$printTypeHTML .= "
+		</select></td>
+		<td><input id='printTypeDescription$printTypeID' value='$description'></td>
+		<td><input id='headSize$printTypeID' value='$headSize'></td>
+		<td><input id='precision$printTypeID' value='$precision'></td>
+		<td><input id='buildSize$printTypeID' value='$plateSize'></td>
+		<td><input id='costPerGram$printTypeID' value='$cost'></td>
+		</tr>
+		";
 	}
-	echo '<tr>';
-	echo '<td>' . '<button id="addPrintTypeButt">Add</button>'. '</td>';
-	echo '<td>' . '<input id="addPrintTypeName"></input>'. '</td>';
-	echo '<td><select id="addPrintTypePrinterSelect">';
+
+	$printTypeHTML .= "
+	<tr>
+	<td><button id=addPrintTypeButt'>Add</button></td>
+	<td><input id=addPrintTypeName'></input></td>
+	<td><select id=addPrintTypePrinterSelect'>";
+
 	foreach ($printers as $printer) {
-		echo '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
+		$printTypeHTML .= '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
 	}
 
-	echo "</select></td>";
-	echo '<td>' . '<input id="addPrintTypeDescription'. '"></input>'. '</td>'; //refactor
-	echo '<td>' . '<input id="addPrintTypeHeadSize"></input>'. '</td>';
-	echo '<td>' . '<input id="addPrintTypePrecision"></input>'. '</td>';
-	echo '<td>' . '<input id="addPrintTypePlateSize"></input>'. '</td>';
-	echo '<td>' . '<input id="addPrintTypeCost"></input>'. '</td>';
-	echo '</tr>';
+	$printTypeHTML .= "
+	<td><input id='addPrintTypeDescription'></input></td>
+	<td><input id='addPrintTypeHeadSize'></input></td>
+	<td><input id='addPrintTypePrecision'></input></td>
+	<td><input id='addPrintTypePlateSize'></input></td>
+	<td><input id='addPrintTypeCost'></input></td>
+	</tr>
+	";
 
-	echo '</table>';
-	echo"</div>";
+	echo"
+						
+	<div class='admin-paper'>
+	<h3>Fees</h3>
+	<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
+	<p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
+	<table class='table' id='checkoutFees'>
+	<caption>Fees Relating to Equipment Checkout</caption>
+	<thead>
+		<tr>
+			<th></th>
+			<th>Print Type Name</th>
+			<th>Printer</th>
+			<th>Description</th>
+			<th>Head Size</th>
+			<th>Precision</th>
+			<th>Build Plate Size</th>
+			<th>Cost Per Gram</th>
+		</tr>
+	</thead>
+	<tbody>
+		$printTypeHTML
+	</tbody>
+	</table>
+	<script>
+		$('#checkoutFees').DataTable();
+	</script>
+	</div>";
 ?>
 
 			</div>
@@ -282,14 +317,14 @@ function editPrintType(printTypeID) {
 }
 
 $("#").click(function(){
-	if($("#addPrinterName").val() == "")
+	if($("#addPrintTypeName").val() == "")
 	{
-		alert("Printer must have a name!");
+		alert("Printer Type must have a name!");
 	}
 	else
 	{
-		let printName = $("#addPrinterName").val();
-		let printDescription = $("#addPrinterDescription").val();
+		let printTypeName = $("#addPrintTypeName").val();
+		let printTypeDescription = $("#addPrinterDescription").val();
 		let printLocation = $("#addPrinterLocation").val();
 		let data = {
 			action: 'addPrintType',

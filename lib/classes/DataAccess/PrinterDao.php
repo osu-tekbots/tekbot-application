@@ -156,13 +156,7 @@ class PrinterDao {
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
 
-            // foreach ($results as $row) {
-            //     $printer = self::ExtractPrinterFromRow($row);
-            //     $printers[] = $printer;
-            // }
             return self::ExtractPrinterFromRow($results[0]);
-
-            // return $printers[0];
         } catch (\Exception $e) {
             $this->logger->error('Failed to get any printers: ' . $e->getMessage());
             return false;
@@ -235,7 +229,7 @@ class PrinterDao {
             $this->conn->execute($sql, $params);
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            $this->logger->error('Failed to add new print job: ' . $e->getMessage());
             return false;
         }
     }
@@ -275,7 +269,7 @@ class PrinterDao {
             $this->conn->execute($sql, $params);
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            $this->logger->error('Failed to add new print type: ' . $e->getMessage());
             return false;
         }
     }
@@ -302,7 +296,7 @@ class PrinterDao {
             $this->conn->execute($sql, $params);
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            $this->logger->error('Failed to add new printer: ' . $e->getMessage());
             return false;
         }
     }
@@ -325,7 +319,7 @@ class PrinterDao {
             $this->conn->execute($sql, $params);
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            $this->logger->error('Failed to update printer: ' . $e->getMessage());
             return false;
         }
     }
@@ -361,6 +355,55 @@ class PrinterDao {
             return false;
         }
     }
+	
+	public function updatePrintJob($printJob) {
+        try {
+            $sql = '
+            UPDATE 3d_jobs SET
+                user_id = :user_id,
+                3dprinter_id = :3dprinter_id,
+                3dprinter_type_id = :3dprinter_type_id,
+                db_filename = :db_filename,
+                stl_file_name = :stl_file_name,
+                payment_method = :payment_method,
+                course_group_id = :course_group_id,
+                voucher_code = :voucher_code,
+                date_created = :date_created,
+                valid_print_date = :valid_print_date,
+                user_confirm_date = :user_confirm_date,
+                complete_print_date = :complete_print_date,
+                employee_notes = :employee_notes,
+                message_group_id = :message_group_id,
+                pending_customer_response = :pending_customer_response,
+                date_updated = :date_updated
+			WHERE 3d_job_id = :3d_job_id
+            ';
+            $params = array(
+                ':3d_job_id' => $printJob->getPrintJobID(),
+                ':user_id' => $printJob->getUserID(),
+                ':3dprinter_id' => $printJob->getPrintTypeID(),
+                ':3dprinter_type_id' => $printJob->getPrinterId(),
+                ':db_filename' => $printJob->getDbFileName(),
+                ':stl_file_name' => $printJob->getStlFileName(),
+                ':payment_method' => $printJob->getPaymentMethod(),
+                ':course_group_id' => $printJob->getCourseGroupId(),
+                ':voucher_code' => $printJob->getVoucherCode(),
+                ':date_created' => $printJob->getDateCreated(),
+                ':valid_print_date' => $printJob->getValidPrintCheck(),
+                ':user_confirm_date' => $printJob->getUserConfirmCheck(),
+                ':complete_print_date' => $printJob->getCompletePrintDate(),
+                ':employee_notes' => $printJob->getEmployeeNotes(),
+                ':message_group_id' => $printJob->getMessageGroupId(),
+                ':pending_customer_response' => $printJob->getPendingCustomerResponse(),
+                ':date_updated' => $printJob->getDateUpdated()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update print job: ' . $e->getMessage());
+            return false;
+        }
+    }
 
 
     /**
@@ -371,6 +414,10 @@ class PrinterDao {
      */
     public static function ExtractPrinterFromRow($row, $printerInRow = false) {
         $printer = new Printer($row['3dprinter_id']);
+		
+		if($printerInRow){
+			return $printer;
+		}
         
 		if(isset($row['3dprinter_name'])){
 			$printer->setPrinterName($row['3dprinter_name']);
@@ -384,12 +431,6 @@ class PrinterDao {
        
         return $printer;
     }
-    public static function ExtractEquipmentHealthFromRow($row, $equipmentInRow = false) {
-        $id = $equipmentInRow ? 'health_name' : 'health_id';
-        $name = isset($row['health_name']) ? $row['health_name'] : null;
-        return new EquipmentHealth($row[$id], $name);
-    }
-
 
     /**
      * Extracts information about an image for a equipment from a row in a database result set.
@@ -399,13 +440,17 @@ class PrinterDao {
      * @param mixed[] $row the row in the database result
      * @return \Model\EquipmentImage the image extracted from the information
      */
-    public static function ExtractPrintTypeFromRow($row) {
+    public static function ExtractPrintTypeFromRow($row, $printTypeInRow = false) {
         $printType = new PrintType($row['3dprinter_type_id']);
+		
+		if($printTypeInRow){
+			return $printType;
+		}
+		
         $printType->setPrintTypeName($row['3dprint_type_name']);
         $printType->setDescription($row['print_type_description']);
         //Cannot get setPrinterID to work
         $printType->setPrinterId(self::ExtractPrinterFromRow($row, true));
-        //$printType->setPrinterId($row['3dprinter_id']);
         $printType->setHeadSize($row['head_size']);
 		$printType->setPrecision($row['3dprinter_precision']);
         $printType->setBuildPlateSize($row['build_plate_size']);
@@ -421,23 +466,23 @@ class PrinterDao {
      * @return \Model\EquipmentCategory
      */
     public static function ExtractPrintJobFromRow($row) {
-        $printJob = new PrintJob($row['print_job_id']);
+        $printJob = new PrintJob($row['3d_job_id']);
 		
-        $printJob->setUserID($row['name']);
-		$printJob->setPrintTypeID(self::ExtractPrintTypeFromRow($row));
-        $printJob->setPrinterId(self::ExtractPrinterFromRow($row));
+        $printJob->setUserID($row['user_id']);
+		$printJob->setPrintTypeID(self::ExtractPrintTypeFromRow($row, true));
+        $printJob->setPrinterId(self::ExtractPrinterFromRow($row, true));
         $printJob->setDbFileName($row['db_filename']);
-		$printJob->setStlFileName($row['stl_filename']);
+		$printJob->setStlFileName($row['stl_file_name']);
         $printJob->setPaymentMethod($row['payment_method']);
         $printJob->setCourseGroupId($row['course_group_id']);
 		$printJob->setVoucherCode($row['voucher_code']);
         $printJob->setDateCreated($row['date_created']);
-        $printJob->setValidPrintCheck($row['valid_print_check']);
-		$printJob->setUserConfirmCheck($row['user_confirm_check']);
+        $printJob->setValidPrintCheck($row['valid_print_date']);
+		$printJob->setUserConfirmCheck($row['user_confirm_date']);
         $printJob->setCompletePrintDate($row['complete_print_date']);
         $printJob->setEmployeeNotes($row['employee_notes']);
 		$printJob->setMessageGroupId($row['message_group_id']);
-        $printJob->setPendingCustomerResponse($row['pending_customer_repsonse']);
+        $printJob->setPendingCustomerResponse($row['pending_customer_response']);
         $printJob->setDateUpdated($row['date_updated']);
 		
         return $printJob;

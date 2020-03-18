@@ -12,6 +12,7 @@ use DataAccess\EquipmentReservationDao;
 use DataAccess\UsersDao;
 use DataAccess\ContractDao;
 use DataAccess\EquipmentFeeDao;
+use DataAccess\EquipmentDao;
 use Api\EquipmentRentalActionHandler;
 use Email\EquipmentRentalMailer;
 
@@ -23,8 +24,9 @@ $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
 $contractDao = new ContractDao($dbConn, $logger);
 $equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
+$equipmentDao = new EquipmentDao($dbConn, $logger);
 $mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
-$handler = new EquipmentRentalActionHandler($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $mailer, $configManager, $logger);
+$handler = new EquipmentRentalActionHandler($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $equipmentDao , $mailer, $configManager, $logger);
 
 // Authorize the request
 if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {

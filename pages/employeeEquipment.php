@@ -68,7 +68,8 @@ foreach ($reservedEquipment as $r){
 		if ($isActive){
 			$active = "Active";
             renderNewHandoutModal($r);
-            $handoutButton = createReservationHandoutButton($reservationID, $listNumber, $userID, $equipmentID);
+			$handoutButton = createReservationHandoutButton($reservationID, $listNumber, $userID, $equipmentID);
+			//$handoutButton = "<button class='handoutBtn btn btn-outline-primary capstone-nav-btn' id='$reservationID' type='button'>Handout</button>";
             $cancelButton = createReservationCancelButton($reservationID, $listNumber);
             $tableIDName = "activeReservation$listNumber";
         }
@@ -180,6 +181,7 @@ foreach ($checkedoutEquipment as $c){
 	
 				<div class='admin-paper'>
 				<h3>Reserved Equipment</h3>
+				<p>After a customer reserves an equipment on the portal, it will appear here.  Once they arrive at the store, hit 'Handout' to rent out the item to the student.  The reservation will expire and now it will show up as a 'Checked Out Equipment' in the table below.</p>
 					<table class='table' id='equipmentReservations'>
 					<caption>Reservations</caption>
 						<thead>
@@ -223,6 +225,7 @@ foreach ($checkedoutEquipment as $c){
 	
 				<div class='admin-paper'>
 				<h3>Checked Out Equipment</h3>
+				<p>When a student brings back the rented equipment, hit the 'Return' button next to their checkout.  Write any necessary notes in the notes section (scratches, broken handle).  The student can see the notes you put here.  If there are any fees that need to be assigned (late fees, damaged item), you can assign them fees by pressing the 'Assign fee' button.</p>
 					<table class='table' id='equipmentCheckouts'>
 					<caption>Checkouts</caption>
 						<thead>
@@ -263,7 +266,8 @@ foreach ($checkedoutEquipment as $c){
 
 				?>
 
-
+					<div id="modal">
+					</div>
 
 
 			</div>
@@ -272,6 +276,45 @@ foreach ($checkedoutEquipment as $c){
 </div>
 
 <script>
+/*
+$('.handoutBtn').on('click', function() {
+	let reservationID = $(this).attr("id");
+	let data = {
+		action: 'equipmentModalHandout',
+		reservationID: reservationID
+	};
+
+	api.post('/equipmentrental.php', data).then(res => {
+		//snackbar(res.message, 'success');
+		console.log(res.message);
+		document.getElementById("modal").innerHTML = res.message;
+		let modalID = "#newHandoutModal" + reservationID;
+		$(modalID).modal();
+		//$(this).toggle();
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+		
+});
+*/
+
+$('select').on('change', function() {
+	let reservationID = $(this).attr('id');
+	let contract = $(this).val();
+	let deadlineID = '#deadline' + reservationID;
+	let data = {
+		action: 'updateDeadlineText',
+		contractID: contract
+	};
+	api.post('/equipmentrental.php', data).then(res => {
+		$(deadlineID).html(res.message);
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+
+});
+
+
 
 
 </script>

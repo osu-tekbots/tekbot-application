@@ -187,7 +187,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentNameText" name="equipmentName"
 								rows="1" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Name of the equipment"><?php 
 									echo "$equipmentname";
 								?></textarea>
 						</div>
@@ -200,7 +200,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentLocationText" name="equipmentLocation"
 								rows="1" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Where the employee can find this equipment"><?php 
 									echo "$location"; 
 								?></textarea>
 	
@@ -212,7 +212,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 								(#) Units <font size="2" style="color:red;">*</font>
 							</label>
 							<input class="form-control input" type="number" step="1" id="equipmentUnitsText" value="<?php echo $instances ?>" name="instances"
-							 data-toggle="tooltip" data-placement="top" title="tooltiptext">
+							 data-toggle="tooltip" data-placement="top" title="The number of available units of that item we have">
 	
 						</div>
                     </div>
@@ -222,7 +222,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 								($) Replace <font size="2" style="color:red;">*</font>
 							</label>
 							<input class="form-control input" type="number" step="0.10" id="equipmentReplacementCost" value="<?php echo $replacementCost ?>" name="replacementCost"
-							 data-toggle="tooltip" data-placement="top" title="tooltiptext">
+							 data-toggle="tooltip" data-placement="top" title="Cost for replacement of item.  Make sure you put the original price of an item not a sale price.">
 						</div>
                     </div>
                     <div class="col-sm-2">
@@ -230,7 +230,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<label for="equipmentHealthSelect"> Health <font size="2" style="color:red;">*</font>
                             </label>
 							<select class="form-control input" id="equipmentHealthSelect" name="equipmentHealthID" data-toggle="tooltip" 
-								data-placement="bottom" title="tooltiptext">
+								data-placement="bottom" title="Health based on functionality of the equipment.  Fully functional has no issues, broken does not work, and partial functionality is functional but has some quirks">
 								<?php
 								foreach ($healths as $h) {
 								    $id = $h->getId();
@@ -250,7 +250,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<label for="equipmentNumberpartsSelect">(#) Parts <font size="2" style="color:red;">*</font>
                             </label>
 							<select class="form-control input" id="equipmentNumberpartsSelect" name="equipmentNumberparts" data-toggle="tooltip" 
-								data-placement="bottom" title="tooltiptext">
+								data-placement="bottom" title="Number of parts that come with the equipment.  Include manuals, cords, accesories in this count.">
 								<?php
 								for ($n = 1; $n <= 10; $n++) {
 								    $selected = $n == $numberparts ? 'selected' : '';
@@ -271,7 +271,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentDescriptionText" name="equipmentDescription"
 								rows="4" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Give some description of the item.  A copy of the item description will work here"><?php 
 									echo "$description"; 
 								?></textarea>
 						</div>
@@ -284,7 +284,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentNotesText" name="equipmentNotes"
 								rows="4" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Notes that are relevant towards the functionality or apperance of the item.  For example, item will only work when tilted upright or item has large scratch near the bottom of the pan."><?php 
 									echo "$notes"; 
 								?></textarea>
 						</div>
@@ -300,7 +300,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentPartlistText" name="equipmentPartlist"
 								rows="6" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="List of parts that correlate to the number of parts above"><?php 
 									echo $partslist; 
 								?></textarea>
 						</div>
@@ -314,7 +314,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentCheckText" name="equipmentCheck"
 								rows="6" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Steps that the employee will need to take when taking back the item.  Things for them to check to make sure that the student handed it back in the same condition it was given."><?php 
 									echo $equipmentcheck; 
 								?></textarea>
 						</div>
@@ -327,7 +327,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<textarea class="form-control input" id="equipmentUsageText" name="equipmentUsage"
 								rows="6" data-toggle="tooltip" 
 								data-placement="top" 
-								title="tooltiptext"><?php 
+								title="Instructions for usage, this could be a link to a pdf"><?php 
 									echo $instructions; 
 								?></textarea>
 						</div>
@@ -347,7 +347,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 					echo("
 					<button id='saveEquipmentBtn' class='btn btn-success capstone-nav-btn' type='button' 
 					data-toggle='tooltip' data-placement='bottom' 
-					title='tooltiptext'>
+					title='Updates the current information on the page'>
 					Update Information</button>
 					");
 					

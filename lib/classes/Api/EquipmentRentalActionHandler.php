@@ -4,10 +4,12 @@ namespace Api;
 use Model\EquipmentCheckout;
 use Model\EquipmentCheckoutStatus;
 use Model\EquipmentReservation;
+use Model\Equipment;
 use Model\EquipmentFee;
 use Model\User;
 use Model\UserAccessLevel;
 use DataAccess\QueryUtils;
+use Util\Security;
 
 
 /**
@@ -25,6 +27,8 @@ class EquipmentRentalActionHandler extends ActionHandler {
     private $UsersDao;
     /** @var \DataAccess\EquipmentFeeDao */
     private $EquipmentFeeDao;
+    /** @var \DataAccess\EquipmentDao */
+    private $EquipmentDao;
     /** @var \Email\EquipmentRentalMailer */
     private $mailer;
     /** @var \Util\ConfigManager */
@@ -39,13 +43,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $UsersDao, $EquipmentFeeDao ,$mailer, $config, $logger) {
+    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $UsersDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger) {
         parent::__construct($logger);
         $this->EquipmentCheckoutDao = $EquipmentCheckoutDao;
         $this->EquipmentReservationDao = $EquipmentReservationDao;
         $this->ContractDao = $ContractDao;
         $this->UsersDao = $UsersDao;
         $this->EquipmentFeeDao = $EquipmentFeeDao;
+        $this->EquipmentDao = $EquipmentDao;
         $this->mailer = $mailer;
         $this->config = $config;
     }
@@ -154,10 +159,138 @@ class EquipmentRentalActionHandler extends ActionHandler {
     }
 
     /**
-     * Assigns equipment fee to user in the database.
-     *
-     * @return void
+     * Handles when 'Handout' button is called.  Creates a modal on the employeeEquipment page
      */
+    public function handleEquipmentModalHandout() {
+          // Ensure all the requred parameters are present
+          $this->requireParam('reservationID');
+          $body = $this->requestBody;
+
+          $reservation = $this->EquipmentReservationDao->getReservation($body['reservationID']);
+          if (empty($reservation)) {
+            $this->respond(new Response(Response::BAD_REQUEST, 'Unable to obtain reservation from ID'));
+        }
+          
+          $hours = QueryUtils::timeAddToCurrent("24:00:00");
+          $reservationID = $reservation->getReservationID();
+          $equipmentID = $reservation->getEquipmentID();
+          $userID = $reservation->getUserID();
+          $contracts = $this->ContractDao->getEquipmentCheckoutContracts();
+          
+          $user = $this->UsersDao->getUserByID($userID);
+          $equipment = $this->EquipmentDao->getEquipment($equipmentID);
+      
+          $equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
+          $equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
+          $equipmentNotes = Security::HtmlEntitiesEncode($equipment->getNotes());
+          $equipmentHealth = $equipment->getHealthID()->getName();
+      
+          $email = Security::HtmlEntitiesEncode($user->getEmail());
+          $name = Security::HtmlEntitiesEncode($user->getFirstName()) 
+          . ' ' 
+          . Security::HtmlEntitiesEncode($user->getLastName());
+          $phoneNumber = Security::HtmlEntitiesEncode($user->getPhone()); 
+          $onid = Security::HtmlEntitiesEncode($user->getOnid());
+      
+          $modal = "
+              <div class='modal fade' id='newHandoutModal$reservationID'>
+                  <br><br><br><br>
+              <div class='modal-dialog modal-lg'>
+                  <div class='modal-content'>
+      
+                          <!-- Modal Header -->
+                          <div class='modal-header'>
+                          <h4 class='modal-title'>Hand out $equipmentName to $name</h4>
+                          <button type='button' class='close' data-dismiss='modal'>&times;</button>
+                          </div>
+              
+                          <!-- Modal body -->
+                          <div class='modal-body'>
+                              <h4 id='projectNameApplicationHeader'>$equipmentName</h4>
+                              <p><b>Location:</b> $equipmentLocation</p>
+                              <p><b>Health:</b> $equipmentHealth</p>
+                              ";
+                              if (!empty($equipmentNotes)){
+                                  $modal .= "<p><b>Notes:</b> $equipmentNotes</p>";
+                              }
+                              $modal .= "
+                              <h4 id='projectNameApplicationHeader'>$name</h4>
+                              <p><b>ONID:</b> $onid</p>
+                              <p><b>Email:</b> $email</p>
+                              <br>
+                              <select class='contract' id='$reservationID'>";
+                                  foreach($contracts as $c){
+                                      $contractID = $c->getContractID();
+                                      $contractTitle = $c->getTitle();
+                                      $modal .= "<option value='$contractID'>$contractTitle</option>";
+                                  }
+                              $modal .= "
+                              </select>
+                              <h5>Deadline Time:  <div style='display:inline-block;' id='deadline$reservationID'>$hours</div></h5>
+                              <h6 class='text-secondary'>Weekends are accounted for, holidays are not.</h6>
+                          </div>
+      
+                          <!-- Modal footer -->
+                          <div class='modal-footer'>
+                          <button type='button' class='btn btn-success' data-dismiss='modal' id='handoutEquipmentBtn$reservationID'>Handout</button>
+                          <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cancel</button>
+                          </div>
+      
+                      </div>
+                  </div>
+              </div>
+
+              <script type='text/javascript'>
+        $('.contract').on('change', function() {
+            let reservationID = $(this).attr('id');
+            let contractID = $(this).attr('value');
+            let deadlineID = '#deadline' + reservationID;
+            $('#contract$reservationID').val();
+            let data = {
+                action: 'updateDeadlineText',
+                contractID: contractID
+            };
+            api.post('/equipmentrental.php', data).then(res => {
+                $(deadlineID).html(res.message);
+            }).catch(err => {
+                snackbar(err.message, 'error');
+            });
+
+        });
+
+    
+ 		$('#handoutEquipmentBtn$reservationID').on('click', function() {
+            let reservationID = '$reservationID';
+            let contractID = $('#contract$reservationID').val();
+            let userID = '$userID';
+            let equipmentID = '$equipmentID';
+ 			let data = {
+ 				action: 'checkoutEquipment',
+                reservationID: reservationID,
+                contractID: contractID,
+                userID: userID,
+                equipmentID: equipmentID
+ 			};
+ 			api.post('/equipmentrental.php', data).then(res => {
+ 				$('#activeReservation$listNumber').remove();
+                 snackbar(res.message, 'success');
+                 setTimeout(function(){
+                    window.location.reload(1);
+                 }, 2000);
+ 			}).catch(err => {
+ 				snackbar(err.message, 'error');
+ 			});
+         });
+         
+ 	</script>
+      
+          ";
+
+          $this->respond(new Response(
+            Response::OK, 
+            $modal            
+        ));
+    }
 
 
     
@@ -442,6 +575,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
 
             case 'rejectEquipmentFees':
                 $this->handleRejectEquipmentFees();
+            
+            case 'equipmentModalHandout':
+                $this->handleEquipmentModalHandout();
 
             
             default:

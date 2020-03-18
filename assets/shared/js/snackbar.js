@@ -2,6 +2,7 @@ let _snackbarQueue = [];
 let _sb = null;
 let _showing = false;
 
+// Appends a snackbar div at the bottom of the body
 document.addEventListener('DOMContentLoaded', () => {
     let eBody = document.getElementsByTagName('body')[0];
     _sb = document.createElement('div');

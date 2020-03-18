@@ -102,7 +102,11 @@ foreach ($equipments as $e){
                 </tbody>
             </table>
             <script>
-            $('#equipmentList').DataTable();
+            $('#equipmentList').DataTable(
+                {
+                    lengthMenu: [[-1, 5, 10, 20, 50], ['All', 5, 10, 20, 50]]
+                }
+            );
 
             </script>
         </div>

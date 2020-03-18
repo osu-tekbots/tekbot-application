@@ -263,6 +263,7 @@ class PrinterFeeDao {
         $fee->setDateCreated(new \DateTime($row['date_created']));
         $fee->setAmount($row['amount']);
         $fee->setPaymentInfo($row['payment_info']);
+        $fee->setIsVerified($row['is_verified']);
         $fee->setIsPending($row['is_pending']);
         $fee->setIsPaid($row['is_paid']);
         $fee->setDateUpdated(new \DateTime($row['date_updated']));

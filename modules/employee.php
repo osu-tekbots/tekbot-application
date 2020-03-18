@@ -212,7 +212,7 @@ function isValidStudentID($sid){
         </a>
         </li>
         <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/3dprinter.php">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="./pages/employeePrintJobList.php">
                 <i class="fas fa-fw fa-print"></i>
                 <span>3D Printing</span>
             </a>
@@ -284,7 +284,7 @@ function isValidStudentID($sid){
  function createEquipmentHideButton($equipmentID) {
 	echo "
 	<button class='btn btn-outline-info hideEquipmentBtn' id='hideEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='tooltiptext'>
+    title='Hide the equipment from public view.  This equipment will only be visible on the employee equipment page.  This can be used for archived items, or listings that you are still working on.'>
 		Make Hidden
 	</button>
 	
@@ -313,7 +313,7 @@ function isValidStudentID($sid){
 function createShowEquipmentButton($equipmentID) {
 	echo "
 	<button class='btn btn-outline-info capstone-nav-btn' id='showEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='tooltiptext'>
+    title='This will make the equipment visible to everyone on the browse equipment page.  By default, items are created as private so to make them visible you will need to hit this button.'>
 		Make Public
 	</button>
 	
@@ -342,7 +342,7 @@ function createShowEquipmentButton($equipmentID) {
 function createArchiveEquipmentButton($equipmentID){
 	echo "
 	<button class='btn btn-outline-danger capstone-nav-btn' id='archiveEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='tooltiptext'>
+    title='Removes the equipment for both employees and students'>
 		Delete Equipment
 	</button>
 	
@@ -422,24 +422,10 @@ function createReservationHandoutButton($reservationID, $listNumber, $userID, $e
     
     
      <script type='text/javascript'>
-        $('#contract$reservationID').on('change', function() {
-            let contractID = $('#contract$reservationID').val();
-            let data = {
-                action: 'updateDeadlineText',
-                contractID: contractID
-            };
-            api.post('/equipmentrental.php', data).then(res => {
-                $('#deadline$reservationID').html(res.message);
-            }).catch(err => {
-                snackbar(err.message, 'error');
-            });
 
-        });
-
-    
  		$('#handoutEquipmentBtn$reservationID').on('click', function() {
             let reservationID = '$reservationID';
-            let contractID = $('#contract$reservationID').val();
+            let contractID = $('#$reservationID').val();
             let userID = '$userID';
             let equipmentID = '$equipmentID';
  			let data = {

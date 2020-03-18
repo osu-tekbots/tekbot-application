@@ -114,6 +114,7 @@ foreach ($printerFees as $fee){
 	$isPaid = $fee->getIsPaid();
 	$isPending = $fee->getIsPending();
 	$dateCreated = $fee->getDateCreated();
+	$relatedPrintID = $fee->getPrintJobId();
 	//getPaymentInfo
 	$dateUpdated = $fee->getDateUpdated();
 
@@ -138,14 +139,14 @@ foreach ($printerFees as $fee){
 		$button = '';
 	}
 
-	
+	$view = "<div id='$relatedPrintID' class='printViewClick' style='color: blue;'>Print View</div>";
 
 
 	$feeHTML .= "
 	<tr>
 	
 		<td>$name</td>
-		<td>Print View</td>
+		<td>$view</td>
 		<td>$feeAmount</td>
 		<td>$feeNotes</td>
 		<td>$status</td>
@@ -229,6 +230,11 @@ foreach ($printerFees as $fee){
 </div>
 
 <script>
+
+$( ".printViewClick" ).click(function() {
+	alert($(this).attr("id"));
+
+});
 
 
 </script>

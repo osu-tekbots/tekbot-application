@@ -70,7 +70,7 @@ function renderNewHandoutModal($reservation) {
 						<p><b>ONID:</b> $onid</p>
 						<p><b>Email:</b> $email</p>
 						<br>
-						<select id='contract$reservationID'>";
+						<select class='contract' id='$reservationID'>";
 							foreach($contracts as $c){
 								$contractID = $c->getContractID();
 								$contractTitle = $c->getTitle();
@@ -436,12 +436,21 @@ function renderPayFeeModal($fee){
 						<p><b>Notes:</b> $feeNotes</p>
 						
 
-						<h4>Pay for your fee at the following link:</h4>
+						<h4>Pay for your fee at the following link:</h4> <a target='_blank'href='https://secure.touchnet.net/C20159_ustores/web/classic/product_detail.jsp?PRODUCTID=2387'>https://secure.touchnet.net/C20159_ustores/web/classic/product_detail.jsp?PRODUCTID=2387</a><br>
+						<ol>
+							<li>In the Quantity, put equal to the amount that you have been charged.  For example, if you are charged $15, put 15 in the quantity.</li>
+							<b style='color:red;'>*Make sure the quantity in touchnet matches the one here!</b>
+							<p><b>Price: </b>$$feeAmount | Quantity: $feeAmount</p>
+							<li>Hit 'Add to Cart'</li>
+							<li>Hit 'Checkout'</li>
+							<li>Go through the prompts and fill out your phone and email and additional information needed.</li>
+							<li>After filling out your card information and hitting 'Continue', hit 'Submit Order'</li>
+							<li>Right under the Print and Continue Shopping buttons, you will see an order number.  Put that order number into the form here</li>
+						</ol>
 
-						<b style='color:red;'>*Make sure the fee in touchnet matches the one here!</b>
-						<p><b>Price: </b>$$feeAmount</p>
+				
 						
-						<h5>After paying, please input the touchnetID here<b style='color:red;'>*</b></h5>
+						<h5>After paying, please input the touchnet Order # here<b style='color:red;'>*</b></h5>
 						<textarea id='touchnetID$feeID' rows='1' cols '20'></textarea>
 
 					</div>

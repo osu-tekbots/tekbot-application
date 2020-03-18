@@ -6,6 +6,7 @@ use DataAccess\EquipmentFeeDao;
 use DataAccess\EquipmentDao;
 use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
+use DataAccess\PrinterFeeDao;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
@@ -50,13 +51,15 @@ $equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 
 
 $uID = $_SESSION['userID'];
 $checkoutFees = $checkoutFeeDao->getFeesForUser($uID);
+$printerFees = $printerFeeDao->getFeesForUser($uID);
 $reservedEquipment = $reservationDao->getReservationsForUser($uID);
 $checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
-$checkoutFeeHTML = '';
+$feeHTML = '';
 
 $checkoutFeeCount = 0;
 foreach ($checkoutFees as $f){
@@ -78,7 +81,7 @@ foreach ($checkoutFees as $f){
     renderPayFeeModal($f);
     $payButton = $isPending ? "PENDING APPROVAL" : ($isPaid ? "PAID" : createPayButton($feeID));
 
-    $checkoutFeeHTML .= "
+    $feeHTML .= "
     <tr>
         <td><a href='' data-toggle='modal' 
 		data-target='#viewCheckoutModal$checkoutID'>Checkout</a></td>
@@ -88,6 +91,44 @@ foreach ($checkoutFees as $f){
     </tr>
     ";
 }
+foreach ($printerFees as $fee){
+	$feeID = $fee->getPrintFeeId();
+	$feeNotes = $fee->getCustomerNotes();
+	$feeAmount = $fee->getAmount();
+	$isPaid = $fee->getIsPaid();
+	$isPending = $fee->getIsPending();
+	$dateCreated = $fee->getDateCreated();
+	$dateUpdated = $fee->getDateUpdated();
+
+	// Print is verified and prints needs to be paid for
+	if ($fee->getIsVerified() == 1 && $fee->getIsPending() == 0) {
+		$actions = 'Pay button';
+	}
+	// Print is verified and payment is submitted
+	if ($fee->getIsVerified() == 1 && $fee->getIsPending() == 1) {
+		$actions = 'Pending Employee Verification';
+	}
+	// Print needs to be verified by employee before charging student
+	if ($fee->getIsVerified() == 0){
+		$actions = 'Pending Print Check';
+	}
+
+	if ($fee->getIsPaid() == 1){
+		$actions = 'PAID';
+	}
+
+
+	$feeHTML .= "
+    <tr>
+        <td>Related Print</td>
+        <td>$feeNotes</td>
+        <td>$feeAmount</td>
+        <td>$actions</td>
+    </tr>
+    ";
+
+}
+
 $reservedEquipmentCount = 0;
 $reservedHTML = '';
 $listNumber = 0;
@@ -253,70 +294,7 @@ if ($checkedoutEquipment){
 
     </ul>
   </section>
-  <!--
-  <section class="panel">
-    <h2>Posts</h2>
-    <ul>
-      <li><b>2458 </b>Published Posts</li>
-      <li><b>18</b> Drafts.</li>
-      <li>Most popular post: <b>This is a post title</b>.</li>
-    </ul>
-  </section>
-  <section class="panel">
-    <h2>Chart</h2>
-    <ul>
-      <li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>
-      <li>Aliquam tincidunt mauris eu risus.</li>
-      <li>Vestibulum auctor dapibus neque.</li>
-    </ul>
-  </section>
-
-  <section class="panel important">
-    <h2>My Profile</h2>
-    <form action="#">
-      <div class="twothirds">
-        <label for="name">Text Input:</label>
-        <input type="text" name="name" id="name" placeholder="John Smith" />
-
-        <label for="textarea">Textarea:</label>
-        <textarea cols="40" rows="8" name="textarea" id="textarea"></textarea>
-
-      </div>
-      <div class="onethird">
-        <legend>Radio Button Choice</legend>
-
-        <label for="radio-choice-1">
-          <input type="radio" name="radio-choice" id="radio-choice-1" value="choice-1" /> Choice 1
-        </label>
-
-        <label for="radio-choice-2">
-          <input type="radio" name="radio-choice" id="radio-choice-2" value="choice-2" /> Choice 2
-        </label>
-
-
-        <label for="select-choice">Select Dropdown Choice:</label>
-        <select name="select-choice" id="select-choice">
-          <option value="Choice 1">Choice 1</option>
-          <option value="Choice 2">Choice 2</option>
-          <option value="Choice 3">Choice 3</option>
-        </select>
-
-
-        <div>
-          <label for="checkbox">
-            <input type="checkbox" name="checkbox" id="checkbox" /> Checkbox
-          </label>
-        </div>
-
-        <div>
-          <input type="submit" value="Submit" />
-        </div>
-      </div>
-    </form>
-  </section>
-  -->
-
-
+ 
 
 </div>
 
@@ -423,22 +401,18 @@ if ($checkedoutEquipment){
 				<caption>Equipment Checkout Fees</caption>
 					<thead>
 						<tr>
-							<th>Related Checkout</th>
+							<th>Related Transaction</th>
 							<th>Notes</th>
 							<th>Amount</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						$checkoutFeeHTML
+						$feeHTML
 					</tbody>
 				</table>
 				<script>
-					$('#equipmentFees').DataTable(
-						{
-							lengthMenu: [[5, 10, 20, -1], [5, 10, 20, 'All']]
-						}
-					);
+					$('#equipmentFees').DataTable();
 				</script>
 			</div>
 				

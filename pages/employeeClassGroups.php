@@ -121,18 +121,21 @@ tr.even td:first-child {
                     <form id='formNewUser'>
                         <input type='hidden' name='action' value='createProfile' />
                         <div class='form-row user-form'>
-                            <div class='col-4'>
-                                <input required type='text' class='form-control' max='' name='courseName' placeholder='Group Name'/>
+                            <div class='col-3'>
+                                <input required type='text' class='form-control' max='' name='groupName' placeholder='Group Name'/>
+							</div>
+							<div class='col-3'>
+								<input required type='number' class='form-control' max='' name='academicYear' placeholder='Academic Year (e.g. 2021)'/>
+							</div>
+                            <div class='col-2'>
+                                <input required type='date' class='form-control' max='' name='dateStart' placeholder='Date Group Starts'/>
                             </div>
                             <div class='col-2'>
-                                <input required type='date' class='form-control' max='' name='numberallowedprints' placeholder='# Free 3D Prints'/>
+                                <input required type='date' class='form-control' max='' name='dateExpired' placeholder='Date Group Ends'/>
                             </div>
                             <div class='col-2'>
-                                <input required type='date' class='form-control' max='' name='numberallowedcuts' placeholder='# Free Cuts'/>
-                            </div>
-                            <div class='col-2'>
-                                <button type='submit' class='btn btn-primary btn-sm'>
-                                    <i class='fas fa-plus'></i>&nbsp;&nbsp;New Course
+                                <button type='submit' class='btn btn-primary '>
+                                    <i class='fas fa-plus'></i>&nbsp;&nbsp;New Group
                                 </button>
                             </div>
                         </div>
@@ -183,11 +186,6 @@ tr.even td:first-child {
 
 <script>
 
-/*
-$('.clickableRow').click(function () {
-   alert($(this).attr("id"));
-});
-*/
 $(document).ready(function() {
     $('#courseGroups').DataTable( {
         order: [[2, 'asc'], [1, 'asc']],
@@ -202,6 +200,53 @@ $(document).ready(function() {
     } );
 } );
 
+
+/**
+ * Handles the form submission for creating a new user by making a request to the API server to create a new profile.
+ */
+function onNewCourseSubmit() {
+	let groupName = $("#groupName").val();
+	let allowanceID = <?php echo $cID ?>; 
+    let academicYear = $("#academicYear").val();
+	let dateExpired = $("#dateExpired").val();
+	let dateCreated = $("#dateStart").val();
+	
+	if (courseName === '') {
+		snackbar('Course name cannot be empty!', 'error');
+		return false;
+	} 
+	if (numberallowedprints === '') {
+		snackbar('Number of allowed prints cannot be empty!', 'error');
+		return false;
+	} 
+	if (numberallowedcuts === ''){
+		snackbar('Number of allowed cuts cannot be empty!', 'error');
+		return false;
+	}
+
+    let data = {
+        action: 'addCourse',
+        courseName: courseName,
+        numberallowedprints: numberallowedprints,
+        numberallowedcuts: numberallowedcuts
+    }
+	
+    api.post('/printcutgroups.php', data)
+        .then(res => {
+            snackbar(res.message, 'success');
+            document.getElementById("addCourseForm").reset();
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+	
+
+    return false;
+}
+
+$( "#submitNewCourse" ).click(function() {
+    onNewCourseSubmit();
+});
 
 
 </script>

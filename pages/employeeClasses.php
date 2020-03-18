@@ -80,29 +80,28 @@ foreach ($courses as $course){
                     
                     echo "
                     <div class='admin-paper'>    
-                    <form id='formNewUser'>
-                        <input type='hidden' name='action' value='createProfile' />
-                        <div class='form-row user-form'>
+                        <div id='addCourseForm' class='form-row user-form'>
                             <div class='col-4'>
-                                <input required type='text' class='form-control' max='' name='courseName' placeholder='Course Name'/>
+                                <input required type='text' class='form-control' max='' id='courseName' placeholder='Course Name'/>
                             </div>
                             <div class='col-2'>
-                                <input required type='number' class='form-control' max='' name='numberallowedprints' placeholder='# Free 3D Prints'/>
+                                <input required type='number' class='form-control' max='' id='numberallowedprints' placeholder='# Free 3D Prints'/>
                             </div>
                             <div class='col-2'>
-                                <input required type='number' class='form-control' max='' name='numberallowedcuts' placeholder='# Free Cuts'/>
+                                <input required type='number' class='form-control' max='' id='numberallowedcuts' placeholder='# Free Cuts'/>
                             </div>
                             <div class='col-2'>
-                                <button type='submit' class='btn btn-primary btn-sm'>
+                                <button id='submitNewCourse' class='btn btn-primary'>
                                     <i class='fas fa-plus'></i>&nbsp;&nbsp;New Course
                                 </button>
                             </div>
                         </div>
-                    </form>
+                   
                     </div>
 						
                         <div class='admin-paper'>
-						<h3>Classes (Print/Cut Allowance)</h3>
+						<h3>Courses (Print/Cut Allowance)</h3>
+						<p>*Click on a course to see groups within the course</p>
 						<table class='table' id='checkoutFees'>
 						<caption>Classes relating to Print/Cut Allowance</caption>
 						<thead>
@@ -152,13 +151,52 @@ $('.clickableRow').click(function () {
    window.location.href = url;
 });
 
+/**
+ * Handles the form submission for creating a new user by making a request to the API server to create a new profile.
+ */
+function onNewCourseSubmit() {
+    let courseName = $("#courseName").val();
+    let numberallowedprints = $("#numberallowedprints").val();
+	let numberallowedcuts = $("#numberallowedcuts").val();
+	
+	if (courseName === '') {
+		snackbar('Course name cannot be empty!', 'error');
+		return false;
+	} 
+	if (numberallowedprints === '') {
+		snackbar('Number of allowed prints cannot be empty!', 'error');
+		return false;
+	} 
+	if (numberallowedcuts === ''){
+		snackbar('Number of allowed cuts cannot be empty!', 'error');
+		return false;
+	}
 
-/*
-function show_hide_row(row)
-{
- $("#"+row).toggle();
+    let data = {
+        action: 'addCourse',
+        courseName: courseName,
+        numberallowedprints: numberallowedprints,
+        numberallowedcuts: numberallowedcuts
+    }
+	
+    api.post('/printcutgroups.php', data)
+        .then(res => {
+            snackbar(res.message, 'success');
+            document.getElementById("addCourseForm").reset();
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+	
+
+    return false;
 }
-*/
+
+$( "#submitNewCourse" ).click(function() {
+    onNewCourseSubmit();
+});
+
+
 </script>
 
 <?php 
