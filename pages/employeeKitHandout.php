@@ -96,7 +96,7 @@ $test = "";
                 renderCourseNames();
 
                 echo'<br><br>
-                <center><input type="button" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
+                <center><input type="submit" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                 
         
             
@@ -118,6 +118,8 @@ $test = "";
             // Check if there are kits for student
             if (!empty($kitList)){
                 $switchList = "";
+                $futureList = "";
+                $previousList = "";
                 $refundedList = "";
                 foreach($kitList as $k){
                     $name = $k->getFirstMiddleLastName();
@@ -126,24 +128,53 @@ $test = "";
                     $termID = $k->getTermID();
                     $kitStatus = $k->getKitStatusID()->getId();
                     $kid = $k->getKitEnrollmentID();
-                    if (($kitStatus == KitEnrollmentStatus::READY || $kitStatus == KitEnrollmentStatus::PICKED_UP) && $termID == $currentTerm)
+                    if (($kitStatus == KitEnrollmentStatus::READY || $kitStatus == KitEnrollmentStatus::PICKED_UP))
                     {
-                        $switchList .= '
-                        <div class="enrollment">';
-                        if ($kitStatus == KitEnrollmentStatus::PICKED_UP){
-                            $switchList .= '<div id='.$kid.' class="switch on">';
+                        if ($termID == $currentTerm){
+                            // Kits for current term
+                            $switchList .= '
+                            <div class="enrollment">';
+                            if ($kitStatus == KitEnrollmentStatus::PICKED_UP){
+                                $switchList .= '<div id='.$kid.' class="switch on">';
+                            } else {
+                                $switchList .= '<div id='.$kid.' class="switch">';
+                            }
+                            $switchList .= '
+                            <label></label>
+                            <div class="knob"></div>
+                            <label>Handed Out</label>
+                            </div> <div class="termText">
+                            '.$courseName.' - '.term2string($termID).'
+                            </div>
+                            </div>
+                            ';
+                        } else if ($termID > $currentTerm){
+                            // Future kits
+                            $futureList .= '
+                            <div class="enrollment">';
+                            if ($kitStatus == KitEnrollmentStatus::PICKED_UP){
+                                $futureList .= '<div id='.$kid.' class="switch on">';
+                            } else {
+                                $futureList .= '<div id='.$kid.' class="switch">';
+                            }
+                            $futureList .= '
+                            <label></label>
+                            <div class="knob"></div>
+                            <label>Handed Out</label>
+                            </div> <div class="termText">
+                            '.$courseName.' - '.term2string($termID).'
+                            </div>
+                            </div>
+                            ';
                         } else {
-                            $switchList .= '<div id='.$kid.' class="switch">';
+                            // All old kits
+                            $previousList .= '
+                            <div class="termText">
+                            '.$courseName.' - '.term2string($termID).'
+                            </div>
+                            ';
+
                         }
-                        $switchList .= '
-                        <label>Ready</label>
-                        <div class="knob"></div>
-                        <label>Handed Out</label>
-                        </div> <div class="termText">
-                        '.$courseName.' - '.term2string($termID).'
-                        </div>
-                        </div>
-                        ';
                     } else if ($kitStatus == KitEnrollmentStatus::REFUNDED){
                         // Show all refunded kits
                         $refundedList .= '
@@ -184,6 +215,24 @@ $test = "";
                         <input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
                         </form>
                         ';
+                        if (!empty($futureList)) {
+                            echo '
+                            <br><br>
+                            <center>
+                            <h4>Future Kits</h4>
+                            '.$futureList.'
+                            </center>
+                            ';
+                        }
+                        if (!empty($previousList)) {
+                            echo '
+                            <br><br>
+                            <center>
+                            <h4>Previous Kits</h4>
+                            '.$previousList.'
+                            </center>
+                            ';
+                        }
                         if (!empty($refundedList)){
                             echo '
                             <br><br>

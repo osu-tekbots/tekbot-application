@@ -120,6 +120,7 @@ function renderTermSelect($limit = 20){
 
 }
 
+
 /**
  * Converts the term ID to a readable string
  *
@@ -150,6 +151,7 @@ function term2string($term){
     return $termname . ' ' . $year;
 }
 
+/** IF YOU NEED TO ADD ANOTHER COURSE ADD IT HERE */
 // Renders the course list dropdown 
 function renderCourseNames(){
     echo '

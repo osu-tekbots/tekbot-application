@@ -25,6 +25,7 @@ $js = array(
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
+include_once PUBLIC_FILES . '/modules/renderTermData.php';
 ?>
 <br/>
 <div id="page-top">
@@ -42,8 +43,12 @@ include_once PUBLIC_FILES . '/modules/employee.php';
             <?php 
                 renderEmployeeBreadcrumb('Employee', 'Insert Kit Enrollments');
             ?>
-			Tab seperated values, Newline seperated entries<br>
-			IDNumber&nbsp;&nbsp;&nbsp;&nbsp;ONID&nbsp;&nbsp;&nbsp;&nbsp;FullName&nbsp;&nbsp;&nbsp;&nbsp;CourseCode
+			<p>To insert a batch of kit enrollments for students, create an excel/google sheet in the following order: 
+			StudentID&nbsp;&nbsp;&nbsp;&nbsp;ONID&nbsp;&nbsp;&nbsp;&nbsp;FullName (Last, First M.)&nbsp;&nbsp;&nbsp;&nbsp;CourseCode</p>
+			<p>Example <a href="https://docs.google.com/spreadsheets/d/1n9qQE-jRnjK9Q-9YuTkdsOLD9n_ZvC48_Ur-bqzmNTM/edit#gid=0">here</a> - in the shared Tekbot folder under Tekbots -> Web Development -> Kit Enrollment Example</p>
+			<p>Copy all the values from the spreadsheet and paste it into the textbox below.  After hitting submit, you will be prompted to select a term and make sure all the entries look correct.</p>
+			Tab seperated values, Newline seperated entries
+			<br>
 			<div class="row">
 				<textarea class="jsonEntry" id="jsonData"></textarea>
 				<button class="draw meet jsonButton" id="submitData">Submit</button>
@@ -51,11 +56,18 @@ include_once PUBLIC_FILES . '/modules/employee.php';
             <br><br><br><br>
             <div id="tableContainer" class='admin-paper' style="display:none">
 				<h3>Are these correct? Select Term:
+				<?php 
+				// This renders a select dropdown with term information located in /modules/renderTermData.php
+				renderTermSelect(20);
+				?>
+				<!--
 				<select id="termSelect">
+				
 					<option></option>
 					<option value="202002">Winter 2020</option>
-				
-				</select> <button class="validJsonButton" id="validEntry">Yes, Upload to DB</button><button class="invalidJsonButton" onClick="window.location.reload();">No</button></h3>
+				</select> 
+				-->
+				<button class="validJsonButton" id="validEntry">Yes, Upload to DB</button><button class="invalidJsonButton" onClick="window.location.reload();">No</button></h3>
 					<table class='table' id='kitEnrollments'>
 					<caption>List Check</caption>
 						<thead>
