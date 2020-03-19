@@ -1,4 +1,8 @@
 <?php
+/*
+ All of the tables within this file have been depricated in favor of jquery datatables
+
+*/
 use Util\Security;
 use DataAccess\UsersDao;
 use DataAccess\EquipmentDao;

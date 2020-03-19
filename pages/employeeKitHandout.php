@@ -96,7 +96,7 @@ $test = "";
                 renderCourseNames();
 
                 echo'<br><br>
-                <center><input type="submit" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
+                <center><input type="submit" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                 
         
             
@@ -212,7 +212,7 @@ $test = "";
                         <input style="display:none" name="name" value="'.$name.'">
                         <input style="display:none" name="onid" value="'.$onid.'">
                         <input style="display:none" name="action" value="addStudent">
-                        <input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
+                        <input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
                         </form>
                         ';
                         if (!empty($futureList)) {
@@ -264,7 +264,7 @@ $test = "";
                         <form autocomplete="off" action="pages/employeeKitHandout.php" method="get">
                             <input style="display:none" name="studentid" value="'.$studentid.'">
                             <input style="display:none" name="action" value="addStudent">
-                        <center><input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-secondary btn-lg" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
+                        <center><input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                         </form>
               
                 </div>

@@ -36,7 +36,7 @@ foreach ($equipments as $e){
         $imagePath = "images/equipment/$imageName";
         
     } else {
-        $imageName = "loginImage.jpg";
+        $imageName = "no-image.png";
         $imagePath = "assets/img/$imageName";
     }
 

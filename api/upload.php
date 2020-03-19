@@ -81,6 +81,6 @@ if ($_POST['action'] == 'uploadImage') {
             respond(500, "Failed to upload the new image");
         }
 
-        respond(201, "Successfully uploaded a new image");
+        respond(201, "Successfully uploaded a new image", $imageId);
     }
 }

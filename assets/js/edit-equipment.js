@@ -243,6 +243,7 @@ function onAddNewImageFormSubmit() {
         .then(res => {
             snackbar(res.message, 'success');
             onUploadImageSuccess(res.content.id);
+            onProjectImageSelected(res.content.id);
         })
         .catch(err => {
             snackbar(err.message, 'error');

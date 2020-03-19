@@ -18,7 +18,9 @@ allowIf($isEmployee, $configManager->getBaseUrl() . 'pages/index.php');
 
 $title = 'Employee Equipment View';
 $css = array(
-    'assets/css/sb-admin.css'
+	'assets/css/sb-admin.css',
+	'assets/css/admin.css',
+	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
 );
 $js = array(
     array(
@@ -32,7 +34,8 @@ $js = array(
     array(
         'defer' => 'true',
         'src' => 'assets/js/upload-image.js'
-    )
+	),
+	'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
@@ -41,6 +44,46 @@ include_once PUBLIC_FILES . '/modules/newEquipmentModal.php';
 
 $dao = new EquipmentDao($dbConn, $logger);
 $equipments = $dao->getAdminEquipment();
+$equipmentItemHTML = "";
+foreach ($equipments as $e){
+	$equipmentID = $e->getEquipmentID();
+	$defaultImage = $dao->getDefaultEquipmentImage($equipmentID);
+	if (!empty($defaultImage)){
+        $imageName = $defaultImage->getImageID();
+        $imagePath = "images/equipment/$imageName";
+    } else {
+        $imageName = "no-image.png";
+        $imagePath = "assets/img/$imageName";
+    }
+	$name = $e->getEquipmentName();
+	$location = $e->getLocation();
+	$replacementCost = $e->getReplacementCost();
+	$notes = $e->getNotes();
+	$parts = $e->getPartList();
+	$units = $e->getInstances();
+	$isPublic = $e->getIsPublic();
+	if ($isPublic){
+		$publicStatus = "Public (Viewable by everyone)";
+	} else {
+		$publicStatus = "Hidden (Viewable by employees)";
+	}
+	$viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
+	$editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
+	
+	$equipmentItemHTML .= "
+	<tr>
+		<td><img height='200px;' src='$imagePath'></td>
+		<td>$name</td>
+		<td>$publicStatus</td>
+		<td>$location</td>
+		<td>$units</td>
+		<td>$replacementCost</td>
+		<td>$notes</td>
+		<td>$viewButton $editButton</td>
+	</tr>
+	";
+
+}
 
 ?>
 <br/>
@@ -63,7 +106,37 @@ $equipments = $dao->getAdminEquipment();
 					<button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button" data-toggle="modal"
 					data-target="#newEquipmentModal" id="openNewEquipmentModalBtn">Create New Equipment</button>
 				<?php
-					renderEmployeeEquipmentList($equipments);
+				echo"
+					<div class='admin-paper'>
+					<h1>Equipment Rentals</h1>
+						<table class='table' id='equipmentList'>
+						<caption>Employee Equipment List</caption>
+							<thead>
+								<tr>
+									<th>Image</th>
+									<th>Name</th>
+									<th>Visibility</th>
+									<th>Location</th>
+									<th>Units</th>
+									<th>Cost</th>
+									<th>Notes</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								$equipmentItemHTML
+							</tbody>
+						</table>
+						<script>
+						$('#equipmentList').DataTable(
+							{
+								lengthMenu: [[-1, 5, 10, 20, 50], ['All', 5, 10, 20, 50]]
+							}
+						);
+			
+						</script>
+					</div>
+					";
 				?>
 
 

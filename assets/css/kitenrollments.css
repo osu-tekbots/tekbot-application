@@ -24,7 +24,7 @@
     color: #4d4d4d;
   }
   .switch label:hover {
-    color: #dfb865 !important;
+    color: #C6DAE7 !important;
   }
   .switch .knob {
     float: left;
@@ -37,7 +37,7 @@
   }
   .switch .knob:after {
     content: "";
-    background: #dfb865;
+    background: #006A8E;
     width: 22px;
     height: 22px;
     border-radius: 100%;

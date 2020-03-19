@@ -73,13 +73,13 @@ form label, form legend {
   margin: 1em 0 .5em;
 }
 form input[type=submit] {
-  background: turquoise;
+  background: #FFB500;
   border: none;
-  border-bottom: solid 4px #21ccbb;
+  border-bottom: solid 4px #D3832B ;
   padding: .7em 3em;
   margin: 1em 0;
   color: white;
-  text-shadow: 0 -1px 0 #21ccbb;
+  text-shadow: 0 -1px 0 #D3832B ;
   font-size: 1.1em;
   font-weight: bold;
   display: inline-block;
@@ -90,13 +90,13 @@ form input[type=submit] {
   border-radius: .5em;
 }
 form input[type=submit]:hover {
-  background: khaki;
+  background: #B8DDE1;
   border: none;
-  border-bottom: solid 4px #eadc5f;
+  border-bottom: solid 4px #00859B;
   padding: .7em 3em;
   margin: 1em 0;
   color: white;
-  text-shadow: 0 -1px 0 #eadc5f;
+  text-shadow: 0 -1px 0 #00859B;
   font-size: 1.1em;
   font-weight: bold;
   display: inline-block;
@@ -106,6 +106,25 @@ form input[type=submit]:hover {
   -ms-border-radius: .5em;
   border-radius: .5em;
 }
+
+.btnReturn {
+  background: #8E9089!important; 
+  border: none!important;
+  border-bottom: solid 4px #A7ACA2!important;
+  padding: .7em 3em!important;
+  margin: 1em 0!important;
+  margin-left: 20px!important;
+  color: white!important;
+  text-shadow: 0 -1px 0 #00859B!important;
+  font-size: 1.1em!important;
+  font-weight: bold!important;
+  width: auto!important;
+  -webkit-border-radius: .5em;
+  -moz-border-radius: .5em;
+  -ms-border-radius: .5em;
+  border-radius: .5em;
+}
+
 
 .panel {
   margin: 2% 0 0 2%;
