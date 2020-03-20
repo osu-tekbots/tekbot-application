@@ -70,6 +70,32 @@ class PrinterActionHandler extends ActionHandler {
         ));
     }
 
+    public function handleRemovePrinter() {
+        $this->requireParam('printerID');
+        $body = $this->requestBody;
+        $ok = $this->printerDao->deletePrinterByID($body['printerID']);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete printer'));
+        }
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully delete printer resource')
+        );
+    }
+
+    public function handleRemovePrintType() {
+        $this->requireParam('printTypeID');
+        $body = $this->requestBody;
+        $ok = $this->printerDao->deletePrintTypeByID($body['printTypeID']);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete print type'));
+        }
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully delete print type resource')
+        );
+    }
+
 
     /**
      * Updates fields editable from the user interface in a printer entry in the database.
@@ -349,7 +375,30 @@ class PrinterActionHandler extends ActionHandler {
 	
 	
 	public function handleCreatePrintType(){
-		
+        $body = $this->requestBody;
+
+        $printer = $this->printerDao->getPrinterByID($body['printerID']);
+
+        $printType = new PrintType();
+
+        $printType->setPrintTypeName($body['name']);
+        $printType->setPrinterId($printer);
+        $printType->setHeadSize($body['headSize']);
+        $printType->setPrecision($body['precision']);
+        $printType->setBuildPlateSize($body['plateSize']);
+        $printType->setCostPerGram($body['cost']);
+        $printType->setDescription($body['description']);
+
+        $ok = $this->printerDao->addNewPrintTypes($printType);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer type'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new printer type resource', 
+            array('id' => $printType->getPrintTypeId())
+        ));
 	}
 	
 	public function handleSavePrintType(){
@@ -409,8 +458,8 @@ class PrinterActionHandler extends ActionHandler {
                 $this->handleCreatePrinter();
             case 'saveprinter':
                 $this->handleSavePrinter();
-			//case 'removeprinter':
-            //	$this->handleRemovePrinter();
+			case 'removeprinter':
+            	$this->handleRemovePrinter();
             case 'renderprintmodal':
                 $this->handleGeneratePrintModal();
 				
@@ -418,13 +467,15 @@ class PrinterActionHandler extends ActionHandler {
 				$this->handleCreatePrintJob();
 			case 'saveprintjob':
 				$this->handleSavePrintJob();
-			//case 'removeprintjob':
-			//	$this->handleRemovePrintJob();
+			// case 'removeprintjob':
+			// 	$this->handleRemovePrintJob();
 			
 			case 'createprinttype':
 				$this->handleCreatePrintType();
 			case 'saveprinttype':
-				$this->handleSavePrintType();
+                $this->handleSavePrintType();
+            case 'removeprinttype':
+                $this->handleRemovePrintType();
 
             case 'createprintfee':
                 $this->handleCreatePrintFee();

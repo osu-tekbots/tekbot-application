@@ -97,6 +97,15 @@ $printTypes = $printerDao->getPrintTypes();
 					";
 				}
 
+				$addPrinterRow= "
+				<tr>
+				<td><button id='addPrinterButt'>Add</button></td>
+				<td><input id='addPrinterName'></td>
+				<td><input id='addPrinterDescription'></td>
+				<td><input id='addPrinterLocation'></td>
+				</tr>
+				";
+
 
 				echo"
 						
@@ -116,6 +125,7 @@ $printTypes = $printerDao->getPrintTypes();
 						</thead>
 						<tbody>
 							$printerHTML
+							$addPrinterRow
 						</tbody>
 						</table>
 						<script>
@@ -128,7 +138,22 @@ $printTypes = $printerDao->getPrintTypes();
 <script>
 
 function removePrinter(printerID) {
-	alert(printerID);
+	let printerName = $("#printerName" + printerID).val();
+	if(window.confirm("Are you sure you want to delete printer: " + printerName + "?"))
+	{
+		let data = {
+			action: 'removeprinter',
+			printerID: printerID
+		};
+		api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+	}
 }
 
 function editPrinter(printerID) {
@@ -226,9 +251,9 @@ $("#addPrinterButt").click(function(){
 
 	$printTypeHTML .= "
 	<tr>
-	<td><button id=addPrintTypeButt'>Add</button></td>
-	<td><input id=addPrintTypeName'></input></td>
-	<td><select id=addPrintTypePrinterSelect'>";
+	<td><button id='addPrintTypeButt' onClick='addPrintType()'>Add</button></td>
+	<td><input id='addPrintTypeName'></input></td>
+	<td><select id='addPrintTypePrinterSelect'>";
 
 	foreach ($printers as $printer) {
 		$printTypeHTML .= '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
@@ -283,7 +308,22 @@ $("#addPrinterButt").click(function(){
 <script>
 
 function removePrintType(printTypeID) {
-	alert(printTypeID);
+	let printTypeName = $("#printTypeName" + printTypeID).val();
+	if(window.confirm("Are you sure you want to delete printer: " + printTypeName + "?"))
+	{
+		let data = {
+			action: 'removeprinttype',
+			printTypeID: printTypeID
+		};
+		api.post('/printers.php', data).then(res => {
+		 snackbar(res.message, 'success');
+		//  TODO Add timeout
+		//  setTimeout(location.reload(), 3000);
+		 location.reload();
+	 }).catch(err => {
+		 snackbar(err.message, 'error');
+	 });
+	}
 }
 
 function editPrintType(printTypeID) {
@@ -294,7 +334,6 @@ function editPrintType(printTypeID) {
 	let precision = $("#precision" + printTypeID).val();
 	let buildSize = $("#buildSize" + printTypeID).val();
 	let cost = $("#costPerGram" + printTypeID).val();
-	// alert(printName + printDesc + printHead + precision + buildSize + cost).val();
 	let data = {
 		action: 'saveprinttype',
 		id: printTypeID,
@@ -316,21 +355,28 @@ function editPrintType(printTypeID) {
 	 });
 }
 
-$("#").click(function(){
-	if($("#addPrintTypeName").val() == "")
-	{
+function addPrintType() {
+	if($("#addPrintTypeName").val() == "") {
 		alert("Printer Type must have a name!");
 	}
-	else
-	{
+	else {
 		let printTypeName = $("#addPrintTypeName").val();
-		let printTypeDescription = $("#addPrinterDescription").val();
-		let printLocation = $("#addPrinterLocation").val();
+		let printerID = $("#addPrintTypePrinterSelect").val();
+		let description = $("#addPrintTypeDescription").val();
+		let headSize = $("#addPrintTypeHeadSize").val();
+		let precision = $("#addPrintTypePrecision").val();
+		let plateSize = $("#addPrintTypePlateSize").val();
+		let cost = $("#addPrintTypeCost").val();
+
 		let data = {
-			action: 'addPrintType',
-			title: printName,
-			description: printDescription,
-			location: printLocation
+			action: 'createprinttype',
+			name: printTypeName,
+			printerID: printerID,
+			headSize: headSize,
+			precision: precision,
+			plateSize: plateSize,
+			cost: cost,
+			description: description
 		}
 		api.post('/printers.php', data).then(res => {
 		 snackbar(res.message, 'success');
@@ -340,11 +386,9 @@ $("#").click(function(){
 	 }).catch(err => {
 		 snackbar(err.message, 'error');
 	 });
-	}
-});
+	}	
+}
 </script>
-
-
 
 <?php 
 include_once PUBLIC_FILES . '/modules/footer.php' ; 

@@ -258,7 +258,7 @@ class PrinterDao {
             )
             ';
             $params = array(
-                ':name' => $printer->getPrinterName(),
+                ':name' => $printer->getPrintTypeName(),
                 ':description' => $printer->getDescription(),
                 ':printId' => $printer->getPrinterId(),
                 ':head' => $printer->getHeadSize(),
@@ -405,6 +405,42 @@ class PrinterDao {
         }
     }
 
+    public function deletePrinterByID($printerID) {
+        try {
+            $sql = '
+            DELETE FROM 3d_printers
+            WHERE 3dprinter_id = :id
+            ';
+            $params = array(
+                ':id' => $printerID,
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove printer metadata: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deletePrintTypeByID($printTypeID) {
+        try {
+            $sql = '
+            DELETE FROM 3d_print_type
+            WHERE 3dprinter_type_id = :id
+            ';
+            $params = array(
+                ':id' => $printTypeID,
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove print type metadata: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Creates a new Equipment object using information from the database row
@@ -487,11 +523,6 @@ class PrinterDao {
 		
         return $printJob;
     }
-
-
-
-
-
 }
 
 ?>
