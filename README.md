@@ -1,22 +1,27 @@
-# Senior Design Capstone Web Application
+# EECS Tekbots  Web Application
 
-![image](https://user-images.githubusercontent.com/20714895/59056597-68958700-884d-11e9-9879-7158ca8a879a.png)
+![tekbotshome](https://user-images.githubusercontent.com/46464630/77836948-57896f80-7118-11ea-9041-09861e7c07ad.png)
 
-Senior Design Capstone is an application that enables students to browse Senior Design projects proposed by 
-individuals from industry and other sponsors. See [the changelog](./CHANGELOG.md) for detailed information about
-updates to the website.
 
-**Initial Development**: Winter Term 2019 - Spring Term 2019
+The Tekbots Web Application enables students to login with their existing Oregon State University accounts (ONID) and execute tasks under their account for the Tekbots store. These tasks include, but are not limited to, obtaining kits for EECS courses, 3D print submissions, Laser cut submission, and checking out equipmnent. 
+
+**Initial Development**: Winter Term 2019 - (Development still ongoing)
 
 **Contributors**
 - Symon Ramos (ramossy@oregonstate.edu)
 - Thien Nam (namt@oregonstate.edu)
 - Braden Hitchcock (hitchcob@oregonstate.edu)
+- Mark Huynh (huynhma@oregonstate.edu)
 
 ## Development
+
+Deployment URL: https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/
+
 The following resources provide information about how to develop the website locally and the workflow for pushing
 changes to the staging area and subsequently deploying them to production.
 
+
+** Outdated
 - [Local Development Setup](./docs/dev-setup.md)
 - [Development Workflow](./docs/dev-workflow.md)
 
@@ -196,7 +201,10 @@ of these variables occur in the following workflow:
 - Github Login Authentication Support.
 - Mobile Support.
 
-# Current Migration onto official capstone site (eecs.oregonstate.edu/capstone/submission)
+# Current Migration onto official capstone site (https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/)
+
+**Outdated
+
 1. Push all changes from STAGE directory (education/capstone/stage) to github for version maintence
 2. Clear all files from official capstone directory EXCEPT
    - images dir
@@ -222,11 +230,6 @@ Create a hidden div and echo out the SESSION variable there. Then reference that
 		 
 ## Screenshots 
 
-![image](https://user-images.githubusercontent.com/20714895/59056636-806d0b00-884d-11e9-8a94-606cb1e5f667.png)
+![reservedequip](https://user-images.githubusercontent.com/46464630/77836999-c070e780-7118-11ea-99f9-8492e281a49d.png)
 
-![image](https://user-images.githubusercontent.com/20714895/59057000-43eddf00-884e-11e9-833a-ad1d8b329c7a.png)
-
-![image](https://user-images.githubusercontent.com/20714895/59057030-55cf8200-884e-11e9-8937-fd465a732039.png)
-
-![image](https://user-images.githubusercontent.com/20714895/59057421-2e2ce980-884f-11e9-83ad-6035f7787e94.png)
-
+![kithandout](https://user-images.githubusercontent.com/46464630/77837008-f01fef80-7118-11ea-9620-69a0f84ce923.png)
