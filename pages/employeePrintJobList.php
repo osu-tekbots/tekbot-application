@@ -86,7 +86,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$name</td>
                     <td>$printType</td>
                     <td>$printer</td>
-                    <td>$stlFileName</td>
+                    <td><a href='../../3dprinter/stl/$stlFileName'>$stlFileName</td>
                     <td>$dateCreated</td>
                     <td>$validPrintData</td>
                     <td>$userConfirm</td>
@@ -131,22 +131,7 @@ $printJobs = $printerDao->getPrintJobs();
                     $('#checkoutFees').DataTable({'scrollX':true});
                 </script>";
 
-                
-
-                    echo '<table id="printJobsTable">'; 
-
-                        foreach ($printJobs as $p) {
-                            $printJobID = $p->getPrintJobID();
-                            $user = $userDao->getUserByID($p->getUserID());
-                            $name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
-                            $printType = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getPrintTypeName());
-
-                            echo '<tr>';
-                            echo '<td>' . '<input id="printerName' . $printJobID . '" value="' . $name . '"></input>'. '</td>';
-                            echo '<td>' . '<input id="printerDescription' . $printJobID . '" value="' . $printType . '"></input>'. '</td>';
-                            echo '<td>' . '<input id="printerLocation' . $printJobID . '" value="' . $p->getPrinterID() . '"></input>'. '</td>';
-                            echo '</tr>'; 
-                        }
+            
                     echo "</div>";
                 echo "</div>";
             ?>

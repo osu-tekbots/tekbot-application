@@ -73,7 +73,12 @@ $printTypes = $printerDao->getPrintTypes();
 		
 				echo "
 				<div class='admin-paper' style='overflow-x:scroll'>
+				<h3>
+				This page allows Tekbot employees to update, remove, and add printers and print types.
+				</h1>
+				<br/>
 				";
+				
 
 
 				$printerHTML = "";
@@ -110,11 +115,10 @@ $printTypes = $printerDao->getPrintTypes();
 				echo"
 						
 						<div class='admin-paper'>
-						<h3>Fees</h3>
-						<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
-						<p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
+						<h3>3D Printers</h3>
+						<p>These are the available Tekbot 3D printers.</p>
 						<table class='table' id='checkoutFees'>
-						<caption>Fees Relating to Equipment Checkout</caption>
+						<caption>Information regarding Tekbot 3D printers</caption>
 						<thead>
 							<tr>
 								<th></th>
@@ -270,12 +274,11 @@ $("#addPrinterButt").click(function(){
 
 	echo"
 						
-	<div class='admin-paper'>
-	<h3>Fees</h3>
-	<p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
-	<p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
+	<div class='admin-paper' style='overflow-x:scroll'>
+	<h3>Print Types</h3>
+	<p>These are the available print types</p>
 	<table class='table' id='checkoutFees'>
-	<caption>Fees Relating to Equipment Checkout</caption>
+	<caption>Information regarding Tekbot print types</caption>
 	<thead>
 		<tr>
 			<th></th>

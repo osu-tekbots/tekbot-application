@@ -28,6 +28,7 @@ if ($isLoggedIn){
 }
 
 $printers = $printerDao->getPrinters();
+$printTypes = $printerDao->getPrintTypes();
 $user = $usersDao->getUserByID($_SESSION['userID']);
 
 
@@ -94,18 +95,15 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 </script>
 
 
-<script>
-/*
-	$(document).ready(function () {
-		$('#printerTable').DataTable();
-	});
-	*/
-</script>
+
 
 <div class="container-fluid">
+
+
+
 	<br/><br/><br/>
 	<h1>3D Print Submission Form</h1>
-	<!--
+	
 				Using this form you can upload a 3D model to be created. Print using a Stratasys BST1220 machine. It produces plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model. 
 			<br/><br/>
 			<ul>
@@ -133,7 +131,11 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
             </div>
 			<p>If you would like to pay via credit card, please submit your file with this form and enter 'Credit Card' in the account code field. We will reply with instructions on how to submit payment.</p>
 			<p class="text-danger">NOTE We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p>
-		-->
+		
+
+	
+
+
 
 	<div class="row">  
 		<div class="col-sm-6">
@@ -145,13 +147,49 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<input name="lastNameInput" class="form-control" value="<?php echo $user->getLastName();?>" placeholder="Enter your last name here..." id="lastNameInput"/>
 			<br/>
 			<input name="userIDInput" id="userIDInput" value="<?php echo $user->getUserID(); ?>" hidden />
-			<select name="materialSelect" name="materialSelect" id="materialSelect">	
+			<!-- <select name="materialSelect" name="materialSelect" id="materialSelect">	
 				<option value="Stencil">Stencil ($2.00)</option>
 				<option value="Clear_Acrylic_3mm">Clear Acrylic - 3mm (1/8") ($5.00)</option>
 				<option value="Clear_Acrylic_5mm">Clear Acrylic - 5mm (1/4") ($8.00)</option>
 				<option value="Plywood_5mm">Plywood - 5mm (7/32") ($5.00)</option>
 				<option value="Plywood_3mm">Plywood - 3mm (1/8") ($5.00)</option>
-			</select>
+			</select> -->
+			Which Printer would you like to print on?: <br/>
+			<select name="printerSelect" id="printerSelect">
+				<?php
+					foreach($printers as $p) {
+						$printerName = $p->getPrinterName();
+						$printerId = $p->getPrinterId();
+						echo "<option value=$printerId>$printerName</option>";
+					}
+				?>
+			</select><br/>
+
+			What Print type would you like?: <br/>
+			<select name="printTypeSelect" id="printTypeSelect">
+				<?php
+					foreach($printTypes as $p) {
+						$printTypeName = $p->getPrintTypeName();
+						$printTypeId = $p->getPrintTypeId();
+						echo "<option value=$printTypeId>$printTypeName</option>";
+					}
+				?>
+			</select><br/>
+			
+			<b>Payment Method:</b>
+			<br/>
+                <input type="radio" name="accounttype" value="cc">
+				Credit Card? 
+				<input type="radio" name="accounttype" value="account">
+				OSU Account Code:
+				<input class=fi type=text size=30 name=account value="">
+                <BR>*Note:<b> We can not directly bill your student account.</b> Students must use the credit card option. Do not enter your credit card info here.*
+                <br/>
+
+			<b>Notes</b>
+			<BR>Any special instructions or deadlines that you have should be entered here
+			<textarea name="notes" rows="4" cols="50"></textarea><br/>
+
 		</div>
 		<div class="col-sm-6">
 			<div id="targetDiv"></div>
@@ -162,91 +200,15 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 		</div>
 	
 
+
+
 	</div>
 
 </div>
 
 
-<!--
-<br/><br/><br/>
-<h1>3D Print Submission Form</h1>
 
 
-
-<form name="submit" id="submit" action="./submit3DPrint.php" method="post" ENCTYPE="multipart/form-data">
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-6">
-			Using this form you can upload a 3D model to be created. Print using a Stratasys BST1220 machine. It produces plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model. 
-			<br/><br/>
-		
-        <div class='col-sm-6'>
-          
-
-                <b>Email: </b> (Must be valid to confirm order)
-				<input name="emailInput" class="form-control" type="email" placeholder="Enter your email here..." id="emailInput" form="submit">
-				<br/>First Name:
-				<input type="text" name="firstNameInput" class="form-control" placeholder="Enter your first name here..." id="firstNameInput" form="submit" required></input>
-				<br/>Last Name:
-				<input type="text" name="lastNameInput" class="form-control" placeholder="Enter your last name here..." id="lastNameInput" form="submit" required></input>
-                <br/>
-				<b>Payment Method:</b>
-                <BR/>
-                <input type="radio" name="accounttype" value="cc">
-				Credit Card? 
-				<input type="radio" name="accounttype" value="account">
-				OSU Account Code:
-				<input class=fi type=text size=30 name=account value="">
-                <BR>*Note:<b> We can not directly bill your student account.</b> Students must use the credit card option. Do not enter your credit card info here.*
-                <br/>
-				<br/><b>Quantity</b><br/>
-                <select id="quantitySelect" name="quantitySelect">
-					<option value="1">1</option>
-					<option value="2">2</option>
-					<option value="3">3</option>
-					<option value="4">4</option>
-					<option value="5">5</option>
-					<option value="6">6</option>
-					<option value="7">7</option>
-					<option value="8">8</option>
-					<option value="9">9</option>
-					<option value="10">10</option>
-				</select>
-                <br/><b>Material</b>
-                <BR>Costs shown are reflective of the price after student discount. Code generated after order submission
-
-                <select name="materialSelect" name="materialSelect" id="materialSelect">	
-					<option value="Stencil">Stencil ($2.00)</option>
-					<option value="Clear_Acrylic_3mm">Clear Acrylic - 3mm (1/8") ($5.00)</option>
-					<option value="Clear_Acrylic_5mm">Clear Acrylic - 5mm (1/4") ($8.00)</option>
-					<option value="Plywood_5mm">Plywood - 5mm (7/32") ($5.00)</option>
-					<option value="Plywood_3mm">Plywood - 3mm (1/8") ($5.00)</option>
-				</select>
-                <br/>
-                <b>Select Laser Cutter</b>
-                <select name="laserCutterId" form="submit">
-					<option value="1">KEC1111 Laser Cutter</option>
-				</select>
-                <br/>
-                <b>Notes</b>
-                <BR>Any special instructions or deadlines that you have should be entered here
-                <textarea name="notes" rows="4" cols="50"></textarea><br/>
-
-                <input type="file" id="submitFile" name="submitFile" multiple>
-				<input name="uploadpath" value="" id="uploadpath" type='hidden'>
-           
-            <div id="target"></div>
-  
-            <br/>
-            <button id="submit3DPrintBtn" class="btn btn-primary">Submit</button>
-			<br/><br/>
-        </div>
-    </div>
-</div>
-
-</form>
-
--->
 
 
 <br /><br /><br/>
@@ -269,10 +231,17 @@ $('#submit3DPrintBtn').on('click', function () {
 		firstName: $('#firstNameInput').val(),
 		lastName: $('#lastNameInput').val(),
 		userId: $('#userIDInput').val(),
-		material: $('#materialSelect').val(),
-		fileName: $('#uploadFileInput').val()
+		// material: $('#materialSelect').val(),
+		fileName: $('#uploadFileInput').val(),
+		printerId: $('#printerSelect').val(),
+		printTypeId: $('#printTypeSelect').val(),
+		// payment method
+		// Course group id
+		// voucher code (is a foreign key?)
+		// date created? Check if dao already has
+		// valid print (maybe put in api)
+		// 
 	}; 
-	
 	
 	// Send our request to the API endpoint
 	api.post('/printers.php', data).then(res => {
