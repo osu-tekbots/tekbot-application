@@ -68,7 +68,7 @@ $printJobs = $printerDao->getPrintJobs();
                     $name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
                     $printType = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getPrintTypeName());
                     $printer = Security::HtmlEntitiesEncode($printerDao->getPrinterByID($p->getPrinterId())->getPrinterName());
-                    // $dbFileName = $p->getDbFileName();
+                    $dbFileName = $p->getDbFileName();
                     $stlFileName = $p->getStlFileName();
                     $dateCreated = $p->getDateCreated();
                     $validPrintData = $p->getValidPrintCheck();
@@ -86,7 +86,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$name</td>
                     <td>$printType</td>
                     <td>$printer</td>
-                    <td><a href='../../3dprinter/stl/$stlFileName'>$stlFileName</td>
+                    <td><a href='./prints/$dbFileName'>$stlFileName</td>
                     <td>$dateCreated</td>
                     <td>$validPrintData</td>
                     <td>$userConfirm</td>

@@ -18,6 +18,7 @@ use Model\User;
 $title = '3D Print Submission';
 $printerDao = new PrinterDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
+$validFile = false;
 
 $isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
 if ($isLoggedIn){
@@ -53,14 +54,17 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
  
 	
 <script type="text/javascript">
+
+	var isValidFile = false;
+	var dbFileName = "";
+
 	function Upload(action,id) {
 		var html= '<B>LOADING</B>';
 		$('#uploadTextDiv').html(html).css('visibility','visible');
 		var file_data = $('#uploadFileInput').prop('files')[0]
 		var form_data = new FormData();
 		form_data.append('file', file_data);
-		form_data.append('action',action);
-		form_data.append('id',id);
+		form_data.append('action','upload');
 		
 		$.ajax({ 
 			url: './ajax/Handler.php', 
@@ -75,19 +79,24 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 				{
 					var setPath = document.getElementById("uploadpath");
 					setPath.value = result["path"];
-					var html= '<B><font color="green">✓</font></B>' + '<a href="'+result["path"]+'">' + result["string"] + '</a>';
-					
+					var good= '<B><font color="green">✓asdfas</font></B>' + '<a href="'+result["path"]+'">' + result["string"] + '</a>';
+					isValidFile = true;
+					dbFileName = result["path"];
+					$('#fileFeedback').text(good);
 				}
 				else if(result["successful"] == 0)
-					var html= '<font color="red">❌ </font> Error: '+result["string"];
-					else
-						var html= result["string"];
-				$('#txt'+id).html(html).css('visibility','visible');
+					isValidFile = false;
+					var html= '❌'+result["string"];
+					// $('#txt'+id).html(html).css('visibility','visible');
+					$('#fileFeedback').text(html);
+
 			},
 			error: function(result)
 			{
+				isValidFile = false;
 				var html= '<font color="red">❌ </font> Failed: '+result["string"];
 				$('#txt'+id).html(html).css('visibility','visible');
+				// Show html
 			}
 		});
 	}
@@ -188,20 +197,18 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 
 			<b>Notes</b>
 			<BR>Any special instructions or deadlines that you have should be entered here
-			<textarea name="notes" rows="4" cols="50"></textarea><br/>
+			<textarea id="specialNotes" name="notes" rows="4" cols="50"></textarea><br/>
 
 		</div>
 		<div class="col-sm-6">
 			<div id="targetDiv"></div>
+			<label id="fileFeedback"></label>
 			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" multiple>
 			<div id="uploadTextDiv"></div>
 			<input name="uploadpath" value="" id="uploadpath" type='hidden'>
 			<button id="submit3DPrintBtn" class="btn btn-primary">Submit</button>
 		</div>
 	
-
-
-
 	</div>
 
 </div>
@@ -224,32 +231,36 @@ window.onload = function(){
 
 
 $('#submit3DPrintBtn').on('click', function () {
-	// Capture the data we need
-	let data = {
-		action: 'createprintjob',
-		email: $('#emailInput').val(),
-		firstName: $('#firstNameInput').val(),
-		lastName: $('#lastNameInput').val(),
-		userId: $('#userIDInput').val(),
-		// material: $('#materialSelect').val(),
-		fileName: $('#uploadFileInput').val(),
-		printerId: $('#printerSelect').val(),
-		printTypeId: $('#printTypeSelect').val(),
-		// payment method
-		// Course group id
-		// voucher code (is a foreign key?)
-		// date created? Check if dao already has
-		// valid print (maybe put in api)
-		// 
-	}; 
-	
-	// Send our request to the API endpoint
-	api.post('/printers.php', data).then(res => {
-		snackbar(res.message, 'success');
-		//window.location.replace('pages/submit3DPrint.php');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
+	let selectedPayment = $("input[type=radio][name=accounttype]:checked").val();
+
+	if(isValidFile && (selectedPayment != null)) {
+		let data = {
+			action: 'createprintjob',
+			userId: $('#userIDInput').val(),
+			printerId: $('#printerSelect').val(),
+			printTypeId: $('#printTypeSelect').val(),
+			dbFileName: dbFileName,
+			stlFileName: $('#uploadFileInput').val(),
+			payment: selectedPayment,
+			// course group?
+			courseGroup: 0,
+			// voucher code (is a foreign key?) ask jack
+			voucherCode: null,
+			employeeNotes: $('#specialNotes').val()
+		}; 
+		// Send our request to the API endpoint
+		api.post('/printers.php', data).then(res => {
+			snackbar(res.message, 'success');
+			$('#submit3DPrintBtn').prop('disabled', true);
+			setTimeout(function(){window.location.replace('pages/submit3DPrint.php')}, 2000);
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		alert("Either File is not valid or Payment not selected");
+	}
+
+
 	
 });
 

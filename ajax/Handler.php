@@ -7,13 +7,14 @@ $Data = array();
 		if(isset($_FILES['file'])){
 			$errors= array();
 			$file_name = $_FILES['file']['name'];
+			$file_name_no_ext = explode(".",$file_name)[0];
 			$file_size =$_FILES['file']['size'];
 			$file_tmp =$_FILES['file']['tmp_name'];
 			$file_type=$_FILES['file']['type'];
 			$file_ext=strtolower(end(explode('.',$_FILES['file']['name'])));
-			$Data["UploadName"] = "".date('Y-m-d-G-i-s').".".$file_ext;
-			$expensions= array("stl", "STL");
-			if(in_array($file_ext,$expensions)=== false){
+			$Data["UploadName"] = $file_name_no_ext.date('Y-m-d-G-i-s').".".$file_ext;
+			$extentions= array("stl", "STL");
+			if(in_array($file_ext,$extentions)=== false){
 				$errors[]="extension not allowed, please choose an STL file.";
 				$Data["successful"] = 0;
 				$Data["string"] = 'extension not allowed, please choose an STL file.';

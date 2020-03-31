@@ -269,35 +269,52 @@ class PrinterActionHandler extends ActionHandler {
     public function handleCreatePrintJob() {
 
 		$body = $this->requestBody;
-		
-		$this->requireParam('email');
-        $this->requireParam('firstName');
-        $this->requireParam('lastName');
-        $this->requireParam('userId');
-        $this->requireParam('material');
-        $this->requireParam('fileName');
+        
+
+		$this->requireParam('userId');
+        $this->requireParam('printerId');
+        $this->requireParam('printTypeId');
+        $this->requireParam('dbFileName');
+        $this->requireParam('stlFileName');
 		
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
-		  
-		//FIXME: Fill out once you do client side
-        $printJob->setUserID($body['']);
-		$printJob->setPrintTypeID($body['']);
-		$printJob->setPrinterId($body['']);
-		$printJob->setDbFileName($body['']);
-		$printJob->setStlFileName($body['']);
-		$printJob->setPaymentMethod($body['']);
-		$printJob->setCourseGroupId($body['']);
-		$printJob->setVoucherCode($body['']);
-		$printJob->setValidPrintCheck($body['']);
-		$printJob->setUserConfirmCheck($body['']);
-		$printJob->setCompletePrintDate($body['']);
-		$printJob->setEmployeeNotes($body['']);
-		$printJob->setMessageGroupId($body['']);
-		$printJob->setPendingCustomerResponse($body['']);
-		$printJob->setDateUpdated($body['']);
-		
+        
+        
+        //FIXME: Fill out once you do client side
+        // Front end values that are not foreign keys
+		$printJob->setDbFileName($body['dbFileName']);
+		$printJob->setStlFileName($body['stlFileName']);
+		$printJob->setPaymentMethod($body['payment']);
+		$printJob->setCourseGroupId($body['courseGroup']);
+		$printJob->setVoucherCode($body['voucherCode']);
+        $printJob->setEmployeeNotes($body['employeeNotes']);
+        
+        // Front end values that are foreign keys
+        $printType = $this->printerDao->getPrintTypesByID($body['printTypeId']);
+        $printer = $this->printerDao->getPrinterByID($body['printerId']);
 
+        $printJob->setUserID($body['userId']);
+		$printJob->setPrintTypeID($printType);
+        $printJob->setPrinterId($printer);
+
+        
+        // Values generated at API call
+            // Check if formatting is correct
+        $printJob->setDateCreated((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPendingCustomerResponse(false);
+
+
+
+        // To be done
+        // Not sure why this needs to be set to null, need to check
+		$printJob->setMessageGroupId(null);
+		// $printJob->setValidPrintCheck($body['']);
+		// $printJob->setUserConfirmCheck($body['']);
+		// $printJob->setCompletePrintDate($body['']);
+		// $printJob->setPendingCustomerResponse($body['']);
+		// $printJob->setDateUpdated($body['']);
+        
         $ok = $this->printerDao->addNewPrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new print job'));
@@ -305,9 +322,8 @@ class PrinterActionHandler extends ActionHandler {
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully submitted print job', 
-            array('id' => $printjob->getPrintJobID())
-        ));
+            'Successfully submitted print job')
+        );
 		
     }
 	
@@ -323,7 +339,7 @@ class PrinterActionHandler extends ActionHandler {
 		
 		//FIXME: Fill out once you do client side
         $printJobId = $this->getFromBody('print_job_id');
-		$userId = $this->getFromBody();
+		$userId = $this->getFromBody('');
 		$printTypeId = $this->getFromBody('');
 		$printerId = $this->getFromBody('');
 		$dbFileName = $this->getFromBody('');
