@@ -73,13 +73,19 @@ $printJobs = $printerDao->getPrintJobs();
                     $dateCreated = $p->getDateCreated();
                     $validPrintData = $p->getValidPrintCheck();
                     $userConfirm = $p->getUserConfirmCheck();
-                    $completeData = $p->getCompletePrintDate();
+                    $completePrintData = $p->getCompletePrintDate();
                     $employeeNotes = $p->getEmployeeNotes();
                     $pendingResponse = $p->getPendingCustomerResponse();
                     $dateUpdated = $p->getDateUpdated();
                                         
+                    $printValidVal = $validPrintData ? $validPrintData : '<button class="btn btn-primary">Send Confirmation</button>';
 
+                    // If print is validified and pending customer response is 0, then the print has been confirmed by the customer
+                        // Insert completePrintData
+                    $customerConfirmVal = $validPrintData ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed (INSERT DATE HERE)") : "An employee has not validified print yet";
 
+                    $completedVal = $completePrintData ? '<button class="btn btn-primary">Click when print is finished</button>' : "Customer has not confirmed print yet";
+                    
                     $printJobsHTML .= "
                     <tr>
 
@@ -88,9 +94,9 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$printer</td>
                     <td><a href='./prints/$dbFileName'>$stlFileName</td>
                     <td>$dateCreated</td>
-                    <td>$validPrintData</td>
-                    <td>$userConfirm</td>
-                    <td>$completeData</td>
+                    <td>$printValidVal</td>
+                    <td>$customerConfirmVal</td>
+                    <td>$completedVal</td>
                     <td>$employeeNotes</td>
                     <td>$pendingResponse</td>
                     <td>$dateUpdated</td>
