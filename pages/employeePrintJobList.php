@@ -62,6 +62,8 @@ $printJobs = $printerDao->getPrintJobs();
 
                 $printJobsHTML = "";
 
+                $buttonScripts = "";
+
                 foreach ($printJobs as $p) {
                     $printJobID = $p->getPrintJobID();
                     $user = $userDao->getUserByID($p->getUserID());
@@ -78,13 +80,15 @@ $printJobs = $printerDao->getPrintJobs();
                     $pendingResponse = $p->getPendingCustomerResponse();
                     $dateUpdated = $p->getDateUpdated();
                                         
-                    $printValidVal = $validPrintData ? $validPrintData : '<button class="btn btn-primary">Send Confirmation</button>';
+                    $printValidVal = $validPrintData ? $validPrintData : "<button id='sendConfirm$printJobID' class='btn btn-primary'>Send Confirmation</button>";
 
                     // If print is validified and pending customer response is 0, then the print has been confirmed by the customer
                         // Insert completePrintData
                     $customerConfirmVal = $validPrintData ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed (INSERT DATE HERE)") : "An employee has not validified print yet";
 
                     $completedVal = $completePrintData ? '<button class="btn btn-primary">Click when print is finished</button>' : "Customer has not confirmed print yet";
+                    
+
                     
                     $printJobsHTML .= "
                     <tr>
@@ -105,12 +109,42 @@ $printJobs = $printerDao->getPrintJobs();
                     </tr>
                 
                     ";
+
+                    $buttonScripts .= 
+                "<script>
+                $('#sendConfirm$printJobID').on('click', function() {
+                    if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
+                        let printJobID = '$printJobID';
+                        let data = {
+                            action: 'sendCustomerConfirm',
+                            printJobID: printJobID
+                        }
+                        api.post('/printers.php', data).then(res => {
+                            snackbar(res.message, 'success');
+                            window.location.reload();
+                        }).catch(err => {
+                            snackbar(err.message, 'error');
+                    });
+                    }
+                });
+            </script>";
+
                 }
 
                 echo"
 						
-                <h3>Fees</h3>
+                <h3>3D Print Jobs</h3>
                 <p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
+
+                <p>Time stamps in 'Is Print Valid', 'Customer Confirmation' and 'Print Completed' colums indicate the completion of that field</p>
+                <p>Steps:</p>
+                <ol>
+                    <li>Verify that print is valid for selected printer. If so, click 'Send Confirmation'</li>
+                    <li>Wait until customer confirms the print job, which will be indicated as a time stamp and 'Confirmed'</li>
+                    <li>If the print is confirmed, perform the print job</li>
+                    <li>Once finished, click 'Print finished' button</li>
+                </ol>
+
                 <p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
                 <table class='table' id='checkoutFees'>
                 <caption>Fees Relating to Equipment Checkout</caption>
@@ -135,8 +169,10 @@ $printJobs = $printerDao->getPrintJobs();
                 </table>
                 <script>
                     $('#checkoutFees').DataTable({'scrollX':true});
-                </script>";
-
+                </script>
+                $buttonScripts
+                "
+                ;
             
                     echo "</div>";
                 echo "</div>";
@@ -145,6 +181,23 @@ $printJobs = $printerDao->getPrintJobs();
         </div>
     </div>
 
+<!-- <script>
+    $('#sendConfirm$printJobID').on('click', function() {
+        if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
+            let printJobID = '$printJobID';
+            let data = {
+                action: 'sendCustomerConfirm',
+                printJobID: printJobID
+            }
+            api.post('/printers.php', data).then(res => {
+                snackbar(res.message, 'success');
+                window.location.reload();
+		    }).catch(err => {
+			    snackbar(err.message, 'error');
+		});
+        }
+    });
+</script> -->
 
 <?php 
 include_once PUBLIC_FILES . '/modules/footer.php' ; 

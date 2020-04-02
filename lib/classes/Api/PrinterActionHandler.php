@@ -450,7 +450,22 @@ class PrinterActionHandler extends ActionHandler {
             Response::OK,
             'Successfully saved print type'
         ));
-	}
+    }
+    
+    public function handleSendCustomerConfirm() {
+        $body = $this->requestBody;
+
+		$this->requireParam('printJobID');
+
+
+        // Dont do this, grab it from dao (example is handleApproveEquipmentFees)
+        // $printJob = new PrintJob($body['printJobID']);
+
+        // TOFIN
+        // $printJob->set
+
+
+    }
  
 
     /**
@@ -498,7 +513,11 @@ class PrinterActionHandler extends ActionHandler {
             case 'saveprintfee':
                 $this->handleSavePrintFee();
 			//case 'removeprintfee':
-			//	$this->handleRemovePrintFee();
+            //	$this->handleRemovePrintFee();
+            
+
+            case 'sendCustomerConfirm':
+                $this->handleSendCustomerConfirm();
             
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));

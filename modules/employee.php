@@ -174,6 +174,19 @@ function isValidStudentID($sid){
          </div>
         </li>
 
+        <li class="nav-item">
+        <a style="color: lightblue;" class="nav-link" href="pages/submit3DPrint.php">
+            <i class="fas fa-fw fa-print"></i>
+            <span>3D Submissions (Temp)</span>
+        </a>
+        </li>
+
+        <li class="nav-item">
+        <a style="color: lightblue;" class="nav-link" href="pages/employeePrintJobList.php">
+            <i class="fas fa-fw fa-print"></i>
+            <span>3D Printing</span>
+        </a>
+        </li>
 
         <li class="nav-item">
             <a class="nav-link" href="pages/employeeFees.php">
@@ -190,7 +203,7 @@ function isValidStudentID($sid){
         <li class="nav-item">
             <a class="nav-link" href="pages/employeePrinter.php">
                 <i class="fas fa-fw fa-print"></i>
-                <span>3D Printing</span>
+                <span>3D Printing? Not?</span>
             </a>
         </li>
         <li class="nav-item">
@@ -210,12 +223,6 @@ function isValidStudentID($sid){
             <i class="fas fa-fw fa-pallet"></i>
             <span>Inventory</span>
         </a>
-        </li>
-        <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="./pages/employeePrintJobList.php">
-                <i class="fas fa-fw fa-print"></i>
-                <span>3D Printing</span>
-            </a>
         </li>
         <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/lasercutter.php">
