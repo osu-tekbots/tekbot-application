@@ -4,7 +4,7 @@ namespace Email;
 use Util\Security;
 use DataAccess\QueryUtils;
 
-class EquipmentRentalMailer extends Mailer {
+class PrinterMailer extends Mailer {
     /**
      * Constructs a new instance of a mailer specifically for capstone project-related emails
      *

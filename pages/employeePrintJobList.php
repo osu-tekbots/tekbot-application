@@ -66,6 +66,7 @@ $printJobs = $printerDao->getPrintJobs();
 
                 foreach ($printJobs as $p) {
                     $printJobID = $p->getPrintJobID();
+                    $userID = $p->getUserID();
                     $user = $userDao->getUserByID($p->getUserID());
                     $name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
                     $printType = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getPrintTypeName());
@@ -116,9 +117,11 @@ $printJobs = $printerDao->getPrintJobs();
                     if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
                         $('#sendConfirm$printJobID').prop('disabled', true);
                         let printJobID = '$printJobID';
+                        let userID = '$userID';
                         let data = {
                             action: 'sendCustomerConfirm',
-                            printJobID: printJobID
+                            printJobID: printJobID,
+                            userID: userID
                         }
                         api.post('/printers.php', data).then(res => {
                             snackbar(res.message, 'success');

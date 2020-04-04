@@ -18,10 +18,12 @@ class PrinterActionHandler extends ActionHandler {
     private $printFeeDao;
     /** @var \DataAccess\printerDao */
     private $printerDao;
-    /** @var \Email\ProjectMailer */
-    //private $mailer;
+    /** @var \Email\PrinterMailer */
+    private $mailer;
     /** @var \Util\ConfigManager */
     private $config;
+    /** @var \DataAccess\UsersDao */
+    private $userDao;
     
     /**
      * Constructs a new instance of the action handler for requests on printer resources.
@@ -32,13 +34,12 @@ class PrinterActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($printerDao, $printFeeDao, $config, $logger) {
+    public function __construct($printerDao, $printFeeDao, $userDao, $mailer, $config, $logger) {
         parent::__construct($logger);
         $this->printerDao = $printerDao;
-        //$this->mailer = $mailer;
+        $this->mailer = $mailer;
         $this->config = $config;
-
-
+        $this->userDao = $userDao;
         $this->printFeeDao = $printFeeDao;
     }
 
@@ -456,6 +457,7 @@ class PrinterActionHandler extends ActionHandler {
         $body = $this->requestBody;
 
 		$this->requireParam('printJobID');
+		$this->requireParam('userID');
 
         $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
         if (empty($printJob)) {
@@ -473,6 +475,9 @@ class PrinterActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
         }
+
+        $user = $this->userDao->getUserByID($body['userID']);
+        $this->mailer->sendPrintConfirmationEmail($user, $printJob);
 
         $this->respond(new Response(
             Response::CREATED, 
