@@ -114,6 +114,7 @@ $printJobs = $printerDao->getPrintJobs();
                 "<script>
                 $('#sendConfirm$printJobID').on('click', function() {
                     if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
+                        $('#sendConfirm$printJobID').prop('disabled', true);
                         let printJobID = '$printJobID';
                         let data = {
                             action: 'sendCustomerConfirm',
@@ -121,10 +122,11 @@ $printJobs = $printerDao->getPrintJobs();
                         }
                         api.post('/printers.php', data).then(res => {
                             snackbar(res.message, 'success');
-                            window.location.reload();
+                            // window.location.reload();
                         }).catch(err => {
                             snackbar(err.message, 'error');
                     });
+                        $('#sendConfirm$printJobID').prop('disabled', true);
                     }
                 });
             </script>";

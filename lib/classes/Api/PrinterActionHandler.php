@@ -457,13 +457,29 @@ class PrinterActionHandler extends ActionHandler {
 
 		$this->requireParam('printJobID');
 
+        $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
 
-        // Dont do this, grab it from dao (example is handleApproveEquipmentFees)
-        // $printJob = new PrintJob($body['printJobID']);
+        $printJob = $printJob[0];
 
-        // TOFIN
-        // $printJob->set
+        $printJob->setValidPrintCheck((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPendingCustomerResponse(true);
 
+        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
+
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated print job')
+        );
+
+        // To finish
 
     }
  
