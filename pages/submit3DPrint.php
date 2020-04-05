@@ -155,7 +155,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<br/>
 			<input disabled name="userIDInput" id="userIDInput" value="<?php echo $user->getUserID(); ?>" hidden />
 			Which Printer would you like to print on?: <br/>
-			<select name="printerSelect" id="printerSelect">
+			<select class="custom-select" name="printerSelect" id="printerSelect">
 				<?php
 					foreach($printers as $p) {
 						$printerName = $p->getPrinterName();
@@ -166,7 +166,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			</select><br/>
 
 			What Print type would you like?: <br/>
-			<select name="printTypeSelect" id="printTypeSelect">
+			<select class="custom-select" name="printTypeSelect" id="printTypeSelect">
 				<?php
 					foreach($printTypes as $p) {
 						$printTypeName = $p->getPrintTypeName();
@@ -178,19 +178,24 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			
 			<b>Payment Method:</b>
 			<br/>
-                <input type="radio" name="accounttype" value="cc">
+			<div class="form-check">
+                <input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
+				<label class="form-check-label" for="paymentradio1">
 				Credit Card? 
-				<input type="radio" name="accounttype" value="account">
+				</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="accounttype" value="account">
 				OSU Account Code:
 				<input class=fi type=text size=30 name=account value="">
+			</div>
                 <BR>*Note:<b> We can not directly bill your student account.</b> Students must use the credit card option. Do not enter your credit card info here.*
                 <br/>
 
-			<b>Notes</b>
-			<BR>Any special instructions or deadlines that you have should be entered here
-			<textarea id="specialNotes" name="notes" rows="4" cols="50"></textarea><br/>
-
-		</div>
+			<b>Notes</b><br/>
+			Any special instructions or deadlines that you have should be entered here<br/>
+			<textarea  class="form-control" id="specialNotes" name="notes" rows="4" cols="50"></textarea><br/>
+			</div>
 		<div class="col-sm-6">
 			<div id="targetDiv"></div>
 			<label id="fileFeedback"></label>
