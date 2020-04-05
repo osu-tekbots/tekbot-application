@@ -15,7 +15,7 @@ class PrinterMailer extends Mailer {
         parent::__construct($from, $subjectTag);
     }
 
-    public function sendPrintConfirmationEmail($user, $printJob) {
+    public function sendPrintConfirmationEmail($user, $printJob, $link) {
         $userName = Security::HtmlEntitiesEncode($user->getFirstName()) 
         . ' ' 
 		. Security::HtmlEntitiesEncode($user->getLastName());
@@ -31,7 +31,29 @@ class PrinterMailer extends Mailer {
 
         We have received your print and have verified that we will be able to print. (MORE DETAILS WILL BE INSERTED).
 
-        Confirmation link: ____
+        Confirmation link: $link
+        
+        ";
+
+        return $this->sendEmail($email, $subject, $message);
+    }
+
+    public function sendPrintCompleteEmail($user, $printJob) {
+        $userName = Security::HtmlEntitiesEncode($user->getFirstName()) 
+        . ' ' 
+		. Security::HtmlEntitiesEncode($user->getLastName());
+
+        $email = Security::HtmlEntitiesEncode($user->getEmail());
+
+        $stlFileName = $printJob->getStlFileName();
+
+        $subject = "Your 3D Print is ready for pickup";
+
+
+        $message = "
+        Dear $userName,
+
+        We have completed your print: $stlFileName. You may come pick it up during our store hours.
         
         ";
 

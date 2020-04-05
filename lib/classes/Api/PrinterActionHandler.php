@@ -459,7 +459,9 @@ class PrinterActionHandler extends ActionHandler {
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
 
-        $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
+        $printJobID = $body['printJobID'];
+
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
         if (empty($printJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
         }
@@ -476,18 +478,52 @@ class PrinterActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
         }
 
+        $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
         $user = $this->userDao->getUserByID($body['userID']);
-        $this->mailer->sendPrintConfirmationEmail($user, $printJob);
+        $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
 
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully updated print job')
         );
 
-        // To finish
-
     }
  
+    function handleCompletePrintJob() {
+        $body = $this->requestBody;
+
+		$this->requireParam('printJobID');
+		$this->requireParam('userID');
+
+        $printJobID = $body['printJobID'];
+
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+
+        $printJob = $printJob[0];
+
+        $printJob->setCompletePrintDate((new \DateTime())->format('Y-m-d H:i:s'));
+
+        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
+
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $user = $this->userDao->getUserByID($body['userID']);
+
+        // Change email method here
+        $this->mailer->sendPrintCompleteEmail($user, $printJob);
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated print job')
+        );
+
+    }
 
     /**
      * Handles the HTTP request on the API resource. 
@@ -539,6 +575,9 @@ class PrinterActionHandler extends ActionHandler {
 
             case 'sendCustomerConfirm':
                 $this->handleSendCustomerConfirm();
+
+            case 'completePrintJob':
+                $this->handleCompletePrintJob();
             
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));

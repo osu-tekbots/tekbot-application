@@ -74,20 +74,22 @@ $printJobs = $printerDao->getPrintJobs();
                     $dbFileName = $p->getDbFileName();
                     $stlFileName = $p->getStlFileName();
                     $dateCreated = $p->getDateCreated();
-                    $validPrintData = $p->getValidPrintCheck();
+                    $validPrintDate = $p->getValidPrintCheck();
                     $userConfirm = $p->getUserConfirmCheck();
-                    $completePrintData = $p->getCompletePrintDate();
+                    $completePrintDate = $p->getCompletePrintDate();
                     $employeeNotes = $p->getEmployeeNotes();
                     $pendingResponse = $p->getPendingCustomerResponse();
                     $dateUpdated = $p->getDateUpdated();
                                         
-                    $printValidVal = $validPrintData ? $validPrintData : "<button id='sendConfirm$printJobID' class='btn btn-primary'>Send Confirmation</button>";
+                    $printValidVal = $validPrintDate ? $validPrintDate : "<button id='sendConfirm$printJobID' class='btn btn-primary'>Send Confirmation</button>";
 
-                    // If print is validified and pending customer response is 0, then the print has been confirmed by the customer
-                        // Insert completePrintData
-                    $customerConfirmVal = $validPrintData ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed (INSERT DATE HERE)") : "An employee has not validified print yet";
+                    $customerConfirmVal = $validPrintDate ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed ✔️ <br/> $userConfirm") : "An employee has not validated print yet";
 
-                    $completedVal = $completePrintData ? '<button class="btn btn-primary">Click when print is finished</button>' : "Customer has not confirmed print yet";
+                    $completedVal = $validPrintDate ?
+                        ($userConfirm ? 
+                        ( $completePrintDate ? "✔️ Completed" : "<button id='completePrint$printJobID' class='btn btn-primary'>Click when print is finished</button>") 
+                        : "❌ Customer has not confirmed print yet") 
+                        : "❌ Print has not been validated by employee";
                     
 
                     
@@ -103,7 +105,6 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$customerConfirmVal</td>
                     <td>$completedVal</td>
                     <td>$employeeNotes</td>
-                    <td>$pendingResponse</td>
                     <td>$dateUpdated</td>
 
 
@@ -125,11 +126,31 @@ $printJobs = $printerDao->getPrintJobs();
                         }
                         api.post('/printers.php', data).then(res => {
                             snackbar(res.message, 'success');
-                            // window.location.reload();
+                            setTimeout(function(){window.location.reload()}, 1000);
                         }).catch(err => {
                             snackbar(err.message, 'error');
                     });
                         $('#sendConfirm$printJobID').prop('disabled', true);
+                    }
+                });
+
+                $('#completePrint$printJobID').on('click', function() {
+                    if(confirm('Print $stlFileName has completed and send confirmation email to $name?')) {
+                        $('#completePrint$printJobID').prop('disabled', true);
+                        let printJobID = '$printJobID';
+                        let userID = '$userID';
+                        let data = {
+                            action: 'completePrintJob',
+                            printJobID: printJobID,
+                            userID: userID
+                        }
+                        api.post('/printers.php', data).then(res => {
+                            snackbar(res.message, 'success');
+                            setTimeout(function(){window.location.reload()}, 1000);
+                        }).catch(err => {
+                            snackbar(err.message, 'error');
+                    });
+                        $('#completePrint$printJobID').prop('disabled', true);
                     }
                 });
             </script>";
@@ -164,7 +185,6 @@ $printJobs = $printerDao->getPrintJobs();
                         <th>Customer Confirmation</th>
                         <th>Print Completed</th>
                         <th>Employee Notes</th>
-                        <th>Pending Customer Response</th>
                         <th>Date Updated</th>
                     </tr>
                 </thead>
@@ -173,7 +193,7 @@ $printJobs = $printerDao->getPrintJobs();
                 </tbody>
                 </table>
                 <script>
-                    $('#checkoutFees').DataTable({'scrollX':true});
+                    $('#checkoutFees').DataTable({'scrollX':true, 'order':[[4, 'desc']]});
                 </script>
                 $buttonScripts
                 "
@@ -185,24 +205,6 @@ $printJobs = $printerDao->getPrintJobs();
 
         </div>
     </div>
-
-<!-- <script>
-    $('#sendConfirm$printJobID').on('click', function() {
-        if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
-            let printJobID = '$printJobID';
-            let data = {
-                action: 'sendCustomerConfirm',
-                printJobID: printJobID
-            }
-            api.post('/printers.php', data).then(res => {
-                snackbar(res.message, 'success');
-                window.location.reload();
-		    }).catch(err => {
-			    snackbar(err.message, 'error');
-		});
-        }
-    });
-</script> -->
 
 <?php 
 include_once PUBLIC_FILES . '/modules/footer.php' ; 
