@@ -75,28 +75,35 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			data: form_data, 
 			success: function(result)
 			{
+				console.log("success: " + JSON.stringify(result));
 				if(result["successful"] == 1)
 				{
 					var setPath = document.getElementById("uploadpath");
 					setPath.value = result["path"];
-					var good= '<B><font color="green">✓asdfas</font></B>' + '<a href="'+result["path"]+'">' + result["string"] + '</a>';
+					// var good= '<B><font color="green">✓asdfas</font></B>' + '<a href="'+result["path"]+'">' + result["string"] + '</a>';
+					var html= '✔️ File is valid: '+result["string"];
+					console.log(html);
 					isValidFile = true;
 					dbFileName = result["path"];
-					$('#fileFeedback').text(good);
+					$('#fileFeedback').text(html);
 				}
 				else if(result["successful"] == 0)
+				{
+					console.log("fail: " + JSON.stringify(result));
 					isValidFile = false;
 					var html= '❌'+result["string"];
 					// $('#txt'+id).html(html).css('visibility','visible');
+					console.log(html);
 					$('#fileFeedback').text(html);
+				}
 
 			},
 			error: function(result)
 			{
+				console.log("fail: " + JSON.stringify(result));
 				isValidFile = false;
 				var html= '<font color="red">❌ </font> Failed: '+result["string"];
-				$('#txt'+id).html(html).css('visibility','visible');
-				// Show html
+				// $('#txt'+id).html(html).css('visibility','visible');
 			}
 		});
 	}
@@ -232,6 +239,9 @@ window.onload = function(){
 
 $('#submit3DPrintBtn').on('click', function () {
 	let selectedPayment = $("input[type=radio][name=accounttype]:checked").val();
+	if(!isValidFile) alert("Please enter a valid STL file of a size less than 10 MB");
+
+	if(selectedPayment == null) alert("Please select a payment method");
 
 	if(isValidFile && (selectedPayment != null)) {
 		let data = {
@@ -255,14 +265,8 @@ $('#submit3DPrintBtn').on('click', function () {
 			setTimeout(function(){window.location.replace('pages/submit3DPrint.php')}, 2000);
 		}).catch(err => {
 			snackbar(err.message, 'error');
-		});
-	} else {
-		alert("Either File is not valid or Payment not selected");
-	}
-
-
-	
-});
+		});	
+}});
 
 
 </script>
