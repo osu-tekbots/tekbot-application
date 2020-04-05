@@ -2,23 +2,18 @@
 
 include_once '../bootstrap.php';
 
-include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/employee.php';
-
-
 use Util\Security;
-//Add the Daos and Models you need here
 use DataAccess\EquipmentDao;
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
-
 use Model\User;
 
+if (!session_id()) {
+    session_start();
+}
 
-$title = '3D Print Submission';
-$printerDao = new PrinterDao($dbConn, $logger);
-$usersDao = new UsersDao($dbConn, $logger);
-$validFile = false;
+
+include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 $isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
 if ($isLoggedIn){
@@ -27,11 +22,7 @@ if ($isLoggedIn){
 } else {
    $isEmployee = FALSE;
 }
-
-$printers = $printerDao->getPrinters();
-$printTypes = $printerDao->getPrintTypes();
-$user = $usersDao->getUserByID($_SESSION['userID']);
-
+allowIf($isLoggedIn, $configManager->getBaseUrl() . 'pages/login.php');
 
 $css = array(
 	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css',
@@ -45,11 +36,22 @@ $js = array(
 	'assets/Madeleine.js/src/Madeleine.js',
 );
 
+include_once PUBLIC_FILES . '/modules/header.php';
+include_once PUBLIC_FILES . '/modules/employee.php';
+
+$title = '3D Print Submission';
+$printerDao = new PrinterDao($dbConn, $logger);
+$usersDao = new UsersDao($dbConn, $logger);
+$validFile = false;
+
+
+$printers = $printerDao->getPrinters();
+$printTypes = $printerDao->getPrintTypes();
+$user = $usersDao->getUserByID($_SESSION['userID']);
 
 
 $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
 	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
 ?>
  
 	
@@ -59,8 +61,10 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 	var dbFileName = "";
 
 	function Upload(action,id) {
+		
 		var html= '<B>LOADING</B>';
-		$('#uploadTextDiv').html(html).css('visibility','visible');
+		// $('#uploadTextDiv').html(html).css('visibility','visible');
+		$('#fileFeedback').text(html);
 		var file_data = $('#uploadFileInput').prop('files')[0]
 		var form_data = new FormData();
 		form_data.append('file', file_data);
@@ -75,42 +79,33 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			data: form_data, 
 			success: function(result)
 			{
-				console.log("success: " + JSON.stringify(result));
 				if(result["successful"] == 1)
 				{
 					var setPath = document.getElementById("uploadpath");
 					setPath.value = result["path"];
-					// var good= '<B><font color="green">✓asdfas</font></B>' + '<a href="'+result["path"]+'">' + result["string"] + '</a>';
 					var html= '✔️ File is valid: '+result["string"];
-					console.log(html);
 					isValidFile = true;
 					dbFileName = result["path"];
 					$('#fileFeedback').text(html);
 				}
 				else if(result["successful"] == 0)
 				{
-					console.log("fail: " + JSON.stringify(result));
 					isValidFile = false;
 					var html= '❌'+result["string"];
-					// $('#txt'+id).html(html).css('visibility','visible');
-					console.log(html);
 					$('#fileFeedback').text(html);
 				}
 
 			},
 			error: function(result)
 			{
-				console.log("fail: " + JSON.stringify(result));
 				isValidFile = false;
 				var html= '<font color="red">❌ </font> Failed: '+result["string"];
-				// $('#txt'+id).html(html).css('visibility','visible');
+				$('#fileFeedback').text(html);
 			}
 		});
 	}
 
 </script>
-
-
 
 
 <div class="container-fluid">
@@ -149,27 +144,16 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<p class="text-danger">NOTE We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p>
 		
 
-	
-
-
-
 	<div class="row">  
 		<div class="col-sm-6">
 			Email:<br/>
-			<input name="emailInput" class="form-control" type="email" value="<?php echo $user->getEmail();?>" id="emailInput"/>
+			<input disabled name="emailInput" class="form-control" type="email" value="<?php echo $user->getEmail();?>" id="emailInput"/>
 			First Name: <br/>
-			<input name="firstNameInput" class="form-control" value="<?php echo $user->getFirstName();?>" placeholder="Enter your first name here..." id="firstNameInput"/>
+			<input disabled name="firstNameInput" class="form-control" value="<?php echo $user->getFirstName();?>" placeholder="Enter your first name here..." id="firstNameInput"/>
 			Last Name: <br/>
-			<input name="lastNameInput" class="form-control" value="<?php echo $user->getLastName();?>" placeholder="Enter your last name here..." id="lastNameInput"/>
+			<input disabled name="lastNameInput" class="form-control" value="<?php echo $user->getLastName();?>" placeholder="Enter your last name here..." id="lastNameInput"/>
 			<br/>
-			<input name="userIDInput" id="userIDInput" value="<?php echo $user->getUserID(); ?>" hidden />
-			<!-- <select name="materialSelect" name="materialSelect" id="materialSelect">	
-				<option value="Stencil">Stencil ($2.00)</option>
-				<option value="Clear_Acrylic_3mm">Clear Acrylic - 3mm (1/8") ($5.00)</option>
-				<option value="Clear_Acrylic_5mm">Clear Acrylic - 5mm (1/4") ($8.00)</option>
-				<option value="Plywood_5mm">Plywood - 5mm (7/32") ($5.00)</option>
-				<option value="Plywood_3mm">Plywood - 3mm (1/8") ($5.00)</option>
-			</select> -->
+			<input disabled name="userIDInput" id="userIDInput" value="<?php echo $user->getUserID(); ?>" hidden />
 			Which Printer would you like to print on?: <br/>
 			<select name="printerSelect" id="printerSelect">
 				<?php
