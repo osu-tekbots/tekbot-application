@@ -22,6 +22,7 @@ class PrinterMailer extends Mailer {
 
         $email = Security::HtmlEntitiesEncode($user->getEmail());
 
+        $stlFileName = $printJob->getStlFileName();
 
         $subject = "Confirm your 3D Print Submission";
 
@@ -29,10 +30,21 @@ class PrinterMailer extends Mailer {
         $message = "
         Dear $userName,
 
-        We have received your print and have verified that we will be able to print. (MORE DETAILS WILL BE INSERTED).
+        We have received 3D print submission file ($stlFileName) and our staff will be able to print after your payment and confirmation.
+        
+        If you submitted this print under a course, then you just need to click the verification link below. Otherwise, please visit ___,
+        submit a payment, and then click the verification link below.
+
+        (MORE DETAILS WILL BE INSERTED LATER).
 
         Confirmation link: $link
         
+        Sincerely,
+
+        TekBots 
+        Oregon State University
+        KEC 1110 (Hours: 10AM - 1PM)
+
         ";
 
         return $this->sendEmail($email, $subject, $message);
@@ -55,6 +67,11 @@ class PrinterMailer extends Mailer {
 
         We have completed your print: $stlFileName. You may come pick it up during our store hours.
         
+        Sincerely,
+
+        TekBots 
+        Oregon State University
+        KEC 1110 (Hours: 10AM - 1PM)
         ";
 
         return $this->sendEmail($email, $subject, $message);
