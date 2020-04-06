@@ -10,7 +10,6 @@ The Tekbots Web Application enables students to login with their existing Oregon
 **Contributors**
 - Symon Ramos (ramossy@oregonstate.edu)
 - Thien Nam (namt@oregonstate.edu)
-- Braden Hitchcock (hitchcob@oregonstate.edu)
 - Mark Huynh (huynhma@oregonstate.edu)
 
 ## Development
