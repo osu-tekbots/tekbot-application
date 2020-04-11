@@ -77,19 +77,30 @@ $printJobs = $printerDao->getPrintJobs();
                     $validPrintDate = $p->getValidPrintCheck();
                     $userConfirm = $p->getUserConfirmCheck();
                     $completePrintDate = $p->getCompletePrintDate();
+
+                    // need to refactor to customer notes
                     $employeeNotes = $p->getEmployeeNotes();
+
                     $pendingResponse = $p->getPendingCustomerResponse();
-                    $dateUpdated = $p->getDateUpdated();
+                    // $dateUpdated = $p->getDateUpdated();
                                         
                     $printValidVal = $validPrintDate ? $validPrintDate : "<button id='sendConfirm$printJobID' class='btn btn-primary'>Send Confirmation</button>";
 
-                    $customerConfirmVal = $validPrintDate ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed ✔️ <br/> $userConfirm") : "An employee has not validated print yet";
+                    // $customerConfirmVal = $validPrintDate ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed ✔️ <br/> $userConfirm") : "An employee has not validated print yet";
+                    $customerConfirmVal = $validPrintDate ? ($pendingResponse ? "Waiting for confirmation" : "Confirmed ✔️ <br/> $userConfirm") : "";
+
+                    // $completedVal = $validPrintDate ?
+                    //     ($userConfirm ? 
+                    //     ( $completePrintDate ? "✔️ Completed" : "<button id='completePrint$printJobID' class='btn btn-primary'>Click when print is finished</button>") 
+                    //     : "❌ Customer has not confirmed print yet") 
+                    //     : "❌ Print has not been validated by employee";
+
 
                     $completedVal = $validPrintDate ?
                         ($userConfirm ? 
                         ( $completePrintDate ? "✔️ Completed" : "<button id='completePrint$printJobID' class='btn btn-primary'>Click when print is finished</button>") 
-                        : "❌ Customer has not confirmed print yet") 
-                        : "❌ Print has not been validated by employee";
+                        : "") 
+                        : "";
                     
 
                     
@@ -100,12 +111,11 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$printType</td>
                     <td>$printer</td>
                     <td><a href='./prints/$dbFileName'>$stlFileName</td>
+                    <td>$employeeNotes</td>
                     <td>$dateCreated</td>
                     <td>$printValidVal</td>
                     <td>$customerConfirmVal</td>
                     <td>$completedVal</td>
-                    <td>$employeeNotes</td>
-                    <td>$dateUpdated</td>
 
 
                     </tr>
@@ -180,12 +190,11 @@ $printJobs = $printerDao->getPrintJobs();
                         <th>Print Type</th>
                         <th>Printer</th>
                         <th>File</th>
+                        <th>Customer Notes</th>
                         <th>Date Created</th>
                         <th>Is Print Valid</th>
                         <th>Customer Confirmation</th>
                         <th>Print Completed</th>
-                        <th>Employee Notes</th>
-                        <th>Date Updated</th>
                     </tr>
                 </thead>
                 <tbody>
