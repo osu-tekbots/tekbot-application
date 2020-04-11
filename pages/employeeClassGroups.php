@@ -118,34 +118,31 @@ tr.even td:first-child {
                     echo "
 					<div class='admin-paper'>    
 					
-                    <form id='formNewUser'>
-                        <input type='hidden' name='action' value='createProfile' />
-                        <div class='form-row user-form'>
-                            <div class='col-3'>
-                                <input required type='text' class='form-control' max='' name='groupName' placeholder='Group Name'/>
-							</div>
-							<div class='col-3'>
-								<input required type='number' class='form-control' max='' name='academicYear' placeholder='Academic Year (e.g. 2021)'/>
-							</div>
-                            <div class='col-2'>
-                                <input required type='date' class='form-control' max='' name='dateStart' placeholder='Date Group Starts'/>
-                            </div>
-                            <div class='col-2'>
-                                <input required type='date' class='form-control' max='' name='dateExpired' placeholder='Date Group Ends'/>
-                            </div>
-                            <div class='col-2'>
-                                <button type='submit' class='btn btn-primary '>
-                                    <i class='fas fa-plus'></i>&nbsp;&nbsp;New Group
-                                </button>
-                            </div>
-                        </div>
+                    <form id='formNewUser' class='form-row user-form'>
+						<div class='col-3'>
+							<input required type='text' class='form-control' max='' id='groupName' placeholder='Group Name'/>
+						</div>
+						<div class='col-3'>
+							<input required type='number' class='form-control' max='' id='academicYear' placeholder='Academic Year (e.g. 2021)'/>
+						</div>
+						<div class='col-2'>
+							<input required type='date' class='form-control' max='' id='dateStart' placeholder='Date Group Starts'/>
+						</div>
+						<div class='col-2'>
+							<input required type='date' class='form-control' max='' id='dateExpired' placeholder='Date Group Ends'/>
+						</div>
+						<div class='col-2'>
+							<button id='submitNewGroup' class='btn btn-primary '>
+								<i class='fas fa-plus'></i>&nbsp;&nbsp;New Group
+							</button>
+						</div>
                     </form>
                     </div>
 						
                         <div class='admin-paper'>
 						<h3>Groups For $courseName</h3>
 						<table class='table display nowrap' id='courseGroups' style='width:100%'>
-						<caption>Course Groups</caption>
+						<caption>Course Groups</caption> 
 						<thead>
 							<tr>
 								
@@ -164,19 +161,66 @@ tr.even td:first-child {
 				
 					</div>
 						
-						
-						
-						
-						
-
 						";
-					
+
+
+
 
 				
 
-	
+
+						echo "
+						<div class='admin-paper'>    
+						
+						<form id='formNewUser' class='form-row user-form'>
+							<div class='col-3'>
+								<input required type='text' class='form-control' max='' id='groupName' placeholder='Group Name'/>
+							</div>
+							<div class='col-3'>
+								<input required type='number' class='form-control' max='' id='academicYear' placeholder='Academic Year (e.g. 2021)'/>
+							</div>
+							<div class='col-2'>
+								<input required type='date' class='form-control' max='' id='dateStart' placeholder='Date Group Starts'/>
+							</div>
+							<div class='col-2'>
+								<input required type='date' class='form-control' max='' id='dateExpired' placeholder='Date Group Ends'/>
+							</div>
+							<div class='col-2'>
+								<button id='submitNewGroup' class='btn btn-primary '>
+									<i class='fas fa-plus'></i>&nbsp;&nbsp;New Group
+								</button>
+							</div>
+						</form>
+						</div>
+							
+							<div class='admin-paper'>
+							<h3>Groups For $courseName</h3>
+							<table class='table display nowrap' id='courseGroups' style='width:100%'>
+							<caption>Course Groups</caption> 
+							<thead>
+								<tr>
+									
+									<th>Term Code</th>
+									<th>Group Name</th>
+									<th>ONID</th>
+									<th>User ID</th>
+									<th>Date Expired</th>
+									<th>Date Created</th>
+								</tr>
+							</thead>
+							<tbody>
+								$studentsHTML
+							</tbody>
+							</table>
+					
+						</div>
+							
+							";
 	
 				?>
+
+
+
 
 
 			</div>
@@ -204,37 +248,43 @@ $(document).ready(function() {
 /**
  * Handles the form submission for creating a new user by making a request to the API server to create a new profile.
  */
-function onNewCourseSubmit() {
+function onNewGroupSubmit() {
 	let groupName = $("#groupName").val();
 	let allowanceID = <?php echo $cID ?>; 
     let academicYear = $("#academicYear").val();
 	let dateExpired = $("#dateExpired").val();
 	let dateCreated = $("#dateStart").val();
 	
-	if (courseName === '') {
-		snackbar('Course name cannot be empty!', 'error');
+	if (groupName === '') {
+		snackbar('Group name cannot be empty!', 'error');
 		return false;
 	} 
-	if (numberallowedprints === '') {
-		snackbar('Number of allowed prints cannot be empty!', 'error');
+	if (academicYear === '') {
+		snackbar('Academic Year cannot be empty!', 'error');
 		return false;
 	} 
-	if (numberallowedcuts === ''){
-		snackbar('Number of allowed cuts cannot be empty!', 'error');
+	if (dateCreated === ''){
+		snackbar('Date created cannot be empty!', 'error');
+		return false;
+	}
+	if (dateExpired === ''){
+		snackbar('Date for group to expire cannot be empty!', 'error');
 		return false;
 	}
 
     let data = {
-        action: 'addCourse',
-        courseName: courseName,
-        numberallowedprints: numberallowedprints,
-        numberallowedcuts: numberallowedcuts
+        action: 'addGroup',
+		groupName: groupName,
+		allowanceID: allowanceID,
+		academicYear: academicYear,
+		dateExpired: dateExpired,
+		dateCreated: dateCreated
     }
 	
     api.post('/printcutgroups.php', data)
         .then(res => {
             snackbar(res.message, 'success');
-            document.getElementById("addCourseForm").reset();
+            document.getElementById("formNewUser").reset();
         })
         .catch(err => {
             snackbar(err.message, 'error');
@@ -244,8 +294,9 @@ function onNewCourseSubmit() {
     return false;
 }
 
-$( "#submitNewCourse" ).click(function() {
-    onNewCourseSubmit();
+$("#submitNewGroup").click(function(e) {
+	e.preventDefault();
+    onNewGroupSubmit();
 });
 
 

@@ -80,7 +80,7 @@ foreach ($courses as $course){
                     
                     echo "
                     <div class='admin-paper'>    
-                        <div id='addCourseForm' class='form-row user-form'>
+                        <form id='addCourseForm' class='form-row user-form'>
                             <div class='col-4'>
                                 <input required type='text' class='form-control' max='' id='courseName' placeholder='Course Name'/>
                             </div>
@@ -95,7 +95,7 @@ foreach ($courses as $course){
                                     <i class='fas fa-plus'></i>&nbsp;&nbsp;New Course
                                 </button>
                             </div>
-                        </div>
+                        </form>
                    
                     </div>
 						

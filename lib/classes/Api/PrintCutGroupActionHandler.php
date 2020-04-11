@@ -2,6 +2,7 @@
 // Updated 11/5/2019
 namespace Api;
 use Model\VoucherCode;
+use Model\CourseGroup;
 use Model\CoursePrintAllowance;
 
 /**
@@ -157,20 +158,29 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         $body = $this->requestBody;
 
+        $courseGroup = new CourseGroup();
+        $courseGroup->setGroupName($body['groupName']);
+        $courseGroup->setAllowanceID($body['allowanceID']);
+        $courseGroup->setAcademicYear($body['academicYear']);
+        $courseGroup->setDateExpiration($body['dateExpired']);
+        $courseGroup->setDateCreated($body['dateCreated']);
+
+        $ok = $this->dao->addNewCourseGroup($courseGroup);
+
         // TODO: If it isn't found, send a NOT_FOUND back to the client
-        $course = new CoursePrintAllowance();
-        $course->setCourseName($body['courseName']);
-        $course->setNumberAllowedPrints($body['numberallowedprints']);
-        $course->setNumberAllowedCuts($body['numberallowedcuts']);
+        // $course = new CoursePrintAllowance();
+        // $course->setCourseName($body['courseName']);
+        // $course->setNumberAllowedPrints($body['numberallowedprints']);
+        // $course->setNumberAllowedCuts($body['numberallowedcuts']);
 
 
-        $ok = $this->dao->addNewCoursePrintAllowance($course);
+        // $ok = $this->dao->addNewCoursePrintAllowance($course);
 
         if(!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add new course'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add new course group'));
         }
 
-        $this->respond(new Response(Response::OK, 'Successfully added course'));
+        $this->respond(new Response(Response::OK, 'Successfully added course group'));
 
     }
 
@@ -204,6 +214,9 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
             case 'addCourse':
                 $this->handleAddCourse();
+            
+            case 'addGroup':
+                $this->handleAddCourseGroup();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on cut print group resource'));

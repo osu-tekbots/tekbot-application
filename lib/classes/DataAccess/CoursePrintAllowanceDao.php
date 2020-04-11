@@ -316,7 +316,7 @@ class CoursePrintAllowanceDao {
             $sql = '
             INSERT INTO course_group 
             (
-                course_group_id, group_name, allowance_id, date_expiration, date_created
+                course_group_id, group_name, allowance_id, academic_year, date_expiration, date_created
             ) VALUES (
                 :id,
                 :name,
