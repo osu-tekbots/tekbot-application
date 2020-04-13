@@ -58,12 +58,6 @@ CREATE TABLE IF NOT EXISTS course_student (
     FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
-CREATE TABLE IF NOT EXISTS voucher_code (
-    voucher_id CHAR(8) NOT NULL,
-    date_used DATETIME,
-
-    PRIMARY KEY (voucher_id)
-);
 
 CREATE TABLE IF NOT EXISTS message_group (
     message_group_id CHAR(16) NOT NULL,
