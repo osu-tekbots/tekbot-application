@@ -93,6 +93,22 @@ foreach ($vouchers as $voucher){
 					echo "
 								</select>
 								&nbsp;&nbsp;
+								<br/>
+								<h4 style='display: inline-block'>When should they expire?</h4>&nbsp;&nbsp;
+								<div class='col-2' style='display: inline-block'>
+									<input required type='date' class='form-control' max='' id='dateExpired' placeholder='Date Vouchers Ends'/>
+								</div>&nbsp;&nbsp;<br/>
+								<h4 style='display: inline-block'>For what service?</h4>&nbsp;&nbsp;
+								<select id='services'>
+								";
+								for ($i = 1; $i < 26; $i++){
+									echo "
+										<option value='$i'>$i</option>
+									";
+											}
+								echo "
+								</select><br/>
+
 								<button id='confirmCreate' class='btn btn-primary'>Confirm</button>
 								&nbsp;&nbsp;
 								<button id='cancelCreate' class='btn btn-danger'>Cancel</button>
@@ -165,24 +181,31 @@ $("#cancelCreate").click(function() {
 
 function addNewVouchers() {
 	num = $("#voucherAmount").val();
+	dateExpired = $("#dateExpired").val();
+	
+	if(dateExpired == "" || dateExpired == null){
+		alert("Must choose an expiration date for voucher codes");
+		return;
+	}
 
-	let body = {
-        action: 'addVoucherCodes',
-        num: num
-    };
+	// let body = {
+    //     action: 'addVoucherCodes',
+    //     num: num,
 
-	api.post('/printcutgroups.php', body)
-	.then(res => {
-		$("#generatedVoucherCodesText").html(res.message);
-		$('#generatedVoucherCodesText').attr('rows', num);
-		$("#generatedVoucherCodes").css("display", "block");
-		snackbar('Successfully generated vouchers', 'success');
-		$("#generateAdditionalVouchers").css("display", "block");
-		$("#confirmAdditionalVouchers").css("display", "none");
+    // };
+
+	// api.post('/printcutgroups.php', body)
+	// .then(res => {
+	// 	$("#generatedVoucherCodesText").html(res.message);
+	// 	$('#generatedVoucherCodesText').attr('rows', num);
+	// 	$("#generatedVoucherCodes").css("display", "block");
+	// 	snackbar('Successfully generated vouchers', 'success');
+	// 	$("#generateAdditionalVouchers").css("display", "block");
+	// 	$("#confirmAdditionalVouchers").css("display", "none");
 		
-    }).catch(err => {
-        snackbar(err.message, 'error');
-	});
+    // }).catch(err => {
+    //     snackbar(err.message, 'error');
+	// });
 	
 }
 
