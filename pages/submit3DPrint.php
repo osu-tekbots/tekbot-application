@@ -179,15 +179,20 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<b>Payment Method:</b>
 			<br/>
 			<div class="form-check">
-                <input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
-				<label class="form-check-label" for="paymentradio1">
-				Credit Card? 
-				</label>
+				<input class="form-check-input" type="radio" name="accounttype" value="account">
+				Voucher Code:
+				<input class=fi type=text size=30 name=account value="">
 			</div>
 			<div class="form-check">
 				<input class="form-check-input" type="radio" name="accounttype" value="account">
 				OSU Account Code:
 				<input class=fi type=text size=30 name=account value="">
+			</div>
+			<div class="form-check">
+                <input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
+				<label class="form-check-label" for="paymentradio1">
+				Credit Card? 
+				</label>
 			</div>
                 <BR>*Note:<b> We can not directly bill your student account.</b> Students must use the credit card option. Do not enter your credit card info here.*
                 <br/>
