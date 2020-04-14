@@ -8,7 +8,9 @@ class VoucherCode {
     private $voucherID;
     private $dateUsed;
     private $userID;
-    private $dateCreated;
+	private $dateCreated;
+	private $dateExpired;
+	private $serviceID;
     
     
     public function __construct($id = null) {
@@ -57,6 +59,21 @@ class VoucherCode {
 		$this->dateCreated = $dateCreated;
 	}
 
+	public function getDateExpired() {
+		return $this->dateExpired;
+	}
+
+	public function setDateExpired($dateExpired) {
+		$this->dateExpired = $dateExpired;
+	}	
+	
+	public function getServiceID() {
+		return $this->serviceID;
+	}
+
+	public function setServiceID($serviceID) {
+		$this->serviceID = $serviceID;
+	}	
 	
 
 }

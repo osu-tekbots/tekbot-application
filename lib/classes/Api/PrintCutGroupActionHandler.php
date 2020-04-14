@@ -89,13 +89,19 @@ class PrintCutGroupActionHandler extends ActionHandler {
     public function handleAddVoucherCodes() {
         // Ensure the required parameters exist
         $this->requireParam('num');
+        $this->requireParam('serviceID');
+        $this->requireParam('date_expired');
 
         $body = $this->requestBody;
         $num = $body['num'];
+        $dateExpired = new \DateTime($body['date_expired']);
+        $serviceID = $body['serviceID'];
 
         $VoucherList = "";
         for ($i = 0; $i < $num; $i++){
             $voucher = new VoucherCode();
+            $voucher->setDateExpired($dateExpired);
+            $voucher->setServiceID($serviceID);
             $voucher->setDateCreated(new \DateTime());
             $ok = $this->dao->addNewVoucherCode($voucher);
             if ($ok){
