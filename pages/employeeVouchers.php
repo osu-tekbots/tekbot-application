@@ -33,6 +33,7 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 $coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
 $vouchers = $coursePrintAllowanceDao->getAdminVoucherCodes();
+$services = $coursePrintAllowanceDao->getServices();
 $voucherCodeHTML = '';
 
 foreach ($vouchers as $voucher){
@@ -77,14 +78,18 @@ foreach ($vouchers as $voucher){
 			<div class="container-fluid">
 				<?php 
                     renderEmployeeBreadcrumb('Employee', 'Vouchers');
-                    
+
 					echo "
 						<div class='admin-paper'>
+						
 							<button id='generateAdditionalVouchers' class='btn btn-primary'>Generate additional voucher codes</button>
 							<div id='confirmAdditionalVouchers' style='display:none'>
 								<h4 style='display: inline-block'>How Many?</h4>&nbsp;&nbsp;
 								<select id='voucherAmount'>
 								";
+
+
+
 								for ($i = 1; $i < 26; $i++){
 									echo "
 										<option value='$i'>$i</option>
@@ -101,11 +106,13 @@ foreach ($vouchers as $voucher){
 								<h4 style='display: inline-block'>For what service?</h4>&nbsp;&nbsp;
 								<select id='services'>
 								";
-								for ($i = 1; $i < 26; $i++){
+								foreach ($services as $service){
+									$name = $service->getServiceName();
+									$id = $service->getServiceID();
 									echo "
-										<option value='$i'>$i</option>
+										<option value=$id>$name</option>
 									";
-											}
+								}
 								echo "
 								</select><br/>
 

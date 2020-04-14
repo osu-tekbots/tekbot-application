@@ -6,6 +6,7 @@ use Model\CoursePrintAllowance;
 use Model\CourseGroup;
 use Model\CourseStudent;
 use Model\VoucherCode;
+use Model\Service;
 
 
 
@@ -400,6 +401,27 @@ class CoursePrintAllowanceDao {
         }
     }
 
+
+    public function getServices() {
+        try {
+            $sql = 'SELECT * FROM tekbot_services';
+            $results = $this->conn->query($sql);
+
+            $services = array();
+
+            foreach ($results as $row) {
+                $service = self::ExtractServiceFromRow($row);
+                $services[] = $service;
+            }
+
+            return $services;
+
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch tekbot services: " . $e->getMessage());
+            return false;
+        }
+    }
+
     /* Extract using models */
 
     public static function ExtractCoursePrintAllowanceFromRow($row) {
@@ -451,6 +473,11 @@ class CoursePrintAllowanceDao {
         return $voucher;
     }
 
+    public static function ExtractServiceFromRow($row){
+        $service = new Service($row['service_id']);
+        $service->setServiceName($row['service_name']);
+        return $service;
+    }
 
 }
 
