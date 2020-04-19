@@ -2,6 +2,7 @@
 include_once '../bootstrap.php';
 
 use DataAccess\CoursePrintAllowanceDao;
+use DataAccess\UsersDao;
 use Util\Security;
 
 if (!session_id()) {
@@ -32,34 +33,58 @@ include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
 $coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
+$userDao = new UsersDao($dbConn, $logger);
 $vouchers = $coursePrintAllowanceDao->getAdminVoucherCodes();
 $services = $coursePrintAllowanceDao->getServices();
 $voucherCodeHTML = '';
+$printingCodesHTML = '';
+$laserCodesHTML = '';
 
 foreach ($vouchers as $voucher){
     $voucherID = $voucher->getVoucherID();
-    $date_used = $voucher->getDateUsed();
-    $user_id = $voucher->getUserID();
-    $date_created = $voucher->getDateCreated();
+	$date_used = $voucher->getDateUsed();
+	$user_id = $voucher->getUserID();
+	$date_created = $voucher->getDateCreated();
+	$date_expired= $voucher->getDateExpired();
+	$service_id = $voucher->getServiceID();
+
+	$onid = "";
+	$user = $userDao->getUserByID($user_id);
+	if($user) $onid = $user->getOnid();
 
 
-	$voucherCodeHTML .= "
-	<tr id='$voucherID'>
+	// TODO: Refactor if additional services other than Printing and Cutting are added
+	if($service_id == 1) {
+		// laser cutting
+		$laserCodesHTML .= "
+		<tr id='$voucherID'>
+		
+			<td>$voucherID</td>
+			<td>$date_created</td>
+			<td>$date_expired</td>
+			<td>$date_used</td>
+			<td>$onid</td>
 	
-		<td>$voucherID</td>
-		<td>$date_used</td>
-		<td>$user_id</td>
-		<td>$date_created</td>
-
-	</tr>
+		</tr>
+		
+		";
+	} else {
+		// 3dprinting
+		$printingCodesHTML .= "
+		<tr id='$voucherID'>
+		
+			<td>$voucherID</td>
+			<td>$date_created</td>
+			<td>$date_expired</td>
+			<td>$date_used</td>
+			<td>$onid</td>
 	
-	";
+		</tr>
+		
+		";
+	}
+
 }
-
-
-
-
-
 
 
 ?>
@@ -124,43 +149,64 @@ foreach ($vouchers as $voucher){
 							<div id='generatedVoucherCodes' style='display:none'><br><br><textarea id='generatedVoucherCodesText' readonly></textarea></div>
 						</div>
        
-                        <div class='admin-paper'>
-						<h3>Print/Cut Vouchers!</h3>
-						<table class='table' id='voucherTable'>
-						<caption>Vouchers that can be used for a free cut or print</caption>
-						<thead>
-							<tr>
-								<th>Voucher Code</th>
-								<th>Date Used</th>
-								<th>User ID</th>
-								<th>Date Created</th>
-							</tr>
-						</thead>
-						<tbody>
-							$voucherCodeHTML
-						</tbody>
-						</table>
-						<script>
-							$('#voucherTable').DataTable(
-								{
-									aaSorting: [[3, 'desc']]
-								}
-
-							);
-						</script>
-					</div>
-						
-						
-						
-						
-						
-
-						";
+					";
+					
 					
 
-				
+					echo "<div class='admin-paper'>
+					<h3>Print Vouchers!</h3>
+					<table class='table' id='printingVoucherTable'>
+					<caption>Vouchers that can be used for a free print</caption>
+					<thead>
+						<tr>
+							<th>Voucher Code</th>
+							<th>Date Created</th>
+							<th>Date Expire(d)</th>
+							<th>Date Used</th>
+							<th>User ONID</th>
+						</tr>
+					</thead>
+					<tbody>
+						$printingCodesHTML
+					</tbody>
+					</table>
+					<script>
+						$('#printingVoucherTable').DataTable(
+							{
+								aaSorting: [[3, 'desc']]
+							}
 
-	
+						);
+					</script>
+				</div>";
+
+				echo "<div class='admin-paper'>
+					<h3>Laser Cut Vouchers!</h3>
+					<table class='table' id='laserVoucherTable'>
+					<caption>Vouchers that can be used for a free laser cut</caption>
+					<thead>
+						<tr>
+							<th>Voucher Code</th>
+							<th>Date Created</th>
+							<th>Date Expire(d)</th>
+							<th>Date Used</th>
+							<th>User ONID</th>
+						</tr>
+					</thead>
+					<tbody>
+						$laserCodesHTML
+					</tbody>
+					</table>
+					<script>
+						$('#laserVoucherTable').DataTable(
+							{
+								aaSorting: [[3, 'desc']]
+							}
+
+						);
+					</script>
+				</div>";
+
 	
 				?>
 
@@ -187,32 +233,34 @@ $("#cancelCreate").click(function() {
 
 
 function addNewVouchers() {
-	num = $("#voucherAmount").val();
-	dateExpired = $("#dateExpired").val();
+	let num = $("#voucherAmount").val();
+	let dateExpired = $("#dateExpired").val();
+	let serviceID = $("#services").val();
 	
 	if(dateExpired == "" || dateExpired == null){
 		alert("Must choose an expiration date for voucher codes");
 		return;
 	}
 
-	// let body = {
-    //     action: 'addVoucherCodes',
-    //     num: num,
+	let body = {
+        action: 'addVoucherCodes',
+        num: num,
+		date_expired: dateExpired,
+		serviceID: serviceID
+    };
 
-    // };
-
-	// api.post('/printcutgroups.php', body)
-	// .then(res => {
-	// 	$("#generatedVoucherCodesText").html(res.message);
-	// 	$('#generatedVoucherCodesText').attr('rows', num);
-	// 	$("#generatedVoucherCodes").css("display", "block");
-	// 	snackbar('Successfully generated vouchers', 'success');
-	// 	$("#generateAdditionalVouchers").css("display", "block");
-	// 	$("#confirmAdditionalVouchers").css("display", "none");
+	api.post('/printcutgroups.php', body)
+	.then(res => {
+		// $("#generatedVoucherCodesText").html(res.message);
+		// $('#generatedVoucherCodesText').attr('rows', num);
+		// $("#generatedVoucherCodes").css("display", "block");
+		snackbar('Successfully generated vouchers', 'success');
+		// $("#generateAdditionalVouchers").css("display", "block");
+		// $("#confirmAdditionalVouchers").css("display", "none");
 		
-    // }).catch(err => {
-    //     snackbar(err.message, 'error');
-	// });
+    }).catch(err => {
+        snackbar(err.message, 'error');
+	});
 	
 }
 

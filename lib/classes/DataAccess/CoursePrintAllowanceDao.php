@@ -401,6 +401,84 @@ class CoursePrintAllowanceDao {
         }
     }
 
+    public function getVoucher($id) {
+        try {
+            $sql = '
+            SELECT * FROM voucher_code
+            WHERE voucher_id = :id';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+            $voucher = self::ExtractVoucherFromRow($results[0]);
+            return $voucher;
+
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch voucher with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    public function updateVoucher($voucher) {
+        try {
+            $sql = '
+            UPDATE voucher_code SET
+            date_used = :used,
+            user_id = :userID
+            WHERE voucher_id = :id
+            ';
+            $params = array(
+                ':id' => $voucher->getVoucherID(),
+                ':used' => $voucher->getDateUsed(),
+                ':userID' => $voucher->getUserID(),
+
+                // TODO: Add later when needed
+                // ':created' => $voucher->getDateCreated(),
+                // ':expired' => $voucher->getDateExpired(),
+                // ':serviceID' => $voucher->getServiceID()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $id = $voucher->getVoucherID();
+            $this->logger->error("Failed to update Voucher with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
+    // public function consumeVoucher($id) {
+    //     try {
+    //         $sql = '
+    //         UPDATE voucher_code  
+    //         (
+    //             voucher_id, date_used, user_id, date_created, date_expired, service_id
+    //         ) VALUES (
+    //             :vid,
+    //             :dt_used,
+    //             :uid,
+    //             :dt_created,
+    //             :dt_expired,
+    //             :service_id
+    //         )';
+    //         $params = array(
+    //             ':vid' => $voucher->getVoucherID(),
+    //             ':dt_used' => $voucher->getDateUsed(),
+    //             ':uid' => $voucher->getUserID(),
+    //             ':dt_created' => QueryUtils::FormatDate($voucher->getDateCreated()),
+    //             ':dt_expired' => QueryUtils::FormatDate($voucher->getDateExpired()),
+    //             ':service_id' => $voucher->getServiceID(),
+    //         );
+    //         $this->conn->execute($sql, $params);
+
+    //         return true;
+    //     } catch (\Exception $e) {
+    //         $this->logger->error('Failed to add new voucher: ' . $e->getMessage());
+    //         return false;
+    //     }
+    // }
+
 
     public function getServices() {
         try {
@@ -469,6 +547,9 @@ class CoursePrintAllowanceDao {
         $voucher->setDateUsed($row['date_used']);
         $voucher->setUserID($row['user_id']);
         $voucher->setDateCreated($row['date_created']);
+        $voucher->setDateExpired($row['date_expired']);
+        $voucher->setServiceID($row['service_id']);
+
        
         return $voucher;
     }

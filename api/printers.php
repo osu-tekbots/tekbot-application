@@ -9,6 +9,7 @@ use Api\Response;
 use DataAccess\PrinterDao;
 use DataAccess\PrinterFeeDao;
 use DataAccess\UsersDao;
+use DataAccess\CoursePrintAllowanceDao;
 use Api\PrinterActionHandler;
 use Email\PrinterMailer;
 
@@ -17,9 +18,10 @@ session_start();
 // Setup our data access and handler classes
 $printerDao = new PrinterDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
+$coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $mailer = new PrinterMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
-$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $userDao, $mailer, $configManager, $logger);
+$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $configManager, $logger);
 
 
 // Authorize the request

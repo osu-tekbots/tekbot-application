@@ -179,9 +179,9 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<b>Payment Method:</b>
 			<br/>
 			<div class="form-check">
-				<input class="form-check-input" type="radio" name="accounttype" value="account">
+				<input class="form-check-input" type="radio" name="accounttype" value="voucher">
 				Voucher Code:
-				<input class=fi type=text size=30 name=account value="">
+				<input class=fi id="voucherInput" type=text size=30 name=account value="">
 			</div>
 			<div class="form-check">
 				<input class="form-check-input" type="radio" name="accounttype" value="account">
@@ -238,6 +238,14 @@ $('#submit3DPrintBtn').on('click', function () {
 	if(selectedPayment == null) alert("Please select a payment method");
 
 	if(isValidFile && (selectedPayment != null)) {
+
+		let voucherVal = null;
+
+		if(selectedPayment == 'voucher') {
+			// alert($("#voucherInput").val());
+			voucherVal = $("#voucherInput").val();
+		}
+
 		let data = {
 			action: 'createprintjob',
 			userId: $('#userIDInput').val(),
@@ -249,7 +257,7 @@ $('#submit3DPrintBtn').on('click', function () {
 			// course group?
 			courseGroup: 0,
 			// voucher code (is a foreign key?) ask jack
-			voucherCode: null,
+			voucherCode: voucherVal,
 			employeeNotes: $('#specialNotes').val()
 		}; 
 		// Send our request to the API endpoint

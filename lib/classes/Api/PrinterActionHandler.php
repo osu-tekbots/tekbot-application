@@ -14,6 +14,7 @@ use DataAccess\QueryUtils;
  */
 class PrinterActionHandler extends ActionHandler {
 
+    private $coursePrintAllowanceDao;
 
     private $printFeeDao;
     /** @var \DataAccess\printerDao */
@@ -34,12 +35,13 @@ class PrinterActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($printerDao, $printFeeDao, $userDao, $mailer, $config, $logger) {
+    public function __construct($printerDao, $printFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $config, $logger) {
         parent::__construct($logger);
         $this->printerDao = $printerDao;
         $this->mailer = $mailer;
         $this->config = $config;
         $this->userDao = $userDao;
+        $this->coursePrintAllowanceDao = $coursePrintAllowanceDao;
         $this->printFeeDao = $printFeeDao;
     }
 
@@ -281,6 +283,23 @@ class PrinterActionHandler extends ActionHandler {
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
         
+        if($body['voucherCode']) {
+            $voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
+            if($voucher) {
+                // TODO: check if expired and invalidate if it is expired
+                // $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+                $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+                $userID = $body['userId'];
+                $voucher->setUserID($userID);
+                $voucher->setDateUsed($dateUsed);
+                $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+                if(!$ok) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+                }
+            } else {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher does not exist'));
+            }
+        }
         
         //FIXME: Fill out once you do client side
         // Front end values that are not foreign keys
