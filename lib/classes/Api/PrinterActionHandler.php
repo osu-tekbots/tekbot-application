@@ -285,10 +285,22 @@ class PrinterActionHandler extends ActionHandler {
         
         if($body['voucherCode']) {
             $voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
-            if($voucher) {
-                // TODO: check if expired and invalidate if it is expired
-                // $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+            // TODO: Fix if there are more services added
+            if($voucher && $voucher->getServiceID() == 2) {
+                
+                // Ensures that voucher code has not been used
+                $isUsed = $voucher->getDateUsed();
+                if($isUsed) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has already been used'));
+                }
+
+                // Ensures that voucher code has not expired
                 $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+                $dateExpired = (new \DateTime($voucher->getDateExpired()))->format('Y-m-d H:i:s');
+                if($dateUsed > $dateExpired) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
+                }
+                
                 $userID = $body['userId'];
                 $voucher->setUserID($userID);
                 $voucher->setDateUsed($dateUsed);
@@ -297,7 +309,7 @@ class PrinterActionHandler extends ActionHandler {
                     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
                 }
             } else {
-                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher does not exist'));
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
             }
         }
         
