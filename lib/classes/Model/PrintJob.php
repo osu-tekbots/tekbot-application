@@ -23,6 +23,7 @@ class PrintJob {
 	private $userConfirmCheck;
 	private $completePrintDate;
 	private $employeeNotes;
+	private $customerNotes;
 	private $messageGroupID;
 	private $pendingCustomerResponse;
 	private $dateUpdated;
@@ -162,6 +163,14 @@ class PrintJob {
 
 	public function setEmployeeNotes($EmployeeNotes){
 		$this->employeeNotes = $EmployeeNotes;
+	}
+
+	public function getCustomerNotes(){
+		return $this->customerNotes;
+	}
+
+	public function setCustomerNotes($customerNotes){
+		$this->customerNotes = $customerNotes;
 	}
 	
 	public function getMessageGroupId(){

@@ -534,10 +534,12 @@ class PrinterActionHandler extends ActionHandler {
         }
 
         $printJob = $printJob[0];
+        
+        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
+
 
         $printJob->setCompletePrintDate((new \DateTime())->format('Y-m-d H:i:s'));
 
-        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
 
         $ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
@@ -552,6 +554,35 @@ class PrinterActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully updated print job')
+        );
+
+    }
+
+    public function handleUpdateEmployeeNotes() {
+        $body = $this->requestBody;
+
+		$this->requireParam('printJobID');
+        $this->requireParam('employeeNotes');
+
+        $printJobID = $body['printJobID'];
+
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+
+        $printJob = $printJob[0];
+        
+        $printJob->setEmployeeNotes($body['employeeNotes']);
+
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated employee notes')
         );
 
     }
@@ -610,6 +641,9 @@ class PrinterActionHandler extends ActionHandler {
             case 'completePrintJob':
                 $this->handleCompletePrintJob();
             
+            case 'updateEmployeeNotes':
+                $this->handleUpdateEmployeeNotes();
+
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }

@@ -78,7 +78,8 @@ $printJobs = $printerDao->getPrintJobs();
                     $userConfirm = $p->getUserConfirmCheck();
                     $completePrintDate = $p->getCompletePrintDate();
 
-                    // need to refactor to customer notes
+                    $customerNotes = $p->getCustomerNotes();
+
                     $employeeNotes = $p->getEmployeeNotes();
 
                     $pendingResponse = $p->getPendingCustomerResponse();
@@ -111,7 +112,8 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$printType</td>
                     <td>$printer</td>
                     <td><a href='./prints/$dbFileName'>$stlFileName</td>
-                    <td>$employeeNotes</td>
+                    <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
+                    <td>$customerNotes</td>
                     <td>$dateCreated</td>
                     <td>$printValidVal</td>
                     <td>$customerConfirmVal</td>
@@ -124,6 +126,26 @@ $printJobs = $printerDao->getPrintJobs();
 
                     $buttonScripts .= 
                 "<script>
+                
+                $('#employeeNotes$printJobID').on('keypress', function(e) {
+                    if(e.which == 13) {
+                        let inputVal = $('#employeeNotes$printJobID').val();
+                        let printJobID = '$printJobID';
+                        // alert('This is the input: ' + inputVal);
+                        let data = {
+                            action: 'updateEmployeeNotes',
+                            printJobID: printJobID,
+                            employeeNotes: inputVal
+                        }
+                        api.post('/printers.php', data).then(res => {
+                            snackbar(res.message, 'success');
+                        }).catch(err => {
+                            snackbar(err.message, 'error');
+                    });
+                        
+                    }
+                });
+
                 $('#sendConfirm$printJobID').on('click', function() {
                     if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
                         $('#sendConfirm$printJobID').prop('disabled', true);
@@ -190,6 +212,7 @@ $printJobs = $printerDao->getPrintJobs();
                         <th>Print Type</th>
                         <th>Printer</th>
                         <th>File</th>
+                        <th>Employee Notes</th>
                         <th>Customer Notes</th>
                         <th>Date Created</th>
                         <th>Is Print Valid</th>
@@ -202,7 +225,7 @@ $printJobs = $printerDao->getPrintJobs();
                 </tbody>
                 </table>
                 <script>
-                    $('#checkoutFees').DataTable({'scrollX':true, 'order':[[4, 'desc']]});
+                    $('#checkoutFees').DataTable({'scrollX':true, 'order':[[6, 'desc']]});
                 </script>
                 $buttonScripts
                 "

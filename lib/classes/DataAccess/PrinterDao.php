@@ -517,6 +517,7 @@ class PrinterDao {
 		$printJob->setUserConfirmCheck($row['user_confirm_date']);
         $printJob->setCompletePrintDate($row['complete_print_date']);
         $printJob->setEmployeeNotes($row['employee_notes']);
+        $printJob->setCustomerNotes($row['customer_notes']);
 		$printJob->setMessageGroupId($row['message_group_id']);
         $printJob->setPendingCustomerResponse($row['pending_customer_response']);
         $printJob->setDateUpdated($row['date_updated']);
