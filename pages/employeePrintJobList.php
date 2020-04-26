@@ -111,7 +111,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <td>$name</td>
                     <td>$printType</td>
                     <td>$printer</td>
-                    <td><a href='./prints/$dbFileName'>$stlFileName</td>
+                    <td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
                     <td>$dateCreated</td>
@@ -127,23 +127,20 @@ $printJobs = $printerDao->getPrintJobs();
                     $buttonScripts .= 
                 "<script>
                 
-                $('#employeeNotes$printJobID').on('keypress', function(e) {
-                    if(e.which == 13) {
-                        let inputVal = $('#employeeNotes$printJobID').val();
-                        let printJobID = '$printJobID';
-                        // alert('This is the input: ' + inputVal);
-                        let data = {
-                            action: 'updateEmployeeNotes',
-                            printJobID: printJobID,
-                            employeeNotes: inputVal
-                        }
-                        api.post('/printers.php', data).then(res => {
-                            snackbar(res.message, 'success');
-                        }).catch(err => {
-                            snackbar(err.message, 'error');
-                    });
-                        
+                $('#employeeNotes$printJobID').on('change', function() {
+                    let inputVal = $('#employeeNotes$printJobID').val();
+                    let printJobID = '$printJobID';
+                    // alert('This is the input: ' + inputVal);
+                    let data = {
+                        action: 'updateEmployeeNotes',
+                        printJobID: printJobID,
+                        employeeNotes: inputVal
                     }
+                    api.post('/printers.php', data).then(res => {
+                        snackbar(res.message, 'success');
+                    }).catch(err => {
+                        snackbar(err.message, 'error');
+                    });
                 });
 
                 $('#sendConfirm$printJobID').on('click', function() {
