@@ -164,7 +164,6 @@ class PrinterDao {
     }
 
 
-
     public function addNewPrintJob($printer) {
         try {
             $sql = '
@@ -401,6 +400,30 @@ class PrinterDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to update print job: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+	public function getPrintJobsForUser($uID) {
+        try {
+            $sql = '
+            SELECT * FROM 3d_jobs
+			WHERE 3d_jobs.user_id = :uID
+            ';
+            $params = array(
+                ':uID' => $uID
+            );
+            $results = $this->conn->query($sql, $params);
+            $printJobs = array();
+
+            foreach ($results as $row) {
+                $printJob = self::ExtractPrintJobFromRow($row);
+                $printJobs[] = $printJob;
+            }
+            return $printJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to obtain user\'s print jobs: ' . $e->getMessage());
             return false;
         }
     }

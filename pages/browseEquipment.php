@@ -21,8 +21,7 @@ $dao = new EquipmentDao($dbConn, $logger);
 $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
 $isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
 if ($isLoggedIn){
-    $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-    && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
+    $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
 } else {
     $isEmployee = FALSE; 
 }

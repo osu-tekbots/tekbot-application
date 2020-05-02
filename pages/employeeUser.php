@@ -85,6 +85,35 @@ foreach ($users as $user){
 
 
 ?>
+
+<script type='text/javascript'>
+function adduser(){
+	
+	let firstname = $('#firstname').val().trim();
+	let lastname =  $('#lastname').val().trim();
+	let onid =  $('#onid').val().trim();
+	let data = {
+		firstName: firstname,
+		lastName: lastname,
+		onid: onid,
+		action: 'addUser'
+	};
+
+	if (onid !='' && lastname != '' && firstname != ''){
+		api.post('/users.php', data).then(res => {
+			//console.log(res.message);
+			alert(res.message);
+			//alert('User Added');
+			//location.reload();
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		alert('One or more fields are empty. No changes made');
+	}
+}
+</script>
+
 <br/>
 <div id="page-top">
 
@@ -106,12 +135,19 @@ foreach ($users as $user){
 						<h4>Unable to find any users</h4>
 						";
 					} else {
-						echo"
-						
-						<div class='admin-paper'>
+						echo"<div class='admin-paper'>
 						<h3>Current Users</h3>
 						<p><strong>IMPORTANT</strong>: Do not give anyone the employee type unless they are currently working at TekBots.
-						</p>
+						</p>";
+						
+						echo '<p><div class="form-row">
+							<div class="col"><input type="text" id="firstname" class="form-control" placeholder="First name"></div>
+							<div class="col"><input type="text" id="lastname" class="form-control" placeholder="Last name"></div>
+							<div class="col"><input type="text" id="onid" class="form-control" placeholder="ONID"></div>
+							<button id="adduser" class="btn btn-primary" onclick="adduser();">Add User</button>
+						  </div><BR></p>';
+						
+						echo "
 						<table class='table' id='currentUsers'>
 						<thead>
 							<tr>

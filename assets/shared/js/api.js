@@ -25,9 +25,13 @@ function request(method, url, data, encoded) {
             let data;
             try {        
                 data = JSON.parse(this.response);
+				//data = this.response;
             } catch(err) {
                 console.log(err);
-                reject(new Error('Failed to parse response from server'));
+                //console.log(this.response);
+                alert(this.response);
+				reject(new Error('Failed to parse JSON response from server'));
+				//reject(this.response);
             }
             if (this.status >= 200 && this.status < 300) {
                 return resolve(data);

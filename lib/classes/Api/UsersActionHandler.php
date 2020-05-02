@@ -1,7 +1,9 @@
 <?php
 // Updated 11/5/2019
 namespace Api;
+
 use Model\UserAccessLevel;
+use Model\User;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
@@ -59,6 +61,41 @@ class UsersActionHandler extends ActionHandler {
         $this->respond(new Response(Response::OK, 'Successfully saved profile information'));
 
     }
+	
+	 /**
+     * Adds a new user to table
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleAddUser() {
+        // Ensure the required parameters exist
+        $this->requireParam('onid');
+        $this->requireParam('firstName');
+        $this->requireParam('lastName');
+
+        $body = $this->requestBody;
+
+        // Get the existing user. 
+        // TODO: If it isn't found, send a NOT_FOUND back to the client
+        
+		$user = new User();
+
+        // Update the user
+        $user->setFirstName($body['firstName']);
+        $user->setLastName($body['lastName']);
+        $user->setOnid($body['onid']);
+
+        $ok = $this->dao->addNewUser($user);
+
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add user profile information'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully added profile information'));
+
+    }
 
     /**
      * Request handler for updating the user type after a user has logged in for the first time.
@@ -105,9 +142,15 @@ class UsersActionHandler extends ActionHandler {
 
             case 'saveProfile':
                 $this->saveUserProfile();
+				break;
 
             case 'updateUserType':
                 $this->handleUpdateUserType();
+				break;
+
+			case 'addUser':
+                $this->handleAddUser();
+				break;
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on user resource'));

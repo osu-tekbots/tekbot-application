@@ -1,82 +1,103 @@
 <?php
+
 namespace Model;
 
-use Util\IdGenerator;
-
+/**
+ * Data structure representing a Locker
+ */
 class Message {
+    
+	/** @var string */
+	private $message_id;
+	
+	/** @var string */
+	private $subject;
+	
+	/** @var string */
+	private $body;
+	
+	/** @var int */
+	private $format;	
 
-    private $messageID;
-    private $messageGroupID;
-    private $userID;
-    private $messageText;
-    private $isEmployee;
-    private $dateCreated;
-    
-    
+    /**
+     * Creates a new instance of an equipment reservation.
+     * 
+     *
+     * @param string|null $id the ID of the reservation. If null, a random ID will be generated.
+    */
     public function __construct($id = null) {
         if ($id == null) {
-            $id = IdGenerator::generateSecureUniqueId();
-            $this->setMessageID($id);
-            $this->setDateCreated(new \DateTime());
-           
+			$id = IdGenerator::generateSecureUniqueId();
+            $this->setMessageId($id);   
         } else {
-            $this->setMessageID($id);
+            $this->setMessageId($id);
         }
-    }
+    } 
 
     /**
      * Getters and Setters
      */
-
-	public function getMessageID(){
-		return $this->messageID;
+	public function getMessageId(){
+		return $this->message_id;
 	}
 
-	public function setMessageID($messageID){
-		$this->messageID = $messageID;
+	public function setMessageId($data){
+		$this->message_id = $data;
 	}
 
-	public function getMessageGroupID(){
-		return $this->messageGroupID;
+	public function getSubject(){
+		return $this->subject;
 	}
 
-	public function setMessageGroupID($messageGroupID){
-		$this->messageGroupID = $messageGroupID;
+	public function setSubject($data){
+		$this->subject = $data;
 	}
-
-	public function getUserID(){
-		return $this->userID;
-	}
-
-	public function setUserID($userID){
-		$this->userID = $userID;
-	}
-
-	public function getMessageText(){
-		return $this->messageText;
-	}
-
-	public function setMessageText($messageText){
-		$this->messageText = $messageText;
-	}
-
-	public function getIsEmployee(){
-		return $this->isEmployee;
-	}
-
-	public function setIsEmployee($isEmployee){
-		$this->isEmployee = $isEmployee;
-	}
-
-	public function getDateCreated(){
-		return $this->dateCreated;
-	}
-
-	public function setDateCreated($dateCreated){
-		$this->dateCreated = $dateCreated;
-	}
-
 	
+	public function getBody(){
+		return $this->body;
+	}
 
+	public function setBody($data){
+		$this->body = $data;
+	}
+	
+	public function getFormat(){
+		return $this->format;
+	}
+	
+	public function setFormat($data){
+		$this->format = $data;
+	}
+	
+	
+	/**
+     * Accepts an array of keywords to replace into $body assuming it tis a template with patterns like {{replace_me}}
+     * 
+     *
+     * @param string|null $keywords the array of words to be replaced. Words to be replaced are keys in array.
+    */
+	public function fillTemplateBody($keywords){
+		$result = $this->body;
+		if ($keywords != '')
+			foreach ($keywords as $k => $v) {	
+				$result =  str_replace('{{' . $k . '}}', $v , $result);
+			}
+		return $result;
+	}
+	
+	/**
+     * Accepts an array of keywords to replace into $subject assuming it tis a template with patterns like {{replace_me}}
+     * 
+     *
+     * @param string|null $keywords the array of words to be replaced. Words to be replaced are keys in array.
+    */
+	public function fillTemplateSubject($keywords){
+		$result = $this->subject;
+		if ($keywords != '')
+			foreach ($keywords as $k => $v) {	
+				$result =  str_replace('{{' . $k . '}}', $v , $result);
+			}
+		return $result;
+	}
 }
 ?>
