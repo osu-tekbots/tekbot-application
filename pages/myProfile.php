@@ -7,6 +7,7 @@ use DataAccess\EquipmentDao;
 use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
 use DataAccess\PrinterFeeDao;
+use DataAccess\PrinterDao;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
@@ -52,6 +53,7 @@ $userDao = new UsersDao($dbConn, $logger);
 $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
+$printerDao = new PrinterDao($dbConn, $logger);
 
 
 $uID = $_SESSION['userID'];
@@ -59,6 +61,66 @@ $checkoutFees = $checkoutFeeDao->getFeesForUser($uID);
 $printerFees = $printerFeeDao->getFeesForUser($uID);
 $reservedEquipment = $reservationDao->getReservationsForUser($uID);
 $checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
+$checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
+$studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
+
+
+$printJobsHTML = '';
+
+foreach($studentPrintJobs as $p) {
+	$printJobID = $p->getPrintJobID();
+	$userID = $p->getUserID();
+	$user = $userDao->getUserByID($p->getUserID());
+	$name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
+	$printType = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getPrintTypeName());
+	$printer = Security::HtmlEntitiesEncode($printerDao->getPrinterByID($p->getPrinterId())->getPrinterName());
+	$dbFileName = $p->getDbFileName();
+	$stlFileName = $p->getStlFileName();
+	$dateCreated = $p->getDateCreated();
+	$validPrintDate = $p->getValidPrintCheck();
+	$userConfirm = $p->getUserConfirmCheck();
+	$completePrintDate = $p->getCompletePrintDate();
+	$customerNotes = $p->getCustomerNotes();
+	$employeeNotes = $p->getEmployeeNotes();
+	$pendingResponse = $p->getPendingCustomerResponse();
+
+	$confirmScript = "
+	<script>
+	$('#confirmPrint$printJobID').on('click', function() {
+		if(confirm('Confirm print and allow employees to start printing?')) {
+			let printJobID = '$printJobID';
+			let data = {
+				action: 'customerConfirmPrint',
+				printJobID: printJobID,
+			}
+			api.post('/printers.php', data).then(res => {
+				snackbar(res.message, 'success');
+				setTimeout(function(){window.location.reload()}, 1000);
+			}).catch(err => {
+				snackbar(err.message, 'error');
+		});
+		}
+	});
+	</script>
+	";
+
+	$confirmationButton = "<button id='confirmPrint$printJobID' class='btn btn-outline-primary capstone-nav-btn'>Confirm</button>";
+
+	$action = $validPrintDate ? ($userConfirm ? "" : $confirmationButton) : "";
+	$currentStatus = $completePrintDate ? ("Print Completed") : ($validPrintDate ? ($userConfirm ? "Validated, in queue to print" : "Validated, awaiting your confirmation") : "Awaiting File Validation by Tekbots Employee");
+
+	$printJobsHTML .= "
+	<tr>
+	<td>$dateCreated</td>
+	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button><button class='btn btn-outline-primary capstone-nav-btn'>View</button></td>
+	<td>$customerNotes</td>
+	<td>$currentStatus</td>
+	<td>$action</td>
+	</tr>
+	$confirmScript
+	";
+}
+
 $feeHTML = '';
 
 $checkoutFeeCount = 0;
@@ -247,10 +309,101 @@ if ($checkedoutEquipment){
 
 <br>
 <div class="stickytabs">
-	<button class="tablink" onclick="openPage('Dashboard', this, '#A7ACA2')" id="defaultOpen">Dashboard</button>
+	<!-- TODO: Change defaultOpen -->
+	<button class="tablink" onclick="openPage('Dashboard', this, '#A7ACA2')" >Dashboard</button>
 	<button class="tablink" onclick="openPage('Profile', this, '#A7ACA2')">Profile</button>
+	<button class="tablink" onclick="openPage('Jobs', this, '#A7ACA2')" id="defaultOpen">Print/Cut Jobs</button>
 	<button class="tablink" onclick="openPage('Fees', this, '#A7ACA2')">My Fees</button>
 	<button class="tablink" onclick="openPage('Equipment', this, '#A7ACA2')">Equipment Reservations</button>
+</div>
+
+
+
+<div id="Jobs" class="tabcontent">
+	<div class="container-fluid">
+		
+		<!-- Perform query for all print jobs of students-->
+		<!-- Using table from print jobs: -->
+			<!-- Students can see status (pending, printing, etc) -->
+			<!-- Students can see a render of the print they submitted -->
+			<?php
+				echo "
+			<br><br><br><br><br>
+			<div class='admin-paper'>
+			<h3>Print Jobs</h3>
+				<table class='table' id='equipmentFees'>
+				<caption>Equipment Checkout Fees</caption>
+					<thead>
+						<tr>
+							<th>Date Submitted</th>
+							<th>File</th>
+							<th>Your notes</th>
+							<th>Current Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						$printJobsHTML
+					</tbody>
+				</table>
+				<script>
+					$('#equipmentFees').DataTable();
+				</script>
+				
+			</div>
+				
+				";
+			?>
+	
+		
+			
+	</div>
+</div>
+
+
+<div id="Dashboard" class="tabcontent">
+	<br><br><br><br>
+	<section class="panel dashboard">
+    <h2>Dashboard </h2>
+	<ul>
+		<?php 
+		// If we have actionable items, show the action required
+		$actionStyle = "style='color:red'";
+		$dashboardText = "";
+		if ($checkoutFeeCount != 0){
+			$dashboardText .= 
+			"
+			<li $actionStyle>You have unpaid equipment checkout fees!  Pay them as soon as possible.</li>
+			";
+		}
+		if ($reservedEquipmentCount != 0){
+			$dashboardText .=
+			"
+			<li $actionStyle>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.</li>
+			";
+		}
+		if ($checkedOutEquipmentLateCount != 0){
+			$dashboardText .= "
+			<li $actionStyle>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!</li>
+			";
+		}
+		if ($checkedoutEquipmentCount != 0){
+			$dashboardText .= "
+			<li>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</li>
+			";
+		}
+
+		if (empty($dashboardText)){
+			$dashboardText = "<li style='list-style-type:none;'>No Pending Items. Have a good day!</li>";
+		}
+		echo $dashboardText;
+		?>
+		
+
+    </ul>
+  </section>
+ 
+
 </div>
 
 <div id="Dashboard" class="tabcontent">

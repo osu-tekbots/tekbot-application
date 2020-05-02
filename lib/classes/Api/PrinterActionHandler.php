@@ -484,6 +484,8 @@ class PrinterActionHandler extends ActionHandler {
         ));
     }
     
+
+
     public function handleSendCustomerConfirm() {
         $body = $this->requestBody;
 
@@ -516,6 +518,41 @@ class PrinterActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully updated print job')
+        );
+
+    }
+
+    
+ 
+    function handleCustomerConfirmPrintJob() {
+        $body = $this->requestBody;
+
+		$this->requireParam('printJobID');
+
+        $printJobID = $body['printJobID'];
+
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+
+        $printJob = $printJob[0];
+        
+        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
+
+
+        $printJob->setPendingCustomerResponse(0);
+        $printJob->setUserConfirmCheck((new \DateTime())->format('Y-m-d H:i:s'));
+        
+
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully confirmed print job')
         );
 
     }
@@ -634,6 +671,8 @@ class PrinterActionHandler extends ActionHandler {
 			//case 'removeprintfee':
             //	$this->handleRemovePrintFee();
             
+            case 'customerConfirmPrint':
+                $this->handleCustomerConfirmPrintJob();
 
             case 'sendCustomerConfirm':
                 $this->handleSendCustomerConfirm();
