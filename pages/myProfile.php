@@ -21,11 +21,25 @@ allowIf($isLoggedIn, $configManager->getBaseUrl() . 'pages/login.php');
 $title = 'My Profile';
 $css = array(
 	'assets/css/admin.css',
-	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
+	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css',
+	'assets/Madeleine.js/src/css/Madeleine.css'
 );
 
 $js = array(
-    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
+	'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+	'assets/Madeleine.js/src/lib/stats.js',
+	'assets/Madeleine.js/src/lib/detector.js',
+	'assets/Madeleine.js/src/lib/three.min.js',
+	'assets/Madeleine.js/src/Madeleine.js',
+	// 'assets/StlViewer.js/stl_viewer.min.js',
+	// 'assets/StlViewer.js/CanvasRenderer.js',
+	// 'assets/StlViewer.js/load_stl.min.js',
+	// 'assets/StlViewer.js/OrbitControls.js',
+	// 'assets/StlViewer.js/parser.min.js',
+	// 'assets/StlViewer.js/Projector.js',
+	// 'assets/StlViewer.js/three.min.js',
+	// 'assets/StlViewer.js/TrackballControls.js',
+	// 'assets/StlViewer.js/webgl_detector.js',
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
@@ -67,6 +81,9 @@ $studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
 
 $printJobsHTML = '';
 
+
+include_once PUBLIC_FILES . '/modules/customerPrintModal.php';
+
 foreach($studentPrintJobs as $p) {
 	$printJobID = $p->getPrintJobID();
 	$userID = $p->getUserID();
@@ -84,7 +101,8 @@ foreach($studentPrintJobs as $p) {
 	$employeeNotes = $p->getEmployeeNotes();
 	$pendingResponse = $p->getPendingCustomerResponse();
 
-	$confirmScript = "
+
+	$buttonScripts = "
 	<script>
 	$('#confirmPrint$printJobID').on('click', function() {
 		if(confirm('Confirm print and allow employees to start printing?')) {
@@ -101,6 +119,8 @@ foreach($studentPrintJobs as $p) {
 		});
 		}
 	});
+
+
 	</script>
 	";
 
@@ -112,12 +132,15 @@ foreach($studentPrintJobs as $p) {
 	$printJobsHTML .= "
 	<tr>
 	<td>$dateCreated</td>
-	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button><button class='btn btn-outline-primary capstone-nav-btn'>View</button></td>
+	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></a>
+	<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
+		View
+	</button></td>
 	<td>$customerNotes</td>
 	<td>$currentStatus</td>
 	<td>$action</td>
 	</tr>
-	$confirmScript
+	$buttonScripts
 	";
 }
 
@@ -347,7 +370,7 @@ if ($checkedoutEquipment){
 					</tbody>
 				</table>
 				<script>
-					$('#equipmentFees').DataTable();
+					$('#equipmentFees').DataTable({'order':[[0, 'desc']]});
 				</script>
 				
 			</div>

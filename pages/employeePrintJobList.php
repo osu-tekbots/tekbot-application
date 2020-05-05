@@ -19,7 +19,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Add Printer';
+$title = 'Employee Print Job List';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',

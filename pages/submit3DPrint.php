@@ -83,7 +83,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 				{
 					var setPath = document.getElementById("uploadpath");
 					setPath.value = result["path"];
-					var html= '✔️ File is valid: '+result["string"];
+					var html= '✔️ File is valid: ' + result["string"];
 					isValidFile = true;
 					dbFileName = result["path"];
 					$('#fileFeedback').text(html);
@@ -115,6 +115,9 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 	<br/><br/><br/>
 	<h1>3D Print Submission Form</h1>
 	
+
+				To check your currently queued or finished prints, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/myProfile.php'>your profile</a><br/><br/>
+
 				Using this form you can upload a 3D model to be created. Print using a Stratasys BST1220 machine. It produces plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model. 
 			<br/><br/>
 			<ul>
@@ -179,14 +182,14 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<b>Payment Method:</b>
 			<br/>
 			<div class="form-check">
-				<input class="form-check-input" type="radio" name="accounttype" value="voucher">
+				<input class="form-check-input" id="voucherRadio" type="radio" name="accounttype" value="voucher">
 				Voucher Code:
 				<input class=fi id="voucherInput" type=text size=30 name=account value="">
 			</div>
 			<div class="form-check">
-				<input class="form-check-input" type="radio" name="accounttype" value="account">
+				<input class="form-check-input" id="accountRadio" type="radio" name="accounttype" value="account">
 				OSU Account Code:
-				<input class=fi type=text size=30 name=account value="">
+				<input class=fi id="accountInput" type=text size=30 name=account value="">
 			</div>
 			<div class="form-check">
                 <input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
@@ -222,6 +225,15 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 <br /><br /><br/>
 <br /><br /><br/>
 <script>
+
+$('#voucherInput').focus(function() {
+    $('#voucherRadio').prop("checked", true);
+});
+
+$('#accountInput').focus(function() {
+    $('#accountRadio').prop("checked", true);
+});
+
 window.onload = function(){
     Lily.ready({
         target: 'targetDiv',  // target div id
@@ -242,9 +254,12 @@ $('#submit3DPrintBtn').on('click', function () {
 		let voucherVal = null;
 
 		if(selectedPayment == 'voucher') {
-			// alert($("#voucherInput").val());
 			voucherVal = $("#voucherInput").val();
 		}
+
+		let filePath = $('#uploadFileInput').val();
+		var filename = filePath.replace(/^.*\\/, "");
+ 		console.log(filename);
 
 		let data = {
 			action: 'createprintjob',
@@ -252,13 +267,11 @@ $('#submit3DPrintBtn').on('click', function () {
 			printerId: $('#printerSelect').val(),
 			printTypeId: $('#printTypeSelect').val(),
 			dbFileName: dbFileName,
-			stlFileName: $('#uploadFileInput').val(),
+			stlFileName: filename,
 			payment: selectedPayment,
-			// course group?
 			courseGroup: 0,
-			// voucher code (is a foreign key?) ask jack
 			voucherCode: voucherVal,
-			employeeNotes: $('#specialNotes').val()
+			customerNotes: $('#specialNotes').val()
 		}; 
 		// Send our request to the API endpoint
 		api.post('/printers.php', data).then(res => {

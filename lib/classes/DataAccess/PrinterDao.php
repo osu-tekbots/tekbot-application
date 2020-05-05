@@ -182,6 +182,7 @@ class PrinterDao {
                 user_confirm_date,
                 complete_print_date,
                 employee_notes,
+                customer_notes,
                 message_group_id,
                 pending_customer_response,
                 date_updated
@@ -201,6 +202,7 @@ class PrinterDao {
                 :user_confirm_date,
                 :complete_print_date,
                 :employee_notes,
+                :customer_notes,
                 :message_group_id,
                 :pending_customer_response,
                 :date_updated
@@ -221,6 +223,7 @@ class PrinterDao {
                 ':user_confirm_date' => $printer->getUserConfirmCheck(),
                 ':complete_print_date' => $printer->getCompletePrintDate(),
                 ':employee_notes' => $printer->getEmployeeNotes(),
+                ':customer_notes' => $printer->getCustomerNotes(),
                 ':message_group_id' => $printer->getMessageGroupId(),
                 ':pending_customer_response' => $printer->getPendingCustomerResponse(),
                 ':date_updated' => $printer->getDateUpdated()

@@ -320,7 +320,7 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setPaymentMethod($body['payment']);
 		$printJob->setCourseGroupId($body['courseGroup']);
 		$printJob->setVoucherCode($body['voucherCode']);
-        $printJob->setEmployeeNotes($body['employeeNotes']);
+        $printJob->setCustomerNotes($body['customerNotes']);
         
         // Front end values that are foreign keys
         $printType = $this->printerDao->getPrintTypesByID($body['printTypeId']);
