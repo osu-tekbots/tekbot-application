@@ -479,6 +479,24 @@ class CoursePrintAllowanceDao {
     //     }
     // }
 
+    public function clearVouchers($currentDate) {
+        try {
+            $sql = '
+            DELETE FROM voucher_code 
+            WHERE date_expired < :date
+            OR date_used IS NOT NULL
+            ';
+            $params = array(
+                ':date' => QueryUtils::FormatDate($currentDate)
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove vouchers: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     public function getServices() {
         try {

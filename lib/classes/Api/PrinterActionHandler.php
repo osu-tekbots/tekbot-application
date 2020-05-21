@@ -25,6 +25,8 @@ class PrinterActionHandler extends ActionHandler {
     private $config;
     /** @var \DataAccess\UsersDao */
     private $userDao;
+
+    private $messageDao;
     
     /**
      * Constructs a new instance of the action handler for requests on printer resources.
@@ -35,7 +37,7 @@ class PrinterActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($printerDao, $printFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $config, $logger) {
+    public function __construct($printerDao, $printFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $config, $logger) {
         parent::__construct($logger);
         $this->printerDao = $printerDao;
         $this->mailer = $mailer;
@@ -43,6 +45,29 @@ class PrinterActionHandler extends ActionHandler {
         $this->userDao = $userDao;
         $this->coursePrintAllowanceDao = $coursePrintAllowanceDao;
         $this->printFeeDao = $printFeeDao;
+
+        $this->messageDao = $messageDao;
+    }
+
+
+
+    /*
+     Used to generate emails for printer action handler
+    */
+
+    public function printerEmailer($messageID, $email, $replacements) {
+
+
+        $message = $this->messageDao->getMessageByID($messageID);
+        
+        $body = $message->fillTemplateBody($replacements);
+		$subject = $message->fillTemplateSubject($replacements);
+
+		$headers = "From:heer@oregonstate.edu\r\n";
+		$headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html;charset=UTF-8\r\n";
+
+        return mail($email, $subject, $body, $headers);
     }
 
     /**
@@ -511,13 +536,24 @@ class PrinterActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
         }
 
-        $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
         $user = $this->userDao->getUserByID($body['userID']);
-        $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
+
+        $replacements = array(
+            "name" => $user->getFirstName(),
+            "print" => $printJob->getStlFileName()
+        );
+
+        $ok = $this->printerEmailer('wersspdoifwkjfd', $user->getEmail(), $replacements);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
+        // $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
+        // $user = $this->userDao->getUserByID($body['userID']);
+        // $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully updated print job')
+            'Successfully updated print job and send email')
         );
 
     }
@@ -586,11 +622,21 @@ class PrinterActionHandler extends ActionHandler {
         $user = $this->userDao->getUserByID($body['userID']);
 
         // Change email method here
-        $this->mailer->sendPrintCompleteEmail($user, $printJob);
+        // $this->mailer->sendPrintCompleteEmail($user, $printJob);
+
+        $replacements = array(
+            "name" => $user->getFirstName(),
+            "print" => $printJob->getStlFileName()
+        );
+
+        $ok = $this->printerEmailer('iutrwoejrlkdfjla', $user->getEmail(), $replacements);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully updated print job')
+            'Successfully updated print job and send email')
         );
 
     }
@@ -622,6 +668,29 @@ class PrinterActionHandler extends ActionHandler {
             'Successfully updated employee notes')
         );
 
+    }
+
+    public function handleVerifyPrintPayment() {
+        $body = $this->requestBody;
+        $this->requireParam('printJobID');
+        $printJobID = $body['printJobID'];
+        
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+        $printJob = $printJob[0];
+
+        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated print job')
+        );
     }
 
     /**
@@ -682,6 +751,9 @@ class PrinterActionHandler extends ActionHandler {
             
             case 'updateEmployeeNotes':
                 $this->handleUpdateEmployeeNotes();
+
+            case 'verifyPrintPayment':
+                $this->handleVerifyPrintPayment();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));

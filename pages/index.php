@@ -19,7 +19,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <img class="tekbotslogo" src="assets/img/resize_tekbots.png">
                     <h2 class="logotext">Creating Platforms For Learning. <br>
                     <h2><strong><a href="http://eecs.oregonstate.edu/education/3dprinter/index.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="http://eecs.oregonstate.edu/education/3dprinter/index-laser.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="http://eecs.oregonstate.edu/education/inventory" target="_blank">Inventory</a></strong></h2>
-                    <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="#faq">Technical Help</strong></h2> </a>
+                    <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/browseEquipment.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="#faq">Technical Help</strong></h2> </a>
                     <h3>KEC 1110 Hours: 10AM - 1PM</h3></h2>
                     
                     <a class="arrowLink" href="#about"><div class="arrow bounce"></div></a>
@@ -41,7 +41,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('assets/img/storecabinet.jpg');"></div>
                          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
                               <h2>TekBots Store</h2>
-                              <p class="lead mb-0">The TekBots store contains all sorts of electronics and modules that can be purchased for projects or classes!  For more information about the items we have in stock, please check our entire inventory list <a href="http://eecs.oregonstate.edu/education/inventory" target="_blank">here</a>.  This is also where ECE students pick up their lab kits.  TekBot Store hours are in KEC 1110 from 10AM - 1PM.</p>
+                              <p class="lead mb-0">The TekBots store contains all sorts of electronics and modules that can be purchased for projects or classes!  For more information about the items we have in stock, please check our entire inventory list <a href="http://eecs.oregonstate.edu/education/inventory" target="_blank">here</a>.  This is also where ECE students pick up their lab kits.</p>
                          </div>
                          </div>
                     <section class="makerspace">
@@ -66,17 +66,13 @@ include_once PUBLIC_FILES . '/modules/header.php';
           </div>
           
 
-
+<!--
                <div class="content-wrapper" id="calendar">
-                    
-                    <!--
-                    <iframe frameborder="0" style="border-width:0;" id="cdr-calendar-iframe" src="https://www.chronoflocalendar.com/calendar/embed/3494/2073244438/#disable-mouse-scroll"></iframe>
-                    -->
                     
                     <iframe src="https://calendar.google.com/calendar/embed?title=TekBots%20&amp;showTitle=0&amp;showNav=0&amp;showDate=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;mode=WEEK&amp;bgcolor=%23000000&amp;src=oregonstate.edu_0053u0kv5bf6l7lube27096lls%40group.calendar.google.com&amp;color=%23865A5A&amp;ctz=America%2FLos_Angeles/#disable-mouse-scroll" style="border-width:0" frameborder="0" scrolling="no"></iframe>     
                </div>
 
-<!--
+
                <div class="content-wrapper" id="contactUs">
                     <br><br>
                     <div class="col-md-10 offset-md-1">

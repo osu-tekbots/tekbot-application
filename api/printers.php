@@ -12,6 +12,8 @@ use DataAccess\UsersDao;
 use DataAccess\CoursePrintAllowanceDao;
 use Api\PrinterActionHandler;
 use Email\PrinterMailer;
+use DataAccess\MessageDao;
+
 
 session_start();
 
@@ -21,7 +23,12 @@ $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $mailer = new PrinterMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
-$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $configManager, $logger);
+
+$messageDao = new MessageDao($dbConn, $logger);
+
+
+$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $configManager, $logger);
+
 
 
 // Authorize the request

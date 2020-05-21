@@ -21,6 +21,7 @@ class PrintJob {
 	private $dateCreated;
 	private $validPrintCheck;
 	private $userConfirmCheck;
+	private $paymentConfirmDate;
 	private $completePrintDate;
 	private $employeeNotes;
 	private $customerNotes;
@@ -147,6 +148,14 @@ class PrintJob {
 
 	public function setUserConfirmCheck($UserConfirmCheck){
 		$this->userConfirmCheck = $UserConfirmCheck;
+	}
+
+	public function getPaymentDate(){
+		return $this->paymentConfirmDate;
+	}
+
+	public function setPaymentDate($paymentConfirmDate){
+		$this->paymentConfirmDate = $paymentConfirmDate;
 	}
 	
 	public function getCompletePrintDate(){

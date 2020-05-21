@@ -80,7 +80,7 @@ $loggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
 // Setup the buttons to use in the header
 // All users
 $buttons = array(
-    'Browse Equipment' => 'pages/browseEquipment.php'
+    // 'Reserve<BR>Equipment' => 'pages/browseEquipment.php'
 );
 // Signed in users
 if ($loggedIn) {
@@ -90,8 +90,7 @@ if ($loggedIn) {
     }
 	
 	//All user types can view these pages
-    //$buttons['My Applications'] = 'pages/myApplications.php';
-    $buttons['My Profile'] = 'pages/myProfile.php';
+    $buttons['My TekBots'] = 'pages/myProfile.php';
 
     //$buttons['My Fees'] = 'pages/feesOwed.php';
     
@@ -102,7 +101,7 @@ if ($loggedIn) {
 }
 
 // All users
-$buttons['Info'] = 'pages/info.php';
+$buttons['FAQ'] = 'pages/info.php';
 
 //$buttons['Laser Cutting'] = 'pages/laserCutting.php';
 

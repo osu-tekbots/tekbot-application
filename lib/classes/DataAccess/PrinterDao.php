@@ -373,6 +373,7 @@ class PrinterDao {
                 date_created = :date_created,
                 valid_print_date = :valid_print_date,
                 user_confirm_date = :user_confirm_date,
+                payment_confirmation = :payment_confirm_date,
                 complete_print_date = :complete_print_date,
                 employee_notes = :employee_notes,
                 message_group_id = :message_group_id,
@@ -393,6 +394,7 @@ class PrinterDao {
                 ':date_created' => $printJob->getDateCreated(),
                 ':valid_print_date' => $printJob->getValidPrintCheck(),
                 ':user_confirm_date' => $printJob->getUserConfirmCheck(),
+                ':payment_confirm_date' => $printJob->getPaymentDate(),
                 ':complete_print_date' => $printJob->getCompletePrintDate(),
                 ':employee_notes' => $printJob->getEmployeeNotes(),
                 ':message_group_id' => $printJob->getMessageGroupId(),
@@ -541,6 +543,7 @@ class PrinterDao {
         $printJob->setDateCreated($row['date_created']);
         $printJob->setValidPrintCheck($row['valid_print_date']);
 		$printJob->setUserConfirmCheck($row['user_confirm_date']);
+		$printJob->setPaymentDate($row['payment_confirmation']);
         $printJob->setCompletePrintDate($row['complete_print_date']);
         $printJob->setEmployeeNotes($row['employee_notes']);
         $printJob->setCustomerNotes($row['customer_notes']);

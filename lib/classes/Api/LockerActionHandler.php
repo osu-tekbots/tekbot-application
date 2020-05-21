@@ -3,7 +3,7 @@
 namespace Api;
 
 use Model\Locker;
-use Email\LockersMailer;
+use Email\TekBotsMailer;
 use DataAccess\UserDao;
 
 /**
@@ -61,7 +61,7 @@ class LockerActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Locker Failed to Checkout'));
         }
 
-		$mailer = New LockersMailer('tekbots-worker@engr.oregonstate.edu');
+		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
         $ok = $mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email sned Failed'));
@@ -97,7 +97,7 @@ class LockerActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Locker Failed to Return'));
         }
 
-		$mailer = New LockersMailer('tekbots-worker@engr.oregonstate.edu');
+		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
         $ok = $mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
@@ -126,7 +126,7 @@ class LockerActionHandler extends ActionHandler {
 		$message = $this->messageDao->getMessageByID($body['messageId']);
 
         
-		$mailer = New LockersMailer('tekbots-worker@engr.oregonstate.edu');
+		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
         $ok = $mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));

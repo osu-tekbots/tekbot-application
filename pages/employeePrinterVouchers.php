@@ -145,10 +145,12 @@ foreach ($vouchers as $voucher){
 						$printingCodesHTML
 					</tbody>
 					</table>
+					<button id='deleteAll' class='btn btn-danger'>Delete All Expired/Used Vouchers</button>
+
 					<script>
 						$('#printingVoucherTable').DataTable(
 							{
-								aaSorting: [[0, 'desc']]
+								aaSorting: [[1, 'desc']]
 							}
 
 						);
@@ -167,6 +169,21 @@ foreach ($vouchers as $voucher){
 <script>
 
 // Hiding and showing functionality for prompting to generate new codes
+
+$("#deleteAll").click(function() {
+	if(confirm("Clicking OK will delete all exisiting Vouchers that have expired and/or have been used"))
+	{
+		let body = {
+			action: 'clearVouchers'
+		}
+		api.post('/printcutgroups.php', body).then(res => {
+			snackbar(res.message, 'success');
+			setTimeout(function(){window.location.reload()}, 1000);
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
+});
 
 $("#generateAdditionalVouchers").click(function() {
 	$("#confirmAdditionalVouchers").css("display", "block");

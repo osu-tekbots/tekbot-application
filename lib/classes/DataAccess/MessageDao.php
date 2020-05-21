@@ -75,6 +75,32 @@ class MessageDao {
             return false;
         }
     }
+	
+	 /**
+     * Fetches all Print Jobs by ID.
+     * @return \Model\PrinterJob[]|boolean an array of printers on success, false otherwise
+     */
+    public function getMessagesByTool($tool_id) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM `messages`
+            WHERE messages.tool_id = :tool_id
+            ';
+            $params = array(':tool_id' => $tool_id);
+            $results = $this->conn->query($sql, $params);
+
+            $messages = array();
+            foreach ($results as $row) {
+                $message = self::ExtractMessageFromRow($row);
+                $messages[] = $message;
+            }
+            return $messages;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get message with id '.$id.': ' . $e->getMessage());
+            return false;
+        }
+    }
 
     public function updateMessage($message) {
         try {

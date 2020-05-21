@@ -124,21 +124,39 @@ foreach($studentPrintJobs as $p) {
 	</script>
 	";
 
-	$confirmationButton = "<button id='confirmPrint$printJobID' class='btn btn-outline-primary capstone-nav-btn'>Confirm</button>";
+	$status = "";
 
-	$action = $validPrintDate ? ($userConfirm ? "" : $confirmationButton) : "";
-	$currentStatus = $completePrintDate ? ("Print Completed") : ($validPrintDate ? ($userConfirm ? "Validated, in queue to print" : "Validated, awaiting your confirmation") : "Awaiting File Validation by Tekbots Employee");
+	if($validPrintDate) {
+		$status = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>👀 Print Validated By Employee</a><br/>";
+	} else {
+		$status = "⌛Waiting for Employee to Validate Print"; 
+	}
+
+
+	$confirmationButton = "<button id='confirmPrint$printJobID' class='btn btn-outline-primary capstone-nav-btn'>Confirm</button>";
+	$denyButton = "<button class='btn btn-outline-danger capstone-nav-btn'>Deny</button>";
+	if($validPrintDate && $pendingResponse) {
+		$status .= "Awaiting your confirmation:<br/>";
+		$status .= $confirmationButton;
+		$status .= $denyButton;	
+	} elseif(!$completePrintDate && $validPrintDate) {
+		$status .= "⌛ Currently in queue to Print";
+	}
+
+	if($completePrintDate) {
+		$status = "✔️ Print has completed";
+	}
 
 	$printJobsHTML .= "
 	<tr>
 	<td>$dateCreated</td>
-	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></a>
+	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='Download' class='btn btn-outline-primary capstone-nav-btn'>$stlFileName</button></a>
 	<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
 		View
 	</button></td>
 	<td>$customerNotes</td>
-	<td>$currentStatus</td>
-	<td>$action</td>
+	<td>$status</td>
+
 	</tr>
 	$buttonScripts
 	";
@@ -361,8 +379,8 @@ if ($checkedoutEquipment){
 							<th>Date Submitted</th>
 							<th>File</th>
 							<th>Your notes</th>
-							<th>Current Status</th>
-							<th>Actions</th>
+							<th>Status</th>
+
 						</tr>
 					</thead>
 					<tbody>
