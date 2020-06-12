@@ -190,13 +190,14 @@ class EquipmentRentalMailer extends Mailer {
      * @param string $link the URL at which the project can be viewed
      * @return boolean true on success, false otherwise
      */
-    public function sendEquipmentCheckoutEmail($checkout, $user, $link) {
+    public function sendEquipmentCheckoutEmail($checkout, $user, $contract, $link) {
         $dt = $checkout->getDeadlineTime();
         $timestamp = strtotime($dt);
         //$deadlineTime = date(QueryUtils::DATE_STR, $timestamp);
         //$tempDate = DateTime::createFromFormat('j-M-Y', $checkout->getDeadlineTime());
         //$deadlineTime = $tempDate->format(QueryUtils::DATE_STR);
         $contractID = $checkout->getContractID();
+        $contractTitle = $contract->getTitle();
         //$pickupTime = $checkout->getPickupTime();
         $checkoutID = $checkout->getCheckoutID();
         $equipmentID = $checkout->getEquipmentID();
@@ -212,7 +213,7 @@ class EquipmentRentalMailer extends Mailer {
     You have checked out an equipment!
     ---------------------------
     Equipment ID: $equipmentID
-    Contract Duration: $contractID day(s)
+    Contract Duration: $contractTitle
     ---------------------------
 
     To view the exact date and time your checkout out ends, view it at this link: $link

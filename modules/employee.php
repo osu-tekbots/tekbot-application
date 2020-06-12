@@ -256,6 +256,17 @@ function isValidStudentID($sid){
 		<li class="nav-item dropdown">
          <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
+            <span>Touchnet</span>
+         </a>
+         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+             <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
+             <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
+         </div>
+        </li>
+		
+		<li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-hand-rock"></i>
             <span>TekBox</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -264,19 +275,6 @@ function isValidStudentID($sid){
              <h6 class="dropdown-header">Options:</h6>
              <a class="dropdown-item" href="pages/employeeBoxMessages.php">Edit Messages</a>
          </div>
-        </li>
-		
-		<li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://secure.touchnet.net/sso/login?service=https%3A%2F%2Fsecure.touchnet.net%2Fcentral%2F%3Fcmmserviceurltoken%3D9a7e7cf6-986d-4f2e-841d-11232a37763a">
-                <i class="fas fa-fw fa-network-wired"></i>
-                <span>TouchNet</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a style="color: lightblue;" class="nav-link" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">
-                <i class="fas fa-fw fa-store"></i>
-                <span>OSU Marketplace</span>
-            </a>
         </li>
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">

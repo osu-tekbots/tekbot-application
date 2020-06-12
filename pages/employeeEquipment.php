@@ -45,6 +45,31 @@ $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 
+
+
+
+$user_option = "<option value=''></option>";
+$users = $userDao->getAllUsers();
+foreach ($users as $user){
+	$user_option .= "<option value='".$user->getUserID()."'>".$user->getLastName().", ".$user->getFirstName()."</option>";
+}
+
+$equipment_option = "<option value=''></option>";
+$availableEquipment = $equipmentDao->getAdminEquipment();
+foreach ($availableEquipment as $e){
+	$equipment_option .= "<option value='".$e->getEquipmentID()."'>".$e->getEquipmentName()."</option>";
+}
+
+$newreservationHTML = '';
+$newreservationHTML .= "<form>
+				<div class='form-row'>
+					<div class='form-group col-sm-3'><label for='user'>User</label><select id='user' class='form-control'>$user_option</select></div>
+					<div class='form-group col-sm-5'><label for='equipment'>Equipment</label><select id='equipment' class='form-control'>$equipment_option</select></div>
+					<div class='form-group col-sm-2'><label for='returndate'>Return Date</label><input type='date' id='returndate'></div>
+					<div class='form-group col-sm-2'><button class='form-control' onclick='reserveEquipment();'>Make Reservation</button></div>
+				</div>
+				</form>";
+
 $reservedHTML = '';
 $listNumber = 0;
 foreach ($reservedEquipment as $r){
@@ -217,12 +242,11 @@ foreach ($checkedoutEquipment as $c){
 
 
 					
-				echo "
-				<br><br>";
-			
+				echo "<div class='admin-paper'>";
+				echo $newreservationHTML;
+				echo '</div>';
 				
 				echo "
-	
 				<div class='admin-paper'>
 				<h3>Checked Out Equipment</h3>
 				<p>When a student brings back the rented equipment, hit the 'Return' button next to their checkout.  Write any necessary notes in the notes section (scratches, broken handle).  The student can see the notes you put here.  If there are any fees that need to be assigned (late fees, damaged item), you can assign them fees by pressing the 'Assign fee' button.</p>
@@ -296,7 +320,7 @@ $('.handoutBtn').on('click', function() {
 	});
 		
 });
-*/
+
 
 $('select').on('change', function() {
 	let reservationID = $(this).attr('id');
@@ -313,6 +337,24 @@ $('select').on('change', function() {
 	});
 
 });
+*/
+function reserveEquipment(){
+	var user = $('#user').val();
+	var equipment = $('#equipment').val();
+	var returndate = $('#returndate').val();
+	
+	let content = {
+		action: 'createReservation',
+		userID: user,
+		equipmentID: equipment
+	}
+	
+	api.post('/equipmentrental.php', content).then(res => {
+		snackbar(res.message, 'Updated');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});	
+}
 
 
 

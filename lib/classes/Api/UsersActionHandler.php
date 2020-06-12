@@ -86,6 +86,7 @@ class UsersActionHandler extends ActionHandler {
         $user->setFirstName($body['firstName']);
         $user->setLastName($body['lastName']);
         $user->setOnid($body['onid']);
+		$user->setEmail($body['onid']."@oregonstate.edu");
 
         $ok = $this->dao->addNewUser($user);
 

@@ -108,7 +108,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         // Create email (pass in checkout and link)
         $user = $this->UsersDao->getUserByID($body['userID']);
         $link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
-        $this->mailer->sendEquipmentCheckoutEmail($checkout, $user, $link);
+        $this->mailer->sendEquipmentCheckoutEmail($checkout, $user, $contract, $link);
 
         $this->respond(new Response(
             Response::CREATED, 

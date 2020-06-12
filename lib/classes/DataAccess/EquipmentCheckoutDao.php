@@ -3,6 +3,7 @@
 namespace DataAccess;
 
 use Model\EquipmentCheckout;
+use Model\EquipmentDao;
 use Model\EquipmentCheckoutStatus;
 
 
@@ -191,6 +192,8 @@ class EquipmentCheckoutDao {
             return false;
         }
     }
+	
+	
 
     /**
      * Adds a new equipment checkout entry into the database.

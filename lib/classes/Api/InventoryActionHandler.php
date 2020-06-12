@@ -1,0 +1,347 @@
+<?php
+// Updated 11/5/2019
+namespace Api;
+
+use Model\Locker;
+use Email\TekBotsMailer;
+use DataAccess\UserDao;
+
+/**
+ * Defines the logic for how to handle AJAX requests made to modify user information.
+ */
+class InventoryActionHandler extends ActionHandler {
+
+    /** @var \DataAccess\* */
+    private $inventoryDao;
+	private $userDao;
+	private $messageDao;
+	
+	/******
+	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
+	***/
+	private $replacements;
+
+    /**
+     * Constructs a new instance of the action handler for requests on user resources.
+     *
+     * @param \DataAccess\UsersDao $dao the data access object for users
+     * @param \Util\Logger $logger the logger to use for logging information about actions
+     */
+    public function __construct($inventoryDao, $userDao, $messageDao, $logger)
+    {
+        parent::__construct($logger);
+        $this->inventoryDao = $inventoryDao;
+		$this->userDao = $userDao;
+		$this->messageDao = $messageDao;
+    }
+
+	/**
+     * Updates part location information  in the database based on data in an HTTP request.
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleUpdateLocation() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('location');
+        $body = $this->requestBody;
+
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+		
+		 // Update the part
+        $part->setLocation($body['location']);
+        
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Inventory Location Updated: '.$body['location']));
+
+    }
+
+
+	/**
+     * Updates part location information  in the database based on data in an HTTP request.
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleUpdateQuantity() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('amount');
+        $body = $this->requestBody;
+
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+		
+		 // Update the part
+        $part->setQuantity($body['amount']);
+        
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+        }
+
+        $this->respond(new Response(Response::OK, 'On Hand Quantity Updated: '. $body['amount']));
+
+    }
+	
+	
+	/**
+     * This section handles individual value updates for a part.
+     * 
+     */
+	 
+	/**
+     * Updates part type information  in the database based on data from an HTTP request.
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     * @return void
+     */
+	public function handleUpdateType() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('typeId');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setTypeId($body['typeId']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Part Type Updated'));
+    }
+	
+	/**
+     * Updates the last price paid information  in the database based on data from an HTTP request.
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     * @return void
+     */
+	public function handleUpdateLastPrice() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('lastPrice');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setLastPrice($body['lastPrice']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Last Price Paid Updated'));
+    }
+	
+	/**
+     * Updates part description information  in the database based on data from an HTTP request.
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     * @return void
+     */
+	public function handleUpdateDescription() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('description');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setName($body['description']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Description Updated'));
+    }
+	
+	/**
+     * Updates the name for the last supplier the item was purchased from in the database based on data from an HTTP request.
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     * @return void
+     */
+	public function handleUpdateLastSupplier() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('lastSupplier');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setLastSupplier($body['lastSupplier']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Last Supplier Name Updated'));
+    }
+	
+	/**
+     * Updates the name of the Manufacturer in the database based on data from an HTTP request.
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     * @return void
+     */
+	public function handleUpdateManufacturer() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('manufacturer');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setManufacturer($body['manufacturer']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Manufacturer Updated'));
+    }
+	public function handleUpdateManufacturerNumber() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('manufacturerNumber');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setManufacturerNumber($body['manufacturerNumber']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Manufacturer Part Number Updated'));
+    }
+	public function handleUpdateTouchnetId() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('touchnetId');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setTouchnetId($body['touchnetId']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Touchnet ID Updated'));
+    }
+	public function handleUpdateMarketPrice() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('marketPrice');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setMarketPrice($body['marketPrice']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Market Price Updated'));
+    }
+	public function handleCalculateMarketPrice() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('lastPrice');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setMarketPrice(1.25*$body['lastPrice']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Market Price Calculated'));
+    }
+	public function handleUpdatePartMargin() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('partMargin');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setPartMargin($body['partMargin']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Part Margin Updated'));
+    }
+	public function handleUpdateComment() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('comment');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setComment($body['comment']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Comment Updated'));
+    }
+	
+	
+   
+    /**
+     * Handles the HTTP request on the API resource. 
+     * 
+     * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
+     * the `action` parameter is not in the body, the request will be rejected. The assumption is that the request
+     * has already been authorized before this function is called.
+     *
+     * @return void
+     */
+    public function handleRequest() {
+        // Make sure the action parameter exists
+        $this->requireParam('action');
+
+        // Call the correct handler based on the action
+        switch($this->requestBody['action']) {
+
+            case 'updateLocation':
+                $this->handleUpdateLocation();
+				break;
+
+			case 'updateQuantity':
+                $this->handleUpdateQuantity();
+				break;
+
+			case 'updateType':
+                $this->handleUpdateType();
+				break;
+			
+			case 'updateManufacturer':
+                $this->handleUpdateManufacturer();
+				break;
+			
+			case 'updateManufacturerNumber':
+                $this->handleUpdateManufacturerNumber();
+				break;
+			
+			case 'updateLastSupplier':
+                $this->handleUpdateLastSupplier();
+				break;
+			
+			case 'updateDescription':
+                $this->handleUpdateDescription();
+				break;
+			
+			case 'updateMarketPrice':
+                $this->handleUpdateMarketPrice();
+				break;
+			
+			case 'calculateMarketPrice':
+                $this->handleCalculateMarketPrice();
+				break;
+			
+			case 'updateTouchnetId':
+                $this->handleUpdateTouchnetId();
+				break;
+			
+			case 'updateLastPrice':
+                $this->handleUpdateLastPrice();
+				break;
+
+            case 'updatePartMargin':
+                $this->handleUpdatePartMargin();
+				break;
+			
+			case 'updateComment':
+                $this->handleUpdateComment();
+				break;
+
+            default:
+                $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Part resource'));
+        }
+    }
+
+}
