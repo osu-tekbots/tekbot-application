@@ -111,7 +111,7 @@ $printJobs = $printerDao->getPrintJobs();
                             $paymentValidation = "<button id='acountpayment$printJobID' onClick='verifyAccountCode(\"$printJobID\", \"$name\")' class='btn btn-primary'>Verify Account Code</button>";
                             break;
                         case "voucher":
-                            // remains null
+                            $paymentConfirmed = 1;
                             break;
                     };
 
@@ -119,7 +119,6 @@ $printJobs = $printerDao->getPrintJobs();
                     if($userConfirm && $paymentMethod && !$paymentConfirmed) $currentStatus .= $paymentValidation;
                     elseif($paymentConfirmed) $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>💲Payment Confirmed</a><br/>";
 
-                    // TODO: Continue from here
                     if($paymentConfirmed && $completePrintDate) {
                         $currentStatus = "✔️Completed";
                     } elseif($paymentConfirmed) { //only render when payment is confirmed

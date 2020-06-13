@@ -321,18 +321,22 @@ class PrinterActionHandler extends ActionHandler {
 
                 // Ensures that voucher code has not expired
                 $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+
+
                 $dateExpired = (new \DateTime($voucher->getDateExpired()))->format('Y-m-d H:i:s');
                 if($dateUsed > $dateExpired) {
                     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
                 }
                 
-                $userID = $body['userId'];
-                $voucher->setUserID($userID);
-                $voucher->setDateUsed($dateUsed);
-                $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-                if(!$ok) {
-                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-                }
+                // As a result of current structure, cannot consume voucher here in case the user chooses to cancel their order
+
+                // $userID = $body['userId'];
+                // $voucher->setUserID($userID);
+                // $voucher->setDateUsed($dateUsed);
+                // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+                // if(!$ok) {
+                //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+                // }
             } else {
                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
             }
@@ -613,6 +617,17 @@ class PrinterActionHandler extends ActionHandler {
 
         $printJob->setCompletePrintDate((new \DateTime())->format('Y-m-d H:i:s'));
 
+        if($printJob->getVoucherCode()) {
+            $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+            $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+            $userID = $body['userID'];
+            $voucher->setUserID($userID);
+            $voucher->setDateUsed($dateUsed);
+            $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+            if(!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+            }
+        }
 
         $ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
