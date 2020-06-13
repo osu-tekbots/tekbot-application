@@ -82,6 +82,7 @@ $printJobs = $printerDao->getPrintJobs();
                     $employeeNotes = $p->getEmployeeNotes();
                     $pendingResponseDate = $p->getPendingCustomerResponse();
                     $paymentConfirmed = $p->getPaymentDate();
+                    $voucherCode = $p->getVoucherCode();
                     // $dateUpdated = $p->getDateUpdated();
                                         
 
@@ -102,25 +103,30 @@ $printJobs = $printerDao->getPrintJobs();
                     }
 
                     // Render appropriate button for each payment method
+                    $payment = "💲Paid: ";
                     $paymentValidation = null;
                     switch($paymentMethod) {
                         case "cc":
                             $paymentValidation = "<button id='ccpayment$printJobID' onClick='verifyCCPayment(\"$printJobID\", \"$name\")' class='btn btn-primary'>Verify CC Payment</button>";
+                            $payment .= "CC";
                             break;
                         case "account":
                             $paymentValidation = "<button id='acountpayment$printJobID' onClick='verifyAccountCode(\"$printJobID\", \"$name\")' class='btn btn-primary'>Verify Account Code</button>";
+                            $payment .= "Account Code";
                             break;
                         case "voucher":
                             $paymentConfirmed = 1;
+                            $payment .= "Voucher ($voucherCode)";
+
                             break;
                     };
 
                     // If print is not pending confirmation, payment is not voucher, and has not been payed yet then render the payment button
                     if($userConfirm && $paymentMethod && !$paymentConfirmed) $currentStatus .= $paymentValidation;
-                    elseif($paymentConfirmed) $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>💲Payment Confirmed</a><br/>";
+                    elseif($paymentConfirmed) $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>$payment</a><br/>";
 
                     if($paymentConfirmed && $completePrintDate) {
-                        $currentStatus = "✔️Completed";
+                        $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$completePrintDate'>✔️Completed</a>";
                     } elseif($paymentConfirmed) { //only render when payment is confirmed
                         $currentStatus .= "<button id='completePrint$printJobID' class='btn btn-primary'>Click when print is finished</button>";
                     }
@@ -141,6 +147,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
                     <td>$status</td>
+                    <td><button id='delete$printJobID'><i class='fas fa-fw fa-trash'></button><br/><button id='process$printJobID'><i class='fas fa-fw fa-thumbs-up'></button></td>
 
 
 
@@ -207,6 +214,42 @@ $printJobs = $printerDao->getPrintJobs();
                         $('#completePrint$printJobID').prop('disabled', true);
                     }
                 });
+
+                $('#delete$printJobID').on('click', function() {
+                    if(confirm('Delete $stlFileName print job created by $name?')) {
+                        $('#delete$printJobID').prop('disabled', true);
+                        let printJobID = '$printJobID';
+                        let data = {
+                            action: 'deletePrintJob',
+                            printJobID: printJobID,
+                        }
+                        api.post('/printers.php', data).then(res => {
+                            snackbar(res.message, 'success');
+                            setTimeout(function(){window.location.reload()}, 1000);
+                        }).catch(err => {
+                            snackbar(err.message, 'error');
+                    });
+                        $('#completePrint$printJobID').prop('disabled', true);
+                    }
+                });
+
+                $('#process$printJobID').on('click', function() {
+                    if(confirm('Process and complete $stlFileName print job created by $name?')) {
+                        $('#process$printJobID').prop('disabled', true);
+                        let printJobID = '$printJobID';
+                        let data = {
+                            action: 'processPrintJob',
+                            printJobID: printJobID,
+                        }
+                        api.post('/printers.php', data).then(res => {
+                            snackbar(res.message, 'success');
+                            setTimeout(function(){window.location.reload()}, 1000);
+                        }).catch(err => {
+                            snackbar(err.message, 'error');
+                    });
+                        $('#completePrint$printJobID').prop('disabled', true);
+                    }
+                });
             </script>";
 
                 }
@@ -236,6 +279,7 @@ $printJobs = $printerDao->getPrintJobs();
                         <th>Employee Notes</th>
                         <th>Customer Notes</th>
                         <th>Creation Date and Status</th>
+                        <th>Actions</th>
 
                     </tr>
                 </thead>
@@ -276,7 +320,7 @@ $printJobs = $printerDao->getPrintJobs();
         }        
         
         function verifyAccountCode(printJobID, name) {
-            if(confirm("IMPORTANT: Verify that (INSERT ACCOUNT CODE) is a valid account code"))
+            if(confirm("Verify that account code in 'employee notes' is a valid account code"))
             {
                 let data = {
                     action: 'verifyPrintPayment',

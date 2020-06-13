@@ -350,6 +350,7 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setCourseGroupId($body['courseGroup']);
 		$printJob->setVoucherCode($body['voucherCode']);
         $printJob->setCustomerNotes($body['customerNotes']);
+        $printJob->setEmployeeNotes($body['employeeNotes']);
         
         // Front end values that are foreign keys
         $printType = $this->printerDao->getPrintTypesByID($body['printTypeId']);
@@ -449,6 +450,23 @@ class PrinterActionHandler extends ActionHandler {
             'Successfully saved print job'
         ));
     }
+    
+    
+    public function handleDeletePrintJob() {
+
+        $body = $this->requestBody;
+        // $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
+        $ok = $this->printerDao->deletePrintJobByID($body['printJobID']);
+
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete print job'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully deleted print job'
+        ));
+    }
 	
 	
 	public function handleCreatePrintType(){
@@ -513,7 +531,35 @@ class PrinterActionHandler extends ActionHandler {
         ));
     }
     
+    public function handleProcessPrintJob() {
+        $body = $this->requestBody;
 
+        $this->requireParam('printJobID');
+        $printJobID = $body['printJobID'];
+
+        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+        $printJob = $printJob[0];
+
+        $printJob->setValidPrintCheck((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setUserConfirmCheck((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setCompletePrintDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPendingCustomerResponse(0);
+
+        $ok = $this->printerDao->updatePrintJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully processed print job')
+        );
+    }
 
     public function handleSendCustomerConfirm() {
         $body = $this->requestBody;
@@ -739,7 +785,11 @@ class PrinterActionHandler extends ActionHandler {
 			case 'saveprintjob':
 				$this->handleSavePrintJob();
 			// case 'removeprintjob':
-			// 	$this->handleRemovePrintJob();
+            // 	$this->handleRemovePrintJob();
+            case 'deletePrintJob':
+                $this->handleDeletePrintJob();
+            case 'processPrintJob':
+                    $this->handleProcessPrintJob();
 			
 			case 'createprinttype':
 				$this->handleCreatePrintType();

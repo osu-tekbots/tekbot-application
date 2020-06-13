@@ -120,6 +120,22 @@ foreach($studentPrintJobs as $p) {
 		}
 	});
 
+	$('#deletePrint$printJobID').on('click', function() {
+		if(confirm('Confirm you would like to delete this print job and remove it from queue (irreversable)?')) {
+			let printJobID = '$printJobID';
+			let data = {
+				action: 'deletePrintJob',
+				printJobID: printJobID,
+			}
+			api.post('/printers.php', data).then(res => {
+				snackbar(res.message, 'success');
+				setTimeout(function(){window.location.reload()}, 1000);
+			}).catch(err => {
+				snackbar(err.message, 'error');
+		});
+		}
+	});
+
 
 	</script>
 	";
@@ -134,7 +150,7 @@ foreach($studentPrintJobs as $p) {
 
 
 	$confirmationButton = "<button id='confirmPrint$printJobID' class='btn btn-outline-primary capstone-nav-btn'>Confirm</button>";
-	$denyButton = "<button class='btn btn-outline-danger capstone-nav-btn'>Deny</button>";
+	$denyButton = "<button id='deletePrint$printJobID' class='btn btn-outline-danger capstone-nav-btn'>Delete</button>";
 	if($validPrintDate && $pendingResponse) {
 		$status .= "Awaiting your confirmation:<br/>";
 		$status .= $confirmationButton;
@@ -150,10 +166,12 @@ foreach($studentPrintJobs as $p) {
 	$printJobsHTML .= "
 	<tr>
 	<td>$dateCreated</td>
-	<td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='Download' class='btn btn-outline-primary capstone-nav-btn'>$stlFileName</button></a>
-	<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
-		View
-	</button></td>
+	<td>
+		<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
+			View
+		</button>
+		<a style='color:#0000FF;' href='./prints/$dbFileName'>$stlFileName</a>
+	</td>
 	<td>$customerNotes</td>
 	<td>$status</td>
 

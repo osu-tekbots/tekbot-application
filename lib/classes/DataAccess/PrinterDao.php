@@ -451,6 +451,24 @@ class PrinterDao {
         }
     }
 
+    public function deletePrintJobByID($printJobId) {
+        try {
+            $sql = '
+            DELETE FROM 3d_jobs
+            WHERE 3d_job_id = :id
+            ';
+            $params = array(
+                ':id' => $printJobId,
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove printjob: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function deletePrintTypeByID($printTypeID) {
         try {
             $sql = '

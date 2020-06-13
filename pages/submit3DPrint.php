@@ -256,6 +256,10 @@ $('#submit3DPrintBtn').on('click', function () {
 		if(selectedPayment == 'voucher') {
 			voucherVal = $("#voucherInput").val();
 		}
+		let employeeNotes = '';
+		if(selectedPayment == 'account') {
+			employeeNotes = 'Account code: ' + $("#accountInput").val();
+		}
 
 		let filePath = $('#uploadFileInput').val();
 		var filename = filePath.replace(/^.*\\/, "");
@@ -271,8 +275,10 @@ $('#submit3DPrintBtn').on('click', function () {
 			payment: selectedPayment,
 			courseGroup: 0,
 			voucherCode: voucherVal,
-			customerNotes: $('#specialNotes').val()
+			customerNotes: $('#specialNotes').val(),
+			employeeNotes: employeeNotes
 		}; 
+		console.log(employeeNotes);
 		// Send our request to the API endpoint
 		api.post('/printers.php', data).then(res => {
 			snackbar(res.message, 'success');
