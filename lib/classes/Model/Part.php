@@ -1,9 +1,10 @@
 <?php
 
 namespace Model;
+use Util\IdGenerator;
 
 /**
- * Data structure representing a Locker
+ * Data structure representing a Part
  */
 class Part {
     
@@ -44,6 +45,8 @@ class Part {
 	private $marketPrice;
 	/** @var string */
 	private $comment;
+	/** @var string */
+	private $publicDescription;
 	/** @var Date/Time (string) */
 	private $lastUpdated;
 	/** @var string */
@@ -63,7 +66,7 @@ class Part {
     */
     public function __construct($stockNumber = null) {
         if ($stockNumber == null) {
-			$stockNumber = IdGenerator::generateSecureUniqueId();
+			$stockNumber = IdGenerator::generateSecureUniquePartId(6); //Only want 8 characters
             $this->setStocknumber($stockNumber);   
         } else {
             $this->setStocknumber($stockNumber);
@@ -213,6 +216,14 @@ class Part {
 		$this->comment = $data;
 	}
 	
+	public function getPublicDescription(){
+		return $this->publicDescription;
+	}
+	
+	public function setPublicDescription($data){
+		$this->publicDescription = $data;
+	}
+	
 	
 	public function getLastUpdated(){
 		return $this->lastUpdated;
@@ -255,4 +266,110 @@ class Part {
 	}
 
 }
+
+/**
+ * Data structure representing a Kit. This is a subset of Part 
+ */
+class Kit {
+    
+	/** @var string */
+	private $name;
+	/** @var string */
+	private $stocknumber;
+	
+	
+	/** @var string */
+	private $image;
+
+	/** @var int */
+	private $typeID;
+	/** @var string */
+	private $type;
+	
+	/** @var array */
+	private $contents;
+	
+	
+    /**
+     * Creates a new instance of a Kit.
+     * 
+     *
+     * @param string|null $id the ID of the reservation. If null, a random ID will be generated.
+    */
+    public function __construct($stockNumber = null) {
+        if ($stockNumber == null) {
+			$stockNumber = IdGenerator::generateSecureUniqueId();
+            $this->setStocknumber($stockNumber);   
+        } else {
+            $this->setStocknumber($stockNumber);
+        }
+    } 
+
+    /**
+     * Getters and Setters
+     */
+	public function getStocknumber(){
+		return $this->stocknumber;
+	}
+
+	public function setStocknumber($data){
+		$this->stocknumber = $data;
+	}
+
+	public function getName(){
+		return $this->name;
+	}
+
+	public function setName($data){
+		$this->name = $data;
+	}
+	
+	public function getImage(){
+		return $this->image;
+	}
+	
+	public function setImage($data){
+		$this->image = $data;
+	}
+	
+	public function getTypeId(){
+		return $this->typeID;
+	}
+	
+	public function setTypeId($data){
+		$this->typeID = $data;
+	}
+	
+	public function getType(){
+		return $this->type;
+	}
+	
+	public function setType($data){
+		$this->type = $data;
+	}
+	
+	public function getContents(){
+		return $this->contents;
+	}
+	
+	public function addContents($stockNumber, $quantity){
+		if ($this->contents == null) {
+            $this->contents = array();
+			$this->contents[$stockNumber] = $quantity;
+        } else {
+            $this->contents[$stockNumber] = $quantity;
+        }
+        return $this;
+	}
+	
+	public function removeContents($stockNumber){
+		if ($this->contents != null) {
+            if (array_key_exists($stockNumber, $this->contents))
+				unset($this->contents[$stockNumber]);
+        }
+		return $this;
+	}
+
+}
+
 ?>

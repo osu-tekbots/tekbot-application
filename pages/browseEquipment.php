@@ -46,6 +46,7 @@ foreach ($equipments as $e){
     } else {
         $actions = "$viewButton";
     }
+	
     $isAvailable = $equipmentReservationDao->getEquipmentAvailableStatus($equipmentID);
     if ($isAvailable){
         $status = "Available";
@@ -53,6 +54,9 @@ foreach ($equipments as $e){
     else {
         $status = "Not Available";
     }
+	
+//	$status .= "<BR>" . $e->getInstances() . " Unit(s) Total";
+	
     $name = Security::HtmlEntitiesEncode($e->getEquipmentName());
     if (strlen($name) > 60) {
         // Restrict the name length
@@ -67,10 +71,9 @@ foreach ($equipments as $e){
     
     $equipmentItemHTML .= "
     <tr>
-        <td><img height='200px;' src='$imagePath'></td>
+        <td><a href='pages/viewEquipment.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
         <td>$name</td>
         <td>$description</td>
-        <td>$health</td>
         <td>$status</td>
         <td>$actions</td>
     </tr>
@@ -83,7 +86,7 @@ foreach ($equipments as $e){
         <?php
         echo "
         <div class='admin-paper'>
-        <h1>Equipment Rentals</h1>
+        <h1>Equipment Available to Borrow</h1>
             <table class='table' id='equipmentList'>
             <caption>Equipments For Rental</caption>
                 <thead>
@@ -91,9 +94,8 @@ foreach ($equipments as $e){
                         <th>Image</th>
                         <th>Name</th>
                         <th>Description</th>
-                        <th>Health</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,7 +105,8 @@ foreach ($equipments as $e){
             <script>
             $('#equipmentList').DataTable(
                 {
-                    lengthMenu: [[-1, 5, 10, 20, 50], ['All', 5, 10, 20, 50]]
+                    'order':[[1, 'asc']],
+					lengthMenu: [[-1, 5, 10, 20, 50], ['All', 5, 10, 20, 50]]
                 }
             );
 

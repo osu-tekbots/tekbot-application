@@ -89,6 +89,37 @@ class KitEnrollmentDao {
             return false;
         }
     }
+	
+	/**
+     * Fetches the kit enrollments with the provided student ID
+     *
+     * @param string $id
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
+    public function getKitEnrollmentsByOnid($id) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.onid = :id
+            
+            ';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+            
+            $kits = array();
+            foreach ($results as $row) {
+                $kit = self::ExtractKitFromRow($row);
+                $kits[] = $kit;
+            }
+           
+            return $kits;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch kit with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Fetches the kit enrollments with the provided onid

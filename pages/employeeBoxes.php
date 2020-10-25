@@ -34,6 +34,17 @@ $js = array(
     'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
 );
 
+
+if (isset($_REQUEST['key'])){
+	$boxDao = new BoxDao($dbConn, $logger);
+	$levels = $boxDao->getBatteryLevels($_REQUEST['key']);
+	echo "<table><tr><th>Time</th><th>Reading</th></tr>";
+	foreach ($levels AS $l)
+		echo "<tr><td>" . $l['timestamp'] . "</td><td>" . $l['battery'] . "</td></tr>";
+	echo "</table>";
+	exit();
+}
+
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
@@ -41,6 +52,8 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 $boxDao = new BoxDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $boxes = $boxDao->getBoxes();
+
+
 
 
 $options = "<option value=''></option>";
@@ -93,7 +106,7 @@ function resetBox(id){
 function lockBox(id){
 	
 	let content = {
-		action: 'lockBox',
+		action: 'lockAdmin',
 		boxId: id
 	}
 	
@@ -108,7 +121,7 @@ function lockBox(id){
 function unlockBox(id){
 	
 	let content = {
-		action: 'unlockBox',
+		action: 'unlockAdmin',
 		boxId: id
 	}
 	
@@ -163,6 +176,8 @@ function emptyBox(id){
 				$locked = $b->getLocked();
 				$userId = $b->getUserId();
 				$orderNumber = $b->getOrderNumber();
+				$battery = $b->getBattery();
+				$battery = (min(($battery - 1248)/(1600-1248),1))*100;
 				if ($userId != '')
 					$user = $userDao->getUserById($userId);
 				$fillBy = $b->getFillBy();
@@ -171,7 +186,10 @@ function emptyBox(id){
 
 			 
 					echo '<div class="form-group row" id="row'.$boxKey.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">
-							<div class="col-sm-1" style="text-align:right;"><h2>'.$boxNumber.':</h2></div>';
+							<div class="col-sm-1" style="text-align:right;">
+							<h2>'.$boxNumber.':</h2>
+							<a href="./pages/employeeBoxes.php?key='.$boxKey.'"><div class="progress"><div class="progress-bar '.($battery < 25 ? 'bg-danger' :'bg-success').'" role="progressbar" style="width: '.$battery.'%" aria-valuenow="'.$battery.'" aria-valuemin="0" aria-valuemax="100">'.number_format($battery,0).'%</div>'.($battery < 25 ? '&nbsp;&nbsp;Low Battery' :'').'</div></a>
+							</div>';
 							
 					if ($fillDate == '0000-00-00 00:00:00'){
 						echo '<div class="form-group col-sm-4">User:<select id="name'.$boxKey.'" class="form-control" >'.$options.'</select></div>';

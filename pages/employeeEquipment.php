@@ -60,15 +60,18 @@ foreach ($availableEquipment as $e){
 	$equipment_option .= "<option value='".$e->getEquipmentID()."'>".$e->getEquipmentName()."</option>";
 }
 
+
+
+
 $newreservationHTML = '';
-$newreservationHTML .= "<form>
-				<div class='form-row'>
-					<div class='form-group col-sm-3'><label for='user'>User</label><select id='user' class='form-control'>$user_option</select></div>
-					<div class='form-group col-sm-5'><label for='equipment'>Equipment</label><select id='equipment' class='form-control'>$equipment_option</select></div>
-					<div class='form-group col-sm-2'><label for='returndate'>Return Date</label><input type='date' id='returndate'></div>
-					<div class='form-group col-sm-2'><button class='form-control' onclick='reserveEquipment();'>Make Reservation</button></div>
-				</div>
+$newreservationHTML .= "<form class='form-inline'>
+
+					<label for='user' class='d-inline-block'>User:</label><select id='user' class='form-control d-inline-block'>$user_option</select>
+					<label for='equipment' class='d-inline-block'>Equipment:</label><select id='equipment' class='form-control d-inline-block'>$equipment_option</select>
+					<button class='form-control' onclick='reserveEquipment();'>Make Reservation</button>
+				
 				</form>";
+				
 
 $reservedHTML = '';
 $listNumber = 0;
@@ -108,19 +111,20 @@ foreach ($reservedEquipment as $r){
 	
 
 
-
-	$reservedHTML .= "
-	<tr id='$tableIDName'>
-		<td>$email</td>
-		<td>$name</td>
-		<td>$reservationTime</td>
-		<td>$latestPickupTime</td>
-		<td>$equipmentName</td>
-		<td>$active</td>
-		<td>$handoutButton $cancelButton</td>
-	</tr>
-	";
-	$listNumber++;
+	if ($isActive){
+		$reservedHTML .= "
+		<tr id='$tableIDName'>
+			<td>$email</td>
+			<td>$name</td>
+			<td>$reservationTime</td>
+			<td>$latestPickupTime</td>
+			<td>$equipmentName</td>
+			<td>$active</td>
+			<td>$handoutButton $cancelButton</td>
+		</tr>
+		";
+		$listNumber++;
+	}
 }
 
 $checkoutHTML = '';
@@ -205,7 +209,11 @@ foreach ($checkedoutEquipment as $c){
 				echo "
 	
 				<div class='admin-paper'>
-				<h3>Reserved Equipment</h3>
+				<h3>Reserved Equipment</h3>";
+				if ($reservedHTML == '')
+					echo "<p>There are no active equipment reservations.</p>$newreservationHTML</div>";
+				else
+					echo "
 				<p>After a customer reserves an equipment on the portal, it will appear here.  Once they arrive at the store, hit 'Handout' to rent out the item to the student.  The reservation will expire and now it will show up as a 'Checked Out Equipment' in the table below.</p>
 					<table class='table' id='equipmentReservations'>
 					<caption>Reservations</caption>
@@ -233,6 +241,7 @@ foreach ($checkedoutEquipment as $c){
 					);
 
 					</script>
+					$newreservationHTML
 				</div>
 					
 					";
@@ -242,16 +251,13 @@ foreach ($checkedoutEquipment as $c){
 
 
 					
-				echo "<div class='admin-paper'>";
-				echo $newreservationHTML;
-				echo '</div>';
+
 				
 				echo "
 				<div class='admin-paper'>
 				<h3>Checked Out Equipment</h3>
 				<p>When a student brings back the rented equipment, hit the 'Return' button next to their checkout.  Write any necessary notes in the notes section (scratches, broken handle).  The student can see the notes you put here.  If there are any fees that need to be assigned (late fees, damaged item), you can assign them fees by pressing the 'Assign fee' button.</p>
 					<table class='table' id='equipmentCheckouts'>
-					<caption>Checkouts</caption>
 						<thead>
 							<tr>
 								<th>Email Address</th>
@@ -271,8 +277,8 @@ foreach ($checkedoutEquipment as $c){
 					<script>
 					$('#equipmentCheckouts').DataTable(
 						{
-							lengthMenu: [[5, 10, 20, -1], [5, 10, 20, 'All']],
-							aaSorting: [[2, 'desc']]
+							lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+							aaSorting: [[4, 'asc']]
 						}
 					);
 
@@ -341,7 +347,6 @@ $('select').on('change', function() {
 function reserveEquipment(){
 	var user = $('#user').val();
 	var equipment = $('#equipment').val();
-	var returndate = $('#returndate').val();
 	
 	let content = {
 		action: 'createReservation',

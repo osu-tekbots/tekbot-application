@@ -20,6 +20,9 @@ if(!session_id()) {
 
 if (isset($_REQUEST['box_key']) && !empty($_REQUEST['box_key'])) {
 	$boxDao = new BoxDao($dbConn, $logger);
+	if (isset($_REQUEST['battery']))
+		$boxDao->updateBattery($_REQUEST['box_key'], $_REQUEST['battery']); //Set Current Battery Level
+	
 	if ($boxDao->boxStatus($_REQUEST['box_key'])) { //if true, locker should be openable
 		$boxDao->pickupBox($_REQUEST['box_key']); //Set Pickup Date in DB so we know
 		echo '{"message":"open"}';

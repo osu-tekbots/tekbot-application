@@ -74,6 +74,30 @@ class BoxDao {
             return false;
         }
     }
+	
+	/**
+     * Fetches a box by box_key.
+     * @return an array of parts on success, false otherwise
+     */
+    public function getBoxByUser($id) {
+        try {
+            $sql = '
+            SELECT *
+			FROM `tekbots_boxes`
+			WHERE tekbots_boxes.user_id = :id
+			 ';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+			$boxes = Array();
+			foreach ($results as $row) {
+                $boxes[] = self::ExtractBoxFromRow($row);
+            }
+            return $boxes;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any boxes: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Fetches a single part by StockNumber.
@@ -161,6 +185,56 @@ class BoxDao {
         }
     }
 	
+	/**
+     * Fetches a single part by StockNumber.
+     * @return \Model\Part|boolean a part on success, false otherwise
+     */
+    public function updateBattery($id, $battery) {
+        try {
+            $sql = '
+            UPDATE  tekbots_boxes 
+			SET battery = :battery 
+			WHERE tekbots_boxes.box_key = :id 
+			';
+            $params = array(':id' => $id,
+							':battery' => $battery);
+            $results = $this->conn->execute($sql, $params);
+			
+			$sql = '
+            INSERT INTO tekbots_boxes_batterylevels 
+			(battery, box_key) VALUES (:battery, :id) 
+			';
+            $params = array(':id' => $id,
+							':battery' => $battery);
+            $results = $this->conn->execute($sql, $params);
+          
+            return (true);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update battery: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function getBatteryLevels($id) {
+        try {
+            
+			$sql = '
+            SELECT *
+			FROM tekbots_boxes_batterylevels 
+			WHERE
+			box_key = :id
+			ORDER BY timestamp ASC			
+			';
+            $params = array(':id' => $id);
+            $results = $this->conn->query($sql, $params);
+          
+            return ($results);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update battery: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
 	public function resetBox($id) {
         try {
             $sql = '
@@ -188,6 +262,7 @@ class BoxDao {
 				fill_date = :fill_date,
 				fill_by = :fill_by,
 				locked = :locked,
+				battery = :battery,
 				pickup_date = :pickup_date
             WHERE box_key = :box_key
             ';
@@ -199,6 +274,7 @@ class BoxDao {
                 ':fill_date' => $box->getFillDate(),
                 ':fill_by' => $box->getFillBy(),
                 ':locked' => $box->getLocked(),
+                ':battery' => $box->getBattery(),
                 ':pickup_date' => $box->getPickupDate() 
             );
             $this->conn->execute($sql, $params);
@@ -264,6 +340,9 @@ class BoxDao {
 		}
 		if(isset($row['order_number'])){
 			$box->setOrderNumber($row['order_number']);
+		}
+		if(isset($row['battery'])){
+			$box->setBattery($row['battery']);
 		}
 			
        

@@ -2,7 +2,7 @@
 // Updated 11/5/2019
 namespace Api;
 
-use Model\Locker;
+use Model\Part;
 use Email\TekBotsMailer;
 use DataAccess\UserDao;
 
@@ -230,18 +230,46 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Market Price Updated'));
     }
 	public function handleCalculateMarketPrice() {
-        // Ensure the required parameters exist
+        $markup = .4;
+		
+		// Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('lastPrice');
         $body = $this->requestBody;
 		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
-        $part->setMarketPrice(1.25*$body['lastPrice']);
+        $part->setMarketPrice((1+$markup)*$body['lastPrice']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Market Price Calculated: ' . $body['lastPrice'] . ' *  ' . (1+$markup) . ' = ' . ((1+$markup)*$body['lastPrice'])));
+    }
+	
+	public function handleCalculateLastPrice() { //This is only used for kits
+        $kitfee = 1.25;
+		
+		// Ensure the required parameters exist
+		// Assuming this is only called on a kit
+        $this->requireParam('stockNumber');
+		$this->requireParam('lastPrice');
+        $body = $this->requestBody;
+        $part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        
+		$contents = $this->inventoryDao->getKitContentsByStocknumber($body['stockNumber']);
+		$cost = $kitfee;
+		foreach ($contents AS $key => $value){
+			$p = $this->inventoryDao->getPartByStocknumber($key);
+			$cost += ($p->getLastPrice() * $value);
+		}
+		
+		$part->setLastPrice($cost);
         $ok = $this->inventoryDao->updatePart($part);
         if(!$ok)
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
 		else
 			$this->respond(new Response(Response::OK, 'Market Price Calculated'));
     }
+	
 	public function handleUpdatePartMargin() {
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
@@ -255,6 +283,47 @@ class InventoryActionHandler extends ActionHandler {
 		else
 			$this->respond(new Response(Response::OK, 'Part Margin Updated'));
     }
+	public function handleAddPart() {
+        // Ensure the required parameters exist
+        $this->requireParam('type');
+		$this->requireParam('desc');
+        $body = $this->requestBody;
+		
+		$part = new Part();
+        $part->setTypeId($body['type']);
+        $part->setName($body['desc']);
+        $ok = $this->inventoryDao->addPart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to be added'));
+		else
+			$this->respond(new Response(Response::OK, 'Part Added'));
+    }
+	public function handleUpdateArchived() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('archived');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setArchive($body['archived']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Status Updated'));
+    }
+	public function handleUpdateStocked() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('stocked');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setStocked($body['stocked']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Status Updated'));
+    }
 	public function handleUpdateComment() {
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
@@ -267,6 +336,84 @@ class InventoryActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
 		else
 			$this->respond(new Response(Response::OK, 'Comment Updated'));
+    }
+	public function handleUpdatePublicDesc() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('publicDescription');
+        $body = $this->requestBody;
+		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+        $part->setPublicDescription($body['publicDescription']);
+        $ok = $this->inventoryDao->updatePart($part);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Public Description Updated'));
+    }
+	public function handleUpdateKitQuantity() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('childid');
+        $this->requireParam('quantity');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->updateKitQuantity($body['stockNumber'],$body['childid'],$body['quantity']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Quantity Updated'));
+    }
+	public function handleAddKitContents() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('childid');
+        $this->requireParam('quantity');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->addKitContents($body['stockNumber'],$body['childid'],$body['quantity']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Quantity Updated'));
+    }
+	public function handleAddSupplierForPart() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('link');
+        $this->requireParam('partnumber');
+        $this->requireParam('supplier');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->addPartSupplier($body['stockNumber'],$body['supplier'],$body['partnumber'],$body['link']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Supplier Added'));
+    }
+	
+	public function handleRemoveSupplierForPart() {
+        // Ensure the required parameters exist
+		$this->requireParam('id');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->removePartSupplier($body['id']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Supplier Removed'));
+    }
+	
+	public function handleRemoveKitContents() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('childid');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->removeKitContents($body['stockNumber'],$body['childid']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Quantity Updated'));
     }
 	
 	
@@ -289,6 +436,14 @@ class InventoryActionHandler extends ActionHandler {
 
             case 'updateLocation':
                 $this->handleUpdateLocation();
+				break;
+
+			case 'addKitContents':
+                $this->handleAddKitContents();
+				break;
+
+			case 'removeKitContents':
+                $this->handleRemoveKitContents();
 				break;
 
 			case 'updateQuantity':
@@ -323,6 +478,10 @@ class InventoryActionHandler extends ActionHandler {
                 $this->handleCalculateMarketPrice();
 				break;
 			
+			case 'calculateLastPrice':
+                $this->handleCalculateLastPrice();
+				break;
+			
 			case 'updateTouchnetId':
                 $this->handleUpdateTouchnetId();
 				break;
@@ -338,6 +497,35 @@ class InventoryActionHandler extends ActionHandler {
 			case 'updateComment':
                 $this->handleUpdateComment();
 				break;
+
+			case 'updateKitQuantity':
+                $this->handleUpdateKitQuantity();
+				break;
+
+			case 'updateStocked':
+                $this->handleUpdateStocked();
+				break;
+
+			case 'updateArchived':
+                $this->handleUpdateArchived();
+				break;
+
+			case 'addPart':
+                $this->handleAddPart();
+				break;
+
+			case 'addSupplierForPart':
+                $this->handleAddSupplierForPart();
+				break;
+
+            case 'removeSupplierForPart':
+                $this->handleRemoveSupplierForPart();
+				break;
+
+			case 'updatePublicDesc':
+                $this->handleUpdatePublicDesc();
+				break;
+
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Part resource'));

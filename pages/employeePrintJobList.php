@@ -123,11 +123,11 @@ $printJobs = $printerDao->getPrintJobs();
 
                     // If print is not pending confirmation, payment is not voucher, and has not been payed yet then render the payment button
                     if($userConfirm && $paymentMethod && !$paymentConfirmed) $currentStatus .= $paymentValidation;
-                    elseif($paymentConfirmed) $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>$payment</a><br/>";
+                    elseif($paymentConfirmed && $userConfirm) $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>$payment</a><br/>";
 
-                    if($paymentConfirmed && $completePrintDate) {
+                    if($paymentConfirmed && $completePrintDate && $userConfirm) {
                         $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$completePrintDate'>✔️Completed</a>";
-                    } elseif($paymentConfirmed) { //only render when payment is confirmed
+                    } elseif($paymentConfirmed && $userConfirm) { //only render when payment is confirmed
                         $currentStatus .= "<button id='completePrint$printJobID' class='btn btn-primary'>Click when print is finished</button>";
                     }
 
@@ -147,7 +147,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
                     <td>$status</td>
-                    <td><button id='delete$printJobID'><i class='fas fa-fw fa-trash'></button><br/><button id='process$printJobID'><i class='fas fa-fw fa-thumbs-up'></button></td>
+                    <td><button id='delete$printJobID'><i class='fas fa-fw fa-trash'></i></button><button id='process$printJobID'><i class='fas fa-fw fa-thumbs-up'></i></button></td>
 
 
 

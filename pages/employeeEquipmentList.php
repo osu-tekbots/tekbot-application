@@ -63,9 +63,9 @@ foreach ($equipments as $e){
 	$units = $e->getInstances();
 	$isPublic = $e->getIsPublic();
 	if ($isPublic){
-		$publicStatus = "Public (Viewable by everyone)";
+		$publicStatus = "Public";
 	} else {
-		$publicStatus = "Hidden (Viewable by employees)";
+		$publicStatus = "Hidden";
 	}
 	$viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
 	$editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
@@ -120,7 +120,7 @@ foreach ($equipments as $e){
 									<th>Units</th>
 									<th>Cost</th>
 									<th>Notes</th>
-									<th>Actions</th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -130,7 +130,7 @@ foreach ($equipments as $e){
 						<script>
 						$('#equipmentList').DataTable(
 							{
-								lengthMenu: [[-1, 5, 10, 20, 50], ['All', 5, 10, 20, 50]]
+								lengthMenu: [[-1, 25, 50], ['All', 25, 50]]
 							}
 						);
 			

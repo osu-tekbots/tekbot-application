@@ -1,11 +1,6 @@
 <?php
 
-use Util\Security;
-use DataAccess\UsersDao;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentReservationDao;
 
 /**
  * Renders the HTML for the panel that displays options for reviewing a capstone project to admins.
@@ -55,7 +50,7 @@ function renderAdminReviewPanel($project, $categories) {
 
     $viewButtonStyle = $pIsHidden ? 'display: none;' : '';
 
-    echo "
+    echo <<< HTML
     <br/>
     <div class='row'>
         <div class='col-sm-3'></div>
@@ -109,7 +104,7 @@ function renderAdminReviewPanel($project, $categories) {
         </div>
     </div>
     <div class='col-sm-3'></div>
-    ";
+HTML;
 }
 
 // Checks if the entry for student ID is valid
@@ -149,12 +144,11 @@ function isValidStudentID($sid){
                 <span>Equipment</span>
              </a>
              <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                 <h6 class="dropdown-header">Reserved/Checked Out:</h6>
-                 <a class="dropdown-item" href="pages/employeeEquipment.php">Checkout Equipment</a>
+                 <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
                  <div class="dropdown-divider"></div>
                  <h6 class="dropdown-header">Adjust Content:</h6>
                  <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                 <a class="dropdown-item" href="blank.html">Info</a>
+                 <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
              </div>
         </li>
 
@@ -222,9 +216,12 @@ function isValidStudentID($sid){
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
              <a class="dropdown-item" href="pages/employeeInventory.php">Inventory List</a>
+             <a class="dropdown-item" href="pages/employeeInventoryKits.php">Configure Kits</a>
+             <a class="dropdown-item" href="pages/employeeInventoryOrderParts.php">Order Parts</a>
              <div class="dropdown-divider"></div>
              <h6 class="dropdown-header">Options:</h6>
              <a class="dropdown-item" href="pages/employeeInventoryMessages.php">Edit Messages</a>
+			 <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
          </div>
         </li>
         <li class="nav-item">
@@ -593,8 +590,3 @@ function renderEquipmentFeeApproveButton($feeID){
 
 
 }
-
-
-
-
-?>

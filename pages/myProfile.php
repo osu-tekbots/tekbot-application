@@ -8,6 +8,9 @@ use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
 use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
+use DataAccess\BoxDao;
+use DataAccess\KitEnrollmentDao;
+use Model\KitEnrollmentStatus;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
@@ -30,16 +33,7 @@ $js = array(
 	'assets/Madeleine.js/src/lib/stats.js',
 	'assets/Madeleine.js/src/lib/detector.js',
 	'assets/Madeleine.js/src/lib/three.min.js',
-	'assets/Madeleine.js/src/Madeleine.js',
-	// 'assets/StlViewer.js/stl_viewer.min.js',
-	// 'assets/StlViewer.js/CanvasRenderer.js',
-	// 'assets/StlViewer.js/load_stl.min.js',
-	// 'assets/StlViewer.js/OrbitControls.js',
-	// 'assets/StlViewer.js/parser.min.js',
-	// 'assets/StlViewer.js/Projector.js',
-	// 'assets/StlViewer.js/three.min.js',
-	// 'assets/StlViewer.js/TrackballControls.js',
-	// 'assets/StlViewer.js/webgl_detector.js',
+	'assets/Madeleine.js/src/Madeleine.js'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
@@ -50,15 +44,17 @@ $usersDao = new UsersDao($dbConn, $logger);
 
 $user = $usersDao->getUserByID($_SESSION['userID']);
 
-
-// TODO: handle the case where we aren't able to fetch the user
 if ($user){
 	$uId = $user->getUserID();
 	$uFirstName = $user->getFirstName();
 	$uLastName = $user->getLastName();
 	$uPhone = $user->getPhone();
 	$uEmail = $user->getEmail();
+	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
+} else {
+	echo "<h1>You are not in db. You shoudl never have seen this.</h1>";
+	exit();
 }
 
 $checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
@@ -68,22 +64,26 @@ $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
-
+$boxDao = new BoxDao($dbConn, $logger);
+$kitsDao = new KitEnrollmentDao($dbConn, $logger);
 
 $uID = $_SESSION['userID'];
 $checkoutFees = $checkoutFeeDao->getFeesForUser($uID);
 $printerFees = $printerFeeDao->getFeesForUser($uID);
-$reservedEquipment = $reservationDao->getReservationsForUser($uID);
-$checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
-$checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
+
+
+
 $studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
 
 
-$printJobsHTML = '';
-
+/*
+This section prepares the 3D printing/Laser cutting tab.
+*/
 
 include_once PUBLIC_FILES . '/modules/customerPrintModal.php';
 
+
+$printJobsHTML = '';
 foreach($studentPrintJobs as $p) {
 	$printJobID = $p->getPrintJobID();
 	$userID = $p->getUserID();
@@ -135,17 +135,16 @@ foreach($studentPrintJobs as $p) {
 		});
 		}
 	});
-
-
+	
 	</script>
 	";
 
 	$status = "";
 
 	if($validPrintDate) {
-		$status = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>👀 Print Validated By Employee</a><br/>";
+		$status = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>Print Validated By Employee</a><br/>";
 	} else {
-		$status = "⌛Waiting for Employee to Validate Print"; 
+		$status = "Waiting for Employee to Validate Print"; 
 	}
 
 
@@ -156,11 +155,11 @@ foreach($studentPrintJobs as $p) {
 		$status .= $confirmationButton;
 		$status .= $denyButton;	
 	} elseif(!$completePrintDate && $validPrintDate) {
-		$status .= "⌛ Currently in queue to Print";
+		$status .= "Currently in queue to Print";
 	}
 
 	if($completePrintDate) {
-		$status = "✔️ Print has completed";
+		$status = "Print has completed";
 	}
 
 	$printJobsHTML .= "
@@ -179,6 +178,11 @@ foreach($studentPrintJobs as $p) {
 	$buttonScripts
 	";
 }
+
+/*
+This section prepares the Fees tab of the webpage
+
+*/
 
 $feeHTML = '';
 
@@ -250,6 +254,15 @@ foreach ($printerFees as $fee){
 
 }
 
+/*
+This section prepares the contents of the Equipment Tba.
+This includes Reservations and Active Check-Outs
+
+*/
+$reservedEquipment = $reservationDao->getReservationsForUser($uID);
+$checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
+
+
 $reservedEquipmentCount = 0;
 $reservedHTML = '';
 $listNumber = 0;
@@ -275,29 +288,53 @@ if ($reservedEquipment){
 				$cancelButton = createReservationCancelButton($reservationID, $listNumber);
 				$tableIDName = "activeReservation$listNumber";
 				$reservedEquipmentCount++;
+				$reservedHTML .= "
+					<tr id='$tableIDName'>
+						<td>$reservationTime</td>
+						<td>$latestPickupTime</td>
+						<td>$equipmentName</td>
+						<td>$active</td>
+						<td>$cancelButton</td>
+					</tr>
+					";
+				$listNumber++;
 			}
-			else {
+			else { //Should not display, TODO: Remove
 				$active = "Expired";
 				//$handoutButton = createReserveAsEmployeeBtn($reservationID, $listNumber, $userID, $equipmentID);
 				$handoutButton = "";
 				$cancelButton = "";
 				$tableIDName = "expiredReservation$listNumber";
 			}
-		
-
-
-
-		$reservedHTML .= "
-		<tr id='$tableIDName'>
-			<td>$reservationTime</td>
-			<td>$latestPickupTime</td>
-			<td>$equipmentName</td>
-			<td>$active</td>
-			<td>$cancelButton</td>
-		</tr>
-		";
-		$listNumber++;
 	}
+	
+	$headers = "<table class='table' id='equipmentReservations'>
+			<thead>
+				<tr>
+					<th>Reservation Time</th>
+					<th>Expiration Time</th>
+					<th>Equipment</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>";
+			
+	$footers = "</tbody>
+		</table>
+		<script>
+		$('#equipmentReservations').DataTable(
+			{
+				aaSorting: [[0, 'desc']]
+			}
+		);
+
+		</script>";
+		
+	if ($reservedHTML != '')
+		$reservedHTML = $headers . $reservedHTML . $footers;	
+	
+	
 } else {
 	$reservedHTML = "";
 }
@@ -305,6 +342,8 @@ if ($reservedEquipment){
 $checkedOutEquipmentLateCount = 0;
 $checkedoutEquipmentCount = 0;
 $checkoutHTML = '';
+$activeHTML = '';
+$oldHTML = '';
 $listNumber = 0;
 if ($checkedoutEquipment){
 	foreach ($checkedoutEquipment as $c){
@@ -337,31 +376,250 @@ if ($checkedoutEquipment){
 			//$assignFeeButton = createAssignEquipmentFeesButton($checkoutID, $userID, $reservationID);
 			$returnButton = createViewCheckoutButton($checkoutID);
 			//TODO: View Checkout button
+			$oldHTML .= "
+			<tr id='checkout$listNumber'>
+				<td>$pickupTime</td>
+				<td>$latestPickupTime</td>
+				<td>$returnedTime</td>
+				<td>$equipmentName</td>
+				<td>$status</td>
+				<td>$returnButton</td>
+			</tr>
+			";
 		} else {
 			//renderEquipmentReturnModal($c);
 			$checkedoutEquipmentCount++;
 			$returnButton = "";
 			$assignFeeButton = "";
 			//TODO: Extend checkout button
+			$activeHTML .= "
+			<tr id='checkout$listNumber'>
+				<td>$pickupTime</td>
+				<td>$latestPickupTime</td>
+				<td>$returnedTime</td>
+				<td>$equipmentName</td>
+				<td>$status</td>
+				<td>$returnButton</td>
+			</tr>
+			";
 
 		}
 
-		$checkoutHTML .= "
-		<tr id='checkout$listNumber'>
-			<td>$pickupTime</td>
-			<td>$latestPickupTime</td>
-			<td>$returnedTime</td>
-			<td>$equipmentName</td>
-			<td>$status</td>
-			<td>$returnButton</td>
-		</tr>
-		";
 		$listNumber++;
 
 	}
+	$headers = "<table class='table' id='activeCheckouts'>
+			<thead>
+				<tr>
+					<th>Pickup Time</th>
+					<th>Deadline Time</th>
+					<th>Returned Time</th>
+					<th>Equipment</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>";
+	$footers = "</tbody>
+		</table>
+		<script>
+		$('#activeCheckouts').DataTable(
+			{
+				'paging':false, 
+				'searching': false, 
+				aaSorting: [[0, 'desc']]
+			}
+		);
+
+		</script>";
+	$checkoutHTML .= "<h3>Current Check-Outs</h3>" . $headers . $activeHTML . $footers;
+	
+	
+	$headers = "<table class='table' id='oldCheckouts'>
+			<thead>
+				<tr>
+					<th>Pickup Time</th>
+					<th>Deadline Time</th>
+					<th>Returned Time</th>
+					<th>Equipment</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>";
+	$footers = "</tbody>
+		</table>
+		<script>
+		$('#oldCheckouts').DataTable(
+			{
+				'paging':false, 
+				aaSorting: [[0, 'desc']]
+			}
+		);
+
+		</script>";
+	$checkoutHTML .= "<h3><BR>Previous Check-Outs</h3>" . $headers . $oldHTML . $footers;
+	
 } else {
 	$checkoutHTML = "";
 }
+
+/*
+This section creates lock/unlock cards for each TekBox currently checked out to the user
+*/
+
+$tekBoxHTML = '';
+$boxes = $boxDao->getBoxByUser($uId);
+$tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+					<h5 class'card-title'>TekBoxs</h5>
+					<div class='card-body'>";
+if (count($boxes) > 0){
+	foreach ($boxes AS $b){
+		$tekBoxHTML .= "<div class='row'><div class='col-9'>TekBox #: " . $b->getNumber() . "<BR>";
+		$tekBoxHTML .= "Filled: " .date("l, M/d",strtotime($b->getFillDate())). "<BR>";
+		
+		if ($b->getLocked() == 0){
+			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Unlocked</span></div>";
+			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-danger' onclick='lock(\"$uId\", \"".$b->getBoxKey()."\")'>Lock?</button></div></div>";
+		} else {
+			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Locked</span></div>";
+			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-success' onclick='unlock(\"$uId\", \"".$b->getBoxKey()."\")'>Unlock?</button></div></div>";	
+		}
+	}
+	$tekBoxHTML .= "</div>
+					</div>";
+} else {
+	$tekBoxHTML .= "You do not have any items in a TekBox.</div>
+					</div>";
+}
+
+$tekBoxHTML .= "
+<script type='text/javascript'>
+function lock(uid, id){
+	
+	let content = {
+		action: 'lock',
+		boxId: id,
+		uId: uid
+	}
+	
+	api.post('/boxes.php', content).then(res => {
+		snackbar(res.message, 'Box Locked');
+		$('#tekboxButton'+id).hide();
+		$('#status'+id).html('Locked');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
+function unlock(uid, id){
+	
+	let content = {
+		action: 'unlock',
+		boxId: id,
+		uId: uid
+	}
+	
+	api.post('/boxes.php', content).then(res => {
+		snackbar(res.message, 'Box Unlocked');
+		$('#tekboxButton'+id).hide();
+		$('#status'+id).html('Unlocked');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+</script>
+
+";
+
+/*
+Checks if the user has kits to pick up.
+*/
+
+$kitsHTML = "";
+$tempkits = $kitsDao->getKitEnrollmentsByOnid($uOnid);
+$kits = Array();
+foreach ($tempkits AS $t)
+	if ($t->getKitStatusID()->getId() == 1) // KitEnrollmentStatus::READY = 1
+		$kits[] = $t;
+	
+if (sizeof($kits) > 0){
+	$kitsHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Class Kits for Pickup</h5>
+						<div class='card-body'><p>Class kits can be picked up from KEC1110 during store hours.</p>Courses:<BR>";
+	foreach ($kits AS $k){
+		$kitsHTML .= $k->getCourseCode() . "<BR>";
+	}
+	$kitsHTML .= "</div>
+				</div>";
+}
+/*
+This section prepares the Dashboard contents for the Dashboard tab.
+This includes Reservations and Active Check-Outs
+
+*/
+
+$dashboardHTML = "";
+$dashboardHTML .= "
+	<br><br><br><br>
+	<section class='panel'>
+		<div class='row'>";
+		$dashboardHTML .= $kitsHTML;
+		$dashboardHTML .= $tekBoxHTML;
+		
+		/*
+		if ($checkoutFeeCount != 0){
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Equipment Fees</h5>
+						<div class='card-body'>You have unpaid equipment checkout fees!  Pay them as soon as possible.
+						</div></div>";
+		} else {
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Equipment Fees</h5>
+						<div class='card-body'>You do not have any unpaid equipment fees.
+						</div></div>";
+		}
+		*/
+		
+		
+		if ($reservedEquipmentCount != 0){
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Equipment Reservations</h5>
+						<div class='card-body'>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.
+						</div></div>";
+		} else {
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Equipment Reservations</h5>
+						<div class='card-body'>You do not have any equipment reservations.
+						</div></div>";
+		}
+		
+		
+		if ($checkedOutEquipmentLateCount != 0){
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Late Equipment</h5>
+						<div class='card-body'>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!
+						</div></div>";
+		} else {
+			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Late Equipment</h5>
+						<div class='card-body'>You do not have any late equipment currently checked out.
+						</div></div>";
+		}
+
+		
+		$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+						<h5 class'card-title'>Equipment Checked Out</h5>";
+		if ($checkedoutEquipmentCount != 0){
+			$dashboardHTML .= "<div class='card-body'>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</div>";
+		} else {
+			$dashboardHTML .= "<div class='card-body'>You do not have any equipment currently checked out.</div>";
+		}
+		$dashboardHTML .= "</div>";
+		
+$dashboardHTML .= "
+		</div>
+	</section>";
 
 
 ?>
@@ -369,11 +627,12 @@ if ($checkedoutEquipment){
 <br>
 <div class="stickytabs">
 	<!-- TODO: Change defaultOpen -->
-	<button class="tablink" onclick="openPage('Dashboard', this, '#A7ACA2')" >Dashboard</button>
+	<button class="tablink" onclick="openPage('Dashboard', this, '#A7ACA2')" id="defaultOpen">Dashboard</button>
+	<button class="tablink" onclick="openPage('Jobs', this, '#A7ACA2')" >Print/Cut Jobs</button>
+	<!-- <button class="tablink" onclick="openPage('Fees', this, '#A7ACA2')">My Fees</button> -->
+	<button class="tablink" onclick="openPage('Equipment', this, '#A7ACA2')">Borrowed Equipment</button>
 	<button class="tablink" onclick="openPage('Profile', this, '#A7ACA2')">Profile</button>
-	<button class="tablink" onclick="openPage('Jobs', this, '#A7ACA2')" id="defaultOpen">Print/Cut Jobs</button>
-	<button class="tablink" onclick="openPage('Fees', this, '#A7ACA2')">My Fees</button>
-	<button class="tablink" onclick="openPage('Equipment', this, '#A7ACA2')">Equipment Reservations</button>
+	
 </div>
 
 
@@ -387,11 +646,10 @@ if ($checkedoutEquipment){
 			<!-- Students can see a render of the print they submitted -->
 			<?php
 				echo "
-			<br><br><br><br><br>
+			<br><br><br>
 			<div class='admin-paper'>
-			<h3>Print Jobs</h3>
-				<table class='table' id='equipmentFees'>
-				<caption>Equipment Checkout Fees</caption>
+			<h3>Print Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/submit3DPrint.php'><button class='btn btn-info'>New 3D Print</button></a></h3>
+				<table class='table' id='printJobs'>
 					<thead>
 						<tr>
 							<th>Date Submitted</th>
@@ -406,9 +664,34 @@ if ($checkedoutEquipment){
 					</tbody>
 				</table>
 				<script>
-					$('#equipmentFees').DataTable({'order':[[0, 'desc']]});
+					$('#printJobs').DataTable({
+						'searching': false, 
+						'order':[[0, 'desc']]
+						});
 				</script>
-				
+			</div>
+			<div class='admin-paper'>
+			<h3>Laser Cuts &nbsp&nbsp&nbsp&nbsp<a href=''><button class='btn btn-info'>New Laser Cut</button></a></h3>
+				<table class='table' id='laserCuts'>
+					<thead>
+						<tr>
+							<th>Date Submitted</th>
+							<th>File</th>
+							<th>Your notes</th>
+							<th>Status</th>
+
+						</tr>
+					</thead>
+					<tbody>
+						$laserCutsHTML
+					</tbody>
+				</table>
+				<script>
+					$('#laserCuts').DataTable({
+						'searching': false, 
+						'order':[[0, 'desc']]
+						});
+				</script>
 			</div>
 				
 				";
@@ -421,94 +704,10 @@ if ($checkedoutEquipment){
 
 
 <div id="Dashboard" class="tabcontent">
-	<br><br><br><br>
-	<section class="panel dashboard">
-    <h2>Dashboard </h2>
-	<ul>
-		<?php 
-		// If we have actionable items, show the action required
-		$actionStyle = "style='color:red'";
-		$dashboardText = "";
-		if ($checkoutFeeCount != 0){
-			$dashboardText .= 
-			"
-			<li $actionStyle>You have unpaid equipment checkout fees!  Pay them as soon as possible.</li>
-			";
-		}
-		if ($reservedEquipmentCount != 0){
-			$dashboardText .=
-			"
-			<li $actionStyle>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.</li>
-			";
-		}
-		if ($checkedOutEquipmentLateCount != 0){
-			$dashboardText .= "
-			<li $actionStyle>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!</li>
-			";
-		}
-		if ($checkedoutEquipmentCount != 0){
-			$dashboardText .= "
-			<li>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</li>
-			";
-		}
-
-		if (empty($dashboardText)){
-			$dashboardText = "<li style='list-style-type:none;'>No Pending Items. Have a good day!</li>";
-		}
-		echo $dashboardText;
-		?>
-		
-
-    </ul>
-  </section>
- 
-
+	<?php echo $dashboardHTML;?>
 </div>
 
-<div id="Dashboard" class="tabcontent">
-	<br><br><br><br>
-	<section class="panel dashboard">
-    <h2>Dashboard </h2>
-	<ul>
-		<?php 
-		// If we have actionable items, show the action required
-		$actionStyle = "style='color:red'";
-		$dashboardText = "";
-		if ($checkoutFeeCount != 0){
-			$dashboardText .= 
-			"
-			<li $actionStyle>You have unpaid equipment checkout fees!  Pay them as soon as possible.</li>
-			";
-		}
-		if ($reservedEquipmentCount != 0){
-			$dashboardText .=
-			"
-			<li $actionStyle>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.</li>
-			";
-		}
-		if ($checkedOutEquipmentLateCount != 0){
-			$dashboardText .= "
-			<li $actionStyle>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!</li>
-			";
-		}
-		if ($checkedoutEquipmentCount != 0){
-			$dashboardText .= "
-			<li>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</li>
-			";
-		}
 
-		if (empty($dashboardText)){
-			$dashboardText = "<li style='list-style-type:none;'>No Pending Items. Have a good day!</li>";
-		}
-		echo $dashboardText;
-		?>
-		
-
-    </ul>
-  </section>
- 
-
-</div>
 
 <div id="Profile" class="tabcontent">
 <form id="formUserProfile">
@@ -600,12 +799,12 @@ if ($checkedoutEquipment){
 </form>
 </div>
 
-<div id="Fees" class="tabcontent">
-	<div class="container-fluid">
+
 		
 			<?php
-
-				echo "
+/*
+echo "<div id='Fees' class='tabcontent'>
+	<div class='container-fluid'>
 			<br><br><br><br><br>
 			<div class='admin-paper'>
 			<h3>Equipment Checkout Fees</h3>
@@ -627,100 +826,30 @@ if ($checkedoutEquipment){
 					$('#equipmentFees').DataTable();
 				</script>
 			</div>
-				
+		</div>
+	</div>	
 				";
-			
-			
-				// File located inside modules/renderBrowse.php
+*/			
 			?>
 	
 		
 			
-	</div>
-</div>
+
 
 <div id="Equipment" class="tabcontent">
 <?php
 echo "
 	<br><br><br><br><br>
 	<div class='admin-paper'>
-	<h3>Reserved Equipment</h3>
-		<table class='table' id='equipmentReservations'>
-		<caption>Reservations</caption>
-			<thead>
-				<tr>
-					<th>Reservation Time</th>
-					<th>Expiration Time</th>
-					<th>Equipment</th>
-					<th>Status</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				$reservedHTML
-			</tbody>
-		</table>
-		<script>
-		$('#equipmentReservations').DataTable(
-			{
-				lengthMenu: [[3, 5, 10, -1], [3, 5, 10, 'All']],
-				aaSorting: [[0, 'desc']]
-			}
-		);
-
-		</script>
-	</div>
-		
-		";
-		
-
-
-
-
-		
-	echo "
-	<br><br>";
-
+	<h3>Reserved Equipment</h3><a href='./pages/browseEquipment.php'><button class='btn btn-warning'>Browse Equipment</button></a>
+	$reservedHTML
+	</div>";
 	
-	echo "
+	echo "<br><br>";
 
-	<div class='admin-paper'>
-	<h3>Checked Out Equipment</h3>
-		<table class='table' id='equipmentCheckouts'>
-		<caption>Checkouts</caption>
-			<thead>
-				<tr>
-					<th>Pickup Time</th>
-					<th>Deadline Time</th>
-					<th>Returned Time</th>
-					<th>Equipment</th>
-					<th>Status</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				$checkoutHTML
-			</tbody>
-		</table>
-		<script>
-		$('#equipmentCheckouts').DataTable(
-			{
-				lengthMenu: [[3, 5, 10, -1], [3, 5, 10, 'All']],
-				aaSorting: [[0, 'desc']]
-			}
-		);
-
-		</script>
-	</div>
-		
-		";
-	
-		
-		
-
-		
-
-
+	echo "<div class='admin-paper'>
+	$checkoutHTML
+	</div>";
 
 	?>
 

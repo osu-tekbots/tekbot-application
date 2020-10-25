@@ -163,7 +163,7 @@ function adduser(){
 						</tbody>
 						</table>
 						<script>
-							$('#currentUsers').DataTable();
+							$('#currentUsers').DataTable({'paging': false});
 						</script>
 					</div>
 						
@@ -191,7 +191,7 @@ function adduser(){
 	</div>
 </div>
 
-<script>
+<script type='text/javascript'>
 /**
  * Handles a click on the user type button in the admin user table to promote/demote a user to/from admin status.
  */

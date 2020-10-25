@@ -3,6 +3,7 @@
 namespace DataAccess;
 
 use Model\Part;
+use Model\Kit;
 
 /**
  * Handles all of the logic related to queries on loading/editing messages in the database.
@@ -69,7 +70,7 @@ class InventoryDao {
 			ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
             ';
             $params = array(':typeid' => $typeId);
-            $result = $this->conn->query($sql, $params);
+            $results = $this->conn->query($sql, $params);
             
             $parts = array();
             foreach ($results as $row) {
@@ -85,6 +86,164 @@ class InventoryDao {
 	
 	/**
      * Fetches all Parts by typeId.
+     * @return an array of parts on success, false otherwise
+     */
+    public function getKitContentsByStocknumber($stockNumber) {
+        try {
+			$sql = '
+			SELECT tekbots_kitcontents.* 
+			FROM `tekbots_kitcontents` 
+			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ParentID 
+			INNER JOIN tekbots_types ON tekbots_types.ID = tekbots_parts.TypeID 
+			WHERE `ParentID` = :stocknumber 
+			ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+			';
+            $params = array(':stocknumber' => $stockNumber);
+            $results = $this->conn->query($sql, $params);
+          
+            $contents = Array();
+			foreach ($results as $row) {
+                $contents[$row['ChildID']] = $row['Quantity'];
+            }
+			
+            return $contents;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get part with StockNumber '.$stockNumber.': ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * Fetches all Parts by typeId.
+     * @return an array of parts on success, false otherwise
+     */
+    public function getSuppliersByStocknumber($stockNumber) {
+        try {
+			$sql = '
+			SELECT tekbots_supplierparts.* , tekbots_supplier.SupplierName, tekbots_supplier.SupplierContact 
+			FROM `tekbots_supplierparts`
+			INNER JOIN tekbots_supplier ON tekbots_supplier.ID = tekbots_supplierparts.SupplierID
+			WHERE `tekbots_supplierparts`.`StockNumber` = :stocknumber		
+			ORDER BY tekbots_supplier.SupplierName ASC
+			';
+            $params = array(':stocknumber' => $stockNumber);
+            $results = $this->conn->query($sql, $params);
+			
+            return $results;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get part with StockNumber '.$stockNumber.': ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function updateKitQuantity($parentid, $childid, $quantity) {
+        try {
+            $sql = '
+			UPDATE tekbots_kitcontents
+			SET Quantity = :quantity
+			WHERE `ParentID` = :parentid 
+			AND ChildID = :childid
+			';
+            $params = array(
+                ':parentid' => $parentid,
+				':childid' => $childid,
+				':quantity' => $quantity
+				
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function addKitContents($parentid, $childid, $quantity) {
+        try {
+            $sql = '
+			INSERT INTO tekbots_kitcontents
+			(Quantity, ParentID, ChildID) VALUES
+			(:quantity, :parentid, :childid)
+			';
+            $params = array(
+                ':parentid' => $parentid,
+				':childid' => $childid,
+				':quantity' => $quantity
+				
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function addPartSupplier($stockNumber, $supplier, $partnumber, $htmllink) {
+        try {
+            $sql = '
+			INSERT INTO tekbots_supplierparts
+			(StockNumber, SupplierID, SupplierPart, link) VALUES
+			(:stockNumber, :supplier, :partnumber, :htmllink)
+			';
+            $params = array(
+                ':stockNumber' => $stockNumber,
+				':supplier' => $supplier,
+				':htmllink' => $htmllink,
+				':partnumber' => $partnumber
+				
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add supplier: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function removePartSupplier($id) {
+        try {
+            $sql = '
+			DELETE FROM tekbots_supplierparts
+			WHERE ID = :id
+			';
+            $params = array(
+                ':id' => $id				
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add supplier: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function removeKitContents($parentid, $childid) {
+        try {
+            $sql = '
+			DELETE FROM tekbots_kitcontents
+			WHERE `ParentID` = :parentid 
+			AND ChildID = :childid
+			';
+            $params = array(
+                ':parentid' => $parentid,
+				':childid' => $childid	
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * 
      * @return an array of rows on success, false otherwise
      */
     public function getTypes() {
@@ -93,6 +252,26 @@ class InventoryDao {
             SELECT tekbots_types.id AS typeId, tekbots_types.Description AS type
 			FROM `tekbots_types`
 			ORDER BY type ASC
+            ';
+            $result = $this->conn->query($sql);
+
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any types: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * 
+     * @return an array of rows on success, false otherwise
+     */
+    public function getSuppliers() {
+        try {
+            $sql = '
+            SELECT tekbots_supplier.*
+			FROM `tekbots_supplier`
+			ORDER BY SupplierName ASC
             ';
             $result = $this->conn->query($sql);
 
@@ -131,7 +310,7 @@ class InventoryDao {
     }
 	
 	/**
-     * Fetches a single part by StockNumber.
+     * Fetches the number of kits using this stocknumber.
      * @return \Model\Part|boolean a part on success, false otherwise
      */
     public function getKitsUsedInByStocknumber($stockNumber) {
@@ -140,7 +319,7 @@ class InventoryDao {
             SELECT COUNT(*) AS kitsusedin 
 			FROM tekbots_kitcontents 
 			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ParentID 
-			WHERE tekbots_kitcontents.ChildID = :stocknumber AND  tekbots_parts.archive = 0
+			WHERE tekbots_kitcontents.ChildID = :stocknumber AND tekbots_parts.archive = 0
 			';
             $params = array(':stocknumber' => $stockNumber);
             $results = $this->conn->query($sql, $params);
@@ -171,6 +350,7 @@ class InventoryDao {
                 archive = :archive,
                 MarketPrice = :MarketPrice,
                 comment = :comment,
+                publicDescription = :publicdesc,
                 lastupdated = NOW() 
             WHERE StockNumber = :stocknumber
             ';
@@ -190,7 +370,8 @@ class InventoryDao {
                 ':stocked' => $part->getStocked(),
                 ':archive' => $part->getArchive(),
                 ':MarketPrice' => $part->getMarketPrice(),
-                ':comment' => $part->getComment()  
+                ':comment' => $part->getComment(),
+				':publicdesc' => $part->getPublicDescription()  
             );
             $this->conn->execute($sql, $params);
 			
@@ -205,6 +386,40 @@ class InventoryDao {
                 ':stocknumber' => $part->getStocknumber(),
 				':Quantity' => $part->getQuantity(),
                 ':Location' => $part->getLocation() 
+            );
+            $this->conn->execute($sql, $params);
+			
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update part: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function addPart($part) {
+        try {
+            $sql = '
+            INSERT INTO tekbots_parts 
+			(StockNumber, TypeID, Name)
+			VALUES
+			(:stocknumber, :TypeID, :Name)
+            ';
+            $params = array(
+                ':stocknumber' => $part->getStocknumber(),
+				':Name' => $part->getName(),
+                ':TypeID' => $part->getTypeId()  
+            );
+            $this->conn->execute($sql, $params);
+			
+			$sql = '
+            INSERT INTO tekbots_inventory
+            (StockNumber, Quantity, Location, lastupdated)
+			VALUES (:stocknumber, :Quantity, :Location, NOW())
+            ';
+            $params = array(
+                ':stocknumber' => $part->getStocknumber(),
+				':Quantity' => 0,
+                ':Location' => 'TBD' 
             );
             $this->conn->execute($sql, $params);
 			
@@ -287,6 +502,9 @@ class InventoryDao {
 		if(isset($row['comment'])){
 			$part->setComment($row['comment']);
 		}
+		if(isset($row['publicDescription'])){
+			$part->setPublicDescription($row['publicDescription']);
+		}
 		if(isset($row['lastupdated'])){
 			$part->setLastUpdated($row['lastupdated']);
 		}
@@ -304,6 +522,31 @@ class InventoryDao {
 		}		
        
         return $part;
+    }
+	
+	/**
+     * Creates a new Equipment object using information from the database row
+     *
+     * @param mixed[] $row the row in the database from which information is to be extracted
+     * @return \Model\Equipment
+     */
+    public static function ExtractKitFromRow($row) {
+        $kit = new Kit($row['StockNumber']);
+
+		if(isset($row['Name'])){
+			$kit->setName($row['Name']);
+		}
+		if(isset($row['Image'])){
+			$kit->setImage($row['Image']);
+		}
+		if(isset($row['TypeID'])){
+			$kit->setTypeId($row['TypeID']);
+		}
+		if(isset($row['type'])){
+			$kit->setType($row['type']);
+		}		
+       
+        return $kit;
     }
 
    

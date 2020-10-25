@@ -105,6 +105,24 @@ class BoxActionHandler extends ActionHandler {
 
     }
 	
+	public function handleLock() {
+        // Ensure the required parameters exist
+        $this->requireParam('boxId');
+		$this->requireParam('uId');
+		$body = $this->requestBody;
+        
+		$box = $this->boxDao->getBoxById($body['boxId']);
+		if ($box->getUserId() == $body['uId']){
+			$ok = $this->boxDao->lockBox($body['boxId']);
+			if(!$ok) {
+				$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box not Locked.'));
+			}
+
+			$this->respond(new Response(Response::OK, 'Box Locked'));
+		} else 
+			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Not Authorized'));
+    }
+	
 	public function handleUnlockBox() {
         // Ensure the required parameters exist
         $this->requireParam('boxId');
@@ -117,6 +135,23 @@ class BoxActionHandler extends ActionHandler {
 
         $this->respond(new Response(Response::OK, 'Box Unlocked'));
 
+    }
+	
+	public function handleUnlock() {
+        // Ensure the required parameters exist
+        $this->requireParam('boxId');
+		$this->requireParam('uId');
+		$body = $this->requestBody;
+        
+		$box = $this->boxDao->getBoxById($body['boxId']);
+		if ($box->getUserId() == $body['uId']){
+			$ok = $this->boxDao->unlockBox($body['boxId']);
+			if(!$ok) {
+				$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box not Unlocked.'));
+			}
+			$this->respond(new Response(Response::OK, 'Box Unlocked'));
+		} else 
+			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Not Authorized'));
     }
 	
 	public function handleEmptyBox() {
@@ -172,12 +207,20 @@ class BoxActionHandler extends ActionHandler {
                 $this->handleEmptyBox();
 				break;
 		
-			case 'lockBox':
+			case 'lockAdmin':
                 $this->handleLockBox();
 				break;
 				
-			case 'unlockBox':
+			case 'unlockAdmin':
                 $this->handleUnlockBox();
+				break;
+
+			case 'lock':
+                $this->handleLock();
+				break;
+				
+			case 'unlock':
+                $this->handleUnlock();
 				break;
 
             default:

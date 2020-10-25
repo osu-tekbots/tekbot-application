@@ -12,9 +12,19 @@ if (!session_id()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
+$time_start = microtime(true);
+$log ='';
+
+function time_point(){
+	global $time_start;
+	
+	$exec_time = number_format((microtime(true) - $time_start) * 1000,2);
+	$time_start = microtime(true);
+	return $exec_time;
+}
 
 function studentPrice($price){
-	$markup = .15;
+	$markup = .25	;
 	if ($price == 0)
 		return ('$0.00');
 		
@@ -53,17 +63,130 @@ $js = array(
     'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
 );
 
+
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
+$log .= "Time to Load Headers: " . time_point() . " mS<BR>";
+
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $parts = $inventoryDao->getInventory();
+$types = $inventoryDao->getTypes();
 
+$log .= "Time to Load Records: " . time_point() . " mS<BR>";
+
+
+$types_select = '';
+foreach ($types as $t){
+	$types_select .= "<option value='".$t['typeId']."'>".$t['type']."</option>";
+}
+
+
+$addpartHTML = "";
+$addpartHTML .= "<div class='form-row'>
+							<div class='col'><select class='form-control' id='addtype'><option value='0'></option>$types_select</select></div>
+							<div class='col'><input type='text' id='adddecription' class='form-control' placeholder='Part/Kit Description'></div>
+							<button id='addpart' class='btn btn-primary' onclick='addpart();'>Add Part/Kit</button>
+						  </div><BR>";
 
 ?>
+
+
+<br/>
+<div id="page-top">
+
+	<div id="wrapper">
+
+	<?php 
+		// Located inside /modules/employee.php
+		renderEmployeeSidebar();
+	?>
+
+    <div class="admin-content" id="content-wrapper">
+        <div class="container-fluid">
+			<div class='admin-paper'>
+            <?php 
+                renderEmployeeBreadcrumb('Employee', 'Inventory');
+
+               echo $addpartHTML;
+			   
+				$inventoryHTML = '';
+				
+				$log .= "Time to Prepare for Loop: " . time_point() . " mS<BR>";
+				
+                foreach ($parts as $p) {
+					$stocknumber = $p->getStocknumber();
+					$type = $p->getType();
+					$description = $p->getName();
+					$lastPrice = $p->getLastPrice();
+					$location = $p->getLocation();
+					$quantity = $p->getQuantity();
+					$image = $p->getImage();
+					$datasheet = $p->getDatasheet();
+					
+					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived':'')." ".($p->getStocked() == 1 ?'':'nonstock')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
+						<td>$type</td><td>$description<BR>Stock: $stocknumber</td><td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td><td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
+						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>"."-"/*$inventoryDao->getKitsUsedInByStocknumber($stocknumber)*/."</td><td>\$".number_format($lastPrice,2)."</td><td>".studentPrice($lastPrice,2)."</td>
+						<td><input class='form-control' type='text' id='location$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
+						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td><td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
+                }
+				
+				$log .= "Time spent in Loop: " . time_point() . " mS<BR>";
+            ?>
+			<div><p>Display Archived? <input type="checkbox" id="archived_checkbox" onchange="toggleArchived();" checked> | Display Non-Stocked? <input type="checkbox" id="nonstock_checkbox" onchange="toggleStocked();" checked></p></div>
+			<table class='table' id='InventoryTable'>
+                <caption>Current Inventory</caption>
+                <thead>
+                    <tr>
+						<th>Type</th>
+                        <th>Description</th>
+						<td></td>
+						<td></td>
+						<td></td>
+						<th>Kits<BR>Used In</th>
+                        <th>Last Price</th>
+                        <th>Student<BR>Price</th>
+                        <th>Location</th>
+                        <th>Quantity</th>
+						<th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php echo $inventoryHTML;?>
+                </tbody>
+            </table>
+			 <?php echo $log;?>
+			</div>
+        </div>
+    </div>
+
+
 <script type='text/javascript'>
+function addpart(){
+	
+	let type = $('#addtype').val().trim();
+	let desc =  $('#adddecription').val().trim();
+	let data = {
+		type: type,
+		desc: desc,
+		action: 'addPart'
+	};
+
+	if (type != 0 && desc != ''){
+		api.post('/inventory.php', data).then(res => {
+			//console.log(res.message);
+			snackbar(res.message, 'Part Added');
+			location.reload();
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		alert('Description field is empty or type is not selected. No changes made');
+	}
+}
+
 function updateLocation(id){
 	var location = $('#location'+id).val();
 	
@@ -97,75 +220,6 @@ function updateQuantity(id){
 		snackbar(err.message, 'error');
 	});
 }
-
-</script>
-
-<br/>
-<div id="page-top">
-
-	<div id="wrapper">
-
-	<?php 
-		// Located inside /modules/employee.php
-		renderEmployeeSidebar();
-	?>
-
-    <div class="admin-content" id="content-wrapper">
-        <div class="container-fluid">
-			<div class='admin-paper'>
-            <?php 
-                renderEmployeeBreadcrumb('Employee', 'Inventory');
-
-               
-				$inventoryHTML = '';
-				
-                foreach ($parts as $p) {
-					$stocknumber = $p->getStocknumber();
-					$type = $p->getType();
-					$description = $p->getName();
-					$lastPrice = $p->getLastPrice();
-					$location = $p->getLocation();
-					$quantity = $p->getQuantity();
-					$image = $p->getImage();
-					$datasheet = $p->getDatasheet();
-					
-					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived':'')." ".($p->getStocked() == 1 ?'':'nonstock')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
-						<td>$type</td><td>Stock: $stocknumber<BR>$description</td><td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td><td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>".$inventoryDao->getKitsUsedInByStocknumber($stocknumber)."</td><td>\$".number_format($lastPrice,2)."</td><td>".studentPrice($lastPrice,2)."</td>
-						<td><input class='form-control' type='text' id='location$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
-						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td><td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
-                }
-            ?>
-			<div><p>Display Archived? <input type="checkbox" id="archived_checkbox" onchange="toggleArchived();" checked> | Display Non-Stocked? <input type="checkbox" id="nonstock_checkbox" onchange="toggleStocked();" checked></p></div>
-			<table class='table' id='InventoryTable'>
-                <caption>Current Inventory</caption>
-                <thead>
-                    <tr>
-						<th>Type</th>
-                        <th>Description</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<th>Kits<BR>Used In</th>
-                        <th>Last Price</th>
-                        <th>Student<BR>Price</th>
-                        <th>Location</th>
-                        <th>Quantity</th>
-						<th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php echo $inventoryHTML;?>
-                </tbody>
-            </table>
-			</div>
-        </div>
-    </div>
-
-<script>
-
-
-
 
 function toggleArchived(){
 	

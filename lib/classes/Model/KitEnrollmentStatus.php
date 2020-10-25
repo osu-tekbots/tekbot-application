@@ -5,9 +5,9 @@ namespace Model;
  * Data class representing a kit enrollment enumeration.
  */
 class KitEnrollmentStatus {
-    const READY = 1;
-    const PICKED_UP = 2;
-    const REFUNDED = 3;
+    public const READY = 1;
+    public const PICKED_UP = 2;
+    public const REFUNDED = 3;
 
     /** @var integer */
     private $id;

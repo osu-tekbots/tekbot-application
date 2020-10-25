@@ -29,8 +29,30 @@ class IdGenerator {
 
         return $token;
     }
+   
+   /**
+     * Generate a secure, random alphanumeric ID of the specified length. The default length is 16.
+     *
+     * @param integer $length the length of the ID in bytes (string characters)
+     * @return string the generated ID
+     */
+    public static function generateSecureUniquePartId($length = 16) {
+        $token = "";
+        $codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $codeAlphabet .= "0123456789";
+        $max = strlen($codeAlphabet);
 
-    
+        try {
+            for ($i = 0; $i < $length; $i++) {
+                $token .= $codeAlphabet[self::cryptoSecureRand(0, $max - 1)];
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $token;
+    }
+   
 
     /**
      * Generates a random number within the provided range. The number will be cryptographically strong.

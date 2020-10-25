@@ -162,7 +162,7 @@ if ($loggedIn) {
                 <h1><span id="projectPrefix">TEKBOTS </span> </h1>
             </div>
         </a>
-        <nav class="navigation">
+		<nav class="navigation">
             <ul>
             <?php 
                 foreach ($buttons as $title => $link) {

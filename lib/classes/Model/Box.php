@@ -25,6 +25,8 @@ class Box {
 	private $fillby;
 	/** @var string */
 	private $pickupDate;
+	/** @var int */
+	private $battery;
 		
     /**
      * Creates a new instance of an equipment reservation.
@@ -107,6 +109,14 @@ class Box {
 	
 	public function setPickupDate($data){
 		$this->pickupDate = $data;
+	}
+	
+	public function getBattery(){
+		return $this->battery;
+	}
+	
+	public function setBattery($data){
+		$this->battery = $data;
 	}
 
 }
