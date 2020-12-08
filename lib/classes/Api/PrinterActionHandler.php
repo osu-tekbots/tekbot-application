@@ -206,7 +206,6 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreatePrintFee() {
-        //MARK: Implmenet this function, reference function above
 
         $this->requireParam('print_fee_id');
         $this->requireParam('print_job_id');

@@ -190,6 +190,7 @@ function isValidStudentID($sid){
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
                 <h6 class="dropdown-header">Laser Cut Jobs:</h6>
+                <a class="dropdown-item" href="pages/submitLaserCut.php">(Temp) Submission</a>
                 <a class="dropdown-item" href="pages/employeePrintJobList.php">All Cut Jobs</a>
                 <a class="dropdown-item" href="pages/employeeCutVouchers.php">Cut Vouchers</a>
                 <div class="dropdown-divider"></div>

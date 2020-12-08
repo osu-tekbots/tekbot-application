@@ -15,3 +15,5 @@ function renderUserFixedInput($user)
 			</div>
 HTML;
 }
+
+?>

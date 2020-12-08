@@ -2,11 +2,8 @@
 
 include_once '../bootstrap.php';
 
-use Util\Security;
-use DataAccess\EquipmentDao;
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
-use Model\User;
 
 if (!session_id()) {
 	session_start();
@@ -39,6 +36,7 @@ $js = array(
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/userHtml.php';
+include_once PUBLIC_FILES . '/modules/submissionPage.php';
 
 $title = '3D Print Submission';
 $printerDao = new PrinterDao($dbConn, $logger);
@@ -53,7 +51,25 @@ $user = $usersDao->getUserByID($_SESSION['userID']);
 
 $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
+
+
+$printerNameGetter = function ($printer) {
+	return $printer->getPrinterName();
+};
+$printerIdGetter = function ($printer) {
+	return $printer->getPrinterId();
+};
+
+$printTypeNameGetter = function ($printType) {
+	return $printType->getPrintTypeName();
+};
+$printTypeIdGetter = function ($printType) {
+	return $printType->getPrintTypeId();
+};
+
 ?>
+
+
 
 <script type="text/javascript">
 	var isValidFile = false;
@@ -79,8 +95,6 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			data: form_data,
 			success: function(result) {
 				if (result["successful"] == 1) {
-					var setPath = document.getElementById("uploadpath");
-					setPath.value = result["path"];
 					var html = '✔️ File is valid: ' + result["string"];
 					isValidFile = true;
 					dbFileName = result["path"];
@@ -110,8 +124,6 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 	Using this form you can upload a 3D model to be created. Printer that will be used is a Stratasys BST1220 machine, producing plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model.
 	<br /><br />
 	<ul>
-		<!-- <li><b>OSU Account Code:</b> $5.50/cubic inch + $5.00 set-up fee</li>
-				<li><b>Credit Card:</b> $16.00/cubic inch + $10.00 set-up fee</li> -->
 		Current Price Per Gram: $
 		<?php
 		echo $configManager->getPrintPrice();
@@ -142,59 +154,23 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 
 	<div class="row">
 		<div class="col-sm-6">
-			<!-- <?php renderUserFixedInput($user) ?> -->
-			<div>
-				Email:<br />
-				<input disabled name="emailInput" class="form-control" type="email" value="<?php echo $user->getEmail(); ?>" id="emailInput" />
-				First Name: <br />
-				<input disabled name="firstNameInput" class="form-control" value="<?php echo $user->getFirstName(); ?>" placeholder="Enter your first name here..." id="firstNameInput" />
-				Last Name: <br />
-				<input disabled name="lastNameInput" class="form-control" value="<?php echo $user->getLastName(); ?>" placeholder="Enter your last name here..." id="lastNameInput" />
-				<br />
-				<input disabled name="userIDInput" id="userIDInput" value="<?php echo $user->getUserID(); ?>" hidden />
-			</div>
+			<?php renderUserFixedInput($user) ?>
+
 			Which Printer would you like to print on?: <br />
-			<select class="custom-select" name="printerSelect" id="printerSelect">
-				<?php
-				foreach ($printers as $p) {
-					$printerName = $p->getPrinterName();
-					$printerId = $p->getPrinterId();
-					echo "<option value=$printerId>$printerName</option>";
-				}
-				?>
-			</select><br />
+
+			<?php
+			renderSelector($printers, $printerIdGetter, $printerNameGetter, "printerSelect");
+			?>
 
 			What Print type would you like?: <br />
-			<select class="custom-select" name="printTypeSelect" id="printTypeSelect">
-				<?php
-				foreach ($printTypes as $p) {
-					$printTypeName = $p->getPrintTypeName();
-					$printTypeId = $p->getPrintTypeId();
-					echo "<option value=$printTypeId>$printTypeName</option>";
-				}
-				?>
-			</select><br />
+
+			<?php
+			renderSelector($printTypes, $printTypeIdGetter, $printTypeNameGetter, "printTypeSelect");
+			?>
 
 			<b>Payment Method:</b>
 			<br />
-			<div class="form-check">
-				<input class="form-check-input" id="voucherRadio" type="radio" name="accounttype" value="voucher">
-				Voucher Code:
-				<input class=fi id="voucherInput" type=text size=30 name=account value="">
-			</div>
-			<div class="form-check">
-				<input class="form-check-input" id="accountRadio" type="radio" name="accounttype" value="account">
-				OSU Account Code:
-				<input class=fi id="accountInput" type=text size=30 name=account value="">
-			</div>
-			<div class="form-check">
-				<input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
-				<label class="form-check-label" for="paymentradio1">
-					Credit Card?
-				</label>
-			</div>
-			<BR>*Note:<b> We can not directly bill your student account.</b> Students must use the credit card option. Do not enter your credit card info here.*
-			<br />
+			<?php renderPaymentForm() ?>
 
 			<b>Notes</b><br />
 			Any special instructions or deadlines that you have should be entered here<br />
@@ -205,7 +181,6 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 			<label id="fileFeedback"></label>
 			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" multiple>
 			<div id="uploadTextDiv"></div>
-			<input name="uploadpath" value="" id="uploadpath" type='hidden'>
 			<button id="submit3DPrintBtn" class="btn btn-primary">Submit</button>
 		</div>
 
@@ -219,13 +194,6 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 <br /><br /><br />
 <br /><br /><br />
 <script>
-	$('#voucherInput').focus(function() {
-		$('#voucherRadio').prop("checked", true);
-	});
-
-	$('#accountInput').focus(function() {
-		$('#accountRadio').prop("checked", true);
-	});
 
 	window.onload = function() {
 		Lily.ready({
@@ -237,8 +205,10 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 
 
 	$('#submit3DPrintBtn').on('click', function() {
-		let selectedPayment = $("input[type=radio][name=accounttype]:checked").val();
+		// let selectedPayment = $("input[type=radio][name=accounttype]:checked").val();
 		if (!isValidFile) alert("Please enter a valid STL file of a size less than 10 MB");
+
+		let selectedPayment = getPaymentMethod();
 
 		if (selectedPayment == null) alert("Please select a payment method");
 
@@ -259,7 +229,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 
 			let data = {
 				action: 'createprintjob',
-				userId: $('#userIDInput').val(),
+				userId: '<?php echo $user->getUserID(); ?>',
 				printerId: $('#printerSelect').val(),
 				printTypeId: $('#printTypeSelect').val(),
 				dbFileName: dbFileName,

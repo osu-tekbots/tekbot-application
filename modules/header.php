@@ -10,8 +10,15 @@
 include_once PUBLIC_FILES . '/modules/button.php';
 
 if (!session_id()) {
-    session_start();
+  $ok = @session_start();
+  if(!$ok){
+    session_regenerate_id(true); // replace the Session ID
+    session_start(); 
+  }
 }
+#if (!session_id()) {
+#    session_start();
+#}
 
 
 $baseUrl = $configManager->getBaseUrl();
