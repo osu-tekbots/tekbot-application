@@ -44,16 +44,12 @@ function studentPrice($price){
 		return ('5 for $1');
 	else
 		return ('Free for one / ' . number_format($price,2) . ' ea.');
-	
+return $price;
 }
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Inventory List';
+$title = 'Public Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -65,32 +61,9 @@ $js = array(
 
 
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
-
-$log .= "Time to Load Headers: " . time_point() . " mS<BR>";
-
 $inventoryDao = new InventoryDao($dbConn, $logger);
-$userDao = new UsersDao($dbConn, $logger);
 $parts = $inventoryDao->getInventory();
 $types = $inventoryDao->getTypes();
-
-$log .= "Time to Load Records: " . time_point() . " mS<BR>";
-
-
-$types_select = '';
-foreach ($types as $t){
-	$types_select .= "<option value='".$t['typeId']."'>".$t['type']."</option>";
-}
-
-
-$addpartHTML = "";
-$addpartHTML .= "<div class='form-row'>
-					<div class='col'><select class='form-control' id='addtype'><option value='0'></option>$types_select</select></div>
-					<div class='col'><input type='text' id='adddescription' class='form-control' placeholder='Part/Kit Description'></div>
-					<button id='addpart' class='btn btn-primary' onclick='addpart();'>Add Part/Kit</button>
-				  </div><BR>";
-
 ?>
 
 
@@ -99,24 +72,13 @@ $addpartHTML .= "<div class='form-row'>
 
 	<div id="wrapper">
 
-	<?php 
-		// Located inside /modules/employee.php
-		renderEmployeeSidebar();
-	?>
-
-    <div class="admin-content" id="content-wrapper">
+	<div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<div class='admin-paper'>
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Inventory');
-
-               echo $addpartHTML;
-			   
 				$inventoryHTML = '';
-				
-				$log .= "Time to Prepare for Loop: " . time_point() . " mS<BR>";
-				
                 foreach ($parts as $p) {
+					if ($p->getArchive() == 0){
 					$stocknumber = $p->getStocknumber();
 					$type = $p->getType();
 					$description = $p->getName();
@@ -126,17 +88,19 @@ $addpartHTML .= "<div class='form-row'>
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
 					
-					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived ':'')." ".($p->getStocked() == 1 ?'':'nonstock ')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
-						<td>$type</td><td>$description<BR>Stock: $stocknumber</td><td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td><td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>"."-"/*$inventoryDao->getKitsUsedInByStocknumber($stocknumber)*/."</td><td>\$".number_format($lastPrice,2)."</td><td>".studentPrice($lastPrice,2)."</td>
-						<td><input class='form-control' type='text' id='location$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
-						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td><td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
-                }
+					$inventoryHTML .= "<tr><td>$type</td>
+						<td>$description<BR>Stock: $stocknumber</td>
+						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
+						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
+						<td>".studentPrice($lastPrice)."</td>
+						<td>$quantity</td>
+						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td></tr>";
+					}
+				}
 				
 				$log .= "Time spent in Loop: " . time_point() . " mS<BR>";
             ?>
-			<div><p>Display Archived? <input type="checkbox" id="archived_checkbox" onchange="toggleArchived();" checked> | Display Non-Stocked? <input type="checkbox" id="nonstock_checkbox" onchange="toggleStocked();" checked></p></div>
-			<table class='table' id='InventoryTable'>
+			<table class='table' id='InventoryTable' style='margin: 0 auto !important;'>
                 <caption>Current Inventory</caption>
                 <thead>
                     <tr>
@@ -144,12 +108,8 @@ $addpartHTML .= "<div class='form-row'>
                         <th>Description</th>
 						<td></td>
 						<td></td>
-						<td></td>
-						<th>Kits<BR>Used In</th>
-                        <th>Last Price</th>
-                        <th>Student<BR>Price</th>
-                        <th>Location</th>
-                        <th>Quantity</th>
+						<th>Student<BR>Price</th>
+                        <th>Current<BR>Stock</th>
 						<th></th>
                     </tr>
                 </thead>
@@ -167,7 +127,7 @@ $addpartHTML .= "<div class='form-row'>
 function addpart(){
 	
 	let type = $('#addtype').val().trim();
-	let desc =  $('#adddescription').val().trim();
+	let desc =  $('#adddecription').val().trim();
 	let data = {
 		type: type,
 		desc: desc,
@@ -177,7 +137,7 @@ function addpart(){
 	if (type != 0 && desc != ''){
 		api.post('/inventory.php', data).then(res => {
 			//console.log(res.message);
-			snackbar(res.message, 'info');
+			snackbar(res.message, 'Part Added');
 			location.reload();
 		}).catch(err => {
 			snackbar(err.message, 'error');
@@ -197,7 +157,8 @@ function updateLocation(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'info');
+		snackbar(res.message, 'Updated');
+		$('#row'+id).html('');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -213,7 +174,8 @@ function updateQuantity(id){
 	}
 	
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'info');
+		snackbar(res.message, 'Updated');
+		$('#row'+id).html('');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -255,20 +217,15 @@ function toggleStocked(){
 
 
 $('#InventoryTable').DataTable({
-		"autoWidth": true,
-		'scrollX':false, 
+		'scrollX':true, 
 		'paging':false, 
-		'order':[[0, 'asc'], [1, 'asc']],
+		'order':[[0, 'asc']],
 		"columns": [
 			null,
 			null,
 			{ "orderable": false },
 			{ "orderable": false },
-			{ "orderable": false },
 			null,
-			null,
-			null,
-			{ "orderable": false },
 			{ "orderable": false },
 			{ "orderable": false }
 		  ]

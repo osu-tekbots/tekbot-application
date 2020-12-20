@@ -58,8 +58,6 @@ $js = array(
 );
 
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 
 if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
@@ -67,7 +65,6 @@ if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
 }
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
-$userDao = new UsersDao($dbConn, $logger);
 $part = $inventoryDao->getPartByStocknumber($stocknumber);
 $types = $inventoryDao->getTypes();
 $suppliers = $inventoryDao->getSuppliers();
@@ -119,10 +116,6 @@ $supplierHTML .= "<table><tr><td><select id='newsupplier'>$supplier_select</sele
 
 $partHTML = '';
 
-
-
-
-
 $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 			<form>
 			<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
@@ -155,7 +148,7 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 							<div class='form-group col-sm-6'><label for='quantity$stocknumber' >Quantity</label><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></div>
 						</div>
 						<div class='form-row'>
-							<div class='form-group col-sm-9'><label for='datasheet'>Datasheet <a href='../../inventory_datasheets/$datasheet' target='_blank'>$datasheet</a></label><input class='form-control' type='file' id='datasheetFile' value='' onchange='updatePartDatasheet(\"$stocknumber\")'></div>
+							<div class='form-group col-sm-9'><label for='datasheet'>Datasheet <a href='../../inventory_datasheets/$datasheet' target='_blank'>$datasheet</a></label><input class='form-control' type='file' id='datasheet' value='' onchange='updateDatasheet(\"$stocknumber\")'></div>
 						</div>
 						<div class='form-row'>
 							<div class='form-group col-sm-12'><label for='comment$stocknumber'>Internal Comment</label><textarea class='form-control' id='comment$stocknumber' onchange='updateComment(\"$stocknumber\")'>$comment</textarea></div>
@@ -227,7 +220,7 @@ function updateLocation(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -248,7 +241,7 @@ function updateStocked(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -269,7 +262,7 @@ function updateArchived(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -285,7 +278,7 @@ function updateDescription(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -301,7 +294,7 @@ function updateLastSupplier(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -317,7 +310,7 @@ function updateManufacturer(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -333,7 +326,7 @@ function updateManufacturerNumber(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -349,7 +342,7 @@ function updateTouchnetId(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -365,7 +358,7 @@ function updateMarketPrice(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 		var inputF = document.getElementById('marketPrice'+id);
 		inputF.value = (marketPrice*1).toFixed(2);
 	}).catch(err => {
@@ -384,7 +377,7 @@ function calculateMarketPrice(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 		var inputF = document.getElementById('marketPrice'+id);
 		inputF.value = (lastprice*1.4).toFixed(2);
 	}).catch(err => {
@@ -406,7 +399,7 @@ function calculateLastPrice(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 		location.reload();
 	}).catch(err => {
 		snackbar(err.message, 'error');
@@ -426,7 +419,7 @@ function updateType(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 		$('#row'+id).html('');
 	}).catch(err => {
 		snackbar(err.message, 'error');
@@ -443,7 +436,7 @@ function updateLastPrice(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 		var inputF = document.getElementById('lastprice'+id);
 		inputF.value = (lastprice*1).toFixed(2);
 	}).catch(err => {
@@ -461,7 +454,7 @@ function updateQuantity(id){
 	}
 	
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -477,7 +470,7 @@ function updatePartMargin(id){
 	}
 	
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -493,7 +486,7 @@ function updateComment(id){
 	}
 	
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -509,7 +502,7 @@ function updatePublicDesc(id){
 	}
 	
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
+		snackbar(res.message, 'Updated');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -517,7 +510,8 @@ function updatePublicDesc(id){
 </script>
 
 <script type='text/javascript'>
-function updatePartImage(id){
+
+	function updatePartImage(id){
 	var content = new FormData();
 		content.append('action', 'updatePartImage');
 		content.append('stockNumber', id);
@@ -531,41 +525,17 @@ function updatePartImage(id){
 		contentType: false,
 		processData: false,
 		success:function(data){
-			snackbar(data.message);
-			setTimeout(location.reload(), 6000);
+			snackbar(data.message, 'Updated');
+			location.reload();
 		},
 		error: function(data){
-			snackbar(data.message);
 			console.log("error");
 			console.log(data);
 		}
 	});
 }
 
-function updatePartDatasheet(id){
-	var content = new FormData();
-		content.append('action', 'updatePartDatasheet');
-		content.append('stockNumber', id);
-		content.append('datasheetFile', $('#datasheetFile').prop('files')[0]);
 
-	$.ajax({
-		type:'POST',
-		url: 'api/inventory-files.php',
-		data: content,
-		cache: false,
-		contentType: false,
-		processData: false,
-		success:function(data){
-			snackbar(data.message);
-			setTimeout(location.reload(), 6000);
-		},
-		error: function(data){
-			snackbar(data.message);
-			console.log("error");
-			console.log(data);
-		}
-	});
-}
 </script>
 
 <br/>

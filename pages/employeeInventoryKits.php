@@ -120,14 +120,15 @@ if (isset($stocknumber)){ // Display single kit information
 		
 	$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
 	
-	$contentsHTML = "<h4>Contents</h4><table id='ContentsTable'>
+	$contentsHTML = "<h4>Contents as of ". date("m-d-y",time()) . "</h4><table id='ContentsTable'>
                 <thead>
                     <tr>
 						<th>Type</th>
                         <th>Description</th>
 						<th>Location</th>
 						<th>Cost (each)</th>
-						<th>Quantity</th>
+						<th>Quantity<BR>per Kit</th>
+						<th>Stock</th>
 						<th></th>
                     </tr>
                 </thead>
@@ -135,7 +136,12 @@ if (isset($stocknumber)){ // Display single kit information
 	foreach ($contents AS $key => $value){
 		$p = $inventoryDao->getPartByStocknumber($key);
 		
-		$contentsHTML .= "<tr><td>".$p->getType()."</td><td><a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a></td><td>".$p->getLocation()."</td><td>$".number_format($p->getLastPrice(),2)."</td><td><input type='text' value='$value' id='quantity$stocknumber' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td><td><button class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	
+		$contentsHTML .= "<tr><td>".$p->getType()."</td>
+		<td><a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a></td>
+		<td>".$p->getLocation()."</td><td>$".number_format($p->getLastPrice(),2)."</td>
+		<td><input type='text' value='$value' id='quantity$stocknumber' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td>
+		<td><input class='form-control' type='number' id='stock$key' value='".$p->getQuantity()."' onchange='updateStock(\"$key\")'></td>
+		<td><button type='button' class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	
 	}
 	$contentsHTML .= "</tbody></table>";
 	
@@ -149,6 +155,7 @@ if (isset($stocknumber)){ // Display single kit information
 	}
 	
 	$kitHTML .= "<h3>Stock Number: $stocknumber</h3>
+				
 				<form>
 				<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
 					<div class='form-row'>
@@ -202,6 +209,23 @@ table {
 </style>
 
 <script type='text/javascript'>
+function updateStock(id){
+	var amount = $('#stock'+id).val();
+	
+	let content = {
+		action: 'updateQuantity',
+		stockNumber: id,
+		amount: amount
+	}
+	
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'Updated');
+		$('#row'+id).html('');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
 function updateAddContents(){
 	var typeid = $('#typeselect').val();
 	//Since we only have one Ajax call on this whole page, I will include it in this page at the top.
@@ -287,19 +311,20 @@ function addKitContents(id){
 }
 
 function removeKitContents(id, childid){
+	if (confirm("Are you sure you want to remove this item?") == true){
+		let content = {
+			action: 'removeKitContents',
+			stockNumber: id,
+			childid: childid
+		}
 
-	let content = {
-		action: 'removeKitContents',
-		stockNumber: id,
-		childid: childid
-	}
-
-	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'Removed');
-		window.location.reload();
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
+		api.post('/inventory.php', content).then(res => {
+			snackbar(res.message, 'Removed');
+			window.location.reload();
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} 
 }
 
 function updatePartImage(id){
@@ -356,15 +381,19 @@ $(document).ready(function() {
 	$('#addImage').hide();
 
 	$('#ContentsTable').DataTable({
-			"autoWidth": false,
+			"autoWidth": true,
 			"searching": false,
-			'scrollX':true, 
-			'paging':false, 
-			'order':[[0, 'asc']],
+			'scrollX': false,
+			'paging': false,
+			'buttons': [
+            'print'
+        ], 
+			'order':[[0, 'asc'],[1, 'asc']],
 			"columns": [
 				null,
 				null,
 				null,
+				{ "orderable": false },
 				{ "orderable": false },
 				{ "orderable": false },
 				{ "orderable": false }			

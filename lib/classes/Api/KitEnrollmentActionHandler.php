@@ -72,14 +72,28 @@ class KitEnrollmentActionHandler extends ActionHandler {
                 $kit->setFirstMiddleLastName($k);
             } else if ($count == 4) {
                 $kit->setCourseCode($k);
-                $ok = $this->kitEnrollmentDao->addNewKitEnrollment($kit);
-                if (!$ok){
-                    $errors .= "
-                    Was unable to add student with onid: ". $kit->getOnid() . "";
-                }
+				
+                //Check if it already exists and not add if true
+				$currentkits = $this->kitEnrollmentDao->getKitEnrollmentsByOnid($kit->getOnid());
+				$new_flag = true;
+				foreach ($currentkits AS $ck){
+						if (($ck->getTermID() == $kit->getTermID()) AND ($ck->getCourseCode() == $kit->getCourseCode()) AND ($ck->getOsuID() == $kit->getOsuID())){
+							$new_flag = false;
+							$errors .= "Kit already in listing: ". $kit->getOnid() . ": ".$kit->getCourseCode()."<BR>";
+							break;
+						}
+				}	
+
+				//If this is new, we can add it
+				if ($new_flag == true){
+					$ok = $this->kitEnrollmentDao->addNewKitEnrollment($kit);
+					if (!$ok){
+						$errors .= "Was unable to add student with onid: ". $kit->getOnid() . "<BR>";
+					}
+				}
+				
                 $count = 0;
             }
-
             $count++;
         }
 

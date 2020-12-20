@@ -19,7 +19,12 @@ if(!session_id()) {
 }
 
 if (isset($_REQUEST['box_key']) && !empty($_REQUEST['box_key'])) {
-	$boxDao = new BoxDao($dbConn, $logger);
+	$boxDao = new BoxDao($dbConn, $logger); // Make new DataAccess Object
+	
+	//See if this is a new TekBox
+	if ($boxDao->getBoxById($_REQUEST['box_key']) == false)
+		$boxDao->addBox($_REQUEST['box_key']);
+	
 	if (isset($_REQUEST['battery']))
 		$boxDao->updateBattery($_REQUEST['box_key'], $_REQUEST['battery']); //Set Current Battery Level
 	

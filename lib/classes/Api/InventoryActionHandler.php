@@ -16,6 +16,9 @@ class InventoryActionHandler extends ActionHandler {
 	private $userDao;
 	private $messageDao;
 	
+	/** @var \Util\Logger */
+ //   private $logger;
+	
 	/******
 	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
 	***/
@@ -57,8 +60,10 @@ class InventoryActionHandler extends ActionHandler {
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
         }
-
+		$this->logger->info($body['stockNumber'] . ' Location Updated: '.$body['location']);
         $this->respond(new Response(Response::OK, 'Inventory Location Updated: '.$body['location']));
+		
+           
 
     }
 

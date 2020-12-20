@@ -65,6 +65,8 @@ class BoxDao {
 			 ';
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
+			if (sizeof($results) == 0)
+				return false;
 			foreach ($results as $row) {
                 $box = self::ExtractBoxFromRow($row);
             }
@@ -123,7 +125,29 @@ class BoxDao {
     }
 	
 	/**
-     * Fetches a single part by StockNumber.
+     * Lock a single box
+     * @return \Model\Part|boolean a part on success, false otherwise
+     */
+    public function addBox($id) {
+        try {
+            $sql = '
+            INSERT INTO tekbots_boxes 
+			(box_key) VALUES
+			(:id)
+			';
+            $params = array(':id' => $id);
+            $results = $this->conn->execute($sql, $params);
+
+			return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Box not added: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	
+	/**
+     * Lock a single box
      * @return \Model\Part|boolean a part on success, false otherwise
      */
     public function lockBox($id) {

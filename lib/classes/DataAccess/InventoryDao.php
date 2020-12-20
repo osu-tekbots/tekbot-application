@@ -27,7 +27,7 @@ class InventoryDao {
         $this->logger = $logger;
     }
 
-    /**
+    /** 
      * Fetches all Parts.
      * @return an array of parts on success, false otherwise
      */

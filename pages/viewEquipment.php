@@ -170,15 +170,15 @@ if (!$isPublic) {
 				Reserve this Equipment &raquo
 			</button>
 			';
+		} else {
+			echo '
+			<a href="./pages/login.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button" >
+				Login to Reserve
+			</button></a>
+			';
 		}
+			
 
-
-		
-		//Generate admin interface for admins.
-		if ($isEmployee) {
-			//$categories = $dao->getCapstoneProjectCategories();
-			//renderAdminReviewPanel($project, $categories);
-		}
 		?>
 		</div>
 

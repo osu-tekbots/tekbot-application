@@ -19,7 +19,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Equipment View';
+$title = 'Employee Kit Listing';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -88,7 +88,7 @@ foreach ($kits as $k){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Equipment', 'Checkout');
+                    renderEmployeeBreadcrumb('Kits', 'Kit Listing');
 
 		
 				echo "

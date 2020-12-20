@@ -91,15 +91,9 @@ $buttons = array(
 );
 // Signed in users
 if ($loggedIn) {
-    //Proposer or Admin only
-	if (isset($_SESSION['userAccessLevel']) && (($_SESSION['userAccessLevel'] == 'Proposer') || ($_SESSION['userAccessLevel'] == 'Admin'))) {
-        $buttons['My Projects'] = 'pages/myProjects.php';
-    }
-	
-	//All user types can view these pages
-    $buttons['My TekBots'] = 'pages/myProfile.php';
+	//All signed in users types can view these pages
+    $buttons['My TekBots'] = 'pages/userDashboard.php';
 
-    //$buttons['My Fees'] = 'pages/feesOwed.php';
     
     // Employee only
     if (isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee') {

@@ -22,7 +22,8 @@ class LaserJob {
     private $dateCreated;
     private $validCutDate;
     private $userConfirmDate;
-    private $completeCutDate;
+	private $completeCutDate;
+	private $paymentConfirmDate;
     private $employeeNotes;
     private $customerNotes;
     private $messageGroupId;
@@ -203,6 +204,14 @@ class LaserJob {
 
 	public function setDateUpdate($dateUpdate){
 		$this->dateUpdate = $dateUpdate;
+	}
+
+	public function getPaymentDate(){
+		return $this->paymentConfirmDate;
+	}
+
+	public function setPaymentDate($paymentConfirmDate){
+		$this->paymentConfirmDate = $paymentConfirmDate;
 	}
 }
 ?>

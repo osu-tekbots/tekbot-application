@@ -99,7 +99,7 @@ function handleUpdateInventoryImage($stocknumber, $inventoryDao, $handler, $conf
 
 
 	if (!isset($_FILES['imageFile'])) 
-       $handler->respond(400, 'Must include file in request to update Part image');
+       $handler->respond(Response::OK, 'Must include file in request to update Part image');
     $file_name = $_FILES['imageFile']['name'];
 	$file_size = $_FILES['imageFile']['size'];
 	$file_tmp  = $_FILES['imageFile']['tmp_name'];
@@ -114,12 +114,11 @@ function handleUpdateInventoryImage($stocknumber, $inventoryDao, $handler, $conf
 	$extension = strtolower($path_parts['extension']);
 	
 	if(!in_array($extension, $supported_image)) 
-		respond(400, "Unsupported file type.");
+		$handler->respond(Response::OK, "Unsupported file type.");
 
 	if ($file_size > (5 * 2097152)) 
-        respond(400, "File size must be less than 10MB");
-        
-		
+        $handler->respond(new Response(Response::OK, "File size must be less than 10MB"));
+        	
 	switch(strtolower($_FILES['imageFile']['type'])){
 		case 'image/jpeg':
 			$image_file = imagecreatefromjpeg($_FILES['imageFile']['tmp_name']);
@@ -131,7 +130,7 @@ function handleUpdateInventoryImage($stocknumber, $inventoryDao, $handler, $conf
 			$image_file = imagecreatefromgif($_FILES['imageFile']['tmp_name']);
 			break;
 		default:
-			$handler->respond(400, "Unsupported file type.");
+			$handler->respond(Response::OK, "Unsupported file type.");
 		}
     $deg = correctImageOrientation($file_tmp);
 	$image_file = imagerotate($image_file, $deg, 0); //Fixes rotated images
@@ -147,7 +146,7 @@ function handleUpdateInventoryImage($stocknumber, $inventoryDao, $handler, $conf
 	ob_start();
 	$ok = imagejpeg($image_file, $filepath);
 	if (!$ok) {
-        $handler->respond(500, 'Failed to upload image file');
+        $handler->respond(new Response(Response::OK, 'Failed to upload image file'));
     }
 	$data = ob_get_clean();
 	
@@ -159,45 +158,42 @@ function handleUpdateInventoryImage($stocknumber, $inventoryDao, $handler, $conf
 	// Destroy resources
 	imagedestroy($image_file);
 
-    $handler->respond(new Response(Response::OK, 'Image uploaded'));
+    $handler->respond(new Response(Response::OK, 'Image Updated'));
 }
 
-function handleUpdateInventoryDatasheet($stocknumber, $inventoryDao, $configManager, $logger) {
+function handleUpdateInventoryDatasheet($stocknumber, $inventoryDao, $handler, $configManager, $logger) {
 
 	if (!isset($_FILES['datasheetFile'])) 
-       $handler->respond(400, 'Must include file in request to update Part image');
+       $handler->respond(new Response(Response::OK, "Must include file in request to update datasheet"));
     $file_name = $_FILES['datasheetFile']['name'];
 	$file_size = $_FILES['datasheetFile']['size'];
 	$file_tmp  = $_FILES['datasheetFile']['tmp_name'];
 
-	$supported_image = array(
-		'pdf',
-		'zip'
-	);
 	$path_parts = pathinfo($file_name);
 	$extension = strtolower($path_parts['extension']);
 	
-	if(!in_array($extension, $supported_image)) 
-		respond(400, "Unsupported file type. Only .pdf and .zip allowed.");
-
 	if ($file_size > (5 * 2097152)) 
-        respond(400, "File size must be less than 10MB");
+        $handler->respond(new Response(Response::OK, "File size must be less than 10MB"));
 	
 	$filepath = 
         $configManager->get('server.upload_part_datasheet_files_path') .
-        "/".$stocknumber.$extension;
+        "/".$stocknumber.'.'.$extension;
 
-	// Save the imagedata
+	// Remove old datasheet and move new one
+	if(file_exists($filepath)) {
+		chmod($filepath,0755); //Change the file permissions if allowed
+		unlink($filepath); //remove the file
+	}
 	$ok = move_uploaded_file($file_tmp, $filepath);
 	if (!$ok) {
-        $handler->respond(500, 'Failed to upload datasheet.');
+        $handler->respond(new Response(Response::OK, 'Failed to upload datasheet.'));
     }
 	
 	$part = $inventoryDao->getPartByStocknumber($stocknumber);
-	$part->setDatasheet($sfile_name);
+	$part->setDatasheet($stocknumber.'.'.$extension);
 	$inventoryDao->updatePart($part);
 
-    $handler->respond(new Response(Response::OK, 'Image uploaded'));
+    $handler->respond(new Response(Response::OK, 'Datasheet uploaded: ' . $filepath));
 }
 
 ?>

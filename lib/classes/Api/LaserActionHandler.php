@@ -9,6 +9,7 @@ class LaserActionHandler extends ActionHandler {
 
     private $coursePrintAllowanceDao;
 
+    /** @var \DataAccess\LaserDao */
     private $laserDao;
     /** @var \Email\PrinterMailer */
     private $mailer;
@@ -220,7 +221,251 @@ class LaserActionHandler extends ActionHandler {
     //         Response::CREATED, 
     //         'Successfully submitted print job')
     //     );
-		
+        
+    
+    public function handleUpdateEmployeeNotes() {
+        $body = $this->requestBody;
+
+		$this->requireParam('laserJobID');
+        $this->requireParam('employeeNotes');
+
+        $laserJobID = $body['laserJobID'];
+
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
+        }
+
+        $laserJob = $laserJob[0];
+        
+        $laserJob->setEmployeeNotes($body['employeeNotes']);
+
+        $ok = $this->laserDao->updateCutJob($laserJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated employee notes')
+        );
+
+    }
+
+    public function handleSendCustomerConfirm() {
+        $body = $this->requestBody;
+
+		$this->requireParam('laserJobID');
+		$this->requireParam('userID');
+
+        $laserJobID = $body['laserJobID'];
+
+        $printJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
+        }
+
+        $printJob = $printJob[0];
+
+        $printJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPendingCustomerResponse(true);
+
+        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+
+        $ok = $this->laserDao->updateCutJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
+        }
+
+        $user = $this->userDao->getUserByID($body['userID']);
+
+        // $replacements = array(
+        //     "name" => $user->getFirstName(),
+        //     "print" => $printJob->getStlFileName()
+        // );
+
+        // $ok = $this->printerEmailer('wersspdoifwkjfd', $user->getEmail(), $replacements);
+        // if (!$ok) {
+        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        // }
+        // $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
+        // $user = $this->userDao->getUserByID($body['userID']);
+        // $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated laser job and (not) send email')
+        );
+
+    }
+    
+    function handleCustomerConfirmCutJob() {
+        $body = $this->requestBody;
+
+		$this->requireParam('laserJobID');
+
+        $laserJobID = $body['laserJobID'];
+
+        $printJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
+        }
+
+        $printJob = $printJob[0];
+        
+        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+
+
+        $printJob->setPendingCustomerResponse(0);
+        $printJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
+        
+
+        $ok = $this->laserDao->updateCutJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully confirmed laser job')
+        );
+
+    }
+
+    public function handleVerifyCutPayment() {
+        $body = $this->requestBody;
+        $this->requireParam('laserJobID');
+        $laserJobID = $body['laserJobID'];
+        
+        $printJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
+        }
+        $printJob = $printJob[0];
+
+        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $ok = $this->laserDao->updateCutJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated laser job')
+        );
+    }
+
+
+    public function handleDeleteCutJob() {
+
+        $body = $this->requestBody;
+        $this->requireParam('laserJobID');
+
+        $ok = $this->laserDao->deleteCutJobByID($body['laserJobID']);
+
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete cut job'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully deleted cut job'
+        ));
+    }
+
+    public function handleProcessCutJob() {
+        $body = $this->requestBody;
+
+        $this->requireParam('laserJobID');
+        $laserJobID = $body['laserJobID'];
+
+        $printJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
+        }
+        $printJob = $printJob[0];
+
+        $printJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $printJob->setPendingCustomerResponse(0);
+
+        $ok = $this->laserDao->updateCutJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully processed print job')
+        );
+    }
+
+    function handleCompleteCutJob() {
+        $body = $this->requestBody;
+
+		$this->requireParam('laserJobID');
+		$this->requireParam('userID');
+
+        $laserJobID = $body['laserJobID'];
+
+        $printJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($printJob)) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
+        }
+
+        $printJob = $printJob[0];
+        
+        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+
+
+        $printJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+
+        if($printJob->getVoucherCode()) {
+
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Vouchers for lasers not implemented yet'));
+
+            // $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+            // $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+            // $userID = $body['userID'];
+            // $voucher->setUserID($userID);
+            // $voucher->setDateUsed($dateUsed);
+            // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+            // if(!$ok) {
+            //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+            // }
+        }
+
+        $ok = $this->laserDao->updateCutJob($printJob);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
+        }
+
+        // $user = $this->userDao->getUserByID($body['userID']);
+
+        // Change email method here
+        // $this->mailer->sendPrintCompleteEmail($user, $printJob);
+
+        // $replacements = array(
+        //     "name" => $user->getFirstName(),
+        //     "print" => $printJob->getStlFileName()
+        // );
+
+        // $ok = $this->printerEmailer('iutrwoejrlkdfjla', $user->getEmail(), $replacements);
+        // if (!$ok) {
+        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        // }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully updated laser job and (not) send email')
+        );
+
+    }
+
+
     // }
         /**
      * Handles the HTTP request on the API resource. 
@@ -242,9 +487,27 @@ class LaserActionHandler extends ActionHandler {
             case 'createCutJob':
                 $this->handleCreateLaserJob();
 
+            case 'updateEmployeeNotes':
+                $this->handleUpdateEmployeeNotes();
+
+            case 'sendCustomerConfirm':
+                $this->handleSendCustomerConfirm();
+            case 'customerConfirmCut':
+                $this->handleCustomerConfirmCutJob();
+
+            case 'verifyCutPayment':
+                $this->handleVerifyCutPayment();
+
+            case 'deleteCutJob':
+                $this->handleDeleteCutJob();
+            case 'processCutJob':
+                    $this->handleProcessCutJob();
+
+            case 'completeCutJob':
+                $this->handleCompleteCutJob();
 
             default:
-                $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
+                $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on laser resource'));
         }
 		
     }

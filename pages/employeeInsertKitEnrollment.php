@@ -60,13 +60,6 @@ include_once PUBLIC_FILES . '/modules/renderTermData.php';
 				// This renders a select dropdown with term information located in /modules/renderTermData.php
 				renderTermSelect(20);
 				?>
-				<!--
-				<select id="termSelect">
-				
-					<option></option>
-					<option value="202002">Winter 2020</option>
-				</select> 
-				-->
 				<button class="validJsonButton" id="validEntry">Yes, Upload to DB</button><button class="invalidJsonButton" onClick="window.location.reload();">No</button></h3>
 					<table class='table' id='kitEnrollments'>
 					<caption>List Check</caption>
