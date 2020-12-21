@@ -53,9 +53,8 @@ foreach ($vouchers as $voucher){
 	if($user) $onid = $user->getOnid();
 
 
-	// TODO: Refactor if additional services other than Printing and Cutting are added
-	if($service_id == 1) {
-		// laser cutting
+	// TODO: Refactor to pull from tekbots_services table rather than hard comparison
+	if($service_id == 5) {
 		$laserCodesHTML .= "
 		<tr id='$voucherID'>
 		
@@ -144,6 +143,8 @@ foreach ($vouchers as $voucher){
 						$laserCodesHTML
 					</tbody>
 					</table>
+					<button id='deleteAll' class='btn btn-danger'>Delete All Expired/Used Vouchers</button>
+
 					<script>
 						$('#laserVoucherTable').DataTable(
 							{
@@ -166,6 +167,21 @@ foreach ($vouchers as $voucher){
 
 // Hiding and showing functionality for prompting to generate new codes
 
+$("#deleteAll").click(function() {
+	if(confirm("Clicking OK will delete all exisiting Vouchers that have expired and/or have been used"))
+	{
+		let body = {
+			action: 'clearCutVouchers'
+		}
+		api.post('/printcutgroups.php', body).then(res => {
+			snackbar(res.message, 'success');
+			setTimeout(function(){window.location.reload()}, 1000);
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
+});
+
 $("#generateAdditionalVouchers").click(function() {
 	$("#confirmAdditionalVouchers").css("display", "block");
 	$(this).css("display", "none");
@@ -183,7 +199,8 @@ function addNewVouchers() {
 	let dateExpired = $("#dateExpired").val();
 	// let serviceID = $("#services").val();
     
-    let serviceID = 1;
+	// TODO: Change from hard set value to tekbot_services table value
+    let serviceID = 5;
 	
 	if(dateExpired == "" || dateExpired == null){
 		alert("Must choose an expiration date for voucher codes");

@@ -201,6 +201,30 @@ class PrintCutGroupActionHandler extends ActionHandler {
         $this->respond(new Response(Response::OK, 'Successfully deleted vouchers'));
     }
 
+    
+    function handleClearPrintVouchers() {
+        // $voucher->setDateCreated(new \DateTime());
+        $date = new \DateTime();
+        $ok = $this->dao->clearPrintVouchers($date);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete vouchers'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully deleted vouchers'));
+    }
+
+    
+    function handleClearCutVouchers() {
+        // $voucher->setDateCreated(new \DateTime());
+        $date = new \DateTime();
+        $ok = $this->dao->clearCutVouchers($date);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete vouchers'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully deleted vouchers'));
+    }
+
 
 
 
@@ -230,6 +254,12 @@ class PrintCutGroupActionHandler extends ActionHandler {
                 $this->handleAddVoucherCodes();
 
             case 'clearVouchers':
+                $this->handleClearVouchers();
+            
+            case 'clearPrintVouchers':
+                $this->handleClearVouchers();
+
+            case 'clearCutVouchers':
                 $this->handleClearVouchers();
 
             case 'addCourse':

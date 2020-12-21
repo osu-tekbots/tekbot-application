@@ -498,6 +498,46 @@ class CoursePrintAllowanceDao {
         }
     }
 
+    public function clearPrintVouchers($currentDate) {
+        try {
+            $sql = '
+            DELETE FROM voucher_code 
+            WHERE (date_expired < :date
+            OR date_used IS NOT NULL)
+            AND voucher_code.service_id=2
+            ';
+            $params = array(
+                ':date' => QueryUtils::FormatDate($currentDate)
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove vouchers: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function clearCutVouchers($currentDate) {
+        try {
+            $sql = '
+            DELETE FROM voucher_code 
+            WHERE (date_expired < :date
+            OR date_used IS NOT NULL)
+            AND service_id=5
+            ';
+            $params = array(
+                ':date' => QueryUtils::FormatDate($currentDate)
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove vouchers: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getServices() {
         try {
             $sql = 'SELECT * FROM tekbot_services';

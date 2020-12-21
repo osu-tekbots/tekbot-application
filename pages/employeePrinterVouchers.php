@@ -52,12 +52,9 @@ foreach ($vouchers as $voucher){
 	$user = $userDao->getUserByID($user_id);
 	if($user) $onid = $user->getOnid();
 
-
-	// TODO: Refactor if additional services other than Printing and Cutting are added
-	if($service_id == 1) {
-		// laser cutting
-	} else {
-		// 3dprinting
+	// 3dprinting
+	// TODO: Refactor to pull from tekbots_services table rather than hard comparison
+	if($service_id == 2) {
 		$printingCodesHTML .= "
 		<tr id='$voucherID'>
 		
@@ -174,7 +171,7 @@ $("#deleteAll").click(function() {
 	if(confirm("Clicking OK will delete all exisiting Vouchers that have expired and/or have been used"))
 	{
 		let body = {
-			action: 'clearVouchers'
+			action: 'clearPrintVouchers'
 		}
 		api.post('/printcutgroups.php', body).then(res => {
 			snackbar(res.message, 'success');

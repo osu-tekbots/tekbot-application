@@ -28,7 +28,7 @@ class LaserDao
 
     /**
      * Fetches all Cutters.
-     * @return \Model\Printer[]|boolean an array of printers on success, false otherwise
+     * @return \Model\Laser[]|boolean an array of printers on success, false otherwise
      */
     public function getLaserCutters() {
         try {
@@ -48,6 +48,7 @@ class LaserDao
             return false;
         }
     }
+
 
     /**
      * Fetches all Print Types by ID.
@@ -226,6 +227,148 @@ class LaserDao
         }
     }
 
+    public function addNewLaserCutter(Laser $cutter) {
+        try {
+            $sql = '
+            INSERT INTO laser_cutters (
+                laser_cutter_name,
+                description,
+                location
+            )
+            VALUES (
+                :name,
+                :description,
+                :location
+            )
+            ';
+            $params = array(
+                ':name' => $cutter->getLaserName(),
+                ':description' => $cutter->getDescription(),
+                ':location' => $cutter->getLocation()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new Laser Cutter: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateLaserMaterial(LaserMaterial $cutMaterial) {
+        try {
+            $sql = '
+            UPDATE laser_cut_material SET
+                laser_cut_material_name = :name,
+                cut_material_description = :description,
+				cost_per_sheet = :cost_per_sheet
+            WHERE laser_cut_material_id = :id
+            ';
+            $params = array(
+                ':id' => $cutMaterial->getLaserMaterialId(),
+                ':name' => $cutMaterial->getLaserMaterialName(),
+				':cost_per_sheet' => $cutMaterial->getCostPerSheet(),
+				':description' => $cutMaterial->getDescription()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new cut material type: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteLaserMaterialByID($materialID) {
+        try {
+            $sql = '
+            DELETE FROM laser_cut_material
+            WHERE laser_cut_material_id = :id
+            ';
+            $params = array(
+                ':id' => $materialID,
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove cut material metadata: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function addNewLaserMaterial(LaserMaterial $cutMaterial) {
+        try {
+            $sql = '
+            INSERT INTO laser_cut_material (
+                laser_cut_material_name,
+                cut_material_description,
+                cost_per_sheet
+            )
+            VALUES (
+                :name,
+                :description,
+                :cost
+
+            )
+            ';
+            $params = array(
+                ':name' => $cutMaterial->getLaserMaterialName(),
+                ':description' => $cutMaterial->getDescription(),
+                ':cost' => $cutMaterial->getCostPerSheet()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new cut material: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteLaserByID($cutterID) {
+        try {
+            $sql = '
+            DELETE FROM laser_cutters
+            WHERE laser_cutter_id = :id
+            ';
+            $params = array(
+                ':id' => $cutterID,
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove laser cutter metadata: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateLaserCutter(Laser $cutter) {
+        try {
+            $sql = '
+            UPDATE laser_cutters SET
+                laser_cutter_name = :name,
+                description = :desc,
+                location = :loc
+            WHERE laser_cutter_id = :id
+            ';
+            $params = array(
+                ':id' => $cutter->getLaserId(),
+                ':name' => $cutter->getLaserName(),
+                ':desc' => $cutter->getDescription(),
+                ':loc' => $cutter->getLocation()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update laser cutter: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Fetches all Cut Materials
+     * @return \Model\LaserMaterial[]|boolean an array of printers on success, false otherwise
+     */
     public function getLaserCutMaterials() {
         try {
             $sql = '

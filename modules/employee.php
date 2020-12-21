@@ -27,12 +27,12 @@ function isValidStudentID($sid){
  */
 
  function renderEmployeeSidebar() {
-    echo'
+    echo <<< HTML
     <br><br>
      <!-- Sidebar -->
      <ul class="sidebar navbar-nav">
         <li class="nav-item dropdown">
-             <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-tools"></i>
                 <span>Equipment</span>
              </a>
@@ -46,7 +46,7 @@ function isValidStudentID($sid){
         </li>
 
         <li class="nav-item dropdown">
-         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
             <span>Kit Handout</span>
          </a>
@@ -68,7 +68,6 @@ function isValidStudentID($sid){
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
                 <h6 class="dropdown-header">Print Jobs:</h6>
                 <a class="dropdown-item" href="pages/employeePrintJobList.php">All Print Jobs</a>
-                <a class="dropdown-item" href="pages/submit3DPrint.php">(Temp) Submission</a>
                 <a class="dropdown-item" href="pages/employeePrinterVouchers.php">Print Vouchers</a>
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Modifying Print Tools:</h6>
@@ -83,28 +82,15 @@ function isValidStudentID($sid){
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
                 <h6 class="dropdown-header">Laser Cut Jobs:</h6>
-                <a class="dropdown-item" href="pages/submitLaserCut.php">(Temp) Submission</a>
                 <a class="dropdown-item" href="pages/employeeLaserJobList.php">All Cut Jobs</a>
                 <a class="dropdown-item" href="pages/employeeCutVouchers.php">Cut Vouchers</a>
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Modifying Print Tools:</h6>
-                <a class="dropdown-item" href="pages/employeeAddPrinter.php">Printers/Print Types</a>
+                <a class="dropdown-item" href="pages/employeeAddLaser.php">Printers/Print Types</a>
             </div>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="pages/employeeFees.php">
-                <i class="fas fa-fw fa-dollar-sign"></i>
-                <span>Fees</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="pages/employeeUser.php">
-                <i class="fas fa-fw fa-users"></i>
-                <span>Users</span>
-            </a>
-        </li>
         <li class="nav-item dropdown">
-         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
             <span>Inventory</span>
          </a>
@@ -118,21 +104,8 @@ function isValidStudentID($sid){
 			 <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
          </div>
         </li>
-        <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://trello.com/b/XUktYdsk/tekbots/">
-                <i class="fab fa-fw fa-trello"></i>
-                <span>Trello</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/labs/index.php">
-                <i class="fas fa-fw fa-ticket-alt"></i>
-                <span>Lab Tickets</span>
-            </a>
-        </li>
-        
-		<li class="nav-item dropdown">
-         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <li class="nav-item dropdown">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
             <span>Lockers</span>
          </a>
@@ -145,7 +118,7 @@ function isValidStudentID($sid){
         </li>
 		
 		<li class="nav-item dropdown">
-         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
             <span>Touchnet</span>
          </a>
@@ -156,7 +129,7 @@ function isValidStudentID($sid){
         </li>
 		
 		<li class="nav-item dropdown">
-         <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-hand-rock"></i>
             <span>TekBox</span>
          </a>
@@ -168,6 +141,30 @@ function isValidStudentID($sid){
          </div>
         </li>
         <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeFees.php">
+                <i class="fas fa-fw fa-dollar-sign"></i>
+                <span>Fees</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeUser.php">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://trello.com/b/XUktYdsk/tekbots/">
+                <i class="fab fa-fw fa-trello"></i>
+                <span>Trello</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/labs/index.php">
+                <i class="fas fa-fw fa-ticket-alt"></i>
+                <span>Lab Tickets</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
                 <i class="fas fa-fw fa-kaaba"></i>
                 <span>HWeekend</span>
@@ -177,7 +174,7 @@ function isValidStudentID($sid){
      </ul>
 
 
-     ';
+HTML;
     
 
  }

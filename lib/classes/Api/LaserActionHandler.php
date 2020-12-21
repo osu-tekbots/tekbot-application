@@ -29,6 +29,82 @@ class LaserActionHandler extends ActionHandler {
         $this->messageDao = $messageDao;
     }
 
+
+    /**
+     * Creates a new printer entry in the database.
+     *
+     * @return void
+     */
+    public function handleCreateLaserCutter() {
+        // Ensure all the requred parameters are present
+        $this->requireParam('title');
+        $body = $this->requestBody;
+
+        $printer = new Laser();
+
+        $printer->setLaserName($body['title']);
+        $printer->setDescription($body['description']);
+        $printer->setLocation($body['location']);
+
+        $ok = $this->laserDao->addNewLaserCutter($printer);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new printer'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new printer resource', 
+            array('id' => $printer->getLaserId())
+        ));
+    }
+
+    public function handleRemoveLaserCutter() {
+        $this->requireParam('laserID');
+        $body = $this->requestBody;
+        $ok = $this->laserDao->deleteLaserByID($body['laserID']);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete laser cutter'));
+        }
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully delete laser cutter resource')
+        );
+    }
+
+    
+    /**
+     * Updates fields editable from the user interface in a printer entry in the database.
+     *
+     * @return void
+     */
+    public function handleSaveLaserCutter() {
+
+        $id = $this->getFromBody('laserId');
+        $name = $this->getFromBody('laserName');
+        $description = $this->getFromBody('description');
+		$location = $this->getFromBody('location');
+         
+        $printer = $this->laserDao->getLaserByID($id);
+   
+        if (empty($printer)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser cutter from ID'));
+        }
+
+        $printer->setLaserName($name);
+        $printer->setDescription($description);
+        $printer->setLocation($location);
+
+        $ok = $this->laserDao->updateLaserCutter($printer);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save laser cutter'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved laser cutter'
+        ));
+    }
+
     public function handleCreateLaserJob() {
         $body = $this->requestBody;
         
@@ -403,6 +479,68 @@ class LaserActionHandler extends ActionHandler {
         );
     }
 
+    public function handleCreateLaserMaterial(){
+        $body = $this->requestBody;
+
+        $printType = new LaserMaterial();
+
+        $printType->setLaserMaterialName($body['name']);
+        $printType->setCostPerSheet($body['cost']);
+        $printType->setDescription($body['description']);
+
+        $ok = $this->laserDao->addNewLaserMaterial($printType);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new cut material'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created new cut material type resource', 
+            array('id' => $printType->getLaserMaterialId())
+        ));
+	}
+	
+	public function handleSaveLaserMaterial(){
+		$id = $this->getFromBody('id');
+		$name = $this->getFromBody('name');
+		$description = $this->getFromBody('description');
+		$costPerGram = $this->getFromBody('cost');
+         
+        $printType = $this->laserDao->getLaserMaterialByID($id);
+   
+        if (empty($printType)){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser material from ID'));
+        }
+
+		$printType->setLaserMaterialName($name);
+        $printType->setDescription($description);
+        $printType->setCostPerSheet($costPerGram);
+
+        $ok = $this->laserDao->updateLaserMaterial($printType);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save laser material'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved laser material'
+        ));
+    }
+    
+
+        public function handleRemoveLaserMaterial() {
+        $this->requireParam('materialID');
+        $body = $this->requestBody;
+        $ok = $this->laserDao->deleteLaserMaterialByID($body['materialID']);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete cut material'));
+        }
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully delete cut material resource')
+        );
+    }
+
     function handleCompleteCutJob() {
         $body = $this->requestBody;
 
@@ -425,17 +563,15 @@ class LaserActionHandler extends ActionHandler {
 
         if($printJob->getVoucherCode()) {
 
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Vouchers for lasers not implemented yet'));
-
-            // $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
-            // $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
-            // $userID = $body['userID'];
-            // $voucher->setUserID($userID);
-            // $voucher->setDateUsed($dateUsed);
-            // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-            // if(!$ok) {
-            //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-            // }
+            $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+            $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+            $userID = $body['userID'];
+            $voucher->setUserID($userID);
+            $voucher->setDateUsed($dateUsed);
+            $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+            if(!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+            }
         }
 
         $ok = $this->laserDao->updateCutJob($printJob);
@@ -483,6 +619,21 @@ class LaserActionHandler extends ActionHandler {
 
         // Call the correct handler based on the action
         switch ($action) {
+
+            case 'createLaserCutter':
+                $this->handleCreateLaserCutter();
+            case 'saveLaserCutter':
+                $this->handleSaveLaserCutter();
+			case 'removeLaserCutter':
+            	$this->handleRemoveLaserCutter();
+
+
+            case 'createLaserMaterial':
+                $this->handleCreateLaserMaterial();
+            case 'saveLaserMaterial':
+                $this->handleSaveLaserMaterial();
+            case 'removeLaserMaterial':
+                $this->handleRemoveLaserMaterial();
 
             case 'createCutJob':
                 $this->handleCreateLaserJob();

@@ -4,10 +4,8 @@ include_once '../bootstrap.php';
 use DataAccess\EquipmentDao;
 use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
-use DataAccess\PrinterDao;
+use DataAccess\LaserDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
-use Util\Security;
 
 if (!session_id()) {
     session_start();
@@ -22,7 +20,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Add Printer';
+$title = 'Employee Add Laser Cutter';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -47,9 +45,9 @@ $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 
 
-$printerDao = new PrinterDao($dbConn, $logger);
-$printers = $printerDao->getPrinters();
-$printTypes = $printerDao->getPrintTypes();
+$printerDao = new LaserDao($dbConn, $logger);
+$printers = $printerDao->getLaserCutters();
+$printTypes = $printerDao->getLaserCutMaterials();
 
 
 
@@ -84,8 +82,8 @@ $printTypes = $printerDao->getPrintTypes();
 				$printerHTML = "";
 
 				foreach ($printers as $p) {
-					$printerID = $p->getPrinterId();
-					$printerName = $p->getPrinterName();
+					$printerID = $p->getLaserId();
+					$printerName = $p->getLaserName();
 					$printerDesc = $p->getDescription();
 					$printerLoc = $p->getLocation();
 					$editPrinterBtn = "<button id='editButton$printerID' onClick='editPrinter($printerID)'>Save</button>";
@@ -115,10 +113,10 @@ $printTypes = $printerDao->getPrintTypes();
 				echo"
 						
 						<div class='admin-paper'>
-						<h3>3D Printers</h3>
-						<p>These are the available Tekbot 3D printers.</p>
+						<h3>Laser Cutters</h3>
+						<p>These are the available Tekbot Laser Cutters.</p>
 						<table class='table' id='checkoutFees'>
-						<caption>Information regarding Tekbot 3D printers</caption>
+						<caption>Information regarding Tekbot Laser Cutters</caption>
 						<thead>
 							<tr>
 								<th></th>
@@ -143,13 +141,13 @@ $printTypes = $printerDao->getPrintTypes();
 
 function removePrinter(printerID) {
 	let printerName = $("#printerName" + printerID).val();
-	if(window.confirm("Are you sure you want to delete printer: " + printerName + "?"))
+	if(window.confirm("Are you sure you want to delete laser cutter: " + printerName + "?"))
 	{
 		let data = {
-			action: 'removeprinter',
-			printerID: printerID
+			action: 'removeLaserCutter',
+			laserID: printerID
 		};
-		api.post('/printers.php', data).then(res => {
+		api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
@@ -166,13 +164,13 @@ function editPrinter(printerID) {
 	let printLoc = $("#printerLocation" + printerID).val();
 	// alert(printName + printDesc + printLoc).val();
 	let data = {
-		action: 'saveprinter',
-		printerId: printerID,
-		printerName: printName,
+		action: 'saveLaserCutter',
+		laserId: printerID,
+		laserName: printName,
 		description: printDesc,
 		location: printLoc
 	};
-	api.post('/printers.php', data).then(res => {
+	api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
@@ -185,7 +183,7 @@ function editPrinter(printerID) {
 $("#addPrinterButt").click(function(){
 	if($("#addPrinterName").val() == "")
 	{
-		alert("Printer must have a name!");
+		alert("Laser Cutter must have a name!");
 	}
 	else
 	{
@@ -193,12 +191,12 @@ $("#addPrinterButt").click(function(){
 		let printDescription = $("#addPrinterDescription").val();
 		let printLocation = $("#addPrinterLocation").val();
 		let data = {
-			action: 'createprinter',
+			action: 'createLaserCutter',
 			title: printName,
 			description: printDescription,
 			location: printLocation
 		}
-		api.post('/printers.php', data).then(res => {
+		api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
@@ -213,60 +211,26 @@ $("#addPrinterButt").click(function(){
 
 <?php
 
-	$printTypeHTML = "";
-
-	$printTypeHTML .= "
+	$printTypeHTML = "
 	<tr>
 	<td><button id='addPrintTypeButt' onClick='addPrintType()'>Add</button></td>
 	<td><input id='addPrintTypeName'></input></td>
-	<td><select id='addPrintTypePrinterSelect'>";
-
-	foreach ($printers as $printer) {
-		$printTypeHTML .= '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';
-	}
-
-	$printTypeHTML .= "
 	<td><input id='addPrintTypeDescription'></input></td>
-	<td><input id='addPrintTypeHeadSize'></input></td>
-	<td><input id='addPrintTypePrecision'></input></td>
-	<td><input id='addPrintTypePlateSize'></input></td>
 	<td><input id='addPrintTypeCost'></input></td>
 	</tr>
 	";
 
 	foreach ($printTypes as $p) {
-		$printTypeID = $p->getPrintTypeId();
-		$printerID = $p->getPrinterId();
-		$selectPrinter = $printerDao->getPrinterByID($printerID);
-		$selectedPrinterID = $selectPrinter->getPrinterId();
-		$selectedPrinterName = $selectPrinter->getPrinterName();
-		$printTypeName = $p->getPrintTypeName();
+		$printTypeID = $p->getLaserMaterialId();
+		$printTypeName = $p->getLaserMaterialName();
 		$description = $p->getDescription();
-		$headSize = $p->getHeadSize();
-		$precision = $p->getPrecision();
-		$plateSize = $p->getBuildPlateSize();
-		$cost = $p->getCostPerGram();
+		$cost = $p->getCostPerSheet();
 
 		$printTypeHTML .= "
 		<tr>
 		<td><button id='editButton$printTypeID' onClick='editPrintType($printTypeID)'>Save</button> <button id='removeButton$printTypeID' onClick='removePrintType($printTypeID)'>Remove</button>
 		<td><input id='printTypeName$printTypeID' value='$printTypeName'></td>
-		<td><select id='printerSelect$printTypeID'>
-		<option value='$selectedPrinterID'>$selectedPrinterName</option>
-		";
-
-		foreach ($printers as $printer) {
-			if($printer->getPrinterId() != $selectedPrinterID) {
-				$printTypeHTML .= '<option value="' . $printer->getPrinterId() . '">' . $printer->getPrinterName() . '</option>';				
-			}			
-		}
-		
-		$printTypeHTML .= "
-		</select></td>
 		<td><input id='printTypeDescription$printTypeID' value='$description'></td>
-		<td><input id='headSize$printTypeID' value='$headSize'></td>
-		<td><input id='precision$printTypeID' value='$precision'></td>
-		<td><input id='buildSize$printTypeID' value='$plateSize'></td>
 		<td><input id='costPerGram$printTypeID' value='$cost'></td>
 		</tr>
 		";
@@ -277,20 +241,16 @@ $("#addPrinterButt").click(function(){
 	echo"
 						
 	<div class='admin-paper' style='overflow-x:scroll'>
-	<h3>Print Types</h3>
-	<p>These are the available print types</p>
+	<h3>Laser Cutting Materials</h3>
+	<p>These are the available laser cutting materials</p>
 	<table class='table' id='checkoutFees'>
-	<caption>Information regarding Tekbot print types</caption>
+	<caption>Information regarding Tekbot Laser Cutter Materials</caption>
 	<thead>
 		<tr>
 			<th></th>
-			<th>Print Type Name</th>
-			<th>Printer</th>
+			<th>Cut Material Name</th>
 			<th>Description</th>
-			<th>Head Size</th>
-			<th>Precision</th>
-			<th>Build Plate Size</th>
-			<th>Cost Per Gram</th>
+			<th>Cost Per Sheet</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -314,13 +274,13 @@ $("#addPrinterButt").click(function(){
 
 function removePrintType(printTypeID) {
 	let printTypeName = $("#printTypeName" + printTypeID).val();
-	if(window.confirm("Are you sure you want to delete printer: " + printTypeName + "?"))
+	if(window.confirm("Are you sure you want to delete Laser Material: " + printTypeName + "?"))
 	{
 		let data = {
-			action: 'removeprinttype',
-			printTypeID: printTypeID
+			action: 'removeLaserMaterial',
+			materialID: printTypeID
 		};
-		api.post('/printers.php', data).then(res => {
+		api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
@@ -335,22 +295,15 @@ function editPrintType(printTypeID) {
 	let printerId = $("#printerSelect" + printTypeID).val();
 	let printName = $("#printTypeName" + printTypeID).val();
 	let printDesc = $("#printTypeDescription" + printTypeID).val();
-	let printHead = $("#headSize" + printTypeID).val();
-	let precision = $("#precision" + printTypeID).val();
-	let buildSize = $("#buildSize" + printTypeID).val();
 	let cost = $("#costPerGram" + printTypeID).val();
 	let data = {
-		action: 'saveprinttype',
+		action: 'saveLaserMaterial',
 		id: printTypeID,
-		printerId: printerId,
 		name: printName,
 		description: printDesc,
-		head: printHead,
-		precision: precision,
-		build: buildSize,
 		cost: cost
 	};
-	api.post('/printers.php', data).then(res => {
+	api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
@@ -362,28 +315,20 @@ function editPrintType(printTypeID) {
 
 function addPrintType() {
 	if($("#addPrintTypeName").val() == "") {
-		alert("Printer Type must have a name!");
+		alert("Laser Material must have a name!");
 	}
 	else {
 		let printTypeName = $("#addPrintTypeName").val();
-		let printerID = $("#addPrintTypePrinterSelect").val();
 		let description = $("#addPrintTypeDescription").val();
-		let headSize = $("#addPrintTypeHeadSize").val();
-		let precision = $("#addPrintTypePrecision").val();
-		let plateSize = $("#addPrintTypePlateSize").val();
 		let cost = $("#addPrintTypeCost").val();
 
 		let data = {
-			action: 'createprinttype',
+			action: 'createLaserMaterial',
 			name: printTypeName,
-			printerID: printerID,
-			headSize: headSize,
-			precision: precision,
-			plateSize: plateSize,
 			cost: cost,
 			description: description
 		}
-		api.post('/printers.php', data).then(res => {
+		api.post('/lasers.php', data).then(res => {
 		 snackbar(res.message, 'success');
 		//  TODO Add timeout
 		//  setTimeout(location.reload(), 3000);
