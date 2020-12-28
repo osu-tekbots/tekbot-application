@@ -93,7 +93,7 @@ class InventoryDao {
 			$sql = '
 			SELECT tekbots_kitcontents.* 
 			FROM `tekbots_kitcontents` 
-			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ParentID 
+			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ChildID 
 			INNER JOIN tekbots_types ON tekbots_types.ID = tekbots_parts.TypeID 
 			WHERE `ParentID` = :stocknumber 
 			ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
@@ -103,7 +103,8 @@ class InventoryDao {
           
             $contents = Array();
 			foreach ($results as $row) {
-                $contents[$row['ChildID']] = $row['Quantity'];
+				$contents[$row['ChildID']] = $row['Quantity'];
+//				$contents[] = $row;
             }
 			
             return $contents;

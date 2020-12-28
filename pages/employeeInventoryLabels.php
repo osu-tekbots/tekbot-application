@@ -428,9 +428,10 @@ function toggleStocked(){
 
 
 $('#InventoryTable').DataTable({
-		'scrollX':true, 
+		"autoWidth": true,
+		'scrollX':false, 
 		'paging':false, 
-		'order':[[0, 'asc']],
+		'order':[[1, 'asc'], [2, 'asc']],
 		"columns": [
 			{ "orderable": false },
 			null,

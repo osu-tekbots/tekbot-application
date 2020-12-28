@@ -119,7 +119,7 @@ $printTypeIdGetter = function ($printType) {
 <div class="container-fluid">
 	<br /><br /><br />
 	<h1>3D Print Submission Form</h1>
-	To check your currently queued or finished prints, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/myProfile.php'>your profile</a><br /><br />
+	To check your currently queued or finished prints, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
 
 	Using this form you can upload a 3D model to be created. Printer that will be used is a Stratasys BST1220 machine, producing plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model.
 	<br /><br />
@@ -245,7 +245,7 @@ $printTypeIdGetter = function ($printType) {
 				snackbar(res.message, 'success');
 				$('#submit3DPrintBtn').prop('disabled', true);
 				setTimeout(function() {
-					window.location.replace('pages/submit3DPrint.php')
+					window.location.replace('pages/userPrintsSubmit.php')
 				}, 2000);
 			}).catch(err => {
 				snackbar(err.message, 'error');

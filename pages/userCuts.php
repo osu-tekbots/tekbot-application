@@ -145,7 +145,7 @@ foreach($studentLaserJobs as $p) {
 	<tr>
 	<td>$dateCreated</td>
 	<td>
-		<a style='color:#0000FF;' href='./prints/$dbFileName'>$dxfFileName</a>
+		<a style='color:#0000FF;' href='./uploads/lasercuts/$dbFileName'>$dxfFileName</a>
 	</td>
 	<td>$customerNotes</td>
 	<td>$status</td>
@@ -167,7 +167,7 @@ foreach($studentLaserJobs as $p) {
 				echo "
 			<br><br><br>
 			<div class='admin-paper'>
-			<h3>Laser Cut Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/submitLaserCut.php'><button class='btn btn-info'>New Laser Cut</button></a></h3>
+			<h3>Laser Cut Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/userCutsSubmit.php'><button class='btn btn-info'>New Laser Cut</button></a></h3>
 				<table class='table' id='printJobs'>
 					<thead>
 						<tr>

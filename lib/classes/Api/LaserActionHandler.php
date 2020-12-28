@@ -30,6 +30,26 @@ class LaserActionHandler extends ActionHandler {
     }
 
 
+    
+    /*
+     Used to generate emails for printer action handler
+    */
+
+    public function laserEmailer($messageID, $email, $replacements) {
+
+
+        $message = $this->messageDao->getMessageByID($messageID);
+        
+        $body = $message->fillTemplateBody($replacements);
+		$subject = $message->fillTemplateSubject($replacements);
+
+		$headers = "From:heer@oregonstate.edu\r\n";
+		$headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html;charset=UTF-8\r\n";
+
+        return mail($email, $subject, $body, $headers);
+    }
+
     /**
      * Creates a new printer entry in the database.
      *
@@ -355,22 +375,19 @@ class LaserActionHandler extends ActionHandler {
 
         $user = $this->userDao->getUserByID($body['userID']);
 
-        // $replacements = array(
-        //     "name" => $user->getFirstName(),
-        //     "print" => $printJob->getStlFileName()
-        // );
+        $replacements = array(
+            "name" => $user->getFirstName(),
+            "laser" => $printJob->getDxfFileName()
+        );
 
-        // $ok = $this->printerEmailer('wersspdoifwkjfd', $user->getEmail(), $replacements);
-        // if (!$ok) {
-        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
-        // }
-        // $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
-        // $user = $this->userDao->getUserByID($body['userID']);
-        // $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
+        $ok = $this->laserEmailer('jdkslkfajllkjfas', $user->getEmail(), $replacements);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully updated laser job and (not) send email')
+            'Successfully updated laser job and sent email')
         );
 
     }
@@ -563,6 +580,7 @@ class LaserActionHandler extends ActionHandler {
 
         if($printJob->getVoucherCode()) {
 
+            // If there ever is an issue here, vouchers is not a foreign key anymore. A possibile error is if there somehow happened to be 2 vouchers with the same id values
             $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
             $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
             $userID = $body['userID'];
@@ -579,24 +597,21 @@ class LaserActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
         }
 
-        // $user = $this->userDao->getUserByID($body['userID']);
+        $user = $this->userDao->getUserByID($body['userID']);
 
-        // Change email method here
-        // $this->mailer->sendPrintCompleteEmail($user, $printJob);
+        $replacements = array(
+            "name" => $user->getFirstName(),
+            "laser" => $printJob->getDxfFileName()
+        );
 
-        // $replacements = array(
-        //     "name" => $user->getFirstName(),
-        //     "print" => $printJob->getStlFileName()
-        // );
-
-        // $ok = $this->printerEmailer('iutrwoejrlkdfjla', $user->getEmail(), $replacements);
-        // if (!$ok) {
-        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
-        // }
+        $ok = $this->laserEmailer('ajlsekgjowefj', $user->getEmail(), $replacements);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully updated laser job and (not) send email')
+            'Successfully updated laser job and sent email')
         );
 
     }

@@ -139,7 +139,7 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 				</div>
 				<div class='form-row'>
 					<div class='form-group col-sm-3'><label for='lastPrice'>Last Price ".($typeId == 1 ? "<span onclick='calculateLastPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span>":"")."</label><input type='text' class='form-control' onchange='updateLastPrice(\"$stocknumber\");' id='lastprice$stocknumber' value='".number_format($lastPrice,2)."'></div>
-					<div class='form-group col-sm-3'><label for='marketPrice'>Touchnet Price <span onclick='calculateMarketPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span></label><input type='text' class='form-control' onchange='updateMarketPrice(\"$stocknumber\");' id='marketPrice$stocknumber' value='".number_format($marketPrice,2)."'></div>
+					" . "" /*<div class='form-group col-sm-3'><label for='marketPrice'>Touchnet Price <span onclick='calculateMarketPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span></label><input type='text' class='form-control' onchange='updateMarketPrice(\"$stocknumber\");' id='marketPrice$stocknumber' value='".number_format($marketPrice,2)."'></div>*/ . "
 					<div class='form-group col-sm-3'><label for='touchnetid'>Touchnet ID</label><input type='text' class='form-control' onchange='updateTouchnetId(\"$stocknumber\");' id='touchnetid$stocknumber' value='".Security::HtmlEntitiesEncode($touchnetId)."'></div>
 					<div class='form-group col-sm-3'><label for='studentprice'>Student Price</label><input type='text' class='form-control' id='studentprice' value='".studentPrice($lastPrice)."' disabled></div>
 				</div>

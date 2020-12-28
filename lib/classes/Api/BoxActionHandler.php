@@ -48,7 +48,7 @@ class BoxActionHandler extends ActionHandler {
 		$this->requireParam('boxId');
 		$this->requireParam('messageId');
         $this->requireParam('fillById');
-        $this->requireParam('orderNumber');
+        $this->requireParam('contents');
         $body = $this->requestBody;
 
 		$user = $this->userDao->getUserbyId($body['userId']);
@@ -57,7 +57,7 @@ class BoxActionHandler extends ActionHandler {
 
 		 // Update the Message
         $box->setUserId($body['userId']);
-        $box->setOrderNumber($body['orderNumber']);
+        $box->setContents($body['contents']);
         $box->setFillBy($body['fillById']);
         $box->setLocked(1);
         $box->setFillDate(date("Y-m-d H:i:s",time()));

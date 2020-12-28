@@ -15,7 +15,7 @@ class Box {
 	/** @var string */
 	private $userId;
 	/** @var string */
-	private $orderNumber;
+	private $contents;
 	/** @var int (0 = false) */
 	private $locked;
 	
@@ -70,12 +70,12 @@ class Box {
 		$this->userId = $data;
 	}
 	
-	public function getOrderNumber(){
-		return $this->orderNumber;
+	public function getContents(){
+		return $this->contents;
 	}
 
-	public function setOrderNumber($data){
-		$this->orderNumber = $data;
+	public function setContents($data){
+		$this->contents = $data;
 	}
 	
 	public function getFillBy(){

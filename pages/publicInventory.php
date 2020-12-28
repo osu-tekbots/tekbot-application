@@ -12,17 +12,6 @@ if (!session_id()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$time_start = microtime(true);
-$log ='';
-
-function time_point(){
-	global $time_start;
-	
-	$exec_time = number_format((microtime(true) - $time_start) * 1000,2);
-	$time_start = microtime(true);
-	return $exec_time;
-}
-
 function studentPrice($price){
 	$markup = .15;
 	if ($price == 0)
@@ -75,6 +64,11 @@ $types = $inventoryDao->getTypes();
 	<div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<div class='admin-paper'>
+			<div class='row'><div class='col-9'>
+			<h3>TekBots Inventory</h3>
+			<p>Welcome to our inventory. You can find all parts available form the TekBots store from the list below. These parts can be purchased via the TekBots Marketplace. Some parts are inexpensive enough that you only need to stop into the store to pick one up for free.</p>
+			</div><div class='col-3'></div>
+			</div>
             <?php 
 				$inventoryHTML = '';
                 foreach ($parts as $p) {
@@ -97,8 +91,6 @@ $types = $inventoryDao->getTypes();
 						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td></tr>";
 					}
 				}
-				
-				$log .= "Time spent in Loop: " . time_point() . " mS<BR>";
             ?>
 			<table class='table' id='InventoryTable' style='margin: 0 auto !important;'>
                 <caption>Current Inventory</caption>
@@ -117,7 +109,6 @@ $types = $inventoryDao->getTypes();
                     <?php echo $inventoryHTML;?>
                 </tbody>
             </table>
-			 <?php echo $log;?>
 			</div>
         </div>
     </div>
@@ -217,9 +208,10 @@ function toggleStocked(){
 
 
 $('#InventoryTable').DataTable({
-		'scrollX':true, 
+		"autoWidth": true,
+		'scrollX':false, 
 		'paging':false, 
-		'order':[[0, 'asc']],
+		'order':[[0, 'asc'], [1, 'asc']],
 		"columns": [
 			null,
 			null,
@@ -230,8 +222,6 @@ $('#InventoryTable').DataTable({
 			{ "orderable": false }
 		  ]
 		});
-
-
 </script>
 
 <?php 

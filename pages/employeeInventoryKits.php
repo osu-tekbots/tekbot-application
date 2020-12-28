@@ -119,7 +119,7 @@ if (isset($stocknumber)){ // Display single kit information
 	$image = $kit->getImage();//
 		
 	$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
-	
+
 	$contentsHTML = "<h4>Contents as of ". date("m-d-y",time()) . "</h4><table id='ContentsTable'>
                 <thead>
                     <tr>
@@ -377,17 +377,36 @@ function updatePartImage(id){
 	
 <script>
 
+var buttonCommon = {
+    exportOptions: {
+        format: {
+            body: function ( data, row, column, node ) {
+                //check if type is input using jquery
+                return node.firstChild.tagName === "INPUT" ?
+                        node.firstElementChild.value :
+                        data;
+
+            }
+        }
+    }
+};
+
+
 $(document).ready(function() {
 	$('#addImage').hide();
 
 	$('#ContentsTable').DataTable({
+			'dom': 'Bft',
+			'buttons': [
+				$.extend( true, {}, buttonCommon, {
+            extend: 'print'
+        } )
+			], 
 			"autoWidth": true,
 			"searching": false,
 			'scrollX': false,
 			'paging': false,
-			'buttons': [
-            'print'
-        ], 
+
 			'order':[[0, 'asc'],[1, 'asc']],
 			"columns": [
 				null,

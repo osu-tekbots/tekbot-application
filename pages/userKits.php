@@ -10,6 +10,7 @@ session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
+
 $isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
 allowIf($isLoggedIn, $configManager->getBaseUrl() . 'pages/login.php');
 
@@ -27,8 +28,8 @@ $js = array(
 	'assets/Madeleine.js/src/lib/three.min.js',
 	'assets/Madeleine.js/src/Madeleine.js'
 );
+include_once PUBLIC_FILES . '/modules/renderTermData.php';
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
@@ -59,25 +60,50 @@ Checks if the user has kits to pick up.
 */
 
 $kitsHTML = "";
-$tempkits = $kitsDao->getKitEnrollmentsByOnid($uOnid);
-$kits = Array();
-foreach ($tempkits AS $t)
-	if ($t->getKitStatusID()->getId() == 1) // KitEnrollmentStatus::READY = 1
-		$kits[] = $t;
+$kits = $kitsDao->getKitEnrollmentsByOnid($uOnid);
+$kitStatus = $kitsDao->getKitEnrollmentTypes();
 	
 if (sizeof($kits) > 0){
-	$kitsHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Class Kits for Pickup</h5>
-						<div class='card-body'><p>Class kits can be picked up from KEC1110 during store hours.</p>Courses:<BR>";
-	foreach ($kits AS $k){
-		$kitsHTML .= $k->getCourseCode() . "<BR>";
-	}
-	$kitsHTML .= "</div>
-				</div>";
+	$kitsHTML .= "<table class='table' id='oldCheckouts'>
+			<thead>
+				<tr>
+					<th>Term</th>
+					<th>Course</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+			<tbody>";
+			
+	foreach ($kits AS $k)
+		$kitsHTML .= "<tr><td>" .term2string($k->getTermID()) . "</td><td>" .$k->getCourseCode() . "</td><td>" . $k->getKitStatusID()->getName(). "</td></tr>";
+	
+	$kitsHTML .= "</tbody></table>";
+	$kitsHTML .= "<script>
+		$('#kits').DataTable(
+			{
+				'paging': false, 
+				aaSorting: [[0, 'desc']]
+			}	
+		);
+
+		</script>";
+} else {
+	$kitsHTML .= "<BR>No records of kits for this user.";
 }
 ?>
-<br>
-<?php echo $kitsHTML;?>
+<br><br>
+<div class="alert">
+	<h1>Course Kits</h1>
+	<div class="row">
+		<div class="col-7">
+		<p class="lead mb-0">The TekBots group helps to distribute kits for courses in the School of EECS. This page lists the status of your kits.</p>
+		<p class="lead mb-0"><b>COVID Update: </b>Normally all kits are available for pickup form KEC1110 during the store hours posted on our mainpage. To address concerns of COVID transmission an option for mailing kits or contactless pickup is available. These processes are described in an email / Canvas announcement that was sent to each course.</p>
+		<BR><BR><?php echo $kitsHTML;?>
+		</div>
+		<div class="col-5"><img class="img-fluid rounded" src="./assets/img/rect2.png">
+		</div>
+	</div>
+</div>
 
 
 <?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>

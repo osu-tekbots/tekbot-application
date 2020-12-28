@@ -4,7 +4,6 @@ include_once '../bootstrap.php';
 
 use DataAccess\LaserDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 if (!session_id()) {
@@ -57,7 +56,7 @@ $printJobs = $laserDao->getLaserJobs();
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Print Jobs List');
+                renderEmployeeBreadcrumb('Employee', 'Laser Cuts Jobs List');
 
                 echo "<div class='admin-paper'>";
 
@@ -93,7 +92,7 @@ $printJobs = $laserDao->getLaserJobs();
                     if(!$validPrintDate) {
                         $currentStatus = "<button id='sendConfirm$printJobID' class='btn btn-primary'>Send Confirmation</button>";
                     } else {
-                        $currentStatus = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>👀 Print Validated</a><br/>";
+                        $currentStatus = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>👀 Cut Validated</a><br/>";
                     }
                     
                     // If print is pending customer confirmation
@@ -144,7 +143,7 @@ $printJobs = $laserDao->getLaserJobs();
 
                     <td>$name</td>
                     <td>$printer<br/>$printType</td>
-                    <td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$dxfFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
+                    <td><a href='./uploads/lasercuts/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$dxfFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
                     <td>$status</td>
@@ -197,7 +196,7 @@ $printJobs = $laserDao->getLaserJobs();
                 });
 
                 $('#completePrint$printJobID').on('click', function() {
-                    if(confirm('Print $dxfFileName has completed and send confirmation email to $name?')) {
+                    if(confirm('Cut $dxfFileName has completed and send confirmation email to $name?')) {
                         $('#completePrint$printJobID').prop('disabled', true);
                         let printJobID = '$printJobID';
                         let userID = '$userID';
@@ -260,18 +259,18 @@ $printJobs = $laserDao->getLaserJobs();
                 <h3>Laser Jobs</h3>
                 <p><strong>IMPORTANT</strong>: You must process the order in touchnet before approving fees!</p>
 
-                <p>Time stamps in 'Is Print Valid', 'Customer Confirmation' and 'Print Completed' colums indicate the completion of that field</p>
+                <p>Time stamps in 'Is Cut Valid', 'Customer Confirmation' and 'Cut Completed' colums indicate the completion of that field</p>
                 <p>Steps:</p>
                 <ol>
-                    <li>Verify that print is valid for selected printer. If so, click 'Send Confirmation'</li>
-                    <li>Wait until customer confirms the print job, which will be indicated as a time stamp and 'Confirmed'</li>
-                    <li>If the print is confirmed, perform the print job</li>
-                    <li>Once finished, click 'Print finished' button</li>
+                    <li>Verify that cut is valid for selected printer. If so, click 'Send Confirmation'</li>
+                    <li>Wait until customer confirms the cut job, which will be indicated as a time stamp and 'Confirmed'</li>
+                    <li>If the cut is confirmed, perform the cut job</li>
+                    <li>Once finished, click 'Cut finished' button</li>
                 </ol>
 
                 <p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
                 <table class='table' id='checkoutFees'>
-                <caption>Fees Relating to Equipment Checkout</caption>
+                <caption>All Submitted Laser Cuts</caption>
                 <thead>
                     <tr>
                         <th>Customer</th>

@@ -26,7 +26,7 @@ $Data = array();
 			}
 			if(empty($errors)==true){
 				$dbfilename = $Data["UploadName"];
-				move_uploaded_file($file_tmp,"../prints/".$dbfilename);
+				move_uploaded_file($file_tmp,"../uploads/prints/".$dbfilename);
 				$Data["successful"] = 1;
 				$Data["string"] = $dbfilename;
 				$Data["path"] = $dbfilename;
@@ -63,7 +63,7 @@ $Data = array();
 		}
 		if(empty($errors)==true){
 			$dbfilename = $Data["UploadName"];
-			move_uploaded_file($file_tmp,"../lasercuts/".$dbfilename);
+			move_uploaded_file($file_tmp,"../uploads/lasercuts/".$dbfilename);
 			$Data["successful"] = 1;
 			$Data["string"] = $dbfilename;
 			$Data["path"] = $dbfilename;

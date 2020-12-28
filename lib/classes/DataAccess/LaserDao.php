@@ -227,6 +227,34 @@ class LaserDao
         }
     }
 
+    /**
+     * Fetches all Cutters.
+     * @return \Model\LaserJob[]|boolean an array of printers on success, false otherwise
+     */
+    public function getUnconfirmedLaserJobsForUser($uID) {
+        try {
+            $sql = '
+            SELECT * FROM laser_jobs
+            WHERE laser_jobs.user_id = :uID
+            AND laser_jobs.pending_customer_response = 1
+            ';
+            $params = array(
+                ':uID' => $uID
+            );
+            $results = $this->conn->query($sql, $params);
+            $laserJobs = array();
+
+            foreach ($results as $row) {
+                $laserJob = self::ExtractLaserJobFromRow($row);
+                $laserJobs[] = $laserJob;
+            }
+            return $laserJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to obtain user\'s laser jobs: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function addNewLaserCutter(Laser $cutter) {
         try {
             $sql = '

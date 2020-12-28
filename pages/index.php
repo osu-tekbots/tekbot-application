@@ -18,8 +18,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <!--<h1><strong>Tek</strong>bots</h1>-->
                     <img class="tekbotslogo" src="assets/img/resize_tekbots.png">
                     <h2 class="logotext">Creating Platforms For Learning. <br>
-                    <h2><strong><a href="http://eecs.oregonstate.edu/education/3dprinter/index.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="http://eecs.oregonstate.edu/education/3dprinter/index-laser.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="http://eecs.oregonstate.edu/education/inventory" target="_blank">Inventory</a></strong></h2>
-                    <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/browseEquipment.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="#faq">Technical Help</strong></h2> </a>
+                    <h2><strong><a href="./pages/userPrints.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="./pages/publicInventory.php" target="_blank">Inventory</a></strong></h2>
+                    <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="./pages/browseEquipment.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="./pages/info.php">Technical Help</strong></h2> </a>
                     <h3>KEC 1110 Hours: 10AM - 1PM</h3></h2>
                     
                     <a class="arrowLink" href="#about"><div class="arrow bounce"></div></a>
@@ -41,7 +41,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('assets/img/storecabinet.jpg');"></div>
                          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
                               <h2>TekBots Store</h2>
-                              <p class="lead mb-0">The TekBots store contains all sorts of electronics and modules that can be purchased for projects or classes!  For more information about the items we have in stock, please check our entire inventory list <a href="http://eecs.oregonstate.edu/education/inventory" target="_blank">here</a>.  This is also where ECE students pick up their lab kits.</p>
+                              <p class="lead mb-0">The TekBots store contains all sorts of electronics and modules that can be purchased for projects or classes!  For more information about the items we have in stock, please check our entire inventory list <a href="./pages/publicInventory.php" target="_blank">here</a>.  This is also where ECE students pick up their lab kits.</p>
                          </div>
                          </div>
                     <section class="makerspace">
@@ -57,7 +57,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image: url('assets/img/3dprinter_unblurred.jpg');"></div>
                          <div class="col-lg-6 order-lg-1 my-auto showcase-text">
                               <h2>3D Printing &amp; Laser Cutting</h2>
-                              <p class="lead mb-0">We provide services for 3D printing and Laser Cutting.  We can print using PLA and dual-extruder material and we can cut wood, acrylic, and some other materials.  For more information about these services, check out our <a href="#faq">FAQ</a>. To submit a print or cut request, head to <a href="http://eecs.oregonstate.edu/education/3dprinter/index.php" target="_blank">3D Printer Submission</a> or <a href="http://eecs.oregonstate.edu/education/3dprinter/index-laser.php" target="_blank">Laser Cutter Submission</a>. </p>
+                              <p class="lead mb-0">We provide services for 3D printing and Laser Cutting.  We can print using PLA and dual-extruder material and we can cut wood, acrylic, and some other materials.  For more information about these services, check out our <a href="./pages/info.php">FAQ</a>. To submit a print or cut request, head to <a href="./pages/userPrints.php" target="_blank">3D Printer Submission</a> or <a href="./pages/userCuts.php" target="_blank">Laser Cutter Submission</a>. </p>
                          </div>
                          </div>
                     </div>

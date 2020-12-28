@@ -55,40 +55,42 @@ $uID = $_SESSION['userID'];
 
 $tekBoxHTML = '';
 $boxes = $boxDao->getBoxByUser($uId);
-$tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-					<h5 class'card-title'>TekBoxs</h5>
-					<div class='card-body'>";
+$tekBoxHTML .= "<div style='padding-top:1em;padding-bottom:1em;margin:1em;'>";
 if (count($boxes) > 0){
+	
 	foreach ($boxes AS $b){
-		$tekBoxHTML .= "<div class='row'><div class='col-9'>TekBox #: " . $b->getNumber() . "<BR>";
+		$tekBoxHTML .= "<div class='alert border rounded'>TekBox #: " . $b->getNumber() . "<BR>";
 		$tekBoxHTML .= "Filled: " .date("l, M/d",strtotime($b->getFillDate())). "<BR>";
+		$tekBoxHTML .= "Contents: " .$b->getContents(). "<BR>";
 		
 		if ($b->getLocked() == 0){
-			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Unlocked</span></div>";
-			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-danger' onclick='lock(\"$uId\", \"".$b->getBoxKey()."\")'>Lock?</button></div></div>";
+			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Unlocked</span>";
+			$tekBoxHTML .= "<button style='position:absolute; top:1em; right:1em;' id='tekboxButton".$b->getBoxKey()."' class='btn btn-danger btn-lg' onclick='lock(\"$uId\", \"".$b->getBoxKey()."\")'>Lock?</button></div>";
 		} else {
-			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Locked</span></div>";
-			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-success' onclick='unlock(\"$uId\", \"".$b->getBoxKey()."\")'>Unlock?</button></div></div>";	
+			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Locked</span>";
+			$tekBoxHTML .= "<button style='position:absolute; top:1em; right:1em;' id='tekboxButton".$b->getBoxKey()."' class='btn btn-success btn-lg' onclick='unlock(\"$uId\", \"".$b->getBoxKey()."\")'>Unlock?</button></div>";	
 		}
 	}
-	$tekBoxHTML .= "</div>
-					</div>";
+	$tekBoxHTML .= "</div>";
 } else {
-	$tekBoxHTML .= "You do not have any items in a TekBox.</div>
-					</div>";
+	$tekBoxHTML .= "You do not have any items in a TekBox.</div>";
 }
 
 
 ?>
-<br><br><br><br>
+<br><br>
 <div class="alert">
-<h3>TekBox Pick-Up System</h3>
-<div class="col-7">
-<p class="lead mb-0">The TekBox system allows for students, faculty, and staff with OSU ONID login abilities to pick up items via a no contact modality. After an order has been placed or a laser cut or 3D print completes, it can be placed into a TekBox locker. These lockers are outside of the KEC1110 room in the Kelley Engineering Center. Users may then digitally unlock the locker using this inerface. On the physical TekBox, pressing the front button will cause the locker to query the server for the state of the locker (locked or unlocked) and respond accordingly.
-</p></div>
+	<h1>TekBox Pick-Up System</h1>
+	<div class="row">
+		<div class="col-7">
+		<p class="lead mb-0">The TekBox system allows for students, faculty, and staff with OSU ONID login abilities to pick up items via a no contact modality. After an order has been placed or a laser cut or 3D print completes, it can be placed into a TekBox locker. These lockers are outside of the KEC1110 room in the Kelley Engineering Center. Users may then digitally unlock the locker using this inerface. On the physical TekBox, pressing the front button will cause the locker to query the server for the state of the locker (locked or unlocked) and respond accordingly.</p>
+		
+		<?php echo $tekBoxHTML;?>
+		</div>
+		<div class="col-5"><img class="img-fluid rounded" src="./assets/img/rect2.png">
+		</div>
+	</div>
 </div>
-
-<?php echo $tekBoxHTML; ?>
 
 <script defer type="text/javascript">
 function lock(uid, id){
@@ -110,19 +112,21 @@ function lock(uid, id){
 
 function unlock(uid, id){
 	
-	let content = {
-		action: 'unlock',
-		boxId: id,
-		uId: uid
+	if (confirm("This will unlock your TekBox and anyone walking by the box can open it. You should wait to do this until you are in front of the box. Is it OK to unlock?")){
+		let content = {
+			action: 'unlock',
+			boxId: id,
+			uId: uid
+		}
+		
+		api.post('/boxes.php', content).then(res => {
+			snackbar(res.message, 'Box Unlocked');
+			$('#tekboxButton'+id).hide();
+			$('#status'+id).html('Unlocked');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
 	}
-	
-	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Box Unlocked');
-		$('#tekboxButton'+id).hide();
-		$('#status'+id).html('Unlocked');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
 }
 </script>
 

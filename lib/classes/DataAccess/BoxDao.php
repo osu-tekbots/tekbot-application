@@ -263,7 +263,7 @@ class BoxDao {
         try {
             $sql = '
             UPDATE tekbots_boxes 
-			SET pickup_date = "0000-00-00 00:00:00", fill_date = "0000-00-00 00:00:00", user_id = "", locked = 1, fill_by = "", order_number = ""  
+			SET pickup_date = "0000-00-00 00:00:00", fill_date = "0000-00-00 00:00:00", user_id = "", locked = 1, fill_by = "", contents = ""  
 			WHERE tekbots_boxes.box_key = :id 
 			';
             $params = array(':id' => $id);
@@ -282,7 +282,7 @@ class BoxDao {
             UPDATE tekbots_boxes SET
                 number = :number,
 				user_id = :user_id,
-				order_number = :order_number,
+				contents = :contents,
 				fill_date = :fill_date,
 				fill_by = :fill_by,
 				locked = :locked,
@@ -294,7 +294,7 @@ class BoxDao {
 				':box_key' => $box->getBoxKey(),
                 ':number' => $box->getNumber(),
 				':user_id' => $box->getUserId(),
-                ':order_number' => $box->getOrderNumber(),
+                ':contents' => $box->getContents(),
                 ':fill_date' => $box->getFillDate(),
                 ':fill_by' => $box->getFillBy(),
                 ':locked' => $box->getLocked(),
@@ -362,8 +362,8 @@ class BoxDao {
 		if(isset($row['pickup_date'])){
 			$box->setPickupDate($row['pickup_date']);
 		}
-		if(isset($row['order_number'])){
-			$box->setOrderNumber($row['order_number']);
+		if(isset($row['contents'])){
+			$box->setContents($row['contents']);
 		}
 		if(isset($row['battery'])){
 			$box->setBattery($row['battery']);

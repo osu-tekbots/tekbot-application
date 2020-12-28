@@ -24,7 +24,7 @@ $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
 allowIf($isEmployee, 'index.php');
 
 
-$title = 'Employee Lockers';
+$title = 'Employee TekBoxes';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -53,9 +53,6 @@ $boxDao = new BoxDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $boxes = $boxDao->getBoxes();
 
-
-
-
 $options = "<option value=''></option>";
 $users = $userDao->getAllUsers();
 foreach ($users as $user){
@@ -67,13 +64,13 @@ foreach ($users as $user){
 <script type='text/javascript'>
 function fillBox(id){
 	var userid = $('#name'+id).val();
-	var orderNumber = $('#order'+id).val();
+	var contents = $('#contents'+id).val();
 	
 	if (userid != ''){
 		let content = {
 			action: 'fillBox',
 			userId: userid,
-			orderNumber: orderNumber,
+			contents: contents,
 			fillById: '<?php echo $_SESSION['userID'];?>',
 			messageId: 'fji8486u6jmfai8w',
 			boxId: id
@@ -175,9 +172,9 @@ function emptyBox(id){
 				$pickupDate = $b->getPickupDate();
 				$locked = $b->getLocked();
 				$userId = $b->getUserId();
-				$orderNumber = $b->getOrderNumber();
+				$contents = $b->getContents();
 				$battery = $b->getBattery();
-				$battery = (min(($battery - 1248)/(1600-1248),1))*100;
+				$battery = (min(($battery - 1248)/(1790-1248),1))*100;
 				if ($userId != '')
 					$user = $userDao->getUserById($userId);
 				$fillBy = $b->getFillBy();
@@ -191,22 +188,22 @@ function emptyBox(id){
 							<a href="./pages/employeeBoxes.php?key='.$boxKey.'"><div class="progress"><div class="progress-bar '.($battery < 25 ? 'bg-danger' :'bg-success').'" role="progressbar" style="width: '.$battery.'%" aria-valuenow="'.$battery.'" aria-valuemin="0" aria-valuemax="100">'.number_format($battery,0).'%</div>'.($battery < 25 ? '&nbsp;&nbsp;Low Battery' :'').'</div></a>
 							</div>';
 							
-					if ($fillDate == '0000-00-00 00:00:00'){
+					if ($fillDate == '0000-00-00 00:00:00'){ //Box is available for use
 						echo '<div class="form-group col-sm-4">User:<select id="name'.$boxKey.'" class="form-control" >'.$options.'</select></div>';
-						echo '<div class="form-group col-sm-4">Order Number:<input type="text" class="form-control" id="order'.$boxKey.'"></div>';
+						echo '<div class="form-group col-sm-4">Contents:<input type="text" class="form-control" id="contents'.$boxKey.'"></div>';
 						echo '<button id="button'.$boxKey.'" onclick="fillBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Fill Box</button>';
 					} else {
-						if ($pickupDate != '0000-00-00 00:00:00'){
+						if ($pickupDate != '0000-00-00 00:00:00'){ // This is likely available but we need to check.
 							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR><b>Picked Up: ' .$pickupDate.'</b><BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
-							echo '<div class="form-group col-sm-4">Order Number: '.$orderNumber.'</div>';
+							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
 							echo '<button onclick="resetBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Reset Box</button>';
 							if ($locked == 1)
 								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Unlock Box</button>';
 							else
 								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Lock Box</button>';
-						} else {
-							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR>Box Filled: '.$fillDate.'<BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
-							echo '<div class="form-group col-sm-4">Order Number: '.$orderNumber.'</div>';
+						} else { // Box still has something in it (for sure)
+							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR>Box Filled: '.((time() - strtotime($fillDate)) > (2*24*60*60) ? "<span style='font-weight: bold;color:red !important;'>$fillDate</span>" : $fillDate).'<BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
+							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
 							echo '<button onclick="emptyBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Empty Box</button>';
 							if ($locked == 1)
 								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Unlock Box</button>';

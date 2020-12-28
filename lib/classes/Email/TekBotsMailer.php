@@ -26,7 +26,7 @@ class TekBotsMailer extends Mailer {
 		$subject = $message->fillTemplateSubject($replacements);
 		$body = $message->fillTemplateBody($replacements);
 
-        return $this->sendEmail($replacements['email'], $subject, $body);
+        return $this->sendEmail($replacements['email'], $subject, $body, true);
     }
 	
 	public function sendBoxEmail($user, $box, $message) {
@@ -35,11 +35,13 @@ class TekBotsMailer extends Mailer {
 		$replacements['email'] = Security::HtmlEntitiesEncode($user->getEmail());
 		$replacements['name'] = Security::HtmlEntitiesEncode($user->getFirstName() . " " . $user->getLastName());
 		$replacements['number'] = $box->getNumber();
+		$replacements['contents'] = $box->getContents();
+		$replacements['filldate'] = date('m/d/y', strtotime($box->getFillDate()));
 		
 		$subject = $message->fillTemplateSubject($replacements);
 		$body = $message->fillTemplateBody($replacements);
 
-        return $this->sendEmail($replacements['email'], $subject, $body);
+        return $this->sendEmail($replacements['email'], $subject, $body, true);
     }
 	
 	public function sendPrinterEmail($user, $job, $message) {

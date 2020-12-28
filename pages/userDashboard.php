@@ -8,10 +8,9 @@ use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentReservationDao;
 use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
+use DataAccess\LaserDao;
 use DataAccess\BoxDao;
 use DataAccess\KitEnrollmentDao;
-use Model\KitEnrollmentStatus;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 session_start();
@@ -64,6 +63,7 @@ $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
+$laserDao = new LaserDao($dbConn, $logger);
 $boxDao = new BoxDao($dbConn, $logger);
 $kitsDao = new KitEnrollmentDao($dbConn, $logger);
 
@@ -369,77 +369,51 @@ if ($checkedoutEquipment){
 }
 
 /*
-This section creates lock/unlock cards for each TekBox currently checked out to the user
+Laser Cuts Notice
 */
-
-$tekBoxHTML = '';
-$boxes = $boxDao->getBoxByUser($uId);
-$tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-					<h5 class'card-title'>TekBoxs</h5>
-					<div class='card-body'>";
-if (count($boxes) > 0){
-	foreach ($boxes AS $b){
-		$tekBoxHTML .= "<div class='row'><div class='col-9'>TekBox #: " . $b->getNumber() . "<BR>";
-		$tekBoxHTML .= "Filled: " .date("l, M/d",strtotime($b->getFillDate())). "<BR>";
-		
-		if ($b->getLocked() == 0){
-			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Unlocked</span></div>";
-			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-danger' onclick='lock(\"$uId\", \"".$b->getBoxKey()."\")'>Lock?</button></div></div>";
-		} else {
-			$tekBoxHTML .= "Status: <span id='status".$b->getBoxKey()."'>Locked</span></div>";
-			$tekBoxHTML .= "<div class='col-3'><button id='tekboxButton".$b->getBoxKey()."' class='btn btn-success' onclick='unlock(\"$uId\", \"".$b->getBoxKey()."\")'>Unlock?</button></div></div>";	
-		}
-	}
-	$tekBoxHTML .= "</div>
-					</div>";
-} else {
-	$tekBoxHTML .= "You do not have any items in a TekBox.</div>
-					</div>";
+$laserCutsHtml = '';
+$unconfirmedCuts = $laserDao->getUnconfirmedLaserJobsForUser($uID);
+$numUnconfirmedCuts = count($unconfirmedCuts);
+if ($numUnconfirmedCuts > 0) {
+	$laserCutsHtml = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+	<h5 class'card-title'>You have $numUnconfirmedCuts unconfirmed cut(s)!</h5>
+	<div class='card-body'>
+	<a href='./pages/userCuts.php'><span class='lead mb-0'>Laser Cuts Webpage →</span></a>
+	</div>
+	</div>";
 }
-
-$tekBoxHTML .= "
-<script type='text/javascript'>
-function lock(uid, id){
-	
-	let content = {
-		action: 'lock',
-		boxId: id,
-		uId: uid
-	}
-	
-	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Box Locked');
-		$('#tekboxButton'+id).hide();
-		$('#status'+id).html('Locked');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
-
-function unlock(uid, id){
-	
-	let content = {
-		action: 'unlock',
-		boxId: id,
-		uId: uid
-	}
-	
-	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Box Unlocked');
-		$('#tekboxButton'+id).hide();
-		$('#status'+id).html('Unlocked');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
-</script>
-
-";
 
 /*
-Checks if the user has kits to pick up.
+3D Prints Notice
 */
+$printsHtml = '';
+$unconfirmedPrints = $printerDao->getUnconfirmedPrintJobsForUser($uID);
+$numUnconfirmedPrints = count($unconfirmedPrints);
+if ($numUnconfirmedPrints > 0) {
+	$laserCutsHtml = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+	<h5 class'card-title'>You have $numUnconfirmedPrints unconfirmed print(s)!</h5>
+	<div class='card-body'>
+	<a href='./pages/userPrints.php'><span class='lead mb-0'>Laser Cuts Webpage →</span></a>
+	</div>
+	</div>";
+}
 
+/*
+TekBox Notice
+*/
+$tekBoxHTML = '';
+$boxes = $boxDao->getBoxByUser($uId);
+if (count($boxes) > 0)
+$tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+			<h5 class'card-title'>You have an item to pickup from a TekBox!</h5>
+			<div class='card-body'>
+			<a href='./pages/userTekbox.php'><span class='lead mb-0'>TekBox Webpage →</span></a>
+			</div>
+			</div>";
+			
+/*
+Kit Handout Notice
+*/
 $kitsHTML = "";
 $tempkits = $kitsDao->getKitEnrollmentsByOnid($uOnid);
 $kits = Array();
@@ -447,74 +421,53 @@ foreach ($tempkits AS $t)
 	if ($t->getKitStatusID()->getId() == 1) // KitEnrollmentStatus::READY = 1
 		$kits[] = $t;
 	
-if (sizeof($kits) > 0){
+if (sizeof($kits) > 0)
 	$kitsHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Class Kits for Pickup</h5>
-						<div class='card-body'><p>Class kits can be picked up from KEC1110 during store hours.</p>Courses:<BR>";
-	foreach ($kits AS $k){
-		$kitsHTML .= $k->getCourseCode() . "<BR>";
-	}
-	$kitsHTML .= "</div>
-				</div>";
-}
+			<h5 class'card-title'>You have a kit to pickup from TekBots!</h5>
+			<div class='card-body'>
+			<a href='./pages/userKits.php'><span class='lead mb-0'>Kit Pickup Webpage →</span></a>
+			</div>
+			</div>";
+
+
 /*
-This section prepares the Dashboard contents for the Dashboard tab.
-This includes Reservations and Active Check-Outs
-
+Equipment Reservation Notice
 */
+$reservationHTML = '';
+if ($reservedEquipmentCount != 0)
+	$reservationHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+			<h5 class'card-title'>You have an active equipment reservation!</h5>
+			<div class='card-body'>
+			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			</div>
+			</div>";
 
-$dashboardHTML = "";
-$dashboardHTML .= "
-	<br><br><br><br>
-	<section class='panel'>
-		<div class='row'>";
-		$dashboardHTML .= $kitsHTML;
-		$dashboardHTML .= $tekBoxHTML;
-			
-		if ($reservedEquipmentCount != 0){
-			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Equipment Reservations</h5>
-						<div class='card-body'>You have an equipment reservation!  Go to TekBots (KEC 1110) to pick up your equipment before your reservation expires.
-						</div></div>";
-		} else {
-			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Equipment Reservations</h5>
-						<div class='card-body'>You do not have any equipment reservations.
-						</div></div>";
-		}
-		
-		
-		if ($checkedOutEquipmentLateCount != 0){
-			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Late Equipment</h5>
-						<div class='card-body'>You have yet to return a checked out equipment!  Return the item to TekBots (KEC 1110) ASAP to prevent late fees and having your student account charged!
-						</div></div>";
-		} else {
-			$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Late Equipment</h5>
-						<div class='card-body'>You do not have any late equipment currently checked out.
-						</div></div>";
-		}
-
-		
-		$dashboardHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-						<h5 class'card-title'>Equipment Checked Out</h5>";
-		if ($checkedoutEquipmentCount != 0){
-			$dashboardHTML .= "<div class='card-body'>You currently have $checkedoutEquipmentCount equipment(s) checked out!  Make sure to keep track of the deadline time and return the item before then!</div>";
-		} else {
-			$dashboardHTML .= "<div class='card-body'>You do not have any equipment currently checked out.</div>";
-		}
-		$dashboardHTML .= "</div>";
-		
-$dashboardHTML .= "
-		</div>
-	</section>";
-
-
+/*
+Late Equipment Notice
+*/
+$lateEquipmentHTML = '';						
+if ($checkedOutEquipmentLateCount != 0)					
+	$lateEquipmentHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+			<h5 class'card-title'>You have equipment to be returned that is now late!</h5>
+			<div class='card-body'>
+			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			</div>
+			</div>";
+					
+/*
+Checked Out Equipment Notice
+*/
+$checkedOutHTML = '';
+if ($checkedoutEquipmentCount != 0)
+	$checkedOutHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
+			<h5 class'card-title'>You have equipment checked out.</h5>
+			<div class='card-body'>
+			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			</div>
+			</div>";
 ?>
 
-<br>
-<?php echo $dashboardHTML;?>
+<br><br>
 <a href="./pages/myProfile.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">User Information</button></a>
 <a href="./pages/userKits.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Course Kits</button></a>
 <a href="./pages/userPrints.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">3D Prints</button></a>
@@ -522,5 +475,13 @@ $dashboardHTML .= "
 <a href="./pages/userCuts.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Laser Cuts</button></a>
 <a href="./pages/browseEquipment.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Equipment for Loan</button></a>
 <a href="./pages/userTekbox.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">TekBox Pickup System</button></a>
+<BR>
+<?php echo $laserCutsHtml;?>
+<?php echo $printsHtml;?>
+<?php echo $tekBoxHTML;?>
+<?php echo $kitsHTML;?>
+<?php echo $reservationHTML;?>
+<?php echo $lateEquipmentHTML;?>
+<?php echo $checkedOutHTML;?>
 
 <?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>

@@ -41,7 +41,7 @@
 		$('#body').append("<div id=target></div>")
 		var button = $(e.relatedTarget);
 		var dbFile = button.data('whatever');
-		let path = 'prints/' + dbFile;
+		let path = 'uploads/prints/' + dbFile;
 		var madeleine = new Madeleine({
 		target: 'target', // target div id
 		data: path, // data path

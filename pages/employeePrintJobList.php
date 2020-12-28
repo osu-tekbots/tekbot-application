@@ -103,7 +103,7 @@ $printJobs = $printerDao->getPrintJobs();
                     }
 
                     // Render appropriate button for each payment method
-                    $payment = "💲Paid: ";
+                    $payment = "💲 Paid: ";
                     $paymentValidation = null;
                     switch($paymentMethod) {
                         case "cc":
@@ -143,7 +143,7 @@ $printJobs = $printerDao->getPrintJobs();
 
                     <td>$name</td>
                     <td>$printer<br/>$printType</td>
-                    <td><a href='./prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
+                    <td><a href='./uploads/prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
                     <td>$status</td>
@@ -270,7 +270,7 @@ $printJobs = $printerDao->getPrintJobs();
 
                 <p>Make sure to process any fees that are awaiting approval.  Some of them are tied to prints or cuts and need to be processed before you are able to cut/print.</p>
                 <table class='table' id='checkoutFees'>
-                <caption>Fees Relating to Equipment Checkout</caption>
+                <caption>All Submitted 3D Prints</caption>
                 <thead>
                     <tr>
                         <th>Customer</th>

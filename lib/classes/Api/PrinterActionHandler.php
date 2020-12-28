@@ -14,6 +14,7 @@ use DataAccess\QueryUtils;
  */
 class PrinterActionHandler extends ActionHandler {
 
+    /** @var \DataAccess\CoursePrintAllowanceDao */
     private $coursePrintAllowanceDao;
 
     private $printFeeDao;
@@ -26,6 +27,7 @@ class PrinterActionHandler extends ActionHandler {
     /** @var \DataAccess\UsersDao */
     private $userDao;
 
+    /** @var \DataAccess\MessageDao */
     private $messageDao;
     
     /**
@@ -596,9 +598,6 @@ class PrinterActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
-        // $link = "https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/ajax/jobhandler.php?id={$printJobID}&action=approve";
-        // $user = $this->userDao->getUserByID($body['userID']);
-        // $this->mailer->sendPrintConfirmationEmail($user, $printJob, $link);
 
         $this->respond(new Response(
             Response::CREATED, 
@@ -680,9 +679,6 @@ class PrinterActionHandler extends ActionHandler {
         }
 
         $user = $this->userDao->getUserByID($body['userID']);
-
-        // Change email method here
-        // $this->mailer->sendPrintCompleteEmail($user, $printJob);
 
         $replacements = array(
             "name" => $user->getFirstName(),

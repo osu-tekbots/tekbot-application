@@ -78,7 +78,7 @@ class MessageActionHandler extends ActionHandler {
 		$body = $message->fillTemplateBody($content['replacements']);
 		$subject = $message->fillTemplateSubject($content['replacements']);
 
-		$headers = "From:heer@oregonstate.edu\r\n";
+		$headers = "From:tekbot-worker@engr.oregonstate.edu\r\n";
 		$headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-type: text/html;charset=UTF-8\r\n";
 		

@@ -57,10 +57,6 @@ function updateMessage(id) {
 	var body = document.getElementById('body'+id).value;
 	var format = 1;
 	
-//		alert(subject);
-//		alert(body);
-//		alert(format);
-	
 	let content = {
 		action: 'updateMessage',
 		subject: subject,
@@ -85,7 +81,7 @@ function sendTestMessage(id) {
 	if(confirm('Confirm that a test email will be sent to your email address (' + email + ')?')) {
 		let content = {
 			action: 'sendMessage',
-			replacements: {name: "Mark", email: "foo"},
+			replacements: {name: "<?php echo $user->getFirstName();?>", email: "<?php echo $user->getEmail();?>"},
 			email: email,
 			message_id: id
 		}

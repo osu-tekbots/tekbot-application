@@ -28,6 +28,35 @@ class PrinterDao {
         $this->logger = $logger;
     }
 
+
+    /**
+     * Fetches all Cutters.
+     * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
+     */
+    public function getUnconfirmedPrintJobsForUser($uID) {
+        try {
+            $sql = '
+            SELECT * FROM 3d_jobs
+            WHERE 3d_jobs.user_id = :uID
+            AND 3d_jobs.pending_customer_response = 1
+            ';
+            $params = array(
+                ':uID' => $uID
+            );
+            $results = $this->conn->query($sql, $params);
+            $laserJobs = array();
+
+            foreach ($results as $row) {
+                $laserJob = self::ExtractPrintJobFromRow($row);
+                $laserJobs[] = $laserJob;
+            }
+            return $laserJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to obtain user\'s printer jobs: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Fetches all Printers.
      * @return \Model\Printer[]|boolean an array of printers on success, false otherwise

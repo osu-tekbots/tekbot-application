@@ -85,7 +85,8 @@ function isValidStudentID($sid){
                 <a class="dropdown-item" href="pages/employeeLaserJobList.php">All Cut Jobs</a>
                 <a class="dropdown-item" href="pages/employeeCutVouchers.php">Cut Vouchers</a>
                 <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Modifying Print Tools:</h6>
+                <h6 class="dropdown-header">Modifying Laser Tools:</h6>
+                <a class="dropdown-item" href="pages/employeeLaserMessages.php">Edit Messages</a>
                 <a class="dropdown-item" href="pages/employeeAddLaser.php">Printers/Print Types</a>
             </div>
         </li>

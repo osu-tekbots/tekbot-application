@@ -153,7 +153,7 @@ foreach($studentPrintJobs as $p) {
 		<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
 			View
 		</button>
-		<a style='color:#0000FF;' href='./prints/$dbFileName'>$stlFileName</a>
+		<a style='color:#0000FF;' href='./uploads/prints/$dbFileName'>$stlFileName</a>
 	</td>
 	<td>$customerNotes</td>
 	<td>$status</td>
@@ -175,7 +175,7 @@ foreach($studentPrintJobs as $p) {
 				echo "
 			<br><br><br>
 			<div class='admin-paper'>
-			<h3>Print Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/submit3DPrint.php'><button class='btn btn-info'>New 3D Print</button></a></h3>
+			<h3>Print Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/userPrintsSubmit.php'><button class='btn btn-info'>New 3D Print</button></a></h3>
 				<table class='table' id='printJobs'>
 					<thead>
 						<tr>

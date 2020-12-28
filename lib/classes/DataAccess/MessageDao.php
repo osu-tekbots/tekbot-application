@@ -52,7 +52,7 @@ class MessageDao {
 
     /**
      * Fetches all Print Jobs by ID.
-     * @return \Model\PrinterJob[]|boolean an array of printers on success, false otherwise
+     * @return \Model\Message|boolean an array of printers on success, false otherwise
      */
     public function getMessageByID($id) {
         try {
