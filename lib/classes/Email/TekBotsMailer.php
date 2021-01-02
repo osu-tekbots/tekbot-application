@@ -16,7 +16,7 @@ class TekBotsMailer extends Mailer {
         parent::__construct($from, $subjectTag);
     }
 
-    public function sendLockerEmail($user, $locker, $message) {
+    public function sendLockerEmail($user, $locker, $message, true) {
         $replacements = Array();
 		
 		$replacements['email'] = Security::HtmlEntitiesEncode($user->getEmail());
@@ -44,18 +44,27 @@ class TekBotsMailer extends Mailer {
         return $this->sendEmail($replacements['email'], $subject, $body, true);
     }
 	
-	public function sendPrinterEmail($user, $job, $message) {
+	public function sendEquipmentEmail($user, $checkout, $equipment, $message, true) {
+        $replacements = Array();
+		
+		$replacements['email'] = Security::HtmlEntitiesEncode($user->getEmail());
+		$replacements['name'] = Security::HtmlEntitiesEncode($user->getFirstName() . " " . $user->getLastName());
+		$replacements['equipname'] = Security::HtmlEntitiesEncode($equipment->getName());
+		$replacements['equipid'] = Security::HtmlEntitiesEncode($equipment->getEquipmentID());
+				
+		$subject = $message->fillTemplateSubject($replacements);
+		$body = $message->fillTemplateBody($replacements);
+
+        return $this->sendEmail($replacements['email'], $subject, $body, true);
+    }
+	
+	public function sendPrinterEmail($user, $job, $message, true) {
         $replacements = Array();
 		
 		$replacements['email'] = Security::HtmlEntitiesEncode($user->getEmail());
 		$replacements['name'] = Security::HtmlEntitiesEncode($user->getFirstName() . " " . $user->getLastName());
 		$replacements['printJobID'] = $job->getPrintJobID();
-		
-		
-		
-		
-		
-		
+
 		$subject = $message->fillTemplateSubject($replacements);
 		$body = $message->fillTemplateBody($replacements);
 

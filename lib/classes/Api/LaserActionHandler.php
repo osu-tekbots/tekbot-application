@@ -353,6 +353,7 @@ class LaserActionHandler extends ActionHandler {
 
 		$this->requireParam('laserJobID');
 		$this->requireParam('userID');
+		$this->requireParam('cutCost');
 
         $laserJobID = $body['laserJobID'];
 
@@ -368,6 +369,8 @@ class LaserActionHandler extends ActionHandler {
 
         $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
 
+        $printJob->setEmployeeNotes($printJob->getEmployeeNotes() . "\nEmailed Cost: $" . $body['cutCost']);
+
         $ok = $this->laserDao->updateCutJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
@@ -377,7 +380,8 @@ class LaserActionHandler extends ActionHandler {
 
         $replacements = array(
             "name" => $user->getFirstName(),
-            "laser" => $printJob->getDxfFileName()
+            "laser" => $printJob->getDxfFileName(),
+            "cost" => $body['cutCost']
         );
 
         $ok = $this->laserEmailer('jdkslkfajllkjfas', $user->getEmail(), $replacements);

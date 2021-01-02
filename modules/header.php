@@ -92,7 +92,7 @@ $buttons = array(
 // Signed in users
 if ($loggedIn) {
 	//All signed in users types can view these pages
-    $buttons['My TekBots'] = 'pages/userDashboard.php';
+    $buttons['My TekBots'] = './pages/userDashboard.php';
 
     
     // Employee only

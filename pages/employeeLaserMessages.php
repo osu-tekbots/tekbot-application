@@ -131,7 +131,7 @@ function sendTestMessage(id) {
 					echo '<div class="form-group row">
 							<label for="body'.$message_id.'" class="col-sm-2 col-form-label">Body</label>
 							<div class="col-sm-8"><textarea type="text" class="form-control" id="body'.$message_id.'">'.$body.'</textarea></div>
-							<div class="col-sm-2"><strong>Inserts</strong><BR>{{name}}: Full Name<BR>{{laser}}: Laser Cut File Name<BR></div>
+							<div class="col-sm-2"><strong>Inserts</strong><BR>{{name}}: Full Name<BR>{{laser}}: Laser Cut File Name<BR>{{cost}}: Total Print cost (no $ symbol)</div>
 						  </div>';
 					echo '<div class="form-group row">
 							<label for="format'.$message_id.'" class="col-sm-2 col-form-label">Format</label>

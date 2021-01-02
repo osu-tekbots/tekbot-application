@@ -121,14 +121,8 @@ $printTypeIdGetter = function ($printType) {
 	<h1>3D Print Submission Form</h1>
 	To check your currently queued or finished prints, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
 
-	Using this form you can upload a 3D model to be created. Printer that will be used is a Stratasys BST1220 machine, producing plastic final models. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model.
+	Using this form you can upload a 3D model to be created. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model.
 	<br /><br />
-	<ul>
-		Current Price Per Gram: $
-		<?php
-		echo $configManager->getPrintPrice();
-		?>
-	</ul>
 	<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">
 		Printing FAQs
 	</button>
@@ -148,7 +142,7 @@ $printTypeIdGetter = function ($printType) {
 		</div>
 
 	</div>
-	<p>If you would like to pay via credit card, please submit your file with this form and enter 'Credit Card' in the account code field. We will reply with instructions on how to submit payment.</p>
+	<p>If you would like to pay via credit card, after confirmation we will reply with instructions on how to submit payment.</p>
 	<p class="text-danger">NOTE We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p>
 
 
@@ -164,10 +158,86 @@ $printTypeIdGetter = function ($printType) {
 
 			What Print type would you like?: <br />
 
-			<?php
-			renderSelector($printTypes, $printTypeIdGetter, $printTypeNameGetter, "printTypeSelect");
-			?>
+			<select id="printTypeSelect" name="printTypeSelect">
+			</select>
 
+
+			<script>
+				/*
+				Structure for associating print types with printer. Allows filtering of print types dropdown
+				let lookup = {
+					printerName1: [
+						[
+							printTypeName,
+							printTypeId,
+						],
+						[
+							printTypeName,
+							printTypeId,
+						], ....
+					],
+					printerName2: [
+						....
+					]
+				}
+				*/
+
+				let lookup = {
+					<?php
+					foreach ($printers as $printer) {
+						$printerId = $printer->getPrinterId();
+						echo $printerId . ":[";
+						foreach ($printTypes as $printType) {
+							if ($printType->getPrinterId() == $printerId) {
+
+								$printTypeName = $printType->getPrintTypeName();
+
+								echo "[" . "'$printTypeName'" . "," . $printType->getPrintTypeId() . "],";
+							}
+						}
+						echo "],";
+					}
+					?>
+				};
+
+
+				// Initially set the Print Type Dropdown
+				$('#printTypeSelect').empty();
+				let initialPrinterValue = $('#printerSelect').val();
+				for (i = 0; i < lookup[initialPrinterValue].length; i++) {
+					$('#printTypeSelect').append("<option value='" + lookup[initialPrinterValue][i][1] + "'>" + lookup[initialPrinterValue][i][0] + "</option>");
+				}
+
+				// Dynamically change Print Type Dropdown on change of Printer
+				$('#printerSelect').on('change', function() {
+					// Set selected option as variable
+					var selectValue = $(this).val();
+
+					// Empty the target field
+					$('#printTypeSelect').empty();
+
+					// For each choice in the selected option
+					for (i = 0; i < lookup[selectValue].length; i++) {
+						// Output choice in the target field
+						$('#printTypeSelect').append("<option value='" + lookup[selectValue][i][1] + "'>" + lookup[selectValue][i][0] + "</option>");
+					}
+				});
+			</script>
+
+			<br /><b>Quantity</b><br />
+			<select id="quantitySelect" class="custom-select" name="quantity" form="mainform">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+				<option value="8">8</option>
+				<option value="9">9</option>
+				<option value="10">10</option>
+			</select>
+			<br />
 			<b>Payment Method:</b>
 			<br />
 			<?php renderPaymentForm() ?>
@@ -194,7 +264,6 @@ $printTypeIdGetter = function ($printType) {
 <br /><br /><br />
 <br /><br /><br />
 <script>
-
 	window.onload = function() {
 		Lily.ready({
 			target: 'targetDiv', // target div id
@@ -234,6 +303,7 @@ $printTypeIdGetter = function ($printType) {
 				printTypeId: $('#printTypeSelect').val(),
 				dbFileName: dbFileName,
 				stlFileName: filename,
+				quantity: $('#quantitySelect').val(),
 				payment: selectedPayment,
 				courseGroup: 0,
 				voucherCode: voucherVal,

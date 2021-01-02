@@ -70,6 +70,7 @@ $printJobs = $laserDao->getLaserJobs();
                     $user = $userDao->getUserByID($p->getUserID());
                     $name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
                     $printType = Security::HtmlEntitiesEncode($laserDao->getLaserMaterialByID($p->getLaserCutMaterialId())->getLaserMaterialName());
+                    $costPerSheet = Security::HtmlEntitiesEncode($laserDao->getCutMaterialByID($p->getLaserCutMaterialId())->getCostPerSheet());
                     $printer = Security::HtmlEntitiesEncode($laserDao->getLaserByID($p->getLaserCutterId())->getLaserName());
                     $dbFileName = $p->getDbFileName();
                     $dxfFileName = $p->getDxfFileName();
@@ -83,6 +84,7 @@ $printJobs = $laserDao->getLaserJobs();
                     $pendingResponseDate = $p->getPendingCustomerResponse();
                     $paymentConfirmed = $p->getPaymentDate();
                     $voucherCode = $p->getVoucherCode();
+                    $quantity = $p->getQuantity();
                     // $dateUpdated = $p->getDateUpdated();
                                         
 
@@ -143,6 +145,7 @@ $printJobs = $laserDao->getLaserJobs();
 
                     <td>$name</td>
                     <td>$printer<br/>$printType</td>
+                    <td>$quantity</td>
                     <td><a href='./uploads/lasercuts/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$dxfFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
@@ -176,14 +179,17 @@ $printJobs = $laserDao->getLaserJobs();
                 });
 
                 $('#sendConfirm$printJobID').on('click', function() {
-                    if(confirm('Confirm laser cut $dxfFileName and send confirmation email to $name?')) {
+                    let totalCost = $costPerSheet * $quantity;
+                    totalCost = totalCost.toFixed(2);
+                    if(confirm('Confirm laser cut $dxfFileName with cost $' + totalCost + ' and send confirmation email to $name?')) {
                         $('#sendConfirm$printJobID').prop('disabled', true);
                         let printJobID = '$printJobID';
                         let userID = '$userID';
                         let data = {
                             action: 'sendCustomerConfirm',
                             laserJobID: printJobID,
-                            userID: userID
+                            userID: userID,
+                            cutCost: totalCost
                         }
                         api.post('/lasers.php', data).then(res => {
                             snackbar(res.message, 'success');
@@ -275,6 +281,7 @@ $printJobs = $laserDao->getLaserJobs();
                     <tr>
                         <th>Customer</th>
                         <th>Cutter and Material</th>
+                        <th>Quantity</th>
                         <th>File</th>
                         <th>Employee Notes</th>
                         <th>Customer Notes</th>
@@ -288,7 +295,7 @@ $printJobs = $laserDao->getLaserJobs();
                 </tbody>
                 </table>
                 <script>
-                    $('#checkoutFees').DataTable({ 'order':[[5, 'desc']]});
+                    $('#checkoutFees').DataTable({ 'order':[[6, 'desc']]});
                 </script>
                 $buttonScripts
                 "

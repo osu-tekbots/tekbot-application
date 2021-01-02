@@ -41,7 +41,8 @@ function isValidStudentID($sid){
                  <div class="dropdown-divider"></div>
                  <h6 class="dropdown-header">Adjust Content:</h6>
                  <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                 <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
+                 <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
+				 <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
              </div>
         </li>
 
@@ -87,7 +88,7 @@ function isValidStudentID($sid){
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Modifying Laser Tools:</h6>
                 <a class="dropdown-item" href="pages/employeeLaserMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeAddLaser.php">Printers/Print Types</a>
+                <a class="dropdown-item" href="pages/employeeAddLaser.php">Laser Cutters/Materials</a>
             </div>
         </li>
         <li class="nav-item dropdown">
@@ -345,7 +346,8 @@ function createReservationHandoutButton($reservationID, $listNumber, $userID, $e
                 reservationID: reservationID,
                 contractID: contractID,
                 userID: userID,
-                equipmentID: equipmentID
+                equipmentID: equipmentID,
+				messageID: 'wersspdohssfuj'
  			};
  			api.post('/equipmentrental.php', data).then(res => {
  				$('#activeReservation$listNumber').remove();

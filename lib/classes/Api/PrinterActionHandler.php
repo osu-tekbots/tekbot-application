@@ -305,6 +305,7 @@ class PrinterActionHandler extends ActionHandler {
         $this->requireParam('printTypeId');
         $this->requireParam('dbFileName');
         $this->requireParam('stlFileName');
+        $this->requireParam('quantity');
 		
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
@@ -352,6 +353,8 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setVoucherCode($body['voucherCode']);
         $printJob->setCustomerNotes($body['customerNotes']);
         $printJob->setEmployeeNotes($body['employeeNotes']);
+        $printJob->setQuantity($body['quantity']);
+
         
         // Front end values that are foreign keys
         $printType = $this->printerDao->getPrintTypesByID($body['printTypeId']);
@@ -567,6 +570,7 @@ class PrinterActionHandler extends ActionHandler {
 
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
+		$this->requireParam('printCost');
 
         $printJobID = $body['printJobID'];
 
@@ -582,6 +586,8 @@ class PrinterActionHandler extends ActionHandler {
 
         $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
 
+        $printJob->setEmployeeNotes($printJob->getEmployeeNotes() . "\nEmailed Cost: $" . $body['printCost']);
+
         $ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
@@ -591,7 +597,8 @@ class PrinterActionHandler extends ActionHandler {
 
         $replacements = array(
             "name" => $user->getFirstName(),
-            "print" => $printJob->getStlFileName()
+            "print" => $printJob->getStlFileName(),
+            "cost" => $body['printCost']
         );
 
         $ok = $this->printerEmailer('wersspdoifwkjfd', $user->getEmail(), $replacements);

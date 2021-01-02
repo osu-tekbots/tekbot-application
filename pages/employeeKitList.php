@@ -42,28 +42,32 @@ $kits = $kitEnrollmentDao->getKitsForAdmin();
 $kitHTML = '';
 $listNumber = 0;
 foreach ($kits as $k){
-		$kitID =$k->getKitEnrollmentID();
-		$osuID = $k->getOsuID();
-		$onid = $k->getOnid();
-		$status = $k->getKitStatusID()->getName();
-		$termID = $k->getTermID();
-		$courseCode = $k->getCourseCode();
-		$dUpdated = $k->getDateUpdated();
-		$dCreated = $k->getDateCreated();
-		$name = $k->getFirstMiddleLastName();
-		$term = term2string($termID);
-	
+	$kitID =$k->getKitEnrollmentID();
+	$osuID = $k->getOsuID();
+	$onid = $k->getOnid();
+	$status = $k->getKitStatusID()->getName();
+	$termID = $k->getTermID();
+	$courseCode = $k->getCourseCode();
+	$dUpdated = $k->getDateUpdated();
+	$dCreated = $k->getDateCreated();
+	$name = $k->getFirstMiddleLastName();
+	$term = term2string($termID);
 
-
+	$statuses = $kitEnrollmentDao->getKitEnrollmentTypes();
+	$selectHTML = '';
+	foreach ($statuses as $s){
+		$selectHTML .= "<option value='".$s->getId()."' ".($s->getName() == $status ?'selected':'').">".$s->getName()."</option>";
+	}
 
 	$kitHTML .= "
-	<tr id='$kitID'>
+	<tr id='row$kitID'>
 		<td>$osuID</td>
 		<td>$onid</td>
 		<td>$name</td>
 		<td>$courseCode</td>
 		<td>$term</td>
 		<td>$status</td>
+		<td><select id='status$kitID' onchange='updateStatus(\"$kitID\");'>$selectHTML</select></td>
 	</tr>
 	";
 	$listNumber++;
@@ -105,21 +109,14 @@ foreach ($kits as $k){
 								<th>Course Code</th>
 								<th>Term</th>
 								<th>Status</th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							$kitHTML
 						</tbody>
 					</table>
-					<script>
-					$('#kitEnrollmentList').DataTable(
-						{
-							lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'All']],
-						
-						}
-					);
-
-					</script>
+					
 				</div>
 					
 					";
@@ -134,9 +131,42 @@ foreach ($kits as $k){
 	</div>
 </div>
 
-<script>
+<script type='text/javascript'>
+function updateStatus(id){
+	var status = $('#status'+id).val();
+	
+	let content = {
+		action: 'updateHandoutKitEnrollments',
+		kid: id,
+		status: status
+	}
 
+	api.post('/kitenrollment.php', content).then(res => {
+		snackbar(res.message, 'success');
+		$('#row'+id).html('');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
 
+$('#kitEnrollmentList').DataTable(
+	{
+		"autoWidth": true,
+		'scrollX':false, 
+		'paging':false, 
+		'order':[[5, 'desc'], [4, 'asc'], [3, 'asc']],
+		"columns": [
+			{ "orderable": false },
+			null,
+			null,
+			null,
+			null,
+			null,
+			{ "orderable": false }
+		  ]
+						
+	}
+);
 </script>
 
 <?php 

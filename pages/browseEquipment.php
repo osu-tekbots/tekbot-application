@@ -25,6 +25,10 @@ if ($isLoggedIn){
 } else {
     $isEmployee = FALSE; 
 }
+
+/* 
+* Populates page with information from the Equipment DAO
+*/
 $equipments = $dao->getBrowsableEquipment();
 $equipmentItemHTML = "";
 foreach ($equipments as $e){
@@ -38,6 +42,10 @@ foreach ($equipments as $e){
         $imageName = "no-image.png";
         $imagePath = "assets/img/$imageName";
     }
+
+/* 
+* Will only show edit button if the user logged in is an employee
+*/
 
     $viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
     $editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
@@ -69,6 +77,11 @@ foreach ($equipments as $e){
         $description = substr($description, 0, 318) . "...";
     }
     
+
+/* 
+* Creates a data table containing each piece of equipment that is available for rental
+*/
+
     $equipmentItemHTML .= "
     <tr>
         <td><a href='pages/viewEquipment.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
@@ -80,6 +93,11 @@ foreach ($equipments as $e){
   
     ";
 }
+
+/* 
+* Populates the top of the page, and sets the table headers for the data items
+*/
+
 ?> 
 <br><br>
 <div class="container-fluid">

@@ -82,7 +82,7 @@ class PrinterDao {
 
     /**
      * Fetches all Print Jobs.
-     * @return \Model\PrinterJob[]|boolean an array of printers on success, false otherwise
+     * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
      */
     public function getPrintJobs() {
         try {
@@ -105,7 +105,7 @@ class PrinterDao {
 
     /**
      * Fetches all Print Types.
-     * @return \Model\PrinterType[]|boolean an array of printers on success, false otherwise
+     * @return \Model\PrintType[]|boolean an array of printers on success, false otherwise
      */
     public function getPrintTypes() {
         try {
@@ -128,7 +128,7 @@ class PrinterDao {
 
     /**
      * Fetches all Print Jobs by ID.
-     * @return \Model\PrinterJob[]|boolean an array of printers on success, false otherwise
+     * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
      */
     public function getPrintJobsByID($id) {
         try {
@@ -154,7 +154,7 @@ class PrinterDao {
 
     /**
      * Fetches all Print Types by ID.
-     * @return \Model\PrinterType[]|boolean an array of printers on success, false otherwise
+     * @return \Model\PrintType|boolean an array of printers on success, false otherwise
      */
     public function getPrintTypesByID($id) {
         try {
@@ -193,7 +193,7 @@ class PrinterDao {
     }
 
 
-    public function addNewPrintJob($printer) {
+    public function addNewPrintJob(PrintJob $printer) {
         try {
             $sql = '
             INSERT INTO 3d_jobs (
@@ -201,6 +201,7 @@ class PrinterDao {
                 user_id,
                 3dprinter_id,
                 3dprinter_type_id,
+                quantity,
                 db_filename,
                 stl_file_name,
                 payment_method,
@@ -221,6 +222,7 @@ class PrinterDao {
                 :user_id,
                 :3dprinter_id,
                 :3dprinter_type_id,
+                :quantity,
                 :db_filename,
                 :stl_file_name,
                 :payment_method,
@@ -240,8 +242,9 @@ class PrinterDao {
             $params = array(
                 ':3d_job_id' => $printer->getPrintJobID(),
                 ':user_id' => $printer->getUserID(),
-                ':3dprinter_id' => $printer->getPrintTypeID(),
-                ':3dprinter_type_id' => $printer->getPrinterId(),
+                ':3dprinter_id' => $printer->getPrinterId(),
+                ':3dprinter_type_id' => $printer->getPrintTypeID(),
+                ':quantity' => $printer->getQuantity(),
                 ':db_filename' => $printer->getDbFileName(),
                 ':stl_file_name' => $printer->getStlFileName(),
                 ':payment_method' => $printer->getPaymentMethod(),
@@ -413,8 +416,8 @@ class PrinterDao {
             $params = array(
                 ':3d_job_id' => $printJob->getPrintJobID(),
                 ':user_id' => $printJob->getUserID(),
-                ':3dprinter_id' => $printJob->getPrintTypeID(),
-                ':3dprinter_type_id' => $printJob->getPrinterId(),
+                ':3dprinter_id' => $printJob->getPrinterId(),
+                ':3dprinter_type_id' => $printJob->getPrintTypeID(),
                 ':db_filename' => $printJob->getDbFileName(),
                 ':stl_file_name' => $printJob->getStlFileName(),
                 ':payment_method' => $printJob->getPaymentMethod(),
@@ -586,6 +589,7 @@ class PrinterDao {
 		$printJob->setStlFileName($row['stl_file_name']);
         $printJob->setPaymentMethod($row['payment_method']);
         $printJob->setCourseGroupId($row['course_group_id']);
+        $printJob->setQuantity($row['quantity']);
 		$printJob->setVoucherCode($row['voucher_code']);
         $printJob->setDateCreated($row['date_created']);
         $printJob->setValidPrintCheck($row['valid_print_date']);

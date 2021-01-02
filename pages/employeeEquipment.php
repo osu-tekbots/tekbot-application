@@ -47,7 +47,10 @@ $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 
 
 
-
+/* 
+ * Retrieves the information corresponding to the user and their choice
+ * and concats this in the option tag in the HTML
+ */
 $user_option = "<option value=''></option>";
 $users = $userDao->getAllUsers();
 foreach ($users as $user){
@@ -61,8 +64,10 @@ foreach ($availableEquipment as $e){
 }
 
 
-
-
+/* 
+ * Creates the HTMl for a new reservation, and populates this
+ * using the option HTML from above
+ */
 $newreservationHTML = '';
 $newreservationHTML .= "<form class='form-inline'>
 
@@ -93,6 +98,10 @@ foreach ($reservedEquipment as $r){
         . ' ' 
 		. Security::HtmlEntitiesEncode($user->getLastName());
 		
+		/* 
+		* If there are any active reservations, this section displays them under the
+		* reserved equipment section. -ADD ADDITIONAL NOTES
+		*/
 		if ($isActive){
 			$active = "Active";
             renderNewHandoutModal($r);
@@ -127,6 +136,12 @@ foreach ($reservedEquipment as $r){
 	}
 }
 
+/* 
+* This section of code displays the "Checked Out Equipment" section
+* Gets the details of each checked out item from the checkedoutEquipment DAO object,
+* then populates a data table with this information.
+*/
+
 $checkoutHTML = '';
 $listNumber = 0;
 foreach ($checkedoutEquipment as $c){
@@ -155,6 +170,10 @@ foreach ($checkedoutEquipment as $c){
 	. Security::HtmlEntitiesEncode($user->getLastName());
 
 
+/* 
+* If the entry has been returned, creates the "assign fee" and "view" buttons.
+* View creates a modal with transaction details.
+*/
 	if ($statusID == "Returned" || $statusID == "Returned Late"){
 		// If equipment has been returned
 		renderViewCheckoutModal($c);
@@ -351,11 +370,12 @@ function reserveEquipment(){
 	let content = {
 		action: 'createReservation',
 		userID: user,
-		equipmentID: equipment
+		equipmentID: equipment,
+		messageID: 'wersspdohssfuj'
 	}
 	
 	api.post('/equipmentrental.php', content).then(res => {
-		snackbar(res.message, 'Updated');
+		snackbar(res.message, 'info');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});	

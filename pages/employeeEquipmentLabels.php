@@ -88,6 +88,10 @@ if (count($items) > 0) { //Need to render labels
 $equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 	
+/* 
+* -DOUBLECHECK- This section creates a page of large labels to print.
+* If there are 10 items in teh page, page is completed, otherwise continues to fill
+*/
 		$j = 0;
 		$labelsHTML .= "<div class='printpagelarge'>";
 		foreach ($items AS $i){
@@ -117,7 +121,10 @@ $userDao = new UsersDao($dbConn, $logger);
 				$j++;
 			}
 		}
-		if ($j != 10){ //Page not full, lets fill it with last label
+/* 
+* If the page is not full, continues to fill with the last label
+*/
+		if ($j != 10){
 			while ($j != 10){
 				$labelsHTML .= '
 				<div class="printlabellarge">
@@ -163,7 +170,11 @@ $formHTML = "<form method='post' target='_blank' id='mainform'>
 						<th>Location</th>
                     </tr>
                 </thead>
-                <tbody>";
+				<tbody>";
+				
+/* 
+* Creates data table that populates from the equipment DAO
+*/
 				
 foreach ($equipment as $e) {
 	$id = $e->getEquipmentID();
@@ -185,6 +196,9 @@ $formHTML .= "</tbody>
 
 ?>
 <script type='text/javascript'>
+
+/*TODO - Did not see this functionality within the page?*/
+
 function updateLocation(id){
 	var location = $('#location'+id).val();
 	

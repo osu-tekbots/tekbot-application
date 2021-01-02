@@ -10,6 +10,7 @@ use Model\User;
 use Model\UserAccessLevel;
 use DataAccess\QueryUtils;
 use Util\Security;
+use Email\TekBotsMailer;
 
 
 /**
@@ -33,6 +34,8 @@ class EquipmentRentalActionHandler extends ActionHandler {
     private $mailer;
     /** @var \Util\ConfigManager */
     private $config;
+	/** @var \DataAccess\MessageDao */
+	private $messageDao;
 
     /**
      * Constructs a new instance of the action handler for requests on project resources.
@@ -43,7 +46,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $UsersDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger) {
+    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $UsersDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger, $messageDao) {
         parent::__construct($logger);
         $this->EquipmentCheckoutDao = $EquipmentCheckoutDao;
         $this->EquipmentReservationDao = $EquipmentReservationDao;
@@ -53,6 +56,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $this->EquipmentDao = $EquipmentDao;
         $this->mailer = $mailer;
         $this->config = $config;
+		$this->messageDao = $messageDao;
     }
 
     /**
@@ -66,7 +70,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $this->requireParam('reservationID');
         $this->requireParam('userID');
         $this->requireParam('equipmentID');
-
+		$this->requireParam('messageID');   
         $body = $this->requestBody;
 
         // Get duration of checkout using the contract ID
@@ -87,7 +91,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $checkout->setDeadlineTime(QueryUtils::timeAddToCurrent($duration));
         $checkout->setDateUpdated(new \DateTime());
 
-    
+		
         $ok = $this->EquipmentCheckoutDao->addNewCheckout($checkout);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new equipment checkout'));
@@ -105,10 +109,15 @@ class EquipmentRentalActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to close reservation'));
         }
 
-        // Create email (pass in checkout and link)
+        // Create email
         $user = $this->UsersDao->getUserByID($body['userID']);
-        $link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
-        $this->mailer->sendEquipmentCheckoutEmail($checkout, $user, $contract, $link);
+        $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
+        $ok = $mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
+		
+//		$link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
+//      $this->mailer->sendEquipmentCheckoutEmail($checkout, $user, $contract, $link);
 
         $this->respond(new Response(
             Response::CREATED, 

@@ -70,7 +70,9 @@ $printJobs = $printerDao->getPrintJobs();
                     $user = $userDao->getUserByID($p->getUserID());
                     $name = Security::HtmlEntitiesEncode($user->getFirstName()) . ' ' . Security::HtmlEntitiesEncode($user->getLastName());
                     $printType = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getPrintTypeName());
+                    $printTypeCost = Security::HtmlEntitiesEncode($printerDao->getPrintTypesByID($p->getPrintTypeID())->getCostPerGram());
                     $printer = Security::HtmlEntitiesEncode($printerDao->getPrinterByID($p->getPrinterId())->getPrinterName());
+                    $quantity = $p->getQuantity();
                     $dbFileName = $p->getDbFileName();
                     $stlFileName = $p->getStlFileName();
                     $dateCreated = $p->getDateCreated();
@@ -143,6 +145,7 @@ $printJobs = $printerDao->getPrintJobs();
 
                     <td>$name</td>
                     <td>$printer<br/>$printType</td>
+                    <td>$quantity</td>
                     <td><a href='./uploads/prints/$dbFileName'><button data-toggle='tool-tip' data-placement='top' title='$stlFileName' class='btn btn-outline-primary capstone-nav-btn'>Download</button></td>
                     <td><textarea class='form-control' cols=50 rows=4 id='employeeNotes$printJobID'>$employeeNotes</textarea></td>
                     <td>$customerNotes</td>
@@ -176,22 +179,33 @@ $printJobs = $printerDao->getPrintJobs();
                 });
 
                 $('#sendConfirm$printJobID').on('click', function() {
-                    if(confirm('Confirm print $stlFileName and send confirmation email to $name?')) {
-                        $('#sendConfirm$printJobID').prop('disabled', true);
-                        let printJobID = '$printJobID';
-                        let userID = '$userID';
-                        let data = {
-                            action: 'sendCustomerConfirm',
-                            printJobID: printJobID,
-                            userID: userID
+                    var numGrams = window.prompt('Enter how many grams of material $stlFileName uses:');
+                    if(!(numGrams == null || numGrams == '')){
+                        numGrams = parseFloat(numGrams);
+                        if(numGrams !== null && !isNaN(numGrams)) {
+                            let totalCost = ($printTypeCost * numGrams) * $quantity;
+                            totalCost = totalCost.toFixed(2);
+                            if(confirm('Confirm print $stlFileName is $' + totalCost + ' and send confirmation email to $name?')) {
+                                $('#sendConfirm$printJobID').prop('disabled', true);
+                                let printJobID = '$printJobID';
+                                let userID = '$userID';
+                                let data = {
+                                    action: 'sendCustomerConfirm',
+                                    printJobID: printJobID,
+                                    userID: userID,
+                                    printCost: totalCost
+                                }
+                                api.post('/printers.php', data).then(res => {
+                                    snackbar(res.message, 'success');
+                                    setTimeout(function(){window.location.reload()}, 1000);
+                                }).catch(err => {
+                                    snackbar(err.message, 'error');
+                            });
+                                $('#sendConfirm$printJobID').prop('disabled', true);
+                            }
+                        } else {
+                            alert('Please enter a number of grams');
                         }
-                        api.post('/printers.php', data).then(res => {
-                            snackbar(res.message, 'success');
-                            setTimeout(function(){window.location.reload()}, 1000);
-                        }).catch(err => {
-                            snackbar(err.message, 'error');
-                    });
-                        $('#sendConfirm$printJobID').prop('disabled', true);
                     }
                 });
 
@@ -275,6 +289,7 @@ $printJobs = $printerDao->getPrintJobs();
                     <tr>
                         <th>Customer</th>
                         <th>Print Type</th>
+                        <th>Quantity</th>
                         <th>File</th>
                         <th>Employee Notes</th>
                         <th>Customer Notes</th>
@@ -288,7 +303,7 @@ $printJobs = $printerDao->getPrintJobs();
                 </tbody>
                 </table>
                 <script>
-                    $('#checkoutFees').DataTable({ 'order':[[5, 'desc']]});
+                    $('#checkoutFees').DataTable({ 'order':[[6, 'desc']]});
                 </script>
                 $buttonScripts
                 "

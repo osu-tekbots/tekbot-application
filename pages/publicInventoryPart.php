@@ -24,7 +24,7 @@ function studentPrice($price){
 		
 	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
 	
-	if ( (1 / $price ) < 1 )
+if ( (1 / $price ) < 1 )
 		return ('$' . ceil($price) . '.00');
 	else if (intval((1 / $price )) == 1 )
 		return ('$1.00');
@@ -34,10 +34,8 @@ function studentPrice($price){
 		return ('3 for $1');
 	else if ((1 / $price ) < 4 )
 		return ('4 for $1');
-	else if ((1 / $price ) < 5 )
-		return ('5 for $1');
-	else
-		return ('Free for one / ' . number_format($price,2) . ' ea.');
+	else 
+		return ('Free for one / 10 for $1');
 return $price;
 }
 

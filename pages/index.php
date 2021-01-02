@@ -20,7 +20,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <h2 class="logotext">Creating Platforms For Learning. <br>
                     <h2><strong><a href="./pages/userPrints.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="./pages/publicInventory.php" target="_blank">Inventory</a></strong></h2>
                     <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="./pages/browseEquipment.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="./pages/info.php">Technical Help</strong></h2> </a>
-                    <h3>KEC 1110 Hours: 10AM - 1PM</h3></h2>
+                    <h3>KEC 1110 Hours: <BR>
+					M, W, F: 12PM-2:50PM<BR>
+					T, Th: 10AM - 1PM</h3></h2>
                     
                     <a class="arrowLink" href="#about"><div class="arrow bounce"></div></a>
 

@@ -8,6 +8,7 @@ use DataAccess\QueryUtils;
 
 
 
+
 /**
  * Defines the logic for how to handle AJAX requests made to modify equipment information.
  */

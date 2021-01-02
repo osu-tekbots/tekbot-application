@@ -13,6 +13,7 @@ class PrintJob {
     private $userID;
 	private $printerID;
 	private $printTypeID;
+    private $quantity;
 	private $dbFileName;
 	private $stlFileName;
 	private $paymentMethod;
@@ -204,6 +205,14 @@ class PrintJob {
 
 	public function setDateUpdated($DateUpdated){
 		$this->dateUpdated = $DateUpdated;
+	}
+
+	public function getQuantity(){
+		return $this->quantity;
+	}
+
+	public function setQuantity($quantity){
+		$this->quantity = $quantity;
 	}
 	
 }

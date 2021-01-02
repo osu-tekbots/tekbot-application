@@ -181,12 +181,14 @@ class KitEnrollmentActionHandler extends ActionHandler {
 
         $kit = $this->kitEnrollmentDao->getKitEnrollment($id);
         if (empty($kit)){
-            $this->respond(new Response(Response::NOT_FOUND, 'Unable to obtain kit from ID'));
+            $this->respond(new Response(Response::NOT_FOUND, 'Unable to obtain kit with this ID'));
         }
         if ($statusID == KitEnrollmentStatus::READY){
             $actionText = "returned";
         } else if ($statusID == KitEnrollmentStatus::PICKED_UP){
-            $actionText = "handed out";
+            $actionText = "dispensed";
+        } else if ($statusID == KitEnrollmentStatus::REFUNDED){
+            $actionText = "refunded";
         }
 
         $kit->setKitStatusID($statusID);

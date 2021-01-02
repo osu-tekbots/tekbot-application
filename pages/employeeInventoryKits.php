@@ -377,7 +377,11 @@ function updatePartImage(id){
 	
 <script>
 
-var buttonCommon = {
+
+/*
+ * explain the funcationality - include version of DT that works with this. 
+*/
+var printButtonExtension = {
     exportOptions: {
         format: {
             body: function ( data, row, column, node ) {
@@ -398,7 +402,7 @@ $(document).ready(function() {
 	$('#ContentsTable').DataTable({
 			'dom': 'Bft',
 			'buttons': [
-				$.extend( true, {}, buttonCommon, {
+				$.extend( true, {}, printButtonExtension, {
             extend: 'print'
         } )
 			], 

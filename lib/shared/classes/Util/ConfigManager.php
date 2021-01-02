@@ -157,18 +157,6 @@ class ConfigManager {
 
 
     /**
-     * Fetches the base URL to use for the website.
-     * 
-     * This base URL can be used to set the `<base>` HTML tag value and create a relative root from which all
-     * links in the website can be resolved.
-     *
-     * @return string
-     */
-    public function getPrintPrice() {
-        return $this->get('print.price_per_gram');
-    }
-
-    /**
      * Fetches the configuration used by the server to communicate with the database.
      * 
      * The resulting array will contain the following fields:

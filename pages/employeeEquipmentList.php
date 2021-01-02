@@ -42,6 +42,11 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/newEquipmentModal.php';
 
+
+/* 
+* Gets the various pieces of information for each item from the Equipment DAO,
+* hides content if it is not public. 
+*/
 $dao = new EquipmentDao($dbConn, $logger);
 $equipments = $dao->getAdminEquipment();
 $equipmentItemHTML = "";
@@ -70,6 +75,9 @@ foreach ($equipments as $e){
 	$viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
 	$editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
 	
+/* 
+* Creates a data table with the information populated from above. 
+*/
 	$equipmentItemHTML .= "
 	<tr>
 		<td><img height='200px;' src='$imagePath'></td>
