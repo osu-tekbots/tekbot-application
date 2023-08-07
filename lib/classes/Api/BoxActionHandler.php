@@ -1,5 +1,4 @@
 <?php
-// Updated 11/5/2019
 namespace Api;
 
 use Model\Box;
@@ -67,13 +66,13 @@ class BoxActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box failed to fill.'));
         }
 
-		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
+		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
         $ok = $mailer->sendBoxEmail($user, $box, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
 
-        $this->respond(new Response(Response::OK, 'Box Fill Sucessful'));
+        $this->respond(new Response(Response::OK, 'Box Fill Successful'));
 
     }
 	
@@ -87,7 +86,7 @@ class BoxActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box failed to reset.'));
         }
 
-        $this->respond(new Response(Response::OK, 'Box Reset Sucessful'));
+        $this->respond(new Response(Response::OK, 'Box Reset Successful'));
 
     }
 	
@@ -151,7 +150,7 @@ class BoxActionHandler extends ActionHandler {
 			}
 			$this->respond(new Response(Response::OK, 'Box Unlocked'));
 		} else 
-			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Not Authorized'));
+			$this->respond(new Response(Response::UNAUTHORIZED, 'Not Authorized'));
     }
 	
 	public function handleEmptyBox() {
@@ -169,7 +168,7 @@ class BoxActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box failed to empty.'));
         }
 
-		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
+		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
         $ok = $mailer->sendBoxEmail($user, $box, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));

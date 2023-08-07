@@ -72,8 +72,8 @@ foreach ($equipments as $e){
 	} else {
 		$publicStatus = "Hidden";
 	}
-	$viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
-	$editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
+	$viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
+	$editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
 	
 /* 
 * Creates a data table with the information populated from above. 
@@ -172,7 +172,7 @@ foreach ($equipments as $e){
 
 				// Send our request to the API endpoint
 				api.post('/equipments.php', data).then(res => {
-					window.location.replace('pages/editEquipment.php?id=' + res.content.id);
+					window.location.replace('pages/employeeEquipmentDetail.php?id=' + res.content.id);
 				}).catch(err => {
 					snackbar(err.message, 'error');
 				});

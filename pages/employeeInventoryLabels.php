@@ -157,7 +157,7 @@ if (count($items) > 0) { //Need to render labels
 				$labelsHTML .= '
 				<div class="printlabellarge">
 					<div style="float:left;width:45%;min-height:130px;margin-top:.5em;"><BR>
-						<img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://eecs.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
+						<img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
 					</div>
 					<div style="float:right;width:55%;min-height:130px;margin-top:.5em;">
 						<BR>
@@ -196,7 +196,7 @@ if (count($items) > 0) { //Need to render labels
 				$j++;
 				$labelsHTML .= "<div class='printlabelsmall'>
 						<div style='float:left;width:55%;'>
-							<img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://eecs.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
+							<img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
 						</div>
 						<div style='float:left;width:40%;'>
 							<BR>
@@ -266,7 +266,8 @@ if (count($items) > 0) { //Need to render labels
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
+//Removed 12-13-2021 by Don
+//include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
@@ -340,7 +341,8 @@ function updateLocation(id){
 
 	api.post('/inventory.php', content).then(res => {
 		snackbar(res.message, 'Updated');
-		$('#row'+id).html('');
+//Updated 12-13-2021 by Don, not needed on this page.
+//		$('#row'+id).html('');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});

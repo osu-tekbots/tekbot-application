@@ -375,14 +375,15 @@ class CoursePrintAllowanceDao {
             $sql = '
             INSERT INTO voucher_code  
             (
-                voucher_id, date_used, user_id, date_created, date_expired, service_id
+                voucher_id, date_used, user_id, date_created, date_expired, service_id, account_code
             ) VALUES (
                 :vid,
                 :dt_used,
                 :uid,
                 :dt_created,
                 :dt_expired,
-                :service_id
+                :service_id,
+                :account_code
             )';
             $params = array(
                 ':vid' => $voucher->getVoucherID(),
@@ -391,6 +392,7 @@ class CoursePrintAllowanceDao {
                 ':dt_created' => QueryUtils::FormatDate($voucher->getDateCreated()),
                 ':dt_expired' => QueryUtils::FormatDate($voucher->getDateExpired()),
                 ':service_id' => $voucher->getServiceID(),
+                ':account_code' => $voucher->getLinkedAccount()
             );
             $this->conn->execute($sql, $params);
 
@@ -607,7 +609,7 @@ class CoursePrintAllowanceDao {
         $voucher->setDateCreated($row['date_created']);
         $voucher->setDateExpired($row['date_expired']);
         $voucher->setServiceID($row['service_id']);
-
+        $voucher->setLinkedAccount($row['account_code']);
        
         return $voucher;
     }

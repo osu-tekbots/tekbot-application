@@ -142,6 +142,37 @@ function isValidStudentID($sid){
              <a class="dropdown-item" href="pages/employeeBoxMessages.php">Edit Messages</a>
          </div>
         </li>
+
+        <!-- Turned Lab tickets into a drop down with employeeTicketList as the main and QR codes and edit equipement as options-->
+        <li class="nav-item dropdown">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-ticket-alt"></i>
+            <span>NEW! Lab Tickets</span>
+         </a>
+         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+             <a class="dropdown-item" href="pages/employeeTicketList.php">Ticket List</a>
+             <div class="dropdown-divider"></div>
+             <h6 class="dropdown-header">Options:</h6>
+             <a class="dropdown-item" href="pages/employeeTicketLabels.php">QR Codes</a>
+             <a class="dropdown-item" href="../../store/labs/ajax/equipment_page.php">Edit Equipment</a>
+             <a class="dropdown-item" href="pages/employeeTicketMessages.php">Edit Messages</a>
+         </div>
+        </li>
+
+        <!-- Internal Sales Page with Bill All implemented, still need to work on message editing-->
+        <li class="nav-item dropdown">
+         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-dollar-sign"></i>
+            <span>Internal Sales</span>
+         </a>
+         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+             <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
+             <div class="dropdown-divider"></div>
+             <h6 class="dropdown-header">Options:</h6>
+             <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
+         </div>
+        </li>
+
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="pages/employeeFees.php">
                 <i class="fas fa-fw fa-dollar-sign"></i>
@@ -155,11 +186,20 @@ function isValidStudentID($sid){
             </a>
         </li>
         <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://discord.gg/9YFafybAv6">
+                <i class="fab fa-discord"></i>
+                <span>Discord</span>
+            </a>
+        </li>
+        <!--
+        <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://trello.com/b/XUktYdsk/tekbots/">
                 <i class="fab fa-fw fa-trello"></i>
                 <span>Trello</span>
             </a>
         </li>
+        -->
+        <!-- Turn Lab tickets into a drop down with employeeTicketList as the main and QR codes and edit equipement as options-->
         <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/labs/index.php">
                 <i class="fas fa-fw fa-ticket-alt"></i>
@@ -170,6 +210,12 @@ function isValidStudentID($sid){
             <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
                 <i class="fas fa-fw fa-kaaba"></i>
                 <span>HWeekend</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://docs.google.com/document/d/1ec17hL1cNvOtv9CpPJCzAewM0tlJ4FV-OH18Fo4_MXM">
+                <i class="fas fa-book"></i>
+                <span>Store Procedures</span>
             </a>
         </li>
 
@@ -388,7 +434,8 @@ function createReserveAsEmployeeBtn($reservationID, $listNumber, $userID, $equip
             let data = {
                 action: 'createReservation',
                userID: userID,
-               equipmentID: equipmentID
+               equipmentID: equipmentID,
+			   messageID: 'wersspdohssfuj'
             };
             api.post('/equipmentrental.php', data).then(res => {
                 $('#expiredReservation$listNumber').remove();
@@ -420,9 +467,10 @@ function renderEquipmentReturnButton($checkout){
            let checkoutID = '$checkoutID';
            let checkoutNotes = $('#checkoutNotes$checkoutID').val();
             let data = {
-                action: 'returnEquipment',
+               action: 'returnEquipment',
                checkoutID: checkoutID,
                checkoutNotes: checkoutNotes,
+			   messageID: 'fsrt56pdohssfuj'
             };
             api.post('/equipmentrental.php', data).then(res => {
                 snackbar(res.message, 'success');

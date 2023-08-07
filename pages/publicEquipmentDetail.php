@@ -219,7 +219,8 @@ function onCreateReservationClick() {
     let body = {
         action: 'createReservation',
         equipmentID: $('#equipmentID').val(),
-        userID: $('#userID').val()
+        userID: $('#userID').val(),
+		messageID: 'wersdhwrujhssfuj'
     };
 
 

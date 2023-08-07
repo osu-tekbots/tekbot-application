@@ -42,6 +42,9 @@ $userDao = new UsersDao($dbConn, $logger);
 //$messages = $messageDao->getMessages();
 $messages = $messageDao->getMessagesByTool($tool_id);
 
+// NEW
+$user = $userDao->getUserByID($_SESSION['userID']);
+
 ?>
 <script type='text/javascript'>
 /*********************************************************************************
@@ -62,7 +65,7 @@ function updateMessage(id) {
 	}
 	
 	api.post('/message.php', content).then(res => {
-		snackbar(res.message, 'Updated');
+		snackbar(res.message, 'success');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -72,7 +75,7 @@ function updateMessage(id) {
 * Function Name: updateMessage(id)
 * Description: Updates the content of a message.
 *********************************************************************************/
-function sendTestMessage(id) {
+/*function sendTestMessage(id) {
 	let content = {
 		action: 'sendMessage',
 		replacements: '',
@@ -85,6 +88,25 @@ function sendTestMessage(id) {
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
+}*/
+// NEW
+function sendTestMessage(id) {
+	let email = "<?php echo $user->getEmail();?>"
+	if(confirm('Confirm that a test email will be sent to your email address (' + email + ')?')) {
+		let content = {
+			action: 'sendMessage',
+			email: email,
+			message_id: id
+		}
+		
+		api.post('/message.php', content).then(res => {
+			snackbar(res.message, 'success');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		return false;
+	}
 }
 </script>
 
@@ -101,7 +123,7 @@ function sendTestMessage(id) {
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Edit Inventory Messages');
+                renderEmployeeBreadcrumb('Employee', 'Edit Equipment Messages');
 
                
                 foreach ($messages as $m) {
@@ -109,10 +131,11 @@ function sendTestMessage(id) {
 					$subject = $m->getSubject();
 					$body = $m->getBody();
 					$format = $m->getFormat();
+					$usage = $m->getPurpose();
 					
 					echo "<div class='admin-paper'>";
 
-					echo '<h6>Message ID: '.$message_id.'</h6>';
+					echo '<h6>Message ID: '.$message_id.'<BR>Purpose: '.$usage.'</h6>';
 					echo '<form>';
 					echo '<div id="row'.$message_id.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">
 						  <div class="form-group row">
@@ -122,15 +145,21 @@ function sendTestMessage(id) {
 					echo '<div class="form-group row">
 							<label for="body'.$message_id.'" class="col-sm-2 col-form-label">Body</label>
 							<div class="col-sm-8"><textarea rows="6" type="text" class="form-control" id="body'.$message_id.'">'.$body.'</textarea></div>
-							<div class="col-sm-2"><strong>Inserts</strong><BR>{{name}}: Full Name<BR>{{email}}: User Email<BR>{{equipname}}: Equipment Name<BR>{{equipid}}: Equipment ID<BR></div>
+							<div class="col-sm-2"><strong>Inserts</strong><BR>
+							{{name}}: Full Name<BR>
+							{{email}}: User Email<BR>
+							{{equipname}}: Equipment Name<BR>
+							{{equipid}}: Equipment ID<BR>
+							{{pickupDate}}: Date equipment was checked out<BR>
+							{{deadlineDate}}: Date equipment is due back<BR></div>
 						  </div>';
 					echo '<div class="form-group row">
 							<label for="format'.$message_id.'" class="col-sm-2 col-form-label">Format</label>
 							<div class="col-sm-10"><input type="text" class="form-control" id="format'.$message_id.'" value="Email" disabled></div>
 						  </div>';
 					echo '<div class="form-group row">
-							<div class="col-sm-10"><button type="submit" class="btn btn-primary" onclick="updateMessage(\''.$message_id.'\');">Update</button>   <button type="submit" class="btn btn-primary" onclick="sendTestMessage(\''.$message_id.'\');">Test Stored Email</button></div>
-						  </div>';  
+							<div class="col-sm-10"><button type="submit" class="btn btn-primary" onclick="updateMessage(\''.$message_id.'\'); return false;">Update</button>   <button type="submit" class="btn btn-primary" onclick="sendTestMessage(\''.$message_id.'\'); return false;">Test Stored Email</button></div>
+						  </div>';  // 'return false;' in click event handler prevents page reload to allow the message to update
 					echo '</form>';
 
 					echo "</div>";

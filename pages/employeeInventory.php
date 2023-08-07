@@ -55,10 +55,10 @@ $title = 'Employee Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
-	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
+	'assets/css/jquery.dataTables.min.css'
 );
 $js = array(
-    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
+    'assets/js/jquery.dataTables.min.js'
 );
 
 
@@ -70,17 +70,59 @@ $log .= "Time to Load Headers: " . time_point() . " mS<BR>";
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$parts = $inventoryDao->getInventory();
 $types = $inventoryDao->getTypes();
+
+if (isset($_REQUEST['archive']))
+	$_SESSION['archive'] = $_REQUEST['archive'];
+
+if (!isset($_SESSION['archive']))
+	$_SESSION['archive'] = 1;
+
+
+if (isset($_REQUEST['typeid']))
+	$_SESSION['typeid'] = $_REQUEST['typeid'];
+
+if (!isset($_SESSION['typeid']))
+	$_SESSION['typeid'] = 0;
+
+$log .= "<BR>Session Archive = " . $_SESSION['archive'] . "<BR>";
+
+if ($_SESSION['typeid'] == 0){
+	if ($_SESSION['archive'] == 0)
+		$parts = $inventoryDao->getInventory(0);
+	else
+		$parts = $inventoryDao->getInventory();
+} else {
+	if ($_SESSION['archive'] == 0)
+		$parts = $inventoryDao->getInventoryByTypeId($_SESSION['typeid'], 0);
+	else
+		$parts = $inventoryDao->getInventoryByTypeId($_SESSION['typeid']);
+}
 
 $log .= "Time to Load Records: " . time_point() . " mS<BR>";
 
+$types_select = '';
+foreach ($types as $t){
+	if ($_SESSION['typeid'] == $t['typeId'])
+		$types_select .= "<option selected value='".$t['typeId']."'>".$t['type']."</option>";
+	else
+		$types_select .= "<option value='".$t['typeId']."'>".$t['type']."</option>";
+}
+
+$filterDiv = "";
+if ($_SESSION['archive'] == 1)
+	$filterDiv .= '<div><input type="checkbox" id="archived_checkbox" onchange="toggleArchived();" checked>';
+else
+	$filterDiv .= '<div><input type="checkbox" id="archived_checkbox" onchange="toggleArchived();">';
+$filterDiv .= ' Display Archived? | ';
+$filterDiv .= '<input type="checkbox" id="nonstock_checkbox" onchange="toggleStocked();" checked>';
+$filterDiv .= ' Display Non-Stocked? | ';
+$filterDiv .= 'Select Category: <select id="categorySelect" onchange="loadCategory();"><option value = "0">All</option>'.$types_select.'</select></div>';
 
 $types_select = '';
 foreach ($types as $t){
 	$types_select .= "<option value='".$t['typeId']."'>".$t['type']."</option>";
 }
-
 
 $addpartHTML = "";
 $addpartHTML .= "<div class='form-row'>
@@ -89,6 +131,13 @@ $addpartHTML .= "<div class='form-row'>
 					<button id='addpart' class='btn btn-primary' onclick='addpart();'>Add Part/Kit</button>
 				  </div><BR>";
 
+function printKitsUsedInt($kits) {
+	$kitStr = '';
+	foreach($kits as $k){
+		$kitStr .= $k['kitNames'];
+	}
+	return $kitStr;
+}
 ?>
 
 
@@ -123,17 +172,27 @@ $addpartHTML .= "<div class='form-row'>
 					$quantity = $p->getQuantity();
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
+					$kitsUsedIn = $inventoryDao->getKitsUsedInByStocknumber($stocknumber);
+					$kitsUsedInStr = '';
+					foreach($kitsUsedIn as $k){
+						//$kitsUsedInStr .= $k['kitNames'];
+						$kitsUsedInStr .= "".$k['kitNames']." ";
+					}
 					
 					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived ':'')." ".($p->getStocked() == 1 ?'':'nonstock ')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
 						<td>$type</td><td>$description<BR>Stock: $stocknumber</td><td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td><td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>"."-"/*$inventoryDao->getKitsUsedInByStocknumber($stocknumber)*/."</td><td>\$".number_format($lastPrice,2)."</td><td>".studentPrice($lastPrice,2)."</td>
-						<td><input class='form-control' type='text' id='location$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
+						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>"."-".$kitsUsedInStr."</td><td>\$".number_format(floatval($lastPrice),2)."</td><td>".studentPrice($lastPrice,2)."</td>
+						<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
 						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td><td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
                 }
 				
 				$log .= "Time spent in Loop: " . time_point() . " mS<BR>";
+				
+
+			
+
+echo $filterDiv;			
             ?>
-			<div><p>Display Archived? <input type="checkbox" id="archived_checkbox" onchange="toggleArchived();" checked> | Display Non-Stocked? <input type="checkbox" id="nonstock_checkbox" onchange="toggleStocked();" checked></p></div>
 			<table class='table' id='InventoryTable'>
                 <caption>Current Inventory</caption>
                 <thead>
@@ -186,12 +245,12 @@ function addpart(){
 }
 
 function updateLocation(id){
-	var location = $('#location'+id).val();
+	var loc = $('#loc'+id).val();
 	
 	let content = {
 		action: 'updateLocation',
 		stockNumber: id,
-		location: location
+		location: loc
 	}
 
 	api.post('/inventory.php', content).then(res => {
@@ -217,19 +276,18 @@ function updateQuantity(id){
 	});
 }
 
+function loadCategory(){	
+	var category = $('#categorySelect').val();
+	window.location.href = "https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/employeeInventory.php?typeid=" + category;
+}
+
 function toggleArchived(){
-	
-	var archivedItems = document.getElementsByClassName('archived');
 	var checkBox = document.getElementById("archived_checkbox");
 	
 	if (checkBox.checked == true){
-		for (var i = 0; i < archivedItems.length; i ++) {
-			archivedItems[i].style.display = '';
-		}
+		window.location.href = "https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/employeeInventory.php?archive=1";
 	} else {
-		for (var i = 0; i < archivedItems.length; i ++) {
-			archivedItems[i].style.display = 'none';
-		}
+		window.location.href = "https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/employeeInventory.php?archive=0";
 	} 
 		
 }

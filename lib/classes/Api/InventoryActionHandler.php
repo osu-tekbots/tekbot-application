@@ -420,6 +420,24 @@ class InventoryActionHandler extends ActionHandler {
 		else
 			$this->respond(new Response(Response::OK, 'Quantity Updated'));
     }
+
+    public function handleSendRecountEmail() {
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+        $this->requireParam('messageId');
+        $body = $this->requestBody;
+
+        $part = $this->inventoryDao->getPartByStockNumber($body['stockNumber']);
+        $message = $this->messageDao->getMessageByID($body['messageId']);
+
+        $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+        $ok = $mailer->sendRecountEmail($part, $message);
+
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Send'));
+        else
+            $this->respond(new Response(Response::OK, 'Email Sent'));
+    }
 	
 	
    
@@ -530,6 +548,10 @@ class InventoryActionHandler extends ActionHandler {
 			case 'updatePublicDesc':
                 $this->handleUpdatePublicDesc();
 				break;
+
+            case 'sendRecountEmail':
+                $this->handleSendRecountEmail();
+                break;
 
 
             default:

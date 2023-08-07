@@ -1,9 +1,12 @@
 <?php
 namespace Api;
 
+use Model\Laser;
 use Model\LaserJob;
 use Model\LaserMaterial;
-use Model\Laser;
+use DataAccess\QueryUtils;
+use Util\Security;
+use Email\TekBotsMailer;
 
 class LaserActionHandler extends ActionHandler {
 
@@ -11,7 +14,7 @@ class LaserActionHandler extends ActionHandler {
 
     /** @var \DataAccess\LaserDao */
     private $laserDao;
-    /** @var \Email\PrinterMailer */
+    /** @var \Email\TekBotsMailer */
     private $mailer;
     /** @var \Util\ConfigManager */
     private $config;
@@ -20,34 +23,14 @@ class LaserActionHandler extends ActionHandler {
 
     private $messageDao;
 
-    public function __construct($laserDao, $coursePrintAllowanceDao, $userDao, $messageDao, $config, $logger) {
+    public function __construct($laserDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $config, $logger) {
         parent::__construct($logger);
         $this->laserDao = $laserDao;
+        $this->mailer = $mailer;
         $this->config = $config;
         $this->userDao = $userDao;
         $this->coursePrintAllowanceDao = $coursePrintAllowanceDao;
         $this->messageDao = $messageDao;
-    }
-
-
-    
-    /*
-     Used to generate emails for printer action handler
-    */
-
-    public function laserEmailer($messageID, $email, $replacements) {
-
-
-        $message = $this->messageDao->getMessageByID($messageID);
-        
-        $body = $message->fillTemplateBody($replacements);
-		$subject = $message->fillTemplateSubject($replacements);
-
-		$headers = "From:heer@oregonstate.edu\r\n";
-		$headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-type: text/html;charset=UTF-8\r\n";
-
-        return mail($email, $subject, $body, $headers);
     }
 
     /**
@@ -126,16 +109,14 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleCreateLaserJob() {
-        $body = $this->requestBody;
-        
-        
 		$this->requireParam('userId');
         $this->requireParam('cutterId');
         $this->requireParam('quantity');
         $this->requireParam('cutMaterialId');
         $this->requireParam('dbFileName');
         $this->requireParam('dxfFileName');
-
+		$this->requireParam('messageID');
+		$body = $this->requestBody;
 
         $laserJob = new LaserJob();
 
@@ -158,26 +139,20 @@ class LaserActionHandler extends ActionHandler {
                 if($dateUsed > $dateExpired) {
                     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
                 }
-                
-                // As a result of current structure, cannot consume voucher here in case the user chooses to cancel their order
-
-                // $userID = $body['userId'];
-                // $voucher->setUserID($userID);
-                // $voucher->setDateUsed($dateUsed);
-                // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-                // if(!$ok) {
-                //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-                // }
             } else {
                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
             }
+
+            $laserJob->setVoucherCode($body['voucherCode']);
+        } else if($body['payment'] == "account") {
+            // TODO: Add verification for account code
+            $laserJob->setAccountCode($body['accountCode']);
         }
 
         $laserJob->setDbFileName($body['dbFileName']);
 		$laserJob->setDxfFileName($body['dxfFileName']);
 		$laserJob->setPaymentMethod($body['payment']);
 		$laserJob->setCourseGroupId($body['courseGroup']);
-		$laserJob->setVoucherCode($body['voucherCode']);
         $laserJob->setCustomerNotes($body['customerNotes']);
         $laserJob->setEmployeeNotes($body['employeeNotes']);
         $laserJob->setQuantity($body['quantity']);
@@ -213,111 +188,20 @@ class LaserActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new cut job'));
         }
 
+		$user = $this->userDao->getUserByID($body['userId']);
+		$laserMaterial = $this->laserDao->getLaserMaterialByID($laserJob->getLaserCutMaterialId());
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
+
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully submitted cut job')
         );
 
     }
-
-    //  /**
-    //  * Creates a new printer job in the database.
-    //  *
-    //  * @return void
-    //  */
-    // public function handleCreatePrintJob() {
-
-	// 	$body = $this->requestBody;
-        
-
-	// 	$this->requireParam('userId');
-    //     $this->requireParam('printerId');
-    //     $this->requireParam('printTypeId');
-    //     $this->requireParam('dbFileName');
-    //     $this->requireParam('stlFileName');
-		
-	// 	//Print Job ID and Date Created attributes are assigned in constructor
-	// 	$printJob = new PrintJob();
-        
-    //     if($body['voucherCode']) {
-    //         $voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
-    //         // TODO: Fix if there are more services added
-    //         if($voucher && $voucher->getServiceID() == 2) {
-                
-    //             // Ensures that voucher code has not been used
-    //             $isUsed = $voucher->getDateUsed();
-    //             if($isUsed) {
-    //                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has already been used'));
-    //             }
-
-    //             // Ensures that voucher code has not expired
-    //             $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
-
-
-    //             $dateExpired = (new \DateTime($voucher->getDateExpired()))->format('Y-m-d H:i:s');
-    //             if($dateUsed > $dateExpired) {
-    //                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
-    //             }
-                
-    //             // As a result of current structure, cannot consume voucher here in case the user chooses to cancel their order
-
-    //             // $userID = $body['userId'];
-    //             // $voucher->setUserID($userID);
-    //             // $voucher->setDateUsed($dateUsed);
-    //             // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-    //             // if(!$ok) {
-    //             //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-    //             // }
-    //         } else {
-    //             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
-    //         }
-    //     }
-        
-    //     //FIXME: Fill out once you do client side
-    //     // Front end values that are not foreign keys
-	// 	$printJob->setDbFileName($body['dbFileName']);
-	// 	$printJob->setStlFileName($body['stlFileName']);
-	// 	$printJob->setPaymentMethod($body['payment']);
-	// 	$printJob->setCourseGroupId($body['courseGroup']);
-	// 	$printJob->setVoucherCode($body['voucherCode']);
-    //     $printJob->setCustomerNotes($body['customerNotes']);
-    //     $printJob->setEmployeeNotes($body['employeeNotes']);
-        
-    //     // Front end values that are foreign keys
-    //     $printType = $this->printerDao->getPrintTypesByID($body['printTypeId']);
-    //     $printer = $this->printerDao->getPrinterByID($body['printerId']);
-
-    //     $printJob->setUserID($body['userId']);
-	// 	$printJob->setPrintTypeID($printType);
-    //     $printJob->setPrinterId($printer);
-
-        
-    //     // Values generated at API call
-    //         // Check if formatting is correct
-    //     $printJob->setDateCreated((new \DateTime())->format('Y-m-d H:i:s'));
-    //     $printJob->setPendingCustomerResponse(false);
-
-
-
-    //     // To be done
-    //     // Not sure why this needs to be set to null, need to check
-	// 	$printJob->setMessageGroupId(null);
-	// 	// $printJob->setValidPrintCheck($body['']);
-	// 	// $printJob->setUserConfirmCheck($body['']);
-	// 	// $printJob->setCompletePrintDate($body['']);
-	// 	// $printJob->setPendingCustomerResponse($body['']);
-	// 	// $printJob->setDateUpdated($body['']);
-        
-    //     $ok = $this->printerDao->addNewPrintJob($printJob);
-    //     if (!$ok) {
-    //         $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new print job'));
-    //     }
-
-    //     $this->respond(new Response(
-    //         Response::CREATED, 
-    //         'Successfully submitted print job')
-    //     );
-        
     
     public function handleUpdateEmployeeNotes() {
         $body = $this->requestBody;
@@ -349,43 +233,39 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleSendCustomerConfirm() {
-        $body = $this->requestBody;
-
-		$this->requireParam('laserJobID');
+        $this->requireParam('laserJobID');
 		$this->requireParam('userID');
 		$this->requireParam('cutCost');
+		// $this->requireParam('messageID');
+		$body = $this->requestBody;
 
         $laserJobID = $body['laserJobID'];
 
-        $printJob = $this->laserDao->getLaserJobById($laserJobID);
-        if (empty($printJob)) {
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
         }
 
-        $printJob = $printJob[0];
+        $laserJob = $laserJob[0];
+        $laserMaterial = $this->laserDao->getLaserMaterialByID($laserJob->getLaserCutMaterialId());
 
-        $printJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setPendingCustomerResponse(true);
+        $laserJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setPendingCustomerResponse(true);
 
-        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setTotalPrice($laserMaterial->getCostPerSheet() * $laserJob->getQuantity());
+        $laserJob->setEmployeeNotes($laserJob->getEmployeeNotes() . "\nEmailed Cost: $" . number_format($laserJob->getTotalPrice(), 2));
 
-        $printJob->setEmployeeNotes($printJob->getEmployeeNotes() . "\nEmailed Cost: $" . $body['cutCost']);
-
-        $ok = $this->laserDao->updateCutJob($printJob);
+        $ok = $this->laserDao->updateCutJob($laserJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
         }
-
+		 
         $user = $this->userDao->getUserByID($body['userID']);
-
-        $replacements = array(
-            "name" => $user->getFirstName(),
-            "laser" => $printJob->getDxfFileName(),
-            "cost" => $body['cutCost']
-        );
-
-        $ok = $this->laserEmailer('jdkslkfajllkjfas', $user->getEmail(), $replacements);
-        if (!$ok) {
+		$message = $this->messageDao->getMessageByID('jdkslkfajllkjfas');
+		// $message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
+		if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
 
@@ -403,21 +283,21 @@ class LaserActionHandler extends ActionHandler {
 
         $laserJobID = $body['laserJobID'];
 
-        $printJob = $this->laserDao->getLaserJobById($laserJobID);
-        if (empty($printJob)) {
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
         }
 
-        $printJob = $printJob[0];
+        $laserJob = $laserJob[0];
         
-        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
 
 
-        $printJob->setPendingCustomerResponse(0);
-        $printJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setPendingCustomerResponse(0);
+        $laserJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
         
 
-        $ok = $this->laserDao->updateCutJob($printJob);
+        $ok = $this->laserDao->updateCutJob($laserJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
         }
@@ -434,14 +314,14 @@ class LaserActionHandler extends ActionHandler {
         $this->requireParam('laserJobID');
         $laserJobID = $body['laserJobID'];
         
-        $printJob = $this->laserDao->getLaserJobById($laserJobID);
-        if (empty($printJob)) {
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
         }
-        $printJob = $printJob[0];
+        $laserJob = $laserJob[0];
 
-        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $ok = $this->laserDao->updateCutJob($printJob);
+        $laserJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $ok = $this->laserDao->updateCutJob($laserJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
         }
@@ -476,20 +356,20 @@ class LaserActionHandler extends ActionHandler {
         $this->requireParam('laserJobID');
         $laserJobID = $body['laserJobID'];
 
-        $printJob = $this->laserDao->getLaserJobById($laserJobID);
-        if (empty($printJob)) {
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
         }
-        $printJob = $printJob[0];
+        $laserJob = $laserJob[0];
 
-        $printJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
-        $printJob->setPendingCustomerResponse(0);
+        $laserJob->setValidCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setUserConfirmDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setPaymentDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setPendingCustomerResponse(0);
 
-        $ok = $this->laserDao->updateCutJob($printJob);
+        $ok = $this->laserDao->updateCutJob($laserJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
         }
@@ -563,29 +443,29 @@ class LaserActionHandler extends ActionHandler {
     }
 
     function handleCompleteCutJob() {
-        $body = $this->requestBody;
-
-		$this->requireParam('laserJobID');
+        $this->requireParam('laserJobID');
 		$this->requireParam('userID');
+		// $this->requireParam('messageID');
+		$body = $this->requestBody;
 
         $laserJobID = $body['laserJobID'];
 
-        $printJob = $this->laserDao->getLaserJobById($laserJobID);
-        if (empty($printJob)) {
+        $laserJob = $this->laserDao->getLaserJobById($laserJobID);
+        if (empty($laserJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain laser job from ID'));
         }
 
-        $printJob = $printJob[0];
+        $laserJob = $laserJob[0];
         
-        $printJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setDateUpdate((new \DateTime())->format('Y-m-d H:i:s'));
 
 
-        $printJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
+        $laserJob->setCompleteCutDate((new \DateTime())->format('Y-m-d H:i:s'));
 
-        if($printJob->getVoucherCode()) {
+        if($laserJob->getVoucherCode()) {
 
             // If there ever is an issue here, vouchers is not a foreign key anymore. A possibile error is if there somehow happened to be 2 vouchers with the same id values
-            $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+            $voucher = $this->coursePrintAllowanceDao->getVoucher($laserJob->getVoucherCode());
             $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
             $userID = $body['userID'];
             $voucher->setUserID($userID);
@@ -596,20 +476,17 @@ class LaserActionHandler extends ActionHandler {
             }
         }
 
-        $ok = $this->laserDao->updateCutJob($printJob);
+        $ok = $this->laserDao->updateCutJob($laserJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update laser job'));
         }
 
-        $user = $this->userDao->getUserByID($body['userID']);
-
-        $replacements = array(
-            "name" => $user->getFirstName(),
-            "laser" => $printJob->getDxfFileName()
-        );
-
-        $ok = $this->laserEmailer('ajlsekgjowefj', $user->getEmail(), $replacements);
-        if (!$ok) {
+		$user = $this->userDao->getUserByID($body['userID']);
+		$laserMaterial = $this->laserDao->getLaserMaterialByID($laserJob->getLaserCutMaterialId());
+		$message = $this->messageDao->getMessageByID('ajlsekgjowefj');
+		// $message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
+		if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
 
@@ -621,8 +498,68 @@ class LaserActionHandler extends ActionHandler {
     }
 
 
-    // }
-        /**
+    /**
+     * Sends an email with the contents entered into the webpage to the user who submitted the laser cut
+     * 
+     * @return void
+     */
+    public function handleSendUserEmail() {
+        $this->requireParam('laserJobID');
+        $this->requireParam('email');
+        $this->requireParam('message');
+        $body = $this->requestBody;
+
+        if($body['message'] == '') $this->respond(new Response(Response::BAD_REQUEST, "Email body is empty"));
+
+        $ok = $this->mailer->sendEmail($body['email'], 'Laser Cut Submission Follow-up', $body['message'], false);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully sent email'));
+    }
+
+    /**
+     * Sends an email to Don with info about all uncharged laser cut jobs & marks them as charged
+     * 
+     * @return void
+     */
+    public function handleProcessAllFees() {
+        $this->requireParam('messageID');
+        $body = $this->requestBody;
+
+        $unprocessedJobs = $this->laserDao->getUnchargedCompleteJobs();
+
+        foreach($unprocessedJobs as $job) {
+            if($job->getPaymentMethod() == 'voucher') {
+                $voucher = $this->coursePrintAllowanceDao->getVoucher($job->getVoucherCode());
+                if(!$voucher) $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get account code for voucher: '.$job->getVoucherCode()));
+                $job->setAccountCode($voucher->getLinkedAccount());
+            }
+        }
+
+        $message = $this->messageDao->getMessageByID($body['messageID']); 
+
+        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message);
+
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send proccess fees email'));
+        }
+
+        $jobIds = [];
+        foreach($unprocessedJobs as $up) {
+            $jobIds[] = $up->getLaserJobId();
+        }
+
+        $ok = $this->laserDao->setChargeDate((new \DateTime())->format('Y-m-d H:i:s'), $jobIds);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Did not mark cut jobs as charged'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Sent process fees email and updated cut jobs'));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -675,6 +612,12 @@ class LaserActionHandler extends ActionHandler {
 
             case 'completeCutJob':
                 $this->handleCompleteCutJob();
+                
+            case 'sendUserEmail':
+                $this->handleSendUserEmail();
+            
+            case 'processAllFees':
+                $this->handleProcessAllFees();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on laser resource'));

@@ -56,6 +56,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         $errors = "";
         $count = 1;
 
+		$adds = '';
         foreach ($kitArray as $k){
             // Building our object
             // Format is:
@@ -79,7 +80,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
 				foreach ($currentkits AS $ck){
 						if (($ck->getTermID() == $kit->getTermID()) AND ($ck->getCourseCode() == $kit->getCourseCode()) AND ($ck->getOsuID() == $kit->getOsuID())){
 							$new_flag = false;
-							$errors .= "Kit already in listing: ". $kit->getOnid() . ": ".$kit->getCourseCode()."<BR>";
+							//$errors .= "Kit already in listing: ". $kit->getOnid() . ": ".$kit->getCourseCode()."<BR>";
 							break;
 						}
 				}	
@@ -88,7 +89,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
 				if ($new_flag == true){
 					$ok = $this->kitEnrollmentDao->addNewKitEnrollment($kit);
 					if (!$ok){
-						$errors .= "Was unable to add student with onid: ". $kit->getOnid() . "<BR>";
+						$errors .= "Was unable to add student with onid: ". $kit->getOnid() . "\n";
+					} else {
+						$adds .= $kit->getOnid(). " added\n";
 					}
 				}
 				
@@ -100,7 +103,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         if ($errors === ""){
             $this->respond(new Response(
                 Response::CREATED, 
-                'Successfully added all kits'
+                "Successfully added all kits\n" . $adds . $errors
             ));
         } else {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, $errors));

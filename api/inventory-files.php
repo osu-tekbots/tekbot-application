@@ -5,6 +5,10 @@
  */
 include_once '../bootstrap.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL); 
+
 use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use DataAccess\MessageDao;
@@ -38,7 +42,7 @@ if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
 
 function correctImageOrientation($filename) {
   if (function_exists('exif_read_data')) {
-    $exif = exif_read_data($filename);
+    $exif = @exif_read_data($filename);
     if($exif && isset($exif['Orientation'])) {
       $orientation = $exif['Orientation'];
       if($orientation != 1){

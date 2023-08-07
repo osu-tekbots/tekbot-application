@@ -252,7 +252,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<select class="form-control input" id="equipmentNumberpartsSelect" name="equipmentNumberparts" data-toggle="tooltip" 
 								data-placement="bottom" title="Number of parts that come with the equipment.  Include manuals, cords, accesories in this count.">
 								<?php
-								for ($n = 1; $n <= 10; $n++) {
+								for ($n = 1; $n <= 25; $n++) {
 								    $selected = $n == $numberparts ? 'selected' : '';
 								    echo "<option $selected value='$n'>$n</option>";
 								}

@@ -1,6 +1,7 @@
 <?php
 
 namespace Model;
+use Util\IdGenerator;
 
 /**
  * Data structure representing a Locker
@@ -37,7 +38,7 @@ class Box {
     public function __construct($boxKey = null) {
         if ($boxKey == null) {
 			$boxKey = IdGenerator::generateSecureUniqueId();
-            $this->setStocknumber($boxKey);   
+            $this->setBoxKey($boxKey);   //changed from setStockNumber
         } else {
             $this->setBoxKey($boxKey);
         }

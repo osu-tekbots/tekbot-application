@@ -19,6 +19,7 @@ include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 
 $dao = new EquipmentDao($dbConn, $logger);
 $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
+// TODO: Look @ this (v) with Don
 $isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
 if ($isLoggedIn){
     $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
@@ -47,8 +48,8 @@ foreach ($equipments as $e){
 * Will only show edit button if the user logged in is an employee
 */
 
-    $viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
-    $editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
+    $viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
+    $editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
     if ($isEmployee){
         $actions = "$viewButton $editButton";
     } else {
@@ -84,7 +85,7 @@ foreach ($equipments as $e){
 
     $equipmentItemHTML .= "
     <tr>
-        <td><a href='pages/viewEquipment.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
+        <td><a href='pages/publicEquipmentDetail.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
         <td>$name</td>
         <td>$description</td>
         <td>$status</td>

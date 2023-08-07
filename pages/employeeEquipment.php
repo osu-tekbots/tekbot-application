@@ -295,7 +295,7 @@ foreach ($checkedoutEquipment as $c){
 					</table>
 					<script>
 					$('#equipmentCheckouts').DataTable(
-						{
+						{ 
 							lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
 							aaSorting: [[4, 'asc']]
 						}
@@ -371,7 +371,7 @@ function reserveEquipment(){
 		action: 'createReservation',
 		userID: user,
 		equipmentID: equipment,
-		messageID: 'wersspdohssfuj'
+		messageID: 'wersdhwrujhssfuj'
 	}
 	
 	api.post('/equipmentrental.php', content).then(res => {

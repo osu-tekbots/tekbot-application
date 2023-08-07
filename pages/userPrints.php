@@ -34,7 +34,9 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 if ($user){
 	$uId = $user->getUserID();
@@ -44,6 +46,7 @@ if ($user){
 	$uEmail = $user->getEmail();
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
+	$_SESSION['userAccessLevel'] = $uAccessLevel; // ADDED for workaround ^
 } else {
 	echo "<h1>You are not in db. You should never have seen this.</h1>";
 	exit();
@@ -64,7 +67,7 @@ $studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
 This section prepares the 3D printing/Laser cutting tab.
 */
 
-include_once PUBLIC_FILES . '/modules/customerPrintModal.php';
+include_once PUBLIC_FILES . '/modules/view3dPrintModal.php';
 
 
 $printJobsHTML = '';
@@ -150,7 +153,7 @@ foreach($studentPrintJobs as $p) {
 	<tr>
 	<td>$dateCreated</td>
 	<td>
-		<button data-toggle='modal' data-target='#newReservationModal' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
+		<button data-toggle='modal' data-target='#view3dModel' data-whatever='$dbFileName' id='openNewReservationBtn'  class='btn btn-outline-primary capstone-nav-btn'>
 			View
 		</button>
 		<a style='color:#0000FF;' href='./uploads/prints/$dbFileName'>$stlFileName</a>

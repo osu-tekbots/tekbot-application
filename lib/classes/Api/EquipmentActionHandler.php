@@ -33,7 +33,6 @@ class EquipmentActionHandler extends ActionHandler {
     public function __construct($equipmentDao , $config, $logger) {
         parent::__construct($logger);
         $this->equipmentDao = $equipmentDao;
-        //$this->mailer = $mailer;
         $this->config = $config;
     }
 

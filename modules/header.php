@@ -16,13 +16,8 @@ if (!session_id()) {
     session_start(); 
   }
 }
-#if (!session_id()) {
-#    session_start();
-#}
-
 
 $baseUrl = $configManager->getBaseUrl();
-$image_dir = 'http://eecs.oregonstate.edu/capstone/submission/';
 
 $title = isset($title) ? $title : 'TekBots | OSU';
 
@@ -87,7 +82,7 @@ $loggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
 // Setup the buttons to use in the header
 // All users
 $buttons = array(
-    // 'Reserve<BR>Equipment' => 'pages/browseEquipment.php'
+    // 'Reserve<BR>Equipment' => 'pages/publicEquipmentList.php'
 );
 // Signed in users
 if ($loggedIn) {
@@ -151,12 +146,19 @@ if ($loggedIn) {
             $link .= '/>';
             echo $link;
         }
-    } ?>
+    } 
+	
+//Added 4/13/2022. Intended to help with image uploads. May slow everything else down.	
+header("Cache-Control: no-cache, must-revalidate"); // HTTP 1.1
+header("Pragma: no-cache"); // HTTP 1.0
+header("Expires: Wed, 1 Jan 2020 00:00:00 GMT"); // Anytime in the past
+	
+	?>
 
 </head>
 <body>
 
-    <header id="header" class="dark">
+    <header id="header" class="dark" style="z-index:1001">
         <a class="header-main-link" href="">
             <div class="logo">
                 <img class="logo" src="assets/img/osu-logo-orange.png" />

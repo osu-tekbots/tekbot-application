@@ -83,8 +83,8 @@ function renderUserCheckoutFeesOwedTable($fees){
 
 function renderEmployeeEquipmentItem($equipmentID, $name, $location, $health){
     $healthColor = ($health == 'Broken') ? 'red' : (($health == 'Partial Functionality') ? '#ffcc00' : 'green');
-    $viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
-    $editButton = createLinkButton("pages/editEquipment.php?id=$equipmentID", 'Edit');
+    $viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
+    $editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
 
     echo "
     <div class='container'>
@@ -140,7 +140,7 @@ function renderEquipmentItem($equipmentID, $name, $description, $health, $isLogg
     $healthColor = ($health == 'Broken') ? 'red' : (($health == 'Partial Functionality') ? '#ffcc00' : 'green');
 
 
-    $viewButton = createLinkButton("pages/viewEquipment.php?id=$equipmentID", 'View');
+    $viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
     if ($isLoggedIn){
         // Check to see if item can be reserved or not
             $reserveButton = '

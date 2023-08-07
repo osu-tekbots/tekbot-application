@@ -324,8 +324,8 @@ class EquipmentCheckoutDao {
         $checkout->setReturnTime($row['return_time']);
         $checkout->setDeadlineTime($row['return_deadline']);
         $checkout->setNotes($row['notes']);
-        $checkout->setDateUpdated(new \DateTime($row['date_updated']));
-        $checkout->setDateCreated(new \DateTime($row['date_created']));
+        $checkout->setDateUpdated(new \DateTime($row['date_updated'] ?? 'now'));
+        $checkout->setDateCreated(new \DateTime($row['date_created'] ?? 'now'));
 
         if ($userInRow) {
             $checkout->setUser(UsersDao::ExtractUserFromRow($row));

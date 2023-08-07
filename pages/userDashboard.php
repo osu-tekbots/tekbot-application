@@ -41,7 +41,9 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 if ($user){
 	$uId = $user->getUserID();
@@ -52,7 +54,8 @@ if ($user){
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
 } else {
-	echo "<h1>You are not in db. You shoudl never have seen this.</h1>";
+	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
+	echo "Please send us an email <a href='mailto:tekbot-worker@engr.oregonstate.edu'>here</a> to report the issue.";
 	exit();
 }
 
@@ -75,18 +78,6 @@ $printerFees = $printerFeeDao->getFeesForUser($uID);
 
 $studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
 
-
-/*
-This section prepares the 3D printing/Laser cutting tab.
-*/
-
-include_once PUBLIC_FILES . '/modules/customerPrintModal.php';
-
-
-/*
-This section prepares the Fees tab of the webpage
-
-*/
 
 $feeHTML = '';
 
@@ -393,7 +384,7 @@ if ($numUnconfirmedPrints > 0) {
 	$laserCutsHtml = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 	<h5 class'card-title'>You have $numUnconfirmedPrints unconfirmed print(s)!</h5>
 	<div class='card-body'>
-	<a href='./pages/userPrints.php'><span class='lead mb-0'>Laser Cuts Webpage →</span></a>
+	<a href='./pages/userPrints.php'><span class='lead mb-0'>3D Prints Webpage →</span></a>
 	</div>
 	</div>";
 }
@@ -438,7 +429,7 @@ if ($reservedEquipmentCount != 0)
 	$reservationHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have an active equipment reservation!</h5>
 			<div class='card-body'>
-			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
 			</div>
 			</div>";
 
@@ -450,7 +441,7 @@ if ($checkedOutEquipmentLateCount != 0)
 	$lateEquipmentHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have equipment to be returned that is now late!</h5>
 			<div class='card-body'>
-			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
 			</div>
 			</div>";
 					
@@ -462,7 +453,7 @@ if ($checkedoutEquipmentCount != 0)
 	$checkedOutHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have equipment checked out.</h5>
 			<div class='card-body'>
-			<a href='./pages/browseEquipment.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
+			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
 			</div>
 			</div>";
 ?>
@@ -473,8 +464,9 @@ if ($checkedoutEquipmentCount != 0)
 <a href="./pages/userPrints.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">3D Prints</button></a>
 <a href="./pages/publicInventory.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">TekBots Inventory</button></a>
 <a href="./pages/userCuts.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Laser Cuts</button></a>
-<a href="./pages/browseEquipment.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Equipment for Loan</button></a>
+<a href="./pages/publicEquipmentList.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Equipment for Loan</button></a>
 <a href="./pages/userTekbox.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">TekBox Pickup System</button></a>
+<a href="./pages/publicTicketSubmit.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Lab Ticket Submission</button></a>
 <BR>
 <?php echo $laserCutsHtml;?>
 <?php echo $printsHtml;?>

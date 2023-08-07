@@ -42,6 +42,7 @@ $laserCodesHTML = '';
 
 foreach ($vouchers as $voucher){
     $voucherID = $voucher->getVoucherID();
+	$accountCode = $voucher->getLinkedAccount();
 	$date_used = $voucher->getDateUsed();
 	$user_id = $voucher->getUserID();
 	$date_created = $voucher->getDateCreated();
@@ -59,6 +60,7 @@ foreach ($vouchers as $voucher){
 		<tr id='$voucherID'>
 		
 			<td>$voucherID</td>
+			<td>$accountCode</td>
 			<td>$date_created</td>
 			<td>$date_expired</td>
 			<td>$date_used</td>
@@ -93,25 +95,34 @@ foreach ($vouchers as $voucher){
 						
 							<button id='generateAdditionalVouchers' class='btn btn-primary'>Generate additional voucher codes</button>
 							<div id='confirmAdditionalVouchers' style='display:none'>
-								<h4 style='display: inline-block'>How Many?</h4>&nbsp;&nbsp;
-								<select id='voucherAmount'>
-								";
-
-
-
-								for ($i = 1; $i < 26; $i++){
-									echo "
-										<option value='$i'>$i</option>
+								<div>
+									<h4 style='display: inline-block'>How Many?</h4>&nbsp;&nbsp;
+									<select id='voucherAmount'>
 									";
-								}
-					echo "
-								</select>
-								&nbsp;&nbsp;
-								<br/>
-								<h4 style='display: inline-block'>When should they expire?</h4>&nbsp;&nbsp;
-								<div class='col-2' style='display: inline-block'>
-									<input required type='date' class='form-control' max='' id='dateExpired' placeholder='Date Vouchers Ends'/>
-								</div>&nbsp;&nbsp;<br/>
+
+
+
+									for ($i = 1; $i < 26; $i++){
+										echo "
+											<option value='$i'>$i</option>
+										";
+									}
+						echo "
+									</select>
+									&nbsp;&nbsp;
+								</div>
+								<div style='margin-top: 10px'>
+									<h4 style='display: inline-block'>Linked account code:</h4>&nbsp;&nbsp;
+									<div style='display: inline-block'>
+										<input required type='text' class='form-control' max='' id='accountCode' placeholder='XXXXX-XXXX'/>
+									</div>
+								</div>
+								<div>
+									<h4 style='display: inline-block; float:left; margin-top:15px'>When should they expire?</h4>&nbsp;&nbsp;
+									<div style='display: inline-block; margin-top: 10px'>
+										<input required type='date' class='form-control' max='' id='dateExpired' placeholder='Date Vouchers Ends'/>
+									</div>
+								</div>
 								<button id='confirmCreate' class='btn btn-primary'>Confirm</button>
 								&nbsp;&nbsp;
 								<button id='cancelCreate' class='btn btn-danger'>Cancel</button>
@@ -126,13 +137,14 @@ foreach ($vouchers as $voucher){
 
 			
 
-				echo "<div class='admin-paper'>
+				echo "<div class='admin-paper' style='overflow: scroll'>
 					<h3>Laser Cut Vouchers!</h3>
-					<table class='table' id='laserVoucherTable'>
+					<table class='table' id='laserVoucherTable' style='text-align: center'>
 					<caption>Vouchers that can be used for a free laser cut</caption>
 					<thead>
 						<tr>
 							<th>Voucher Code</th>
+							<th>Linked Account</th>
 							<th>Date Created</th>
 							<th>Date Expire(d)</th>
 							<th>Date Used</th>
@@ -148,7 +160,7 @@ foreach ($vouchers as $voucher){
 					<script>
 						$('#laserVoucherTable').DataTable(
 							{
-								aaSorting: [[0, 'desc']]
+								aaSorting: [[2, 'desc']]
 							}
 						);
 					</script>
@@ -196,11 +208,17 @@ $("#cancelCreate").click(function() {
 
 function addNewVouchers() {
 	let num = $("#voucherAmount").val();
+	let accountCode = $("#accountCode").val();
 	let dateExpired = $("#dateExpired").val();
 	// let serviceID = $("#services").val();
     
 	// TODO: Change from hard set value to tekbot_services table value
     let serviceID = 5;
+	
+	if(accountCode == "" || accountCode == null){
+		alert("Must connect with an account code");
+		return;
+	}
 	
 	if(dateExpired == "" || dateExpired == null){
 		alert("Must choose an expiration date for voucher codes");
@@ -210,6 +228,7 @@ function addNewVouchers() {
 	let body = {
         action: 'addVoucherCodes',
         num: num,
+		accountCode: accountCode,
 		date_expired: dateExpired,
 		serviceID: serviceID
     };

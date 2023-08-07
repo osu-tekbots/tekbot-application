@@ -157,10 +157,10 @@ function renderCourseNames(){
     echo '
     <select name="course" class="form-control">
         <option value=""></option> 
-        <option value="ECE 272">ECE 272</option>
-        <option value="ENGR202-001">ENGR202-001</option>
-        <option value="ECE111-010">ECE111-010</option>
-        <option value="ECE111-020">ECE111-020</option>
+        <option value="ENGR103Udell">ENGR103 (C. Udell)</option>
+        <option value="ENGR103Heer">ENGR103 (D. Heer)</option>
+        <option value="ENGR202">ENGR202 (On Campus)</option>
+        <option value="ECE272">ECE272</option>
         <option value="ECE341">ECE341</option>
         <option value="ECE375">ECE375</option>
         <option value="ECE473">ECE473</option>

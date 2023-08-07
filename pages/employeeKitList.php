@@ -143,7 +143,7 @@ function updateStatus(id){
 
 	api.post('/kitenrollment.php', content).then(res => {
 		snackbar(res.message, 'success');
-		$('#row'+id).html('');
+//		$('#row'+id).html('');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});

@@ -6,8 +6,11 @@ use Model\PrintFee;
 use Model\PrintJob;
 use Model\PrintType;
 use DataAccess\QueryUtils;
+use Util\Security;
+use Email\TekBotsMailer;
 
-
+// Temporary; just for setting up processAllFees
+use Model\Message;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify printer information.
@@ -20,7 +23,7 @@ class PrinterActionHandler extends ActionHandler {
     private $printFeeDao;
     /** @var \DataAccess\printerDao */
     private $printerDao;
-    /** @var \Email\PrinterMailer */
+    /** @var \Email\TekBotsMailer */
     private $mailer;
     /** @var \Util\ConfigManager */
     private $config;
@@ -49,27 +52,6 @@ class PrinterActionHandler extends ActionHandler {
         $this->printFeeDao = $printFeeDao;
 
         $this->messageDao = $messageDao;
-    }
-
-
-
-    /*
-     Used to generate emails for printer action handler
-    */
-
-    public function printerEmailer($messageID, $email, $replacements) {
-
-
-        $message = $this->messageDao->getMessageByID($messageID);
-        
-        $body = $message->fillTemplateBody($replacements);
-		$subject = $message->fillTemplateSubject($replacements);
-
-		$headers = "From:heer@oregonstate.edu\r\n";
-		$headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-type: text/html;charset=UTF-8\r\n";
-
-        return mail($email, $subject, $body, $headers);
     }
 
     /**
@@ -296,51 +278,51 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreatePrintJob() {
-
-		$body = $this->requestBody;
-        
-
 		$this->requireParam('userId');
         $this->requireParam('printerId');
         $this->requireParam('printTypeId');
         $this->requireParam('dbFileName');
         $this->requireParam('stlFileName');
         $this->requireParam('quantity');
+		$this->requireParam('messageID');
+		$body = $this->requestBody;
+        
 		
 		//Print Job ID and Date Created attributes are assigned in constructor
 		$printJob = new PrintJob();
         
-        if($body['voucherCode']) {
-            $voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
-            // TODO: Fix if there are more services added
-            if($voucher && $voucher->getServiceID() == 2) {
-                
-                // Ensures that voucher code has not been used
-                $isUsed = $voucher->getDateUsed();
-                if($isUsed) {
-                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has already been used'));
-                }
+		
+        if ($body['payment'] == "voucher"){
+			if($body['voucherCode']) {
+				$voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
+				// TODO: Fix if there are more services added
+				if($voucher && $voucher->getServiceID() == 2) {
+					
+					// Ensures that voucher code has not been used
+					$isUsed = $voucher->getDateUsed();
+					if($isUsed) {
+						$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has already been used'));
+					}
 
-                // Ensures that voucher code has not expired
-                $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+					// Ensures that voucher code has not expired
+					$dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
 
 
-                $dateExpired = (new \DateTime($voucher->getDateExpired()))->format('Y-m-d H:i:s');
-                if($dateUsed > $dateExpired) {
-                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
-                }
-                
-                // As a result of current structure, cannot consume voucher here in case the user chooses to cancel their order
-
-                // $userID = $body['userId'];
-                // $voucher->setUserID($userID);
-                // $voucher->setDateUsed($dateUsed);
-                // $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-                // if(!$ok) {
-                //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-                // }
-            } else {
-                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
+					$dateExpired = (new \DateTime($voucher->getDateExpired()))->format('Y-m-d H:i:s');
+					if($dateUsed > $dateExpired) {
+						$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher code has been expired'));
+					}
+					
+				} else {
+					$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Voucher is not valid'));
+				}
+				
+				$printJob->setVoucherCode($body['voucherCode']);
+			}
+        } else if($body['payment'] == "account") {
+            if($body['accountCode']) {
+                // TODO: Add verification for account code
+                $printJob->setAccountCode($body['accountCode']);
             }
         }
         
@@ -350,7 +332,6 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setStlFileName($body['stlFileName']);
 		$printJob->setPaymentMethod($body['payment']);
 		$printJob->setCourseGroupId($body['courseGroup']);
-		$printJob->setVoucherCode($body['voucherCode']);
         $printJob->setCustomerNotes($body['customerNotes']);
         $printJob->setEmployeeNotes($body['employeeNotes']);
         $printJob->setQuantity($body['quantity']);
@@ -385,6 +366,14 @@ class PrinterActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new print job'));
         }
+		
+		$user = $this->userDao->getUserByID($body['userId']);
+		$printType = $this->printerDao->getPrintTypesByID($printJob->getPrintTypeID());
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendPrinterEmail($user, $printJob, $printType, $message);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send confirmation email'));
+        }
 
         $this->respond(new Response(
             Response::CREATED, 
@@ -394,7 +383,7 @@ class PrinterActionHandler extends ActionHandler {
     }
 	
 	
-	    /**
+	/**
      * Updates fields editable from the user interface in a print job entry in the database.
      *
      * @return void
@@ -536,10 +525,13 @@ class PrinterActionHandler extends ActionHandler {
     }
     
     public function handleProcessPrintJob() {
+        $this->requireParam('printJobID');
+        $this->requireParam('userID');
+
         $body = $this->requestBody;
 
-        $this->requireParam('printJobID');
         $printJobID = $body['printJobID'];
+        $userID = $body['userID'];
 
         $printJob = $this->printerDao->getPrintJobsByID($printJobID);
         if (empty($printJob)) {
@@ -559,6 +551,20 @@ class PrinterActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
         }
 
+		//Check if a voucher was used for this print. If so, mark it as used now.
+		if ($printJob->getPaymentMethod() == "voucher"){
+			if($printJob->getVoucherCode()) {
+				$voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+				$dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+				$voucher->setUserID($userID);
+				$voucher->setDateUsed($dateUsed);
+				$ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+				if(!$ok) {
+					$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+				}
+			}
+		}
+
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully processed print job')
@@ -566,11 +572,13 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleSendCustomerConfirm() {
-        $body = $this->requestBody;
-
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
-		$this->requireParam('printCost');
+		// $this->requireParam('printCost');
+		$this->requireParam('material_amount');
+		$this->requireParam('messageID');
+		
+		$body = $this->requestBody;
 
         $printJobID = $body['printJobID'];
 
@@ -578,15 +586,16 @@ class PrinterActionHandler extends ActionHandler {
         if (empty($printJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
         }
-
         $printJob = $printJob[0];
+        
+        $printType = $this->printerDao->getPrintTypesByID($printJob->getPrintTypeID());
 
         $printJob->setValidPrintCheck((new \DateTime())->format('Y-m-d H:i:s'));
         $printJob->setPendingCustomerResponse(true);
+		$printJob->setMaterialAmount($body['material_amount']);
+        $printJob->setTotalPrice($printJob->getQuantity() * $printType->getCostPerGram() * $printJob->getMaterialAmount());
 
         $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
-
-        $printJob->setEmployeeNotes($printJob->getEmployeeNotes() . "\nEmailed Cost: $" . $body['printCost']);
 
         $ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
@@ -594,15 +603,9 @@ class PrinterActionHandler extends ActionHandler {
         }
 
         $user = $this->userDao->getUserByID($body['userID']);
-
-        $replacements = array(
-            "name" => $user->getFirstName(),
-            "print" => $printJob->getStlFileName(),
-            "cost" => $body['printCost']
-        );
-
-        $ok = $this->printerEmailer('wersspdoifwkjfd', $user->getEmail(), $replacements);
-        if (!$ok) {
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendPrinterEmail($user, $printJob, $printType, $message);
+		if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
 
@@ -649,52 +652,50 @@ class PrinterActionHandler extends ActionHandler {
     }
  
     function handleCompletePrintJob() {
-        $body = $this->requestBody;
-
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
-
-        $printJobID = $body['printJobID'];
-
-        $printJob = $this->printerDao->getPrintJobsByID($printJobID);
+		$this->requireParam('messageID');
+		$body = $this->requestBody;
+		
+        $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
         if (empty($printJob)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print job from ID'));
         }
 
         $printJob = $printJob[0];
-        
         $printJob->setDateUpdated((new \DateTime())->format('Y-m-d H:i:s'));
-
-
         $printJob->setCompletePrintDate((new \DateTime())->format('Y-m-d H:i:s'));
 
-        if($printJob->getVoucherCode()) {
-            $voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
-            $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
-            $userID = $body['userID'];
-            $voucher->setUserID($userID);
-            $voucher->setDateUsed($dateUsed);
-            $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
-            if(!$ok) {
-                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
-            }
+        $user = $this->userDao->getUserByID($body['userID']);
+		$printType = $this->printerDao->getPrintTypesByID($printJob->getPrintTypeID());
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+        $ok = $this->mailer->sendPrinterEmail($user, $printJob, $printType, $message);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
 
-        $ok = $this->printerDao->updatePrintJob($printJob);
+		//Check if a voucher was used for this print. If so, mark it as used now.
+		if ($printJob->getPaymentMethod() == "voucher"){
+			if($printJob->getVoucherCode()) {
+				$voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+				$dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
+				$userID = $body['userID'];
+				$voucher->setUserID($userID);
+				$voucher->setDateUsed($dateUsed);
+				$ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+				if(!$ok) {
+					$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
+				}
+			}
+		}
+
+        //added to fix account code completion error 4/22/2022 by Travis
+        //check if account code was used for this print.
+        
+
+		$ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update print job'));
-        }
-
-        $user = $this->userDao->getUserByID($body['userID']);
-
-        $replacements = array(
-            "name" => $user->getFirstName(),
-            "print" => $printJob->getStlFileName()
-        );
-
-        $ok = $this->printerEmailer('iutrwoejrlkdfjla', $user->getEmail(), $replacements);
-        if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
 
         $this->respond(new Response(
@@ -757,6 +758,66 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     /**
+     * Sends an email with the contents entered into the webpage to the user who submitted the 3D print
+     * 
+     * @return void
+     */
+    public function handleSendUserEmail() {
+        $this->requireParam('printJobID');
+        $this->requireParam('email');
+        $this->requireParam('message');
+        $body = $this->requestBody;
+
+        if($body['message'] == '') $this->respond(new Response(Response::BAD_REQUEST, "Email body is empty"));
+
+        $ok = $this->mailer->sendEmail($body['email'], '3D Print Submission Follow-up', $body['message'], false);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Successfully sent email'));
+    }
+
+    /**
+     * Sends an email to Don with info about all uncharged print jobs & marks them as charged
+     * 
+     * @return void
+     */
+    public function handleProcessAllFees() {
+        $this->requireParam('messageID');
+        $body = $this->requestBody;
+
+        $unprocessedJobs = $this->printerDao->getUnchargedCompleteJobs();
+
+        foreach($unprocessedJobs as $job) {
+            if($job->getPaymentMethod() == 'voucher') {
+                $voucher = $this->coursePrintAllowanceDao->getVoucher($job->getVoucherCode());
+                if(!$voucher) $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get account code for voucher: '.$job->getVoucherCode()));
+                $job->setAccountCode($voucher->getLinkedAccount());
+            }
+        }
+
+        $message = $this->messageDao->getMessageByID($body['messageID']);
+
+        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send proccess fees email'));
+        }
+
+        $jobIds = [];
+        foreach($unprocessedJobs as $up) {
+            $jobIds[] = $up->getPrintJobId();
+        }
+
+        $ok = $this->printDao->setChargeDate((new \DateTime())->format('Y-m-d H:i:s'), $jobIds);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Did not mark print jobs as charged'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Sent process fees email'));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -768,7 +829,6 @@ class PrinterActionHandler extends ActionHandler {
     public function handleRequest() {
         // Make sure the action parameter exists
         $action = $this->getFromBody('action');
-
 
         // Call the correct handler based on the action
         switch ($action) {
@@ -786,8 +846,7 @@ class PrinterActionHandler extends ActionHandler {
 				$this->handleCreatePrintJob();
 			case 'saveprintjob':
 				$this->handleSavePrintJob();
-			// case 'removeprintjob':
-            // 	$this->handleRemovePrintJob();
+
             case 'deletePrintJob':
                 $this->handleDeletePrintJob();
             case 'processPrintJob':
@@ -804,8 +863,7 @@ class PrinterActionHandler extends ActionHandler {
                 $this->handleCreatePrintFee();
             case 'saveprintfee':
                 $this->handleSavePrintFee();
-			//case 'removeprintfee':
-            //	$this->handleRemovePrintFee();
+
             
             case 'customerConfirmPrint':
                 $this->handleCustomerConfirmPrintJob();
@@ -822,6 +880,11 @@ class PrinterActionHandler extends ActionHandler {
             case 'verifyPrintPayment':
                 $this->handleVerifyPrintPayment();
 
+            case 'sendUserEmail':
+                $this->handleSendUserEmail();
+            
+            case 'processAllFees':
+                $this->handleProcessAllFees();
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }

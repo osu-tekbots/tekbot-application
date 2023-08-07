@@ -1,3 +1,10 @@
+<!-- 
+
+    Keeping for future use to allow users to pay fees associated with improper equipment return
+
+ -->
+
+
 <?php
 include_once '../bootstrap.php';
 

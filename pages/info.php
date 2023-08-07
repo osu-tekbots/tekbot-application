@@ -23,7 +23,7 @@ $FAQs = $FaqDao->getAllFaqs();
  <?php 
 	if ($isEmployee){
 		echo '
-		<a class="btn btn-primary btn-lg" href="pages/editFaq.php">Add new FAQ</a>
+		<a class="btn btn-primary btn-lg" href="pages/employeeFaqDetail.php">Add new FAQ</a>
 		<br><br>
 		';
 	}
@@ -57,7 +57,7 @@ if (!empty($FAQs)){
 		  </a>
 		  ';
 		  if ($isEmployee){
-			echo '<a style="color:blue" href="./pages/editFaq.php?id='.$f->getFaqID().'">Edit</a>';
+			echo '<a style="color:blue" href="./pages/employeeFaqDetail.php?id='.$f->getFaqID().'">Edit</a>';
 		}
 		echo '
 		</h4>

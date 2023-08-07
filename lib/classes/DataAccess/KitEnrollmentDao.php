@@ -379,8 +379,8 @@ class KitEnrollmentDao {
         $kit->setCourseCode($row['course_code']);
         $kit->setTermID($row['term_id']);
         $kit->setKitStatusID(self::ExtractKitEnrollmentStatusFromRow($row));
-        $kit->setDateUpdated(new \DateTime($row['date_updated']));
-        $kit->setDateCreated(new \DateTime($row['date_created']));
+        $kit->setDateUpdated(new \DateTime(($row['date_updated'] == '' ? 'now' : $row['date_updated'])));
+        $kit->setDateCreated(new \DateTime(($row['date_created'] == '' ? 'now' : $row['date_created'])));
 
         return $kit;
     }

@@ -41,8 +41,6 @@ include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);
 $kits = $kitEnrollmentDao->getKitsForAdmin();
-
-//$result = CallAPI("GET", "https://api.oregonstate.edu/oauth2/token", $data);
 $test = "";
 ?>
 <br/>
@@ -64,7 +62,10 @@ $test = "";
     <div class="row">
 <?php 
     // Grabs current term data using OSU Term API within modules/termData.php
+	//TODO: Is returning Summer 2021 during Spring break. WIll disable temporarily
     $currentTerm = getCurrentTermId();
+	
+//	$currentTerm = 202203;
 
     if (isset($_REQUEST['studentid']) && isset($_REQUEST['action'])){
         // No courses found for ID or wanting to add student
@@ -110,10 +111,15 @@ $test = "";
     }
     else if (isset($_REQUEST['studentid']))
     {  
-        if (isValidStudentID($_REQUEST['studentid'])){
+		$studentid = $_REQUEST['studentid'];
+        if ($studentid[0] == ';'){ //Card Swiped
+			$studentid = substr($studentid, 1, 9);
+		}
+		
+		if (isValidStudentID($studentid)){
             // Here is a valid studentID 
 
-            $studentid = $_REQUEST['studentid'];
+//            $studentid = $_REQUEST['studentid'];
             $kitList = $kitEnrollmentDao->getKitEnrollmentsForUser($studentid);
             // Check if there are kits for student
             if (!empty($kitList)){
@@ -133,16 +139,16 @@ $test = "";
                         if ($termID == $currentTerm){
                             // Kits for current term
                             $switchList .= '
-                            <div class="enrollment">';
+                            <div class="enrollment"><h3>Handed Out?</h3>';
                             if ($kitStatus == KitEnrollmentStatus::PICKED_UP){
                                 $switchList .= '<div id='.$kid.' class="switch on">';
                             } else {
                                 $switchList .= '<div id='.$kid.' class="switch">';
                             }
                             $switchList .= '
-                            <label></label>
+                            <label>No</label>
                             <div class="knob"></div>
-                            <label>Handed Out</label>
+                            <label>Yes</label>
                             </div> <div class="termText">
                             '.$courseName.' - '.term2string($termID).'
                             </div>
@@ -212,7 +218,7 @@ $test = "";
                         <input style="display:none" name="name" value="'.$name.'">
                         <input style="display:none" name="onid" value="'.$onid.'">
                         <input style="display:none" name="action" value="addStudent">
-                        <input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Return</a></center>
+                        <a class="btn btn-lg" style="margin-left: 20px; background-color: #FFB500; border: none; border-bottom: solid 4px #D3832B; border-radius: .5em; color: white; font-weight: bold; font-size:1.1em; padding: .7em 3em" href="pages/employeeKitHandout.php">Done</a><br><input type="submit" value="Add Kit" class="btn btn-lg btnReturn"></center>
                         </form>
                         ';
                         if (!empty($futureList)) {

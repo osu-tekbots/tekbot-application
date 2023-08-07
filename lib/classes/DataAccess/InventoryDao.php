@@ -31,16 +31,30 @@ class InventoryDao {
      * Fetches all Parts.
      * @return an array of parts on success, false otherwise
      */
-    public function getInventory() {
+    public function getInventory($archive = null) {
         try {
-            $sql = '
-            SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
-			FROM `tekbots_parts`
-			INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
-			INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
-			ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
-            ';
-            $results = $this->conn->query($sql);
+            if ($archive === null){
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$results = $this->conn->query($sql);
+			} else {
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				WHERE tekbots_parts.archive = :archive 
+				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$params = array(':archive' => $archive);
+				$results = $this->conn->query($sql, $params);
+            
+			}
 
             $parts = array();
             foreach ($results as $row) {
@@ -59,18 +73,31 @@ class InventoryDao {
      * Fetches all Parts by typeId.
      * @return an array of parts on success, false otherwise
      */
-    public function getInventoryByTypeId($typeId) {
+    public function getInventoryByTypeId($typeId, $archive = null) {
         try {
-            $sql = '
-            SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
-			FROM `tekbots_parts`
-			INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
-			INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
-			WHERE tekbots_parts.TypeID = :typeid 
-			ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
-            ';
-            $params = array(':typeid' => $typeId);
-            $results = $this->conn->query($sql, $params);
+            if ($archive === null){
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				WHERE tekbots_parts.TypeID = :typeid 
+				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$params = array(':typeid' => $typeId);
+				$results = $this->conn->query($sql, $params);
+			} else {
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				WHERE tekbots_parts.TypeID = :typeid AND tekbots_parts.archive = :archive
+				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$params = array(':typeid' => $typeId, ':archive' => $archive);
+				$results = $this->conn->query($sql, $params);
+			}
             
             $parts = array();
             foreach ($results as $row) {
@@ -141,9 +168,9 @@ class InventoryDao {
         try {
             $sql = '
 			UPDATE tekbots_kitcontents
-			SET Quantity = :quantity
+			SET `Quantity` = :quantity
 			WHERE `ParentID` = :parentid 
-			AND ChildID = :childid
+			AND `ChildID` = :childid
 			';
             $params = array(
                 ':parentid' => $parentid,
@@ -312,12 +339,12 @@ class InventoryDao {
 	
 	/**
      * Fetches the number of kits using this stocknumber.
-     * @return \Model\Part|boolean a part on success, false otherwise
+     * @return an array on success failure on false
      */
     public function getKitsUsedInByStocknumber($stockNumber) {
         try {
             $sql = '
-            SELECT COUNT(*) AS kitsusedin 
+            SELECT DISTINCT Name AS kitNames 
 			FROM tekbots_kitcontents 
 			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ParentID 
 			WHERE tekbots_kitcontents.ChildID = :stocknumber AND tekbots_parts.archive = 0
@@ -325,7 +352,9 @@ class InventoryDao {
             $params = array(':stocknumber' => $stockNumber);
             $results = $this->conn->query($sql, $params);
           
-            return ($results[0]['kitsusedin'] == 0 ? ' ' : $results[0]['kitsusedin']);
+            //return ($results[0]['kitsusedin'] == 0 ? ' ' : $results[0]['kitsusedin']);
+            return $results;
+            //return \array_map('self::ExtractKitFromRow', $results);
         } catch (\Exception $e) {
             $this->logger->error('Failed to identify kits with StockNumber '.$stockNumber.': ' . $e->getMessage());
             return false;
@@ -448,6 +477,8 @@ class InventoryDao {
             return false;
         }
     }
+
+    //public function sendRecountEmail($id) {}
 
     /**
      * Creates a new Equipment object using information from the database row

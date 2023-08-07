@@ -5,11 +5,14 @@ use DataAccess\BoxDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-/*
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); 
-*/
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
+
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL); 
+
 
 if (!session_id()) {
     session_start();
@@ -59,7 +62,6 @@ foreach ($users as $user){
 	$options .= "<option value='".$user->getUserID()."'>".$user->getLastName().", ".$user->getFirstName()."</option>";
 }
 
-
 ?>
 <script type='text/javascript'>
 function fillBox(id){
@@ -93,7 +95,7 @@ function resetBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Order Removed');
+		snackbar(res.message, 'info');
 		$('#row'+id).css({ opacity: 0 });
 	}).catch(err => {
 		snackbar(err.message, 'error');
@@ -108,7 +110,7 @@ function lockBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Box Locked');
+		snackbar(res.message, 'info');
 		$('#row'+id).css({ opacity: 0 });
 	}).catch(err => {
 		snackbar(err.message, 'error');
@@ -165,6 +167,7 @@ function emptyBox(id){
 
 			echo "<div class='admin-paper'>";
 
+			
 			foreach ($boxes as $b) {
 				$boxNumber = $b->getNumber();
 				$boxKey = $b->getBoxKey();

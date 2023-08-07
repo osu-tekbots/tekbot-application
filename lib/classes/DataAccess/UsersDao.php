@@ -202,9 +202,9 @@ class UsersDao {
         $user->setEmail($row['email']);
         $user->setPhone($row['phone']);
         $user->setOnid($row['onid']);
-        $user->setDateCreated(new \DateTime($row['date_created']));
-        $user->setDateUpdated(new \DateTime($row['date_updated']));
-        $user->setDateLastLogin(new \DateTime($row['last_login_date']));
+        $user->setDateCreated(new \DateTime(($row['date_created'] == '' ? 'now' : $row['date_created'])));
+        $user->setDateUpdated(new \DateTime(($row['date_updated'] == '' ? 'now' : $row['date_updated'])));
+        $user->setDateLastLogin(new \DateTime(($row['last_login_date'] == '' ? 'now' : $row['last_login_date'])));
 
         return $user;
     }

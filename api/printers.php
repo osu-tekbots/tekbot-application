@@ -11,9 +11,8 @@ use DataAccess\PrinterFeeDao;
 use DataAccess\UsersDao;
 use DataAccess\CoursePrintAllowanceDao;
 use Api\PrinterActionHandler;
-use Email\PrinterMailer;
+use Email\TekBotsMailer;
 use DataAccess\MessageDao;
-
 
 session_start();
 
@@ -22,14 +21,10 @@ $printerDao = new PrinterDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$mailer = new PrinterMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
-
+$mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 
-
 $handler = new PrinterActionHandler($printerDao, $printerFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $configManager, $logger);
-
-
 
 // Authorize the request
 if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {

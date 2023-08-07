@@ -45,7 +45,7 @@ class DatabaseConnection {
             try {
                 $this->conn->beginTransaction();
             } catch (\PDOException $e) {
-                throw new Exception('Failed to start transaction: ' . $e->getMessage());
+                throw new \Exception('Failed to start transaction: ' . $e->getMessage());
             }
         } else {
             throw new \Exception('Failed to start transaction: no database connection');
@@ -66,7 +66,7 @@ class DatabaseConnection {
                 throw new \Exception('Failed to rollback transaction: ' . $e->getMessage());
             }
         } else {
-            throw new Exception('Failed to rollback transaction: no database connection');
+            throw new \Exception('Failed to rollback transaction: no database connection');
         }
     }
 
@@ -151,6 +151,7 @@ class DatabaseConnection {
             $prepared = $this->conn->prepare($sql);
             $this->bind($prepared, $params);
             $prepared->execute();
+			
         } catch (\PDOException $e) {
             throw new \Exception('Failed to execute statement: ' . $e->getMessage());
         }
@@ -204,3 +205,4 @@ class DatabaseConnection {
         return new DatabaseConnection($config['host'], $config['db_name'], $config['user'], $config['password']);
     }
 }
+?>

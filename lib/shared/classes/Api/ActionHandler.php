@@ -2,7 +2,7 @@
 namespace Api;
 
 /**
- * Abstract base class that defines common core functinality among action handlers for requests to website APIs. The
+ * Abstract base class that defines common core functionality among action handlers for requests to website APIs. The
  * class expects to handle POST requests with request bodies containing JSON encoded data.
  */
 class ActionHandler {
@@ -35,18 +35,23 @@ class ActionHandler {
      * Verifies that the provided parameter name exists in the requst body. If it does not, the server will send
      * a BAD_REQUEST response to the client and the script will exit.
      *
-     * @param string $name the name of the paramter expected in the request body
+     * @param string $name the name of the parameter expected in the request body
      * @param string|null $message the message to send back to the client if the check fails. I null, a default message
      * will be sent
      * @return void
      */
     public function requireParam($name, $message = null) {
-        if (!\array_key_exists($name, $this->requestBody)) {
-            $message = $message == null ? "Missing required request body parameter: $name" : $message;
-            $this->respond(new Response(Response::BAD_REQUEST, $message));
-        }
-    }
-
+        if (is_array($this->requestBody)){
+			if (!\array_key_exists($name, $this->requestBody)) {
+				$message = $message == null ? "Missing required request body parameter: $name" : $message;
+				$this->respond(new Response(Response::BAD_REQUEST, $message));
+			}
+		} else {
+			$message = "Empty POST";
+			$this->respond(new Response(Response::BAD_REQUEST, $message));
+		}
+	}
+	
     /**
      * Fetches the provided parameter from the request body. This will not work for nested parameters.
      * 

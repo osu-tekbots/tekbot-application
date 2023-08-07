@@ -33,42 +33,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <i class="fas fa-book mr-2"></i> Student Login (ONID)
             </button>
         </a>
-        <!--
-        <hr class="my-4">
-        <h4 class="text-center">Project Proposer Login</h4>
-        <a class="login" href="auth/index.php?provider=google" style="text-decoration:none;">
-            <button id="googleBtn" class="btn btn-lg btn-danger btn-block text-uppercase" type="submit">
-                <i class="fab fa-google mr-2"></i> Proposer Login (Google)
-            </button>
-        </a>
-        <br/>
-        -->
-        <!--
-        <a class="login" href="auth/index.php?provider=microsoft" style="text-decoration:none;">
-            <button id="microsoftBtn" class="btn btn-lg btn-success btn-block text-uppercase" type="submit">
-                <i class="fab fa-microsoft mr-2"></i> Login with Microsoft
-            </button>
-        </a>
-        <br/>
-        -->
-		<!--
-        <a class="login" href="auth/index.php?provider=github" style="text-decoration:none;">
-            <button id="microsoftBtn" class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">
-                <i class="fab fa-github mr-2"></i> Login with GitHub
-            </button>
-        </a>
-		-->
         <hr class="my-4">
     </div>
-    <!--
-	<div class="col-sm-8">
-        <center>
-            <br>
-            <img src="assets/img/loginImage.jpg" alt="icon" />
-            <br/>
-        </center>
-	</div>
-    -->
 </div>
 </div>
 

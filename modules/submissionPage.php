@@ -20,18 +20,36 @@ HTML;
 HTML;
 }
 
+function renderSelectorOnChange($listOfObjects, $valueGetter, $contentGetter, $id, $func)
+{
+	$optionsHtml = "";
+	foreach ($listOfObjects as $o) {
+		$value = $valueGetter($o);
+		$content = $contentGetter($o);
+		$optionsHtml .= <<< HTML
+<option value={$value}>{$content}</option>
+HTML;
+	}
+	echo <<< HTML
+			<select class="custom-select" name="{$id}" id="{$id}" onchange=$func>
+			<option value="none">Select an Option</option>
+			$optionsHtml
+			</select><br />
+HTML;
+}
+
 function renderPaymentForm()
 {
 	echo <<< HTML
 <div class="form-check">
 				<input class="form-check-input" id="voucherRadio" type="radio" name="accounttype" value="voucher">
 				Voucher Code:
-				<input class=fi id="voucherInput" type=text size=30 name=account value="">
+				<input class="fi" id="voucherInput" type="text" size=30 name="account" value="">
 			</div>
 			<div class="form-check">
 				<input class="form-check-input" id="accountRadio" type="radio" name="accounttype" value="account">
 				OSU Account Code:
-				<input class=fi id="accountInput" type=text size=30 name=account value="">
+				<input class="fi" id="accountInput" type="text" size=30 name="account" value="">
 			</div>
 			<div class="form-check">
 				<input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">

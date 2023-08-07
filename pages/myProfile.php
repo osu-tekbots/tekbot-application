@@ -42,7 +42,9 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 if ($user){
 	$uId = $user->getUserID();
@@ -52,8 +54,10 @@ if ($user){
 	$uEmail = $user->getEmail();
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
+	$_SESSION['userAccessLevel'] = $uAccessLevel; // ADDED for workaround ^
 } else {
-	echo "<h1>You are not in db. You shoudl never have seen this.</h1>";
+	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
+	echo "Please send us an email <a href='mailto:tekbot-worker@engr.oregonstate.edu'>here</a> to report the issue.";
 	exit();
 }
 
@@ -78,14 +82,14 @@ $uID = $_SESSION['userID'];
 							<label class="col control-label" for="firstNameText">First Name</label>
 							<div class="col-sm-11">
 								<textarea class="form-control" id="firstNameText" name="firstName" rows="1"
-									required readonly><?php echo $uFirstName; ?></textarea>
+									required ><?php echo $uFirstName; ?></textarea>
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="col control-label" for="lastNameText">Last Name</label>
 							<div class="col-sm-11">
 								<textarea class="form-control" id="lastNameText" name="lastName"
-									rows="1" readonly><?php echo $uLastName; ?></textarea>
+									rows="1"><?php echo $uLastName; ?></textarea>
 							</div>
 						</div>
 						<div class="container">
@@ -131,7 +135,7 @@ $uID = $_SESSION['userID'];
 						</div>
 						<hr class="my-4">
 						<div class="form-group">
-							<p class="form-control-static">User Type: <?php echo $uAccessLevel; ?> </p>
+							<p class="form-control-static">User Type: <?php echo $uAccessLevel . '<BR>'; ?> </p>
 							<div class="col">
 
 							</div>
