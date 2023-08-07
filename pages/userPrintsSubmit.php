@@ -46,7 +46,9 @@ $validFile = false;
 
 $printers = $printerDao->getPrinters();
 $printTypes = $printerDao->getPrintTypes();
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 
 $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
@@ -119,9 +121,13 @@ $printTypeIdGetter = function ($printType) {
 <div class="container-fluid">
 	<br /><br /><br />
 	<h1>3D Print Submission Form</h1>
-	To check your currently queued or finished prints, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
+	To check your currently queued or finished prints, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
 
-	Using this form you can upload a 3D model to be created. Once a file is uploaded, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model.
+	Using this form you can upload a 3D model to be created. Once a file is uploaded, we will review the model and email you with the cost to print. 
+	<br> Once you approve the charge, we will print the model and it can be picked up during store hours or in the TekBoxes after store hours (If the print fits).
+	<br>Be aware that our 3d printer build plate dimensions are 280 mm x 280 mm x 250mm (about the size of an average textbook and about the height of a piece of paper), <br> so we can only accomodate prints within those bounds.
+	<br> We only process prints during store hours, please be aware that there might also be other prints in queue.
+
 	<br /><br />
 	<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">
 		Printing FAQs
@@ -130,7 +136,7 @@ $printTypeIdGetter = function ($printType) {
 	<div class="collapse" id="collapseExample">
 		<div class="card card-body">
 			<i>Q: How big can your printer print?</i> <br />
-			A:10" deep x 10" wide x 12" tall <br />
+			A: Within 280 mm x 280 mm x 250mm <br />
 			<br />
 			<i>Q: How thick should my part's walls be?</i><br />
 			A: This is not a simple answer, as it depends on the size of the wall and the strength needed. We recommend at least .1" thick walls when feasible.<br />
@@ -249,7 +255,7 @@ $printTypeIdGetter = function ($printType) {
 		<div class="col-sm-6">
 			<div id="targetDiv"></div>
 			<label id="fileFeedback"></label>
-			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" multiple>
+			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".stl"><!-- NOT multiple; Upload() fn only handles 1-->
 			<div id="uploadTextDiv"></div>
 			<button id="submit3DPrintBtn" class="btn btn-primary">Submit</button>
 		</div>
@@ -284,13 +290,16 @@ $printTypeIdGetter = function ($printType) {
 		if (isValidFile && (selectedPayment != null)) {
 
 			let voucherVal = null;
+			let accountVal = null;
 
 			if (selectedPayment == 'voucher') {
 				voucherVal = $("#voucherInput").val();
 			}
-			let employeeNotes = '';
+			
+			// let employeeNotes = '';
 			if (selectedPayment == 'account') {
-				employeeNotes = 'Account code: ' + $("#accountInput").val();
+				accountVal = $("#accountInput").val();
+			// 	employeeNotes = 'Account code: ' + $("#accountInput").val(); // Won't need after this update
 			}
 
 			let filePath = $('#uploadFileInput').val();
@@ -307,8 +316,10 @@ $printTypeIdGetter = function ($printType) {
 				payment: selectedPayment,
 				courseGroup: 0,
 				voucherCode: voucherVal,
+				accountCode: accountVal,
 				customerNotes: $('#specialNotes').val(),
-				employeeNotes: employeeNotes
+				employeeNotes: '',
+				messageID: 'wersspdoifwkjfd'
 			};
 			// Send our request to the API endpoint
 			api.post('/printers.php', data).then(res => {

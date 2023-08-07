@@ -59,17 +59,18 @@ class MessageDao {
             $sql = '
             SELECT * 
             FROM `messages`
-            WHERE messages.message_id = :id
+            WHERE message_id = :id
             ';
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
 
-            
-            foreach ($results as $row) {
-                $message = self::ExtractMessageFromRow($row);
+            return self::ExtractMessageFromRow($results[0]);
 
-            }
-            return $message;
+            // foreach ($results as $row) {
+            //     $message = self::ExtractMessageFromRow($row);
+
+            // }
+            // return $message;
         } catch (\Exception $e) {
             $this->logger->error('Failed to get message with id '.$id.': ' . $e->getMessage());
             return false;
@@ -108,14 +109,18 @@ class MessageDao {
             UPDATE messages SET
                 subject = :subject,
                 body = :body,
-                format = :format
+                purpose = :purpose,
+                format = :format,
+                tool_id = :tool_id
             WHERE message_id = :id
             ';
             $params = array(
                 ':id' => $message->getMessageId(),
                 ':subject' => $message->getSubject(),
                 ':body' => $message->getBody(),
-                ':format' => $message->getFormat()
+                ':purpose' => $message->getPurpose(),
+                ':format' => $message->getFormat(),
+                ':tool_id' => $message->getToolId()
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -160,6 +165,12 @@ class MessageDao {
 		}
 		if(isset($row['format'])){
 			$message->setFormat($row['format']);
+		}
+        if(isset($row['tool_id'])){
+			$message->setToolId($row['tool_id']);
+		}
+		if(isset($row['purpose'])){
+			$message->setPurpose($row['purpose']);
 		}
        
         return $message;

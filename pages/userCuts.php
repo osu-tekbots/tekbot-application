@@ -33,7 +33,9 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 if ($user){
 	$uId = $user->getUserID();
@@ -43,8 +45,9 @@ if ($user){
 	$uEmail = $user->getEmail();
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
+	$_SESSION['userAccessLevel'] = $uAccessLevel; // ADDED for workaround ^
 } else {
-	echo "<h1>You are not in db. You should never have seen this.</h1>";
+	echo "<h1>You are not in the database. You should never have seen this.</h1>";
 	exit();
 }
 
@@ -84,7 +87,7 @@ foreach($studentLaserJobs as $p) {
 	$buttonScripts = "
 	<script>
 	$('#confirmPrint$printJobID').on('click', function() {
-		if(confirm('Confirm cut and allow employees to start printing?')) {
+		if(confirm('Confirm cut and allow employees to start cutting?')) {
 			let printJobID = '$printJobID';
 			let data = {
 				action: 'customerConfirmCut',
@@ -123,7 +126,7 @@ foreach($studentLaserJobs as $p) {
 	if($validPrintDate) {
 		$status = "<a data-toggle='tool-tip' data-placement='top' title='$validPrintDate'>Cut Validated By Employee</a><br/>";
 	} else {
-		$status = "Waiting for Employee to Cut Print"; 
+		$status = "Waiting for Employee to Validate Laser Cut"; 
 	}
 
 

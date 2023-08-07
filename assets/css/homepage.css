@@ -890,6 +890,7 @@ footer .social-links ul li a {
 
 .maincenter a {
   color: white;
+  text-decoration: underline;
 }
 
 .maincenter a:hover{

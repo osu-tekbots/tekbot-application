@@ -5,6 +5,7 @@ use Model\VoucherCode;
 use Model\CourseGroup;
 use Model\CoursePrintAllowance;
 
+
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
  */
@@ -39,6 +40,9 @@ class PrintCutGroupActionHandler extends ActionHandler {
         // Get the existing user. 
         // TODO: If it isn't found, send a NOT_FOUND back to the client
         $user = $this->dao->getUserByID($body['uid']);
+        if(!$user) {
+            $this->respond(new Response(Response::NOT_FOUND, 'Failed to find user'));
+        }
 
         // Update the user
         $user->setFirstName($body['firstName']);
@@ -89,17 +93,20 @@ class PrintCutGroupActionHandler extends ActionHandler {
     public function handleAddVoucherCodes() {
         // Ensure the required parameters exist
         $this->requireParam('num');
+        $this->requireParam('accountCode'); // Needed for linking w/ a payment account
         $this->requireParam('serviceID');
         $this->requireParam('date_expired');
 
         $body = $this->requestBody;
         $num = $body['num'];
+        $accountCode = $body['accountCode'];
         $dateExpired = new \DateTime($body['date_expired']);
         $serviceID = $body['serviceID'];
 
         $VoucherList = "";
         for ($i = 0; $i < $num; $i++){
             $voucher = new VoucherCode();
+            $voucher->setLinkedAccount($accountCode);
             $voucher->setDateExpired($dateExpired);
             $voucher->setServiceID($serviceID);
             $voucher->setDateCreated(new \DateTime());
@@ -130,9 +137,6 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         $body = $this->requestBody;
 
-        
-
-        // TODO: If it isn't found, send a NOT_FOUND back to the client
         $course = new CoursePrintAllowance();
         $course->setCourseName($body['courseName']);
         $course->setNumberAllowedPrints($body['numberallowedprints']);
@@ -172,16 +176,6 @@ class PrintCutGroupActionHandler extends ActionHandler {
         $courseGroup->setDateCreated($body['dateCreated']);
 
         $ok = $this->dao->addNewCourseGroup($courseGroup);
-
-        // TODO: If it isn't found, send a NOT_FOUND back to the client
-        // $course = new CoursePrintAllowance();
-        // $course->setCourseName($body['courseName']);
-        // $course->setNumberAllowedPrints($body['numberallowedprints']);
-        // $course->setNumberAllowedCuts($body['numberallowedcuts']);
-
-
-        // $ok = $this->dao->addNewCoursePrintAllowance($course);
-
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add new course group'));
         }

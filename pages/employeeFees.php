@@ -1,3 +1,7 @@
+<!-- This file is used for processing fees associated with equipment rentals. -->
+<!-- NOTE: Assigning payments should send users an email, but is not implemented -->
+<!-- NOTE: Verifying payments requires a call to an uncreated mailing function -->
+
 <?php
 include_once '../bootstrap.php';
 

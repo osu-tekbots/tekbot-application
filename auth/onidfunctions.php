@@ -12,7 +12,7 @@ if (!isset($_SESSION)) {
  * is recommended that you save any required query string paramters in a session variable during authentication and
  * read them back out once it is successful.
  * 
- * This function will, on successfuly authentication, set the `$_SESSION['auth']` variable to an associative array with
+ * This function will, on successful authentication, set the `$_SESSION['auth']` variable to an associative array with
  * the following keys:
  * - `method`: `'onid'`
  * - `id`: the ONID of the user
@@ -45,13 +45,18 @@ function authenticateWithONID() {
         $url = 'https://login.oregonstate.edu/cas/serviceValidate?ticket=' . $ticket . '&service=' . $pageURL;
         $html = file_get_contents($url);
 
+		$_SESSION['cas_xml'] = $html;
+
         $_SESSION['auth'] = array(
             'method' => 'onid',
             'id' => strtolower(extractFromXml('cas:user', $html)),
-            'firstName' => extractFromXml('cas:firstname', $html),
-            'lastName' => extractFromXml('cas:lastname', $html),
+            'firstName' => extractFromXml('cas:firstname', $html), 
+			'lastName' => extractFromXml('cas:lastname', $html),
             'email' => extractFromXml('cas:email', $html)
         );
+		
+		if ($_SESSION['auth']['firstName'] == '') //updated to 'givenname' from 'firstname' to maybe catch foreign students?
+			$_SESSION['auth']['firstName'] = extractFromXml('cas:givenname', $html);
 
         return $_SESSION['auth']['id'];
     } else {

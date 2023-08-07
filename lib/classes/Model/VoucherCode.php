@@ -11,7 +11,7 @@ class VoucherCode {
 	private $dateCreated;
 	private $dateExpired;
 	private $serviceID;
-    
+    private $accountCode;
     
     public function __construct($id = null) {
         if ($id == null) {
@@ -73,7 +73,15 @@ class VoucherCode {
 
 	public function setServiceID($serviceID) {
 		$this->serviceID = $serviceID;
-	}	
+	}
+
+	public function getLinkedAccount() {
+		return $this->accountCode;
+	}
+
+	public function setLinkedAccount($accountCode) {
+		$this->accountCode = $accountCode;
+	}
 	
 
 }

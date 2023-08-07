@@ -1,3 +1,6 @@
+<!-- NOTE: Assigning payments should send users an email, but is not implemented -->
+<!-- NOTE: Verifying payments requires a call to an uncreated mailing function -->
+
 <?php
 namespace Api;
 // This action handler will contain handlers for equipment checkout and equipment reservation
@@ -25,7 +28,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
     /** @var \DataAccess\ContractDao */
     private $ContractDao;
     /** @var \DataAccess\UsersDao */
-    private $UsersDao;
+    private $userDao;
     /** @var \DataAccess\EquipmentFeeDao */
     private $EquipmentFeeDao;
     /** @var \DataAccess\EquipmentDao */
@@ -46,12 +49,12 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $UsersDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger, $messageDao) {
+    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $userDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger, $messageDao) {
         parent::__construct($logger);
         $this->EquipmentCheckoutDao = $EquipmentCheckoutDao;
         $this->EquipmentReservationDao = $EquipmentReservationDao;
         $this->ContractDao = $ContractDao;
-        $this->UsersDao = $UsersDao;
+        $this->userDao = $userDao;
         $this->EquipmentFeeDao = $EquipmentFeeDao;
         $this->EquipmentDao = $EquipmentDao;
         $this->mailer = $mailer;
@@ -110,15 +113,12 @@ class EquipmentRentalActionHandler extends ActionHandler {
         }
 
         // Create email
-        $user = $this->UsersDao->getUserByID($body['userID']);
+        $user = $this->userDao->getUserByID($body['userID']);
         $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-		$mailer = New TekBotsMailer('tekbots-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
+		// $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+        $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 		
-//		$link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
-//      $this->mailer->sendEquipmentCheckoutEmail($checkout, $user, $contract, $link);
-
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully created new equipment checkout', 
@@ -135,6 +135,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         // Ensure all the requred parameters are present
         $this->requireParam('checkoutID');
         $this->requireParam('checkoutNotes');
+		$this->requireParam('messageID');
 
         $body = $this->requestBody;
 
@@ -160,7 +161,16 @@ class EquipmentRentalActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create return equipment'));
         }
-
+		
+		// Create email
+		$userID = $checkout->getUserID();
+        $user = $this->userDao->getUserByID($userID);
+        $equipmentID = $checkout->getEquipmentID();
+		$equipment = $this->EquipmentDao->getEquipment($equipmentID);
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+		// $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+        $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
+		
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully returned equipment'
@@ -186,7 +196,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
           $userID = $reservation->getUserID();
           $contracts = $this->ContractDao->getEquipmentCheckoutContracts();
           
-          $user = $this->UsersDao->getUserByID($userID);
+          $user = $this->userDao->getUserByID($userID);
           $equipment = $this->EquipmentDao->getEquipment($equipmentID);
       
           $equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
@@ -291,7 +301,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
  			});
          });
          
- 	</script>
+        </script>
       
           ";
 
@@ -342,7 +352,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $reserveDuration = 1;
         $this->requireParam('equipmentID');
         $this->requireParam('userID');
-
+		$this->requireParam('messageID');   
         $body = $this->requestBody;
 
         $isEquipmentAvailable = $this->EquipmentReservationDao->getEquipmentAvailableStatus($body['equipmentID']);
@@ -362,10 +372,12 @@ class EquipmentRentalActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create equipment reservation'));
         }
 
-        $user = $this->UsersDao->getUserByID($body['userID']);
-
-        $link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
-        $this->mailer->sendReservationAgreementEmail($user, $link);
+        // Create email
+        $user = $this->userDao->getUserByID($body['userID']);
+        $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
+		$message = $this->messageDao->getMessageByID($body['messageID']);
+		//$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+        $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
 
         $this->respond(new Response(
             Response::OK,
@@ -439,7 +451,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         }
 
 
-        $user = $this->UsersDao->getUserByID($body['userID']);
+        $user = $this->userDao->getUserByID($body['userID']);
         $link = $this->getAbsoluteLinkTo('pages/myProfile.php?id=' . $body['userID']);
         $this->mailer->sendAssignEquipmentFeesEmail($user, $equipmentFee, $link);
 
@@ -475,7 +487,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $userID = $equipmentFee->getUserID();
 
         // Send email
-        $user = $this->UsersDao->getUserByID($userID);
+        $user = $this->userDao->getUserByID($userID);
         $this->mailer->sendPaidEquipmentFeesEmail($user, $equipmentFee);
         */
         
@@ -505,7 +517,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
 
         $userID = $equipmentFee->getUserID();
         // Send email to user that fee is successful
-        $user = $this->UsersDao->getUserByID($userID);
+        $user = $this->userDao->getUserByID($userID);
         $this->mailer->sendApproveEquipmentFeesEmail($user, $equipmentFee);
 
         $this->respond(new Response(
@@ -533,7 +545,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
 
         $userID = $equipmentFee->getUserID();
         // Handle reject email
-        $user = $this->UsersDao->getUserByID($userID);
+        $user = $this->userDao->getUserByID($userID);
         $this->mailer->sendRejectEquipmentFeesEmail($user, $equipmentFee);
 
         $this->respond(new Response(

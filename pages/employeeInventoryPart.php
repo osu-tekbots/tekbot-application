@@ -5,9 +5,9 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); 
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL); 
 
 if (!session_id()) {
     session_start();
@@ -70,6 +70,10 @@ $part = $inventoryDao->getPartByStocknumber($stocknumber);
 $types = $inventoryDao->getTypes();
 $suppliers = $inventoryDao->getSuppliers();
 
+if ($part == false){
+	echo "<h1><BR><BR><BR>DB Down</h1>";
+	exit();
+}
 $stocknumber = $part->getStocknumber();//
 $description = $part->getName();//
 $lastPrice = $part->getLastPrice();//
@@ -115,12 +119,30 @@ $supplierHTML .= "</table><BR><BR>";
 
 $supplierHTML .= "<table><tr><td><select id='newsupplier'>$supplier_select</select></td><td><input type='text' id='newpartnumber' class='form-control' placeholder='Supplier Part Number'></td><td><input type='text' id='newlink' class='form-control' placeholder='Direct Link'></td><td><button type='button' class='btn btn-primary' onclick='addsupplier(\"$stocknumber\");'>Add Supplier</button></td></tr></table><BR><BR>";
 
+
+$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
+$contentsHTML = '';
+if (count($contents) > 0){
+	$contentsHTML = "<h4>Contents as of ". date("m-d-y",time()) . "</h4><table>
+                <thead>
+                    <tr>
+						<th>Quantity<BR>per Kit</th>
+						<th>Type</th>
+                        <th>Description</th>
+						<th>Last Price</th>
+                    </tr>
+                </thead>
+                <tbody>";
+	foreach ($contents AS $key => $value){
+		$p = $inventoryDao->getPartByStocknumber($key);
+		
+		$contentsHTML .= "<tr><td>$value</td><td>".$p->getType()."</td>
+		<td><a href='./pages/employeeInventoryPart.php?stocknumber=$key'>".$p->getName()."</a></td><td>$".$p->getLastPrice()."</td></tr>";	
+	}
+	$contentsHTML .= "</tbody></table>";
+}
+
 $partHTML = '';
-
-
-
-
-
 $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 			<form>
 			<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
@@ -136,10 +158,10 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 					<div class='form-group col-sm-3'><label for='manufacturerNumber'>Manufacturer Number</label><input type='text' class='form-control' onchange='updateManufacturerNumber(\"$stocknumber\");' id='manufacturerNumber$stocknumber' value='".Security::HtmlEntitiesEncode($manufacturerNumber)."'></div>
 				</div>
 				<div class='form-row'>
-					<div class='form-group col-sm-3'><label for='lastPrice'>Last Price ".($typeId == 1 ? "<span onclick='calculateLastPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span>":"")."</label><input type='text' class='form-control' onchange='updateLastPrice(\"$stocknumber\");' id='lastprice$stocknumber' value='".number_format($lastPrice,2)."'></div>
-					" . "" /*<div class='form-group col-sm-3'><label for='marketPrice'>Touchnet Price <span onclick='calculateMarketPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span></label><input type='text' class='form-control' onchange='updateMarketPrice(\"$stocknumber\");' id='marketPrice$stocknumber' value='".number_format($marketPrice,2)."'></div>*/ . "
+					<div class='form-group col-sm-3'><label for='lastPrice'>Last Price ".($typeId == 1 ? "<span onclick='calculateLastPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span>":"")."</label><input type='text' class='form-control' onchange='updateLastPrice(\"$stocknumber\");' id='lastprice$stocknumber' value='".number_format(floatval($lastPrice),2)."'></div>
 					<div class='form-group col-sm-3'><label for='touchnetid'>Touchnet ID</label><input type='text' class='form-control' onchange='updateTouchnetId(\"$stocknumber\");' id='touchnetid$stocknumber' value='".Security::HtmlEntitiesEncode($touchnetId)."'></div>
 					<div class='form-group col-sm-3'><label for='studentprice'>Student Price</label><input type='text' class='form-control' id='studentprice' value='".studentPrice($lastPrice)."' disabled></div>
+					<div class='form-group col-sm-1'><label for='marketPrice'>Touchnet Price</label><input type='text' class='form-control' onchange='updateMarketPrice(\"$stocknumber\");' id='marketPrice$stocknumber' value='".number_format($marketPrice,2)."'></div>					
 				</div>
 				<div class='form-row'>
 					<div class='col-sm-7'>
@@ -171,9 +193,17 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 					<div class='col-sm-3'>
 						<div class='form-group'><label for='quantity$stocknumber' >Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'><input class='form-control' type='file' id='imageFile' value='' onchange='updatePartImage(\"$stocknumber\");'></div>
 					</div>
+
+					<div class='col-sm-3'>
+						<div class='form-group'><label for='recountButton$stocknumber'><button type='button' class='btn btn-primary' onclick='recountEmail(\"$stocknumber\");'>Recount Item</button> </div>
+					</div>
+
+					
 				</div>
 			</div>
 			</form>";
+			//added last div
+			//recount button emails tekbot-worker list
 
 ?>
 <script type='text/javascript'>
@@ -371,28 +401,6 @@ function updateMarketPrice(id){
 	});
 }
 
-function calculateMarketPrice(id){
-//	event.preventDefault();
-	var lastprice = $('#lastprice'+id).val();
-	
-	let content = {
-		action: 'calculateMarketPrice',
-		stockNumber: id,
-		lastPrice: lastprice
-	}
-
-	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'success');
-		var inputF = document.getElementById('marketPrice'+id);
-		inputF.value = (lastprice*1.4).toFixed(2);
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-	
-	
-	return false;
-}
-
 function calculateLastPrice(id){
 //	event.preventDefault();
 	var lastprice = $('#lastprice'+id).val();
@@ -512,6 +520,20 @@ function updatePublicDesc(id){
 		snackbar(err.message, 'error');
 	});
 }
+
+function recountEmail(id){
+	let content = {
+		action: 'sendRecountEmail',
+		messageId: 'naxvunw64vwrw84s',
+		stockNumber: id
+	}
+
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'Email Sent');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
 </script>
 
 <script type='text/javascript'>
@@ -530,7 +552,7 @@ function updatePartImage(id){
 		processData: false,
 		success:function(data){
 			snackbar(data.message);
-			setTimeout(location.reload(), 6000);
+			setTimeout(location.reload(), 10000);
 		},
 		error: function(data){
 			snackbar(data.message);
@@ -583,7 +605,10 @@ function updatePartDatasheet(id){
                 renderEmployeeBreadcrumb('Employee', 'Update Part');
             ?>
 			
-            <?php echo $partHTML;?>
+            <?php 
+			echo $partHTML;
+			echo $contentsHTML;
+			?>
 
 			</div>
         </div>

@@ -12,7 +12,9 @@ use DataAccess\EquipmentDao;
 session_start();
 
 $usersDao = new UsersDao($dbConn, $logger);
-$user = $usersDao->getUserByID($_SESSION['userID']);
+// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
+            // except different engr sites use different databases & different userIDs
+$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
 
 /*
  * TO DO: Reference the submit3DPrint and use npm in order to install three-dxf. 
@@ -63,9 +65,9 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 
 	function Upload(action, id) {
 
-		var html = '<B>LOADING</B>';
+		var html = '<B>LOADING...</B>';
 		// $('#uploadTextDiv').html(html).css('visibility','visible');
-		$('#fileFeedback').text(html);
+		$('#fileFeedback').html(html);
 		var file_data = $('#uploadFileInput').prop('files')[0]
 		var form_data = new FormData();
 		form_data.append('file', file_data);
@@ -107,9 +109,10 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 	<div class="row">
 		<div class="col-sm-6">
 			<h1>Laser Cutter Submission Form</h1>
-			To check your currently queued or finished cuts, visit <a href='https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
+			To check your currently queued or finished cuts, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>My Tekbots</a><br /><br />
 
-			<p>Using this form you can upload a .dxf file to be created and cut using the laser cutter. It produces final models made out of the material which you can chose from the material list below. Once a file is uploaded, we will review the model and email you with the cost to cut. Once you approve the charge, we will start cutting the model.
+			<p>Using this form you can upload a .dxf or .svg file to be cut using the laser cutter. It produces final models made out of the material which you can chose from the material list below. Once a file is uploaded, we will review the model and email you with the cost to cut. Once you approve the charge, we will start cutting the model.
+			<br><strong>Note:</strong> DXF format is strongly recommended for all cuts. However, if your cut requires a raster engrave or you are struggling to make a DXF file, SVG format may be necessary. We will alert you if this change must be made.
 			</p>
 			<p>If you would like to pay via credit card, please submit your file with this form and enter 'Credit Card' in the account code field. We will reply with instructions on how to submit payment.
 			</p>
@@ -167,7 +170,7 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 				<BR>Any special instructions or deadlines that you have should be entered here
 				<textarea name=notes id="specialNotes" rows="4" cols="50"></textarea><br />
 				<label id="fileFeedback"></label>
-				<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" multiple>
+				<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".dxf, .svg"> <!-- Not multiple bc the server's only processing 1 file-->
 			</form>
 			<div id="target"></div>
 
@@ -191,13 +194,14 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 		if (isValidFile && (selectedPayment != null)) {
 
 			let voucherVal = null;
+			let accountVal = null;
 
 			if (selectedPayment == 'voucher') {
 				voucherVal = $("#voucherInput").val();
 			}
 			let employeeNotes = '';
 			if (selectedPayment == 'account') {
-				employeeNotes = 'Account code: ' + $("#accountInput").val();
+				accountVal = $("#accountInput").val();
 			}
 
 			let filePath = $('#uploadFileInput').val();
@@ -214,8 +218,10 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 				payment: selectedPayment,
 				courseGroup: 0,
 				voucherCode: voucherVal,
+				accountCode: accountVal,
 				customerNotes: $('#specialNotes').val(),
-				employeeNotes: employeeNotes
+				employeeNotes: employeeNotes,
+				messageID: 'wersspdogggkjfd'
 			};
 			// Send our request to the API endpoint
 			api.post('/lasers.php', data).then(res => {

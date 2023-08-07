@@ -37,7 +37,8 @@ class EquipmentDao {
      * @param integer $limit the max number of results to fetch in this batch
      * @return \Model\Equipment[]|boolean an array of equipments on success, false otherwise
      */
-    public function getBrowsableEquipment($offset = 0, $limit = -1) {
+    public function getBrowsableEquipment() {
+        // $offset = 0, $limit = -1
         try {
             $sql = '
             SELECT * 
@@ -46,11 +47,11 @@ class EquipmentDao {
             AND is_public = 1 AND is_archived = 0
             ';
 
-            $params = array(
-                ':public' => true,
-                ':archived' => false
-            );
-            $results = $this->conn->query($sql, $params);
+            // $params = array(
+            //     ':public' => true,
+            //     ':archived' => false
+            // );
+            $results = $this->conn->query($sql); //removed $params
 
             $equipments = array();
             foreach ($results as $row) {
@@ -522,8 +523,8 @@ class EquipmentDao {
         //$equipment->setCategoryID(self::ExtractEquipmentCategoryFromRow($row, true));
         $equipment->setIsPublic($row['is_public']);
         $equipment->setIsArchived($row['is_archived']);
-        $equipment->setDateCreated(new \DateTime($row['date_created']));
-        $equipment->setDateUpdated(new \DateTime($row['date_updated']));
+        $equipment->setDateCreated(new \DateTime(($row['date_created'] == '' ? 'now' : $row['date_created'])));
+        $equipment->setDateUpdated(new \DateTime(($row['date_updated'] == '' ? 'now' : $row['date_updated'])));
         return $equipment;
     }
 

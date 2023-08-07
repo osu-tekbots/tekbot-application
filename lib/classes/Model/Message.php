@@ -16,14 +16,20 @@ class Message {
 	/** @var string */
 	private $body;
 	
+	/** @var string */
+	private $purpose;
+	
 	/** @var int */
-	private $format;	
+	private $format;
+	
+	/** @var int */
+	private $tool_id;
 
     /**
-     * Creates a new instance of an equipment reservation.
+     * Creates a new instance of a message object.
      * 
      *
-     * @param string|null $id the ID of the reservation. If null, a random ID will be generated.
+     * @param string|null $id the ID of the message. If null, a random ID will be generated.
     */
     public function __construct($id = null) {
         if ($id == null) {
@@ -61,12 +67,28 @@ class Message {
 		$this->body = $data;
 	}
 	
+	public function getPurpose(){
+		return $this->purpose;
+	}
+
+	public function setPurpose($data){
+		$this->purpose = $data;
+	}
+	
 	public function getFormat(){
 		return $this->format;
 	}
 	
 	public function setFormat($data){
 		$this->format = $data;
+	}
+
+	public function getToolId(){
+		return $this->tool_id;
+	}
+	
+	public function setToolId($data){
+		$this->tool_id = $data;
 	}
 	
 	
@@ -80,7 +102,7 @@ class Message {
 		$result = $this->body;
 		if ($keywords != '')
 			foreach ($keywords as $k => $v) {	
-				$result =  str_replace('{{' . $k . '}}', $v , $result);
+				$result =  str_replace('{{' . $k . '}}', $v ?? '', $result);
 			}
 		return $result;
 	}
@@ -95,7 +117,7 @@ class Message {
 		$result = $this->subject;
 		if ($keywords != '')
 			foreach ($keywords as $k => $v) {	
-				$result =  str_replace('{{' . $k . '}}', $v , $result);
+				$result =  str_replace('{{' . $k . '}}', $v ?? '', $result);
 			}
 		return $result;
 	}

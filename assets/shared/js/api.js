@@ -28,8 +28,9 @@ function request(method, url, data, encoded) {
 				//data = this.response;
             } catch(err) {
                 console.log(err);
-                //console.log(this.response);
-                alert(this.response);
+                console.log("Error:");
+                console.log(this.response);
+                //alert(this.response);
 				reject(new Error('Failed to parse JSON response from server'));
 				//reject(this.response);
             }

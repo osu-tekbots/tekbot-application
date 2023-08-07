@@ -18,7 +18,7 @@ class BoxDao {
     /**
      * Creates a new instance of the data access object for 3d printer data.
      *
-     * @param DatabaseConnection $connection the connection to use to communiate with the database
+     * @param DatabaseConnection $connection the connection used to communicate with the database
      * @param \Util\Logger $logger the logger to use to log details about the interactions with the database
      */
     public function __construct($connection, $logger) {
@@ -78,7 +78,7 @@ class BoxDao {
     }
 	
 	/**
-     * Fetches a box by box_key.
+     * Fetches a box by user_id.
      * @return an array of parts on success, false otherwise
      */
     public function getBoxByUser($id) {
@@ -102,8 +102,8 @@ class BoxDao {
     }
 
     /**
-     * Fetches a single part by StockNumber.
-     * @return \Model\Part|boolean a part on success, false otherwise
+     * Fetches a box by status.
+     * @return \Model\Part|boolean correct status on success, false otherwise
      */
     public function boxStatus($id) {
         try {
@@ -125,8 +125,8 @@ class BoxDao {
     }
 	
 	/**
-     * Lock a single box
-     * @return \Model\Part|boolean a part on success, false otherwise
+     * Add a single box
+     * @return \Model\Part|boolean added on success, false otherwise
      */
     public function addBox($id) {
         try {
@@ -190,7 +190,7 @@ class BoxDao {
 	
 	/**
      * Fetches a single part by StockNumber.
-     * @return \Model\Part|boolean a part on success, false otherwise
+     * @return boolean true on success, false otherwise
      */
     public function pickupBox($id) {
         try {
@@ -210,8 +210,8 @@ class BoxDao {
     }
 	
 	/**
-     * Fetches a single part by StockNumber.
-     * @return \Model\Part|boolean a part on success, false otherwise
+     * Updates battery value for a box by id.
+     * @return boolean true on success, false otherwise
      */
     public function updateBattery($id, $battery) {
         try {
@@ -263,7 +263,7 @@ class BoxDao {
         try {
             $sql = '
             UPDATE tekbots_boxes 
-			SET pickup_date = "0000-00-00 00:00:00", fill_date = "0000-00-00 00:00:00", user_id = "", locked = 1, fill_by = "", contents = ""  
+			SET pickup_date = "0000-00-00 00:00:00", fill_date = "0000-00-00 00:00:00", user_id = "", locked = 0, fill_by = "", contents = ""  
 			WHERE tekbots_boxes.box_key = :id 
 			';
             $params = array(':id' => $id);

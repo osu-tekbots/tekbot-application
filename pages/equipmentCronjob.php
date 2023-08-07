@@ -8,7 +8,7 @@ use DataAccess\UsersDao;
 use DataAccess\QueryUtils;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
-use Email\EquipmentRentalMailer;
+use Email\TekBotsMailer;
 
 if (!session_id()) {
     session_start();
@@ -40,6 +40,7 @@ $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
+$messageDao = new MessageDao($dbConn, $logger);
 $mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
 
 $reservedHTML = '';
@@ -71,24 +72,9 @@ foreach ($reservedEquipment as $r){
 				$ok = $reservationDao->updateReservation($r);
 			} 
 		} 
-	
-	$reservedHTML .= "
-	<tr id='$reservationID'>
-		<td>$email</td>
-		<td>$name</td>
-		<td>$reservationTime</td>
-		<td>$latestPickupTime</td>
-		<td>$equipmentName</td>
-		<td>$isActive</td>
 
-
-	</tr>
-	";
-	$listNumber++;
 }
 
-$checkoutHTML = '';
-$listNumber = 0;
 foreach ($checkedoutEquipment as $c){
 	$checkoutID = $c->getCheckoutID();
 	$reservationID = $c->getReservationID();

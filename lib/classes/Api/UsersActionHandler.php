@@ -43,13 +43,15 @@ class UsersActionHandler extends ActionHandler {
         $body = $this->requestBody;
 
         // Get the existing user. 
-        // TODO: If it isn't found, send a NOT_FOUND back to the client
         $user = $this->dao->getUserByID($body['uid']);
+        if(!$user) {
+            $this->respond(new Response(Response::NOT_FOUND, 'Failed to find user'));
+        }
 
         // Update the user
         $user->setFirstName($body['firstName']);
         $user->setLastName($body['lastName']);
-        $user->setEmail($body['email']);
+        // $user->setEmail($body['email']); //-- Right now, users should not be able to change their email address
         $user->setPhone($body['phone']);
 
         $ok = $this->dao->updateUser($user);
@@ -76,9 +78,6 @@ class UsersActionHandler extends ActionHandler {
         $this->requireParam('lastName');
 
         $body = $this->requestBody;
-
-        // Get the existing user. 
-        // TODO: If it isn't found, send a NOT_FOUND back to the client
         
 		$user = new User();
 

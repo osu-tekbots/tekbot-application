@@ -111,10 +111,9 @@ class EquipmentFeeDao {
     }
 
         /**
-     * Fetches fees associated with a user.
+     * Returns all fees for an admin user
      *
-     * @param string $userID the ID of the user whose projects to fetch
-     * @return \Model\FeesOwed[]|boolean an array of projects on success, false otherwise
+     * @return \Model\FeesOwed[]|boolean an array of fees on success, false otherwise
      */
     public function getAdminFees() {
         try {

@@ -134,10 +134,10 @@ $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description)."</h3>
 
 				<div class='form-row'>
 					<div class='col-sm-6'>
-						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".studentPrice($lastPrice)."</div>
+						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".($marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2))."</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>In Stock Quantity</label>$quantity</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Datasheet</label>".($datasheet != '' ? "<a href='../../inventory_datasheets/$datasheet' target='_blank'>$datasheet</a>" : '<i>Not Present</i>' )."</div>
-						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Public Description</label>".nl2br($publicdesc)."</div>
+						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Public Description</label>".nl2br($publicdesc ?? '')."</div>
 					</div>		
 					<div class='col-sm-6'>
 						<div class='form-group'><label style='font-weight:bold;'>Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>

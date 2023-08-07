@@ -26,6 +26,94 @@ class LaserDao
         $this->logger = $logger;
     }
 
+
+	/**
+     * Fetches a list of laser cutting jobs that require Employee actions. This function is useful for creating alerts for employees.
+     * @return \Model\LaserJob[]|boolean an array of laser jobs on success, false otherwise
+     */
+    public function getLaserJobsRequiringAction() {
+        try {
+            $sql = '
+            SELECT * FROM `laser_jobs`
+            WHERE
+			pending_customer_response = 0 AND
+			(complete_cut_date = "" OR complete_cut_date IS NULL) 
+			ORDER BY date_created ASC';
+            $results = $this->conn->query($sql);
+
+           $laserJobs = array();
+            foreach ($results as $row) {
+                $laserJob = self::ExtractLaserJobFromRow($row);
+                $laserJobs[] = $laserJob;
+            }
+            return $laserJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any laser cuts: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Fetches a list of laser jobs that were paid for with an account/voucher and are complete but haven't been charged
+     * This function is useful for processing account fees
+     * 
+     * @return \Model\LaserJob[]|boolean an array of laser jobs on success, false otherwise
+     */
+    public function getUnchargedCompleteJobs() {
+        try {
+            $sql = '
+            SELECT * FROM `laser_jobs` 
+            WHERE account_charge_date IS NULL
+                AND NOT payment_method = "cc"
+                AND NOT complete_cut_date IS NULL';
+            $results = $this->conn->query($sql);
+
+            $laserJobs = array();
+            foreach ($results as $row) {
+                $laserJob = self::ExtractLaserJobFromRow($row);
+                $laserJobs[] = $laserJob;
+            }
+            return $laserJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to obtain laser jobs requiring charging: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Updates the database with the charge date for all cut jobs in $ids[]
+     * 
+     * @param DateTime $date The date to set as the charge date
+     * @param Array $ids     The ids of the cut jobs to update
+     * 
+     * @return boolean Whether the database was successfully updated
+     */
+    public function setChargeDate($date, $ids) {
+        try {
+            $ids = implode(',', $ids);
+            $this->logger->info('Setting charge date for: '.$ids);
+
+            $sql = '
+            UPDATE laser_jobs SET
+                date_updated = :udate,
+                account_charge_date = :date
+			WHERE FIND_IN_SET(laser_job_id, :ids) <> 0
+            ';
+            $params = array(
+                ':udate' => $date,
+                ':date' => $date,
+                ':ids' => $ids
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update laser job: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
     /**
      * Fetches all Cutters.
      * @return \Model\Laser[]|boolean an array of printers on success, false otherwise
@@ -70,10 +158,10 @@ class LaserDao
         }
     }
 
-   /**
+    /**
      * Fetches all Print Jobs.
      * @return \Model\LaserJob[]|boolean an array of printers on success, false otherwise
-     */
+    */
     public function getLaserJobs() {
         try {
             $sql = '
@@ -81,22 +169,22 @@ class LaserDao
             ';
             $results = $this->conn->query($sql);
 
-            $printerJobs = array();
+            $laserJobs = array();
             foreach ($results as $row) {
-                $printJob = self::ExtractLaserJobFromRow($row);
-                $printerJobs[] = $printJob;
+                $laserJob = self::ExtractLaserJobFromRow($row);
+                $laserJobs[] = $laserJob;
             }
-            return $printerJobs;
+            return $laserJobs;
         } catch (\Exception $e) {
             $this->logger->error('Failed to get any laser cuts: ' . $e->getMessage());
             return false;
         }
     }
 
-   /**
+    /**
      * Fetches all Print Jobs by ID.
      * @return \Model\LaserJob[]|boolean an array of printers on success, false otherwise
-     */
+    */
     public function getLaserJobById($id) {
         try {
             $sql = '
@@ -143,7 +231,7 @@ class LaserDao
      *
      * @param \Model\Equipment $row the row in the database from which information is to be extracted
      * @return \Model\Equipment
-     */
+    */
 	public function updateCutJob(LaserJob $printJob) {
         try {
             $sql = '
@@ -166,7 +254,8 @@ class LaserDao
                 customer_notes = :customer_notes,
                 message_group_id = :message_group_id,
                 pending_customer_response = :pending_customer_response,
-                date_updated = :date_updated
+                date_updated = :date_updated,
+                total_price = :total_price
 			WHERE laser_job_id = :laser_job_id
             ';
             $params = array(
@@ -189,7 +278,8 @@ class LaserDao
                 ':customer_notes' => $printJob->getCustomerNotes(),
                 ':message_group_id' => $printJob->getMessageGroupId(),
                 ':pending_customer_response' => $printJob->getPendingCustomerResponse(),
-                ':date_updated' => $printJob->getDateUpdate()
+                ':date_updated' => $printJob->getDateUpdate(),
+                ':total_price' => $printJob->getTotalPrice()
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -200,10 +290,10 @@ class LaserDao
     }
 
 
-        /**
+    /**
      * Fetches all Cutters.
      * @return \Model\LaserJob[]|boolean an array of printers on success, false otherwise
-     */
+    */
     public function getLaserJobsForUser($uID) {
         try {
             $sql = '
@@ -230,7 +320,7 @@ class LaserDao
     /**
      * Fetches all Cutters.
      * @return \Model\LaserJob[]|boolean an array of printers on success, false otherwise
-     */
+    */
     public function getUnconfirmedLaserJobsForUser($uID) {
         try {
             $sql = '
@@ -396,7 +486,7 @@ class LaserDao
     /**
      * Fetches all Cut Materials
      * @return \Model\LaserMaterial[]|boolean an array of printers on success, false otherwise
-     */
+    */
     public function getLaserCutMaterials() {
         try {
             $sql = '
@@ -439,7 +529,8 @@ class LaserDao
                 customer_notes,
                 message_group_id,
                 pending_customer_response,
-                date_updated
+                date_updated,
+                account_code
             )
             VALUES (
                 :laser_job_id,
@@ -461,7 +552,8 @@ class LaserDao
                 :customer_notes,
                 :message_group_id,
                 :pending_customer_response,
-                :date_updated
+                :date_updated,
+                :account_code
             )
             ';
             $params = array(
@@ -484,7 +576,8 @@ class LaserDao
                 ':customer_notes' => $job->getCustomerNotes(),
                 ':message_group_id' => $job->getMessageGroupId(),
                 ':pending_customer_response' => $job->getPendingCustomerResponse(),
-                ':date_updated' => $job->getDateUpdate()
+                ':date_updated' => $job->getDateUpdate(),
+                ':account_code' => $job->getAccountCode()
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -581,6 +674,7 @@ class LaserDao
         $laserJob->setPaymentMethod($row['payment_method']);
         $laserJob->setCourseGroupId($row['course_group_id']);
 		$laserJob->setVoucherCode($row['voucher_code']);
+        $laserJob->setAccountCode($row['account_code']);
         $laserJob->setDateCreated($row['date_created']);
         $laserJob->setValidCutDate($row['valid_cut_date']);
 		$laserJob->setUserConfirmDate($row['user_confirm_date']);
@@ -591,6 +685,7 @@ class LaserDao
 		$laserJob->setMessageGroupId($row['message_group_id']);
         $laserJob->setPendingCustomerResponse($row['pending_customer_response']);
         $laserJob->setDateUpdate($row['date_updated']);
+        $laserJob->setTotalPrice($row['total_price']);
 		
         return $laserJob;
     }

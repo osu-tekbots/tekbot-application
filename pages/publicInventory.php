@@ -76,21 +76,26 @@ $types = $inventoryDao->getTypes();
 					$type = $p->getType();
 					$description = $p->getName();
 					$lastPrice = $p->getLastPrice();
+					$marketPrice = $p->getMarketPrice();
 					$location = $p->getLocation();
 					$quantity = $p->getQuantity();
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
+					# add get touchnet page link
+					$touchnetId = $p->getTouchnetId();
 					
 					$inventoryHTML .= "<tr><td>$type</td>
 						<td>$description<BR>Stock: $stocknumber</td>
 						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
 						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".studentPrice($lastPrice)."</td>
+						<td>".($marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2))."</td>
 						<td>$quantity</td>
+						<td>".($touchnetId != '' ?"<a target ='_blank' href='https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=$touchnetId'>Purchase Item</a>":'')."</td>
 						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td></tr>";
 					}
 				}
             ?>
+			
 			<table class='table' id='InventoryTable' style='margin: 0 auto !important;'>
                 <caption>Current Inventory</caption>
                 <thead>
@@ -101,6 +106,7 @@ $types = $inventoryDao->getTypes();
 						<td></td>
 						<th>Student<BR>Price</th>
                         <th>Current<BR>Stock</th>
+						<th>Purchase<BR>Link <!-- Added touchnet links by Travis Hudson 10/5/2022-->
 						<th></th>
                     </tr>
                 </thead>
@@ -218,6 +224,7 @@ $('#InventoryTable').DataTable({
 			{ "orderable": false },
 			null,
 			{ "orderable": false },
+			{ "orderable": false }, //added row for puchase link
 			{ "orderable": false }
 		  ]
 		});

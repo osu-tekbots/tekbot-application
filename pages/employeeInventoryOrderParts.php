@@ -81,7 +81,14 @@ for ($i = 0; $i < 20; $i++){ //Max of 20 items in one order
 		}
 }
 
+
 $formHTML = "";
+//added column labels 
+$formHTML .= "<div class='row'>
+				<div class='col-sm-4'> Part Type:</div>
+				<div class='col-sm-4'> Part Name:</div>
+				<div class='col-sm-2'> Quantity Needed:</div>
+			</div>";
 
 $formHTML .= "<form action=''>";
 for($i=1;$i<11;$i++){

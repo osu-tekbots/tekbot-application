@@ -5,11 +5,33 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-/*
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL); 
-*/
+
+function studentPrice($price){
+	$markup = .15;
+	if ($price == 0)
+		return ('$0.00');
+		
+	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
+	
+	if ( (1 / $price ) < 1 )
+		return ('$' . ceil($price) . '.00');
+	else if (intval((1 / $price )) == 1 )
+		return ('$1.00');
+	else if ((1 / $price ) < 2 )
+		return ('2 for $1');
+	else if ((1 / $price ) < 3 )
+		return ('3 for $1');
+	else if ((1 / $price ) < 4 )
+		return ('4 for $1');
+	else 
+		return ('Free for one / 10 for $1');
+return $price;
+}
+
 
 if (!session_id()) {
     session_start();
@@ -55,10 +77,10 @@ $css = array(
     
 );
 $js = array(
-    'https://code.jquery.com/jquery-3.5.1.js',
-	'https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js',
-	'https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js',
-	'https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.min.js'
+    'https://code.jquery.com/jquery-3.5.1.min.js',
+	'https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js',
+	'https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.js',
+	'https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.js'
 );
 
 
@@ -115,19 +137,23 @@ if (isset($stocknumber)){ // Display single kit information
 	
 	$title = $kit->getName() . " Parts List";
 	$description = $kit->getName();//
-	//$lastPrice = $kit->getLastPrice();//
+	$lastPrice = $kit->getLastPrice();//
 	$image = $kit->getImage();//
 		
 	$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
-
-	$contentsHTML = "<h4>Contents as of ". date("m-d-y",time()) . "</h4><table id='ContentsTable'>
+	
+	//added current kit stock 07/26/2023 by Travis
+	$quantity = $kit->getQuantity();
+	$contentsHTML = " <h4>Current Stock: ".$quantity."</h4>
+				<h4>Contents as of ". date("m-d-y",time()) . "</h4>Student Price: ".studentPrice($lastPrice) ."
+				<button type='button' onclick='calculateLastPrice(\"$stocknumber\")'>Update</button><table id='ContentsTable'>
                 <thead>
                     <tr>
 						<th>Type</th>
                         <th>Description</th>
 						<th>Location</th>
 						<th>Cost (each)</th>
-						<th>Quantity<BR>per Kit</th>
+						<th>Quantity per Kit</th>
 						<th>Stock</th>
 						<th></th>
                     </tr>
@@ -137,9 +163,14 @@ if (isset($stocknumber)){ // Display single kit information
 		$p = $inventoryDao->getPartByStocknumber($key);
 		
 		$contentsHTML .= "<tr><td>".$p->getType()."</td>
-		<td><a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a></td>
-		<td>".$p->getLocation()."</td><td>$".number_format($p->getLastPrice(),2)."</td>
-		<td><input type='text' value='$value' id='quantity$stocknumber' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td>
+		<td>";
+		if($p->getType() == "Kit")
+			$contentsHTML .= "<a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a>";
+		else
+			$contentsHTML .= "<a href='./pages/employeeInventoryPart.php?stocknumber=$key'>".$p->getName()."</a>";
+		$contentsHTML .= "</td>
+		<td>".$p->getLocation()."</td><td>$".number_format(floatval($p->getLastPrice()),2)."</td>
+		<td><input type='number' value='$value' id='quantity$key' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td>
 		<td><input class='form-control' type='number' id='stock$key' value='".$p->getQuantity()."' onchange='updateStock(\"$key\")'></td>
 		<td><button type='button' class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	
 	}
@@ -164,7 +195,7 @@ if (isset($stocknumber)){ // Display single kit information
 						$contentsHTML
 						</div>
 						<div class='col-sm-3 print-hide'>
-							<div class='form-group'><label for='partImage' >Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>
+							<div class='form-group'><label for='partImage' >Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img id='partImage' src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>
 						</div>
 					</div>
 				</div>
@@ -275,7 +306,7 @@ function loadAddImage(){
 }
 
 function updateKitQuantity(id,childid){
-	var quantity = $('#quantity'+id).val();
+	var quantity = $('#quantity'+childid).val();
 	
 	let content = {
 		action: 'updateKitQuantity',
@@ -286,6 +317,7 @@ function updateKitQuantity(id,childid){
 
 	api.post('/inventory.php', content).then(res => {
 		snackbar(res.message, 'Updated');
+		window.location.reload();
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -304,7 +336,7 @@ function addKitContents(id){
 
 	api.post('/inventory.php', content).then(res => {
 		snackbar(res.message, 'Added');
-		location.reload();
+		window.location.reload();
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -375,7 +407,7 @@ function updatePartImage(id){
         </div>
     </div>
 	
-<script>
+<script type='text/javascript'>
 
 
 /*
@@ -395,6 +427,27 @@ var printButtonExtension = {
     }
 };
 
+function calculateLastPrice(id){
+//	event.preventDefault();
+//	var lastprice = $('#lastprice'+id).val();
+	var lastprice = 0;
+	
+	let content = {
+		action: 'calculateLastPrice',
+		stockNumber: id,
+		lastPrice: lastprice
+	}
+
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'success');
+		location.reload();
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+	
+	
+	return false;
+}
 
 $(document).ready(function() {
 	$('#addImage').hide();

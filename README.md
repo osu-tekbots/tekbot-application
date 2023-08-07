@@ -14,7 +14,7 @@ The Tekbots Web Application enables students to login with their existing Oregon
 
 ## Development
 
-Deployment URL: https://eecs.oregonstate.edu/education/tekbotSuite/tekbot/pages/
+Deployment URL: https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/
 
 The following resources provide information about how to develop the website locally and the workflow for pushing
 changes to the staging area and subsequently deploying them to production.

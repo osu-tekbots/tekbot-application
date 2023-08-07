@@ -19,6 +19,7 @@ class LaserJob {
     private $paymentMethod;
     private $courseGroupId;
     private $voucherCode;
+	private $accountCode;
     private $dateCreated;
     private $validCutDate;
     private $userConfirmDate;
@@ -29,6 +30,7 @@ class LaserJob {
     private $messageGroupId;
     private $pendingCustomerResponse;
     private $dateUpdate;
+	private $totalPrice;
     
 	
 
@@ -134,6 +136,14 @@ class LaserJob {
 		$this->voucherCode = $voucherCode;
 	}
 
+	public function getAccountCode() {
+		return $this->accountCode;
+	}
+
+	public function setAccountCode($accountCode) {
+		$this->accountCode = $accountCode;
+	}
+
 	public function getDateCreated(){
 		return $this->dateCreated;
 	}
@@ -212,6 +222,14 @@ class LaserJob {
 
 	public function setPaymentDate($paymentConfirmDate){
 		$this->paymentConfirmDate = $paymentConfirmDate;
+	}
+	
+	public function getTotalPrice() {
+		return $this->totalPrice;
+	}
+	
+	public function setTotalPrice($price) {
+		$this->totalPrice = $price;
 	}
 }
 ?>

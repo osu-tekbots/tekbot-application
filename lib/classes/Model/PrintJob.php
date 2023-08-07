@@ -14,11 +14,13 @@ class PrintJob {
 	private $printerID;
 	private $printTypeID;
     private $quantity;
+	private $materialAmount;
 	private $dbFileName;
 	private $stlFileName;
 	private $paymentMethod;
 	private $courseGroupID;
 	private $voucherCode;
+	private $accountCode;
 	private $dateCreated;
 	private $validPrintCheck;
 	private $userConfirmCheck;
@@ -29,6 +31,7 @@ class PrintJob {
 	private $messageGroupID;
 	private $pendingCustomerResponse;
 	private $dateUpdated;
+	private $totalPrice;
 	
 
     /**
@@ -126,6 +129,14 @@ class PrintJob {
 	public function setVoucherCode($VoucherCode){
 		$this->voucherCode = $VoucherCode;
 	}
+
+	public function getAccountCode() {
+		return $this->accountCode;
+	}
+
+	public function setAccountCode($accountCode) {
+		$this->accountCode = $accountCode;
+	}
 	
 	public function getDateCreated(){
 		return $this->dateCreated;
@@ -213,6 +224,22 @@ class PrintJob {
 
 	public function setQuantity($quantity){
 		$this->quantity = $quantity;
+	}
+	
+	public function getMaterialAmount(){
+		return $this->materialAmount;
+	}
+
+	public function setMaterialAmount($value){
+		$this->materialAmount = $value;
+	}
+	
+	public function getTotalPrice() {
+		return $this->totalPrice;
+	}
+	
+	public function setTotalPrice($price) {
+		$this->totalPrice = $price;
 	}
 	
 }

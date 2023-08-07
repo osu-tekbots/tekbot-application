@@ -72,7 +72,7 @@ class Mailer {
             $to = \implode(',', $to);
         }
 
-        $accepted = \mail($to, $subject, $message, $headersStr);
+        $accepted = mail($to, $subject, $message, $headersStr);
         if (!$accepted) {
             $lastError = error_get_last();
             if ($this->logger != null) {

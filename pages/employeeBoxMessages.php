@@ -44,6 +44,8 @@ $userDao = new UsersDao($dbConn, $logger);
 //$messages = $messageDao->getMessages();
 $messages = $messageDao->getMessagesByTool($tool_id);
 
+$user = $userDao->getUserByID($_SESSION['userID']);
+
 ?>
 <script type='text/javascript'>
 /*********************************************************************************
@@ -68,7 +70,7 @@ function updateMessage(id) {
 	}
 	
 	api.post('/message.php', content).then(res => {
-		snackbar(res.message, 'Updated');
+		snackbar(res.message, 'success');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -79,18 +81,22 @@ function updateMessage(id) {
 * Description: Updates the content of a message.
 *********************************************************************************/
 function sendTestMessage(id) {
-	let content = {
-		action: 'sendMessage',
-		replacements: '',
-		email: 'heer@oregonstate.edu',
-		message_id: id
+	let email = "<?php echo $user->getEmail();?>"
+	if(confirm('Confirm that a test email will be sent to your email address (' + email + ')?')) {
+		let content = {
+			action: 'sendMessage',
+			email: email,
+			message_id: id
+		}
+		
+		api.post('/message.php', content).then(res => {
+			snackbar(res.message, 'success');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		return false;
 	}
-	
-	api.post('/message.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
 }
 </script>
 
@@ -140,7 +146,7 @@ function sendTestMessage(id) {
 							<div class="col-sm-10"><input type="text" class="form-control" id="format'.$message_id.'" value="Email" disabled></div>
 						  </div>';
 					echo '<div class="form-group row">
-							<div class="col-sm-10"><button type="submit" class="btn btn-primary" onclick="updateMessage(\''.$message_id.'\');">Update</button>   <button type="submit" class="btn btn-primary" onclick="sendTestMessage(\''.$message_id.'\');">Test Stored Email</button></div>
+							<div class="col-sm-10"><button type="submit" class="btn btn-primary" onclick="updateMessage(\''.$message_id.'\'); return false;">Update</button>   <button type="submit" class="btn btn-primary" onclick="sendTestMessage(\''.$message_id.'\'); return false;">Test Stored Email</button></div>
 						  </div>';  
 					echo '</form>';
 

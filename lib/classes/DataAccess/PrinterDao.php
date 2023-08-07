@@ -7,7 +7,7 @@ use Model\PrintType;
 use Model\PrintJob;
 
 /**
- * Handles all of the logic related to queries on capstone 3dprinter resources in the database.
+ * Handles all of the logic related to queries on  3dprinter resources in the database.
  */
 class PrinterDao {
 
@@ -28,9 +28,63 @@ class PrinterDao {
         $this->logger = $logger;
     }
 
+	
+	/**
+     * Fetches a list of print jobs that require Employee actions. This function is useful for creating alerts for employees.
+     * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
+     */
+     public function getPrintJobsRequiringAction() {
+		 try {
+            $sql = '
+            SELECT * FROM `3d_jobs`
+            WHERE
+			pending_customer_response = 0 AND
+			(complete_print_date = "" OR complete_print_date IS NULL) 
+			ORDER BY date_created ASC';
+            $results = $this->conn->query($sql);
+
+            $printerJobs = array();
+            foreach ($results as $row) {
+                $printJob = self::ExtractPrintJobFromRow($row);
+                $printerJobs[] = $printJob;
+            }
+            return $printerJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any printers: ' . $e->getMessage());
+            return false;
+        }
+	 }
+    
+    /**
+     * Fetches a list of print jobs that were paid for with an account/voucher and are complete but haven't been charged
+     * This function is useful for processing account fees
+     * 
+     * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
+     */
+    public function getUnchargedCompleteJobs() {
+        try {
+            $sql = '
+            SELECT * FROM `3d_jobs` 
+            WHERE account_charge_date IS NULL
+                AND NOT payment_method = "cc"
+                AND NOT complete_print_date IS NULL';
+            $results = $this->conn->query($sql);
+
+            $printJobs = array();
+            foreach ($results as $row) {
+                $printJob = self::ExtractPrintJobFromRow($row);
+                $printJobs[] = $printJob;
+            }
+            return $printJobs;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to obtain printer jobs requiring charging: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
-     * Fetches all Cutters.
+     * Fetches all Printers.
      * @return \Model\PrintJob[]|boolean an array of printers on success, false otherwise
      */
     public function getUnconfirmedPrintJobsForUser($uID) {
@@ -193,7 +247,7 @@ class PrinterDao {
     }
 
 
-    public function addNewPrintJob(PrintJob $printer) {
+    public function addNewPrintJob(PrintJob $printJob) {
         try {
             $sql = '
             INSERT INTO 3d_jobs (
@@ -215,7 +269,8 @@ class PrinterDao {
                 customer_notes,
                 message_group_id,
                 pending_customer_response,
-                date_updated
+                date_updated,
+                account_code
             )
             VALUES (
                 :3d_job_id,
@@ -236,29 +291,31 @@ class PrinterDao {
                 :customer_notes,
                 :message_group_id,
                 :pending_customer_response,
-                :date_updated
+                :date_updated,
+                :account_code
             )
             ';
             $params = array(
-                ':3d_job_id' => $printer->getPrintJobID(),
-                ':user_id' => $printer->getUserID(),
-                ':3dprinter_id' => $printer->getPrinterId(),
-                ':3dprinter_type_id' => $printer->getPrintTypeID(),
-                ':quantity' => $printer->getQuantity(),
-                ':db_filename' => $printer->getDbFileName(),
-                ':stl_file_name' => $printer->getStlFileName(),
-                ':payment_method' => $printer->getPaymentMethod(),
-                ':course_group_id' => $printer->getCourseGroupId(),
-                ':voucher_code' => $printer->getVoucherCode(),
-                ':date_created' => $printer->getDateCreated(),
-                ':valid_print_date' => $printer->getValidPrintCheck(),
-                ':user_confirm_date' => $printer->getUserConfirmCheck(),
-                ':complete_print_date' => $printer->getCompletePrintDate(),
-                ':employee_notes' => $printer->getEmployeeNotes(),
-                ':customer_notes' => $printer->getCustomerNotes(),
-                ':message_group_id' => $printer->getMessageGroupId(),
-                ':pending_customer_response' => $printer->getPendingCustomerResponse(),
-                ':date_updated' => $printer->getDateUpdated()
+                ':3d_job_id' => $printJob->getPrintJobID(),
+                ':user_id' => $printJob->getUserID(),
+                ':3dprinter_id' => $printJob->getPrinterId(),
+                ':3dprinter_type_id' => $printJob->getPrintTypeID(),
+                ':quantity' => $printJob->getQuantity(),
+                ':db_filename' => $printJob->getDbFileName(),
+                ':stl_file_name' => $printJob->getStlFileName(),
+                ':payment_method' => $printJob->getPaymentMethod(),
+                ':course_group_id' => $printJob->getCourseGroupId(),
+                ':voucher_code' => $printJob->getVoucherCode(),
+                ':date_created' => $printJob->getDateCreated(),
+                ':valid_print_date' => $printJob->getValidPrintCheck(),
+                ':user_confirm_date' => $printJob->getUserConfirmCheck(),
+                ':complete_print_date' => $printJob->getCompletePrintDate(),
+                ':employee_notes' => $printJob->getEmployeeNotes(),
+                ':customer_notes' => $printJob->getCustomerNotes(),
+                ':message_group_id' => $printJob->getMessageGroupId(),
+                ':pending_customer_response' => $printJob->getPendingCustomerResponse(),
+                ':date_updated' => $printJob->getDateUpdated(),
+                ':account_code' => $printJob->getAccountCode()
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -400,6 +457,7 @@ class PrinterDao {
                 db_filename = :db_filename,
                 stl_file_name = :stl_file_name,
                 payment_method = :payment_method,
+                material_amount = :material_amount,
                 course_group_id = :course_group_id,
                 voucher_code = :voucher_code,
                 date_created = :date_created,
@@ -410,7 +468,8 @@ class PrinterDao {
                 employee_notes = :employee_notes,
                 message_group_id = :message_group_id,
                 pending_customer_response = :pending_customer_response,
-                date_updated = :date_updated
+                date_updated = :date_updated,
+                total_price = :total_price
 			WHERE 3d_job_id = :3d_job_id
             ';
             $params = array(
@@ -421,6 +480,7 @@ class PrinterDao {
                 ':db_filename' => $printJob->getDbFileName(),
                 ':stl_file_name' => $printJob->getStlFileName(),
                 ':payment_method' => $printJob->getPaymentMethod(),
+                ':material_amount' => $printJob->getMaterialAmount(),
                 ':course_group_id' => $printJob->getCourseGroupId(),
                 ':voucher_code' => $printJob->getVoucherCode(),
                 ':date_created' => $printJob->getDateCreated(),
@@ -431,7 +491,8 @@ class PrinterDao {
                 ':employee_notes' => $printJob->getEmployeeNotes(),
                 ':message_group_id' => $printJob->getMessageGroupId(),
                 ':pending_customer_response' => $printJob->getPendingCustomerResponse(),
-                ':date_updated' => $printJob->getDateUpdated()
+                ':date_updated' => $printJob->getDateUpdated(),
+                ':total_price' => $printJob->getTotalPrice()
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -590,7 +651,9 @@ class PrinterDao {
         $printJob->setPaymentMethod($row['payment_method']);
         $printJob->setCourseGroupId($row['course_group_id']);
         $printJob->setQuantity($row['quantity']);
+		$printJob->setMaterialAmount($row['material_amount']); //Added 3/8/2021
 		$printJob->setVoucherCode($row['voucher_code']);
+        $printJob->setAccountCode($row['account_code']);
         $printJob->setDateCreated($row['date_created']);
         $printJob->setValidPrintCheck($row['valid_print_date']);
 		$printJob->setUserConfirmCheck($row['user_confirm_date']);
@@ -601,6 +664,7 @@ class PrinterDao {
 		$printJob->setMessageGroupId($row['message_group_id']);
         $printJob->setPendingCustomerResponse($row['pending_customer_response']);
         $printJob->setDateUpdated($row['date_updated']);
+        $printJob->setTotalPrice($row['total_price']);
 		
         return $printJob;
     }
