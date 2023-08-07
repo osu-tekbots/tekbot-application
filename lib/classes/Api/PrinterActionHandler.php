@@ -809,12 +809,12 @@ class PrinterActionHandler extends ActionHandler {
             $jobIds[] = $up->getPrintJobId();
         }
 
-        $ok = $this->printDao->setChargeDate((new \DateTime())->format('Y-m-d H:i:s'), $jobIds);
+        $ok = $this->printerDao->setChargeDate((new \DateTime())->format('Y-m-d H:i:s'), $jobIds);
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Did not mark print jobs as charged'));
         }
 
-        $this->respond(new Response(Response::OK, 'Sent process fees email'));
+        $this->respond(new Response(Response::OK, 'Sent process fees email and updated jobs'));
     }
 
     /**

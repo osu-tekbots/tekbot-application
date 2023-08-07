@@ -82,6 +82,38 @@ class PrinterDao {
         }
     }
 
+    /**
+     * Updates the database with the charge date for all print jobs in $ids[]
+     * 
+     * @param DateTime $date The date to set as the charge date
+     * @param Array $ids     The ids of the print jobs to update
+     * 
+     * @return boolean Whether the database was successfully updated
+     */
+    public function setChargeDate($date, $ids) {
+        try {
+            $ids = implode(',', $ids);
+            $this->logger->info('Setting charge date for: '.$ids);
+
+            $sql = '
+            UPDATE 3d_jobs SET
+                date_updated = :udate,
+                account_charge_date = :date
+			WHERE FIND_IN_SET(3d_job_id, :ids) <> 0
+            ';
+            $params = array(
+                ':udate' => $date,
+                ':date' => $date,
+                ':ids' => $ids
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update print job: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Fetches all Printers.

@@ -141,7 +141,7 @@ class TekBotsMailer extends Mailer {
         return $this->sendEmail($recieverEmail, $subject, $body, true);
 	}
 
-	public function sendRecountEmail($part, $message, $email = "tekbot-worker@engr.orst.edu") {
+	public function sendRecountEmail($part, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
 		$replacements = Array();
 
 		$replacements['email'] = $email;
@@ -154,7 +154,7 @@ class TekBotsMailer extends Mailer {
 		return $this->sendEmail($replacements['email'], $subject, $body, true);
 	}
 
-	public function sendToolProcessFeesEmail($unprocessed, $message, $email = "tekbot-worker@oregonstate.edu") {
+	public function sendToolProcessFeesEmail($unprocessed, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
         $replacements = Array();
 		$replacements['email'] = $email;
 		$replacements['date'] = date("m/d/y", time());	
@@ -202,7 +202,7 @@ class TekBotsMailer extends Mailer {
         return $this->sendEmail($replacements['email'], $subject, $body, true);
     }
 
-	public function sendBillAllEmail($unprocessed, $message, $email = "tekbot-worker@oregonstate.edu") {
+	public function sendBillAllEmail($unprocessed, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
         $replacements = Array();
 		$replacements['email'] = $email;
 		$replacements['date'] = date("m/d/y", time());	
