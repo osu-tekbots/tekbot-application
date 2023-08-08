@@ -222,9 +222,6 @@ foreach ($checkedoutEquipment as $c){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Equipment Checkout');
-
-		
 				echo "
 	
 				<div class='admin-paper'>

@@ -60,7 +60,6 @@ $printJobs = $laserDao->getLaserJobs();
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Laser Cuts Jobs List');
 
                 echo "<div class='admin-paper'>";
 

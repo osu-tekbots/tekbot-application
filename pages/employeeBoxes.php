@@ -163,8 +163,6 @@ function emptyBox(id){
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<?php 
-			renderEmployeeBreadcrumb('Employee', 'Boxes');
-
 			echo "<div class='admin-paper'>";
 
 			

@@ -53,18 +53,19 @@ $history = $ticketDao->getStationHistory($station->getId());
 $historyContents = array();
 foreach($history as $h) {
 	$historyContents[] = array(
-		"contents" => substr(strip_tags($h->getIssue()), 0, 60) . '...', 
+		"contents" => substr(strip_tags($h->getIssue()), 0, 60) . 
+			(strlen(strip_tags($h->getIssue())) > 60 ? '...' : ''), 
 		"id" => $h->getId()
 	);
 };
 
-$outputHTML .=  '<div class="row">';
-$outputHTML .= '<div id="currentIssue" class= "flex-fill float-left" style="margin-left: 10px">';
-$outputHTML .=  '<h3>Current Issue: #'.$key.'</h3>';
-$outputHTML .=  'Room: '.$station->getRoom()->getName().'<BR>';
-$outputHTML .=  'Bench Number: '.$station->getName().'<BR>';
-$outputHTML .=  '<p>'.htmlspecialchars($ticket->getIssue()).'</p>';
+$outputHTML .= '<h3>Current Issue: #'.$key.'</h3>';
+$outputHTML .= 'Room: '.$station->getRoom()->getName().'<BR>';
+$outputHTML .= 'Bench Number: '.$station->getName().'<BR><BR>';
 
+$outputHTML .= '<div class="row">';
+$outputHTML .= '<div id="currentIssue" class= "flex-fill col-6">';
+$outputHTML .= '<p><b>Submitter\'s note: </b>'.htmlspecialchars($ticket->getIssue()).'</p>';
 
 if ($userImg != null AND $userImg!= ''){
 	$outputHTML .= '
@@ -96,19 +97,20 @@ if($ticket->getStatus() != 1) {
 	$outputHTML .=  '<button class="btn col-sm-1" id="button" style="background-color: #ffcccb; border: 2px solid black; margin: 10px; padding:20px 60px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="escalateTicket('.$key.')">Escalate</button>';
 	$outputHTML .=  '</div>';
 }
-
-
-$outputHTML .=  '</div>';
-
-$outputHTML .=  ' <div id="history" class = "flex-fill float-right" style="margin-left: 10px">';
-$outputHTML .=  '<img src="../../labs/image/map/' . $station->getRoom()->getMap() . '" class="img-responsive" width="400" >';
-$outputHTML .=  '<h4>Station History:</h4><ul>';
+$outputHTML .=  '<h4>Station History</h4><ul>';
 	foreach($historyContents as $hc) {
 		$outputHTML .=  '<li><a href="https://'.$_SERVER['HTTP_HOST'].substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?')).'?key='.$hc['id'].'">'.$hc['contents'].'</a></li>';
 	};
-	$outputHTML .=  '</ul></div>';
-	$outputHTML .=  '</div>';
+	$outputHTML .=  '</ul>';
 
+$outputHTML .=  '</div>';
+
+$outputHTML .= ' <div id="stationInfo" class = "flex-fill col-6">';
+$outputHTML .= '<h4>Room Layout</h4>';
+$outputHTML .= '<img src="../../labs/image/map/' . $station->getRoom()->getMap() . '" class="img-responsive" width="400" >';
+$outputHTML .= '<h4>Room Equipment</h4>';
+
+$outputHTML .=  '</div></div>';
 
 $outputHTML .=  '</div>'; //close admin paper div
 ?>
@@ -197,7 +199,6 @@ $outputHTML .=  '</div>'; //close admin paper div
 			<div class="container-fluid">
 				
 				<?php 
-				renderEmployeeBreadcrumb('Employee', 'Ticket Detail');
 				echo $outputHTML; 
 				?>
 			</div>

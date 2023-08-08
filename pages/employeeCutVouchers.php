@@ -88,8 +88,6 @@ foreach ($vouchers as $voucher){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Vouchers');
-
 					echo "
 						<div class='admin-paper'>
 						

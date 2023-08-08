@@ -227,8 +227,11 @@ HTML;
 
  }
 
+ /*
+ Old function that's been deprecated as of 8/8/23
+ */
  function renderEmployeeBreadcrumb($section, $pagetitle){
-     echo" 
+     /*echo" 
         <!-- Breadcrumbs-->
         <ol class='breadcrumb'>
             <li class='breadcrumb-item'>
@@ -236,7 +239,7 @@ HTML;
             </li>
             <li class='breadcrumb-item active'>$pagetitle</li>
         </ol>
-     ";
+     ";*/
 
  }
 

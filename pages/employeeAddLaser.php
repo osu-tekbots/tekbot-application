@@ -66,9 +66,6 @@ $printTypes = $printerDao->getLaserCutMaterials();
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Edit Printers');
-
-		
 				echo "
 				<div class='admin-paper' style='overflow-x:scroll'>
 				<h3>

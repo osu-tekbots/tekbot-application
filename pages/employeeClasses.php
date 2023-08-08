@@ -76,8 +76,6 @@ foreach ($courses as $course){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Classes');
-                    
                     echo "
                     <div class='admin-paper'>    
                         <form id='addCourseForm' class='form-row user-form'>

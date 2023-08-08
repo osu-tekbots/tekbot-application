@@ -113,9 +113,6 @@ function sendTestMessage(id) {
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Edit Box Messages');
-
-               
                 foreach ($messages as $m) {
                     $message_id = $m->getMessageId();
 					$subject = $m->getSubject();

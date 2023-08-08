@@ -60,7 +60,6 @@ $sales = $internalSalesDao->getSales();
         <div class="container-fluid">
 			<!-- Form for data entry -->
 			<?php 
-			renderEmployeeBreadcrumb('Employee', 'internalSale');
 			echo "
 				<div class='admin-paper w-35 p-10 h-25 d-inline-block'>
 				<h3>New Transaction: </h3> 

@@ -249,7 +249,6 @@ function updateQuantity(id){
         <div class="container-fluid">
 			<div class='admin-paper'>
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Labels');
 				echo $formHTML;   
 				echo $labelsHTML;
 				
