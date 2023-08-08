@@ -60,7 +60,6 @@ $printJobs = $printerDao->getPrintJobs();
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Print Jobs List');
 
                 echo "<div class='admin-paper'  style='overflow: scroll'>";
 

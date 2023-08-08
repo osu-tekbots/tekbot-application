@@ -67,11 +67,6 @@ if ($faq) {
 		<div id="content-wrapper">
 
 			<div class="container-fluid">
-
-				<!-- Breadcrumbs-->
-                <?php 
-                renderEmployeeBreadcrumb("Employee", "Edit FAQ");
-                ?>
                 <div class="container"><br>
                 <form id="faqForm">
                 <h5>Category:</h5>

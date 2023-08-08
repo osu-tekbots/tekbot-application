@@ -56,9 +56,6 @@ $test = "";
 		<div class="admin-content" id="content-wrapper">
 
 			<div class="container-fluid">
-				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Kit Handout');	
-                ?>
     <div class="row">
 <?php 
     // Grabs current term data using OSU Term API within modules/termData.php

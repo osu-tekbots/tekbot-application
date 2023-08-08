@@ -155,7 +155,6 @@ function printKitsUsedInt($kits) {
         <div class="container-fluid">
 			<div class='admin-paper'>
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Inventory');
 
                echo $addpartHTML;
 			   

@@ -397,9 +397,6 @@ function updatePartImage(id){
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<div class='admin-paper'>
-            <?php 
-                renderEmployeeBreadcrumb('Employee', 'Configure Kits');
-            ?>
 			
             <?php echo $kitsSELECT . $kitHTML . $addHTML;?>
 

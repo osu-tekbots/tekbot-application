@@ -92,8 +92,6 @@ foreach ($kits as $k){
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Kits', 'Kit Listing');
-
 		
 				echo "
 	

@@ -128,7 +128,6 @@ function adduser(){
 
 			<div class="container-fluid">
 				<?php 
-					renderEmployeeBreadcrumb('Employee', 'Users');
 					
 					if (empty($users)){
 						echo "

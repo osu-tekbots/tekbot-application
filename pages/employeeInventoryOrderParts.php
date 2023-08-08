@@ -403,9 +403,6 @@ function updateQuantity(id){
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<div class='admin-paper'>
-            <?php 
-                renderEmployeeBreadcrumb('Employee', 'Order Parts');
-            ?>
 			
             <?php echo $formHTML .'<br>'.$orderHTML.'<br>'.$log;?>
 			

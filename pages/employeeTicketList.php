@@ -152,7 +152,6 @@ function specialDeskNumber($deskNum) {
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<?php 
-			renderEmployeeBreadcrumb('Employee', 'Ticket List');
 
 			echo "<div class='admin-paper' id='fullList'>";
 

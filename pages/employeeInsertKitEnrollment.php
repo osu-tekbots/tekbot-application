@@ -40,9 +40,6 @@ include_once PUBLIC_FILES . '/modules/renderTermData.php';
 
 			<div class="container-fluid">
 
-            <?php 
-                renderEmployeeBreadcrumb('Employee', 'Insert Kit Enrollments');
-            ?>
 			<p>To insert a batch of kit enrollments for students, create an excel/google sheet in the following order: 
 			StudentID&nbsp;&nbsp;&nbsp;&nbsp;ONID&nbsp;&nbsp;&nbsp;&nbsp;FullName (Last, First M.)&nbsp;&nbsp;&nbsp;&nbsp;CourseCode</p>
 			<p>Example <a href="https://docs.google.com/spreadsheets/d/1n9qQE-jRnjK9Q-9YuTkdsOLD9n_ZvC48_Ur-bqzmNTM/edit#gid=0">here</a> - in the shared Tekbot folder under Tekbots -> Web Development -> Kit Enrollment Example</p>

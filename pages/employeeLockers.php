@@ -118,7 +118,6 @@ function checkoutLocker(id){
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
             <?php 
-                renderEmployeeBreadcrumb('Employee', 'Print Jobs List');
 
                 echo "<div class='admin-paper'>";
 

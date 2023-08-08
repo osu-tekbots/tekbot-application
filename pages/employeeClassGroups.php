@@ -106,7 +106,6 @@ tr.even td:first-child {
 
 			<div class="container-fluid">
 				<?php 
-                    renderEmployeeBreadcrumb('Employee', 'Groups');
 					echo "
 					<div class='admin-paper'>    
 					<button type='button' onclick='history.back()'>

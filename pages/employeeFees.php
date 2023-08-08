@@ -180,8 +180,6 @@ foreach ($printerFees as $fee){
 
 			<div class="container-fluid">
 				<?php 
-					renderEmployeeBreadcrumb('Employee', 'Fees');
-					
 						echo"
 						
 						<div class='admin-paper'>
