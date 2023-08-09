@@ -26,11 +26,11 @@ function isValidStudentID($sid){
  * @return void
  */
 
- function renderEmployeeSidebar() {
+function renderEmployeeSidebar() {
     echo <<< HTML
     <br><br>
-     <!-- Sidebar -->
-     <ul class="sidebar navbar-nav">
+    <!-- Sidebar -->
+    <ul class="sidebar navbar-nav">
         <li class="nav-item dropdown">
              <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-tools"></i>
@@ -93,7 +93,7 @@ function isValidStudentID($sid){
         </li>
         <li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-hand-rock"></i>
+            <i class="fas fa-fw fa-warehouse"></i>
             <span>Inventory</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -108,7 +108,7 @@ function isValidStudentID($sid){
         </li>
         <li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-hand-rock"></i>
+            <i class="fas fa-fw fa-door-closed"></i>
             <span>Lockers</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -121,7 +121,7 @@ function isValidStudentID($sid){
 		
 		<li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-hand-rock"></i>
+            <i class="fas fa-fw fa-globe"></i>
             <span>Touchnet</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -132,7 +132,7 @@ function isValidStudentID($sid){
 		
 		<li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-hand-rock"></i>
+            <i class="fas fa-fw fa-lock"></i>
             <span>TekBox</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -147,7 +147,7 @@ function isValidStudentID($sid){
         <li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-ticket-alt"></i>
-            <span>NEW! Lab Tickets</span>
+            <span>Lab Tickets</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
              <a class="dropdown-item" href="pages/employeeTicketList.php">Ticket List</a>
@@ -162,7 +162,7 @@ function isValidStudentID($sid){
         <!-- Internal Sales Page with Bill All implemented, still need to work on message editing-->
         <li class="nav-item dropdown">
          <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-dollar-sign"></i>
+            <i class="fas fa-fw fa-money-check-alt"></i>
             <span>Internal Sales</span>
          </a>
          <div class="dropdown-menu" aria-labelledby="pagesDropdown">
@@ -199,16 +199,10 @@ function isValidStudentID($sid){
             </a>
         </li>
         -->
-        <!-- Turn Lab tickets into a drop down with employeeTicketList as the main and QR codes and edit equipement as options-->
-        <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="../../store/labs/index.php">
-                <i class="fas fa-fw fa-ticket-alt"></i>
-                <span>Lab Tickets</span>
-            </a>
-        </li>
+        
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
-                <i class="fas fa-fw fa-kaaba"></i>
+                <i class="fas fa-fw fa-project-diagram"></i>
                 <span>HWeekend</span>
             </a>
         </li>
@@ -225,7 +219,7 @@ function isValidStudentID($sid){
 HTML;
     
 
- }
+}
 
  /*
  Old function that's been deprecated as of 8/8/23
