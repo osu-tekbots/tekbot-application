@@ -14,7 +14,7 @@ use Model\KitEnrollmentStatus;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
-session_start();
+if(!session_id()) session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
@@ -42,9 +42,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
-// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
-            // except different engr sites use different databases & different userIDs
-$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
+$user = $usersDao->getUserByID($_SESSION['userID']);
 
 if ($user){
 	$uId = $user->getUserID();
@@ -54,7 +52,6 @@ if ($user){
 	$uEmail = $user->getEmail();
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
-	$_SESSION['userAccessLevel'] = $uAccessLevel; // ADDED for workaround ^
 } else {
 	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
 	echo "Please send us an email <a href='mailto:tekbot-worker@engr.oregonstate.edu'>here</a> to report the issue.";

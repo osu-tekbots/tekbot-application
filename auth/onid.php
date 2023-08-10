@@ -23,6 +23,7 @@ function authenticateStudent() {
 
     $u = $dao->getUserByONID($onid);
     if ($u) {
+        $_SESSION['site'] = 'tekbot';
         $_SESSION['userID'] = $u->getUserID();
         $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = false;

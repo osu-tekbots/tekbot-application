@@ -16,7 +16,7 @@ use DataAccess\LaserDao;
 use DataAccess\TicketDao;
 use Util\Security;
 
-session_start();
+if(!session_id()) session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 

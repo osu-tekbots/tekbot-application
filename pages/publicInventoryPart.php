@@ -5,9 +5,9 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); 
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL); 
 
 if (!session_id()) {
     session_start();

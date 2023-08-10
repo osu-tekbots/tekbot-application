@@ -1,11 +1,9 @@
 <?php
 include_once '../bootstrap.php';
 
-/*
 if(!isset($_SESSION)) {
     @session_start();
 }
-*/
 
 
 $isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
