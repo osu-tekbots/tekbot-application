@@ -9,8 +9,7 @@ $css = array(
 	'assets/css/homepage.css'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
+$isEmployee = verifyPermissions('employee');
 
 $FaqDao = new FaqDao($dbConn, $logger);
 $FAQs = $FaqDao->getAllFaqs();

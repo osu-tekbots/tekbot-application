@@ -20,10 +20,7 @@ if(!session_id()) session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee);
+allowIf(verifyPermissions('employee'));
 
 $checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
 $equipmentDao = new EquipmentDao($dbConn, $logger);

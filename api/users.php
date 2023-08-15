@@ -18,7 +18,7 @@ $dao = new UsersDao($dbConn, $logger);
 $handler = new UsersActionHandler($dao, $logger);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
     $handler->handleRequest();
 } else {

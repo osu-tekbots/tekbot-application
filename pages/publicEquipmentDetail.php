@@ -26,10 +26,9 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/header.php';
 
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
+$isEmployee = verifyPermissions('employee');
 
-$isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] != '';
+$isLoggedIn = verifyPermissions(['user', 'employee']);
 
 $dao = new EquipmentDao($dbConn, $logger);
 $equipment = $dao->getEquipment($eID);

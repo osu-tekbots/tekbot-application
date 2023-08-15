@@ -10,10 +10,7 @@ if (!session_id()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, $configManager->getBaseUrl() . 'pages/index.php');
+allowIf(verifyPermissions('employee'), 'pages/index.php');
 
 
 $title = 'Employee Equipment View';

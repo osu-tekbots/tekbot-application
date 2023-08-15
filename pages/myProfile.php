@@ -18,8 +18,7 @@ if(!session_id()) session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
-allowIf($isLoggedIn, $configManager->getBaseUrl() . 'pages/login.php');
+allowIf(verifyPermissions(['user', 'employee']), $configManager->getBaseUrl() . 'pages/login.php');
 
 $title = 'My Profile';
 $css = array(

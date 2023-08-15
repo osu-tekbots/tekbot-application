@@ -6,7 +6,7 @@ if(!isset($_SESSION)) {
 }
 
 
-$isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
+$isLoggedIn = verifyPermissions(['user', 'employee']);
 if ($isLoggedIn) {
     // Redirect to their profile page
     $redirect = $configManager->getBaseUrl() . 'pages/myProfile.php';

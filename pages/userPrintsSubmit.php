@@ -12,14 +12,7 @@ if (!session_id()) {
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
-if ($isLoggedIn) {
-	$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
-		&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin' || $_SESSION['userAccessLevel'] == 'Employee';
-} else {
-	$isEmployee = FALSE;
-}
-allowIf($isLoggedIn, $configManager->getBaseUrl() . 'pages/login.php');
+allowIf(verifyPermissions(['user', 'employee']), $configManager->getBaseUrl() . 'pages/login.php');
 
 $css = array(
 	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css',
@@ -46,13 +39,8 @@ $validFile = false;
 
 $printers = $printerDao->getPrinters();
 $printTypes = $printerDao->getPrintTypes();
-// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
-            // except different engr sites use different databases & different userIDs
-$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
+$user = $usersDao->getUserByID($_SESSION['userID']);
 
-
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID'])
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
 
 
 $printerNameGetter = function ($printer) {

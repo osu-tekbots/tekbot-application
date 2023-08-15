@@ -32,7 +32,7 @@ $messageDao = new MessageDao($dbConn, $logger);
 $handler = new EquipmentRentalActionHandler($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $equipmentDao , $mailer, $configManager, $logger, $messageDao);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
     $handler->handleRequest();
 } else {

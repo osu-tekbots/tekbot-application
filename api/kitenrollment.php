@@ -18,7 +18,7 @@ $mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $
 $handler = new KitEnrollmentActionHandler($kitEnrollmentDao, $mailer, $configManager, $logger);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
     $handler->handleRequest();
 } else {

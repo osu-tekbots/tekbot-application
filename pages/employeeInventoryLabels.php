@@ -37,10 +37,7 @@ function studentPrice($price){
 return $price;
 }
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, 'index.php');
+allowIf(verifyPermissions('employee'), 'index.php');
 
 
 $title = 'Employee Inventory List';

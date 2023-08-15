@@ -25,7 +25,7 @@ $messageDao = new MessageDao($dbConn, $logger);
 $handler = new LaserActionHandler($laserDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $configManager, $logger);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
     $handler->handleRequest();
 } else {

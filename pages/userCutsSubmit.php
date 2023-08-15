@@ -12,9 +12,7 @@ use DataAccess\EquipmentDao;
 session_start();
 
 $usersDao = new UsersDao($dbConn, $logger);
-// $user = $usersDao->getUserByID($_SESSION['userID']); // -- This is the 'good' way, 
-            // except different engr sites use different databases & different userIDs
-$user = $usersDao->getUserByONID($_SESSION['auth']['id']); // -- This is a temporary fix tempId1
+$user = $usersDao->getUserByID($_SESSION['userID']);
 
 /*
  * TO DO: Reference the submit3DPrint and use npm in order to install three-dxf. 

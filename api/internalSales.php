@@ -25,7 +25,7 @@ $mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger)
 $handler = new InternalSalesActionHandler($internalSalesDao, $mailer, $userDao, $messageDao, $logger);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
 	$handler->handleRequest();
 } else {

@@ -28,10 +28,7 @@ If we ever decide to implement the category for equipment
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, 'index.php');
+allowIf(verifyPermissions('employee'), 'index.php');
 
 
 $title = 'Edit Equipment';

@@ -26,7 +26,7 @@ $messageDao = new MessageDao($dbConn, $logger);
 $handler = new InventoryActionHandler($inventoryDao, $userDao, $messageDao, $logger);
 
 // Authorize the request
-if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
 	$stockNumber = $_REQUEST['stockNumber'];
 	if ($_REQUEST['action'] == 'updatePartImage'){

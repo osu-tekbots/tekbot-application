@@ -19,13 +19,8 @@ include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 
 $dao = new EquipmentDao($dbConn, $logger);
 $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
-// TODO: Look @ this (v) with Don
-$isLoggedIn = isset($_SESSION['userID']) && $_SESSION['userID'] . ''  != '';
-if ($isLoggedIn){
-    $isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Admin'|| $_SESSION['userAccessLevel'] == 'Employee';
-} else {
-    $isEmployee = FALSE; 
-}
+
+$isEmployee = verifyPermissions('employee');
 
 /* 
 * Populates page with information from the Equipment DAO

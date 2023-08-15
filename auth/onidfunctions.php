@@ -23,9 +23,9 @@ if (!isset($_SESSION)) {
  * @return string the ONID for the user
  */
 function authenticateWithONID() {
-    if (isset($_SESSION['auth']['id'])) {
+    /*if (isset($_SESSION['auth']['id'])) {
         return $_SESSION['auth']['id'];
-    }
+    }*/ // Removed because it doesn't play nice with logins on other sites w/ different provider options 
 
     $pageURL = 'http';
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {

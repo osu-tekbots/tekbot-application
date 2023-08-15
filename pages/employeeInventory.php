@@ -12,6 +12,9 @@ if (!session_id()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
+allowIf(verifyPermissions('employee'), 'index.php');
+
+
 $time_start = microtime(true);
 $log ='';
 
@@ -44,11 +47,6 @@ function studentPrice($price){
 		return ('Free for one / 10 for $1');
 	
 }
-
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, 'index.php');
 
 
 $title = 'Employee Inventory List';

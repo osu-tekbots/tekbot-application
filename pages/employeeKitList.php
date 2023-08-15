@@ -13,10 +13,7 @@ if (!session_id()) {
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 include_once PUBLIC_FILES . '/modules/renderTermData.php';
 
-$isEmployee = isset($_SESSION['userID']) && !empty($_SESSION['userID']) 
-	&& isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
-
-allowIf($isEmployee, 'index.php');
+allowIf(verifyPermissions('employee'), 'index.php');
 
 
 $title = 'Employee Kit Listing';

@@ -25,7 +25,7 @@ $handler = new TicketsActionHandler($ticketDao, $labDao, $messageDao, $mailer, $
 $handler->handleRequest();
 
 // Authorize the request
-// if (isset($_SESSION['userID']) && !empty($_SESSION['userID'])) {
+// if (verifyPermissions(['user', 'employee'])) {
 //     // Handle the request
     
 // } else {
