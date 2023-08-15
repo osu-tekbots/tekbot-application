@@ -96,7 +96,6 @@ if (sizeof($kits) > 0){
 	<div class="row">
 		<div class="col-7">
 		<p class="lead mb-0">The TekBots group helps to distribute kits for courses in the School of EECS. This page lists the status of your kits.</p>
-		<p class="lead mb-0"><b>COVID Update: </b>Normally all kits are available for pickup form KEC1110 during the store hours posted on our mainpage. To address concerns of COVID transmission an option for mailing kits or contactless pickup is available. These processes are described in an email / Canvas announcement that was sent to each course.</p>
 		<BR><BR><?php echo $kitsHTML;?>
 		</div>
 		<div class="col-5"><img class="img-fluid rounded" src="./assets/img/rect2.png">
