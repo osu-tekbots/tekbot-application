@@ -11,6 +11,10 @@ use DataAccess\EquipmentDao;
 
 session_start();
 
+include_once PUBLIC_FILES . '/lib/shared/authorize.php';
+
+allowIf(verifyPermissions(['user', 'employee']), $configManager->getBaseUrl() . 'pages/login.php');
+
 $usersDao = new UsersDao($dbConn, $logger);
 $user = $usersDao->getUserByID($_SESSION['userID']);
 
