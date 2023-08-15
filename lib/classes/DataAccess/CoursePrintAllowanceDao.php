@@ -485,8 +485,8 @@ class CoursePrintAllowanceDao {
         try {
             $sql = '
             DELETE FROM voucher_code 
-            WHERE date_expired < :date
-            OR date_used IS NOT NULL
+            WHERE (date_expired < :date OR date_used IS NOT NULL)
+            AND account_code IS NOT NULL
             ';
             $params = array(
                 ':date' => QueryUtils::FormatDate($currentDate)
