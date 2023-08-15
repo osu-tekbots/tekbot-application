@@ -1,8 +1,9 @@
-<!-- NOTE: Assigning payments should send users an email, but is not implemented -->
-<!-- NOTE: Verifying payments requires a call to an uncreated mailing function -->
-
 <?php
 namespace Api;
+
+/* NOTE: Assigning payments should send users an email, but is not implemented
+NOTE: Verifying payments requires a call to an uncreated mailing function */
+
 // This action handler will contain handlers for equipment checkout and equipment reservation
 use Model\EquipmentCheckout;
 use Model\EquipmentCheckoutStatus;

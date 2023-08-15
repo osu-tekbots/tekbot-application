@@ -141,7 +141,7 @@ class EquipmentRentalMailer extends Mailer {
         return $this->sendEmail($user->getEmail(), $subject, $message);
     }
 
- /**
+    /**
      * Sends a confirmation email to the user after reserving their equipment
      *
      * @param \Model\EquipmentReservation $project 
@@ -208,59 +208,59 @@ class EquipmentRentalMailer extends Mailer {
         $subject = "Equipment Checkout: $equipmentID";
 
         $message = "
-    Dear $userName,
+        Dear $userName,
 
-    You have checked out an equipment!
-    ---------------------------
-    Equipment ID: $equipmentID
-    Contract Duration: $contractTitle
-    ---------------------------
+        You have checked out an equipment!
+        ---------------------------
+        Equipment ID: $equipmentID
+        Contract Duration: $contractTitle
+        ---------------------------
 
-    To view the exact date and time your checkout out ends, view it at this link: $link
+        To view the exact date and time your checkout out ends, view it at this link: $link
 
-    You must return the item before the contract ends!  Failure to return the item before the deadline time can result in late fees.
+        You must return the item before the contract ends!  Failure to return the item before the deadline time can result in late fees.
 
-    Below are the rental agreements you agreed to when reserving the equipment.
-    
-    Terms & Conditions:
+        Below are the rental agreements you agreed to when reserving the equipment.
+        
+        Terms & Conditions:
 
-        Responsibility and Use & Disclaimer Warrenties: You are responsible for the use of the rented
-        items. You assume all risks inherent to the operation and use of rented items, and agree to
-        assume the entire responsibility for the defense of, and to pay, indemnity and hold Above All
-        Party Rentals harmless from and hereby release Above All Party Rentals from, all claims for
-        damage to property or bodily injury (including death) resulting from the use, operation or
-        possession of the items, whether or not it be claimed or found that such damage or injury
-        resulted in whole or part from Above All Party Rentals negligence, from the defective condition
-        of the items, or any other cause. YOU AGREE THAT NO WARRANTIES EXPRESSED OR IMPLIED,
-        INCLUDING MERCHANTIBILITY OR FITNESS FOR A PARTICULAR PURPOSE HAVE BEEN MADE IN
-        CONNECTION WITH THE EQUIPMENT RENTED.
+            Responsibility and Use & Disclaimer Warrenties: You are responsible for the use of the rented
+            items. You assume all risks inherent to the operation and use of rented items, and agree to
+            assume the entire responsibility for the defense of, and to pay, indemnity and hold Above All
+            Party Rentals harmless from and hereby release Above All Party Rentals from, all claims for
+            damage to property or bodily injury (including death) resulting from the use, operation or
+            possession of the items, whether or not it be claimed or found that such damage or injury
+            resulted in whole or part from Above All Party Rentals negligence, from the defective condition
+            of the items, or any other cause. YOU AGREE THAT NO WARRANTIES EXPRESSED OR IMPLIED,
+            INCLUDING MERCHANTIBILITY OR FITNESS FOR A PARTICULAR PURPOSE HAVE BEEN MADE IN
+            CONNECTION WITH THE EQUIPMENT RENTED.
 
-        Equipment Failure: You agree to immediately discontinue the use of rented items should it at
-        any time become unsafe or in a state of disrepair, and will immediately (one hour or less) notify
-        Above All Party Rentals of the facts. Above All Party Rentals agrees at our discretion to make the
-        items operable in a reasonable time, or provide a like items if available, or make a like item
-        available at another time, or adjust rental charges, The provision does not relieve renter from
-        obligations of contract. In all events Above All Party Rentals shall not be responsible for injury or
-        damage resulting in failure or defect of rented item.
-    
-        Equipment Responsibility: Renter is responsible for equipment from time of possession to time
-        of return. Renter assumes the entire risk of loss, regardless of cause. If items are lost, stolen,
-        damaged, renter will assume cost of replacemt or repair, including labor costs. Renter shall pay
-        a reasonable cleaning charge for rented items returned dirty.
+            Equipment Failure: You agree to immediately discontinue the use of rented items should it at
+            any time become unsafe or in a state of disrepair, and will immediately (one hour or less) notify
+            Above All Party Rentals of the facts. Above All Party Rentals agrees at our discretion to make the
+            items operable in a reasonable time, or provide a like items if available, or make a like item
+            available at another time, or adjust rental charges, The provision does not relieve renter from
+            obligations of contract. In all events Above All Party Rentals shall not be responsible for injury or
+            damage resulting in failure or defect of rented item.
+        
+            Equipment Responsibility: Renter is responsible for equipment from time of possession to time
+            of return. Renter assumes the entire risk of loss, regardless of cause. If items are lost, stolen,
+            damaged, renter will assume cost of replacemt or repair, including labor costs. Renter shall pay
+            a reasonable cleaning charge for rented items returned dirty.
 
-        Time of Return: Renter's right of possession terminates upon the expiration of rental period set
-        forth on the contract. Time is of the essence in this contract. Any extension must be agreed
-        upon in writing.
+            Time of Return: Renter's right of possession terminates upon the expiration of rental period set
+            forth on the contract. Time is of the essence in this contract. Any extension must be agreed
+            upon in writing.
 
-        Late Returns: Renter shall return rented items to Above All Party Rentals during regular
-        business hours, promptly upon. or prior to expiration of rental period. If renter does not timely
-        return, the rental rate shall continue until items are returned.
+            Late Returns: Renter shall return rented items to Above All Party Rentals during regular
+            business hours, promptly upon. or prior to expiration of rental period. If renter does not timely
+            return, the rental rate shall continue until items are returned.
 
-    Sincerely,
+        Sincerely,
 
-    TekBots 
-    Oregon State University
-    KEC 1110 (Hours: 10AM - 1PM)
+        TekBots 
+        Oregon State University
+        KEC 1110 (Hours: 10AM - 1PM)
         ";
 
         return $this->sendEmail($user->getEmail(), $subject, $message);
@@ -283,27 +283,27 @@ class EquipmentRentalMailer extends Mailer {
         $subject = "Equipment Needs To Be Returned!";
 
         $message = "
-    Dear $name,
+        Dear $name,
 
-    Our system has indicated that you currently have an equipment checked out that has passed your deadline time.
+        Our system has indicated that you currently have an equipment checked out that has passed your deadline time.
 
-    To prevent incremental late fees, or a charge to your student account, please return the item as soon as possible to KEC 1110 (10AM - 1PM).
+        To prevent incremental late fees, or a charge to your student account, please return the item as soon as possible to KEC 1110 (10AM - 1PM).
 
-    ---- Checkout Details ----
-    Equipment: $equipmentName
+        ---- Checkout Details ----
+        Equipment: $equipmentName
 
-    Contract Duration: $contractName *Weekends are accounted for, holidays are not*
+        Contract Duration: $contractName *Weekends are accounted for, holidays are not*
 
-    Picked Up Time: $pickupTime 
+        Picked Up Time: $pickupTime 
 
-    Deadline Time: $latestPickupTime
-    ---------------------------
+        Deadline Time: $latestPickupTime
+        ---------------------------
 
-    If you believe this email was sent in error, either come to KEC 1110 (10AM - 1PM) or respond to this email.
+        If you believe this email was sent in error, either come to KEC 1110 (10AM - 1PM) or respond to this email.
 
-    ";
+        ";
 
-        return $this->sendEmail($email, $subject, $message);
+        return $this->sendEmail($email, $subject, $message, false, 'tekbot-worker@engr.oregonstate.edu');
     }
 
 

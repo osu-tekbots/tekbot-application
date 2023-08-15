@@ -8,31 +8,7 @@ use DataAccess\UsersDao;
 use DataAccess\QueryUtils;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
-use Email\TekBotsMailer;
-
-if (!session_id()) {
-    session_start();
-}
-
-// Make sure the user is logged in and allowed to be on this page
-include_once PUBLIC_FILES . '/lib/shared/authorize.php';
-
-
-$title = 'Cronjob';
-$css = array(
-	'assets/css/sb-admin.css',
-	'assets/css/admin.css',
-	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
-);
-
-$js = array(
-    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
-);
-
-include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
-
+use Email\EquipmentRentalMailer;
 
 $equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
@@ -40,7 +16,7 @@ $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
-$messageDao = new MessageDao($dbConn, $logger);
+// $messageDao = new MessageDao($dbConn, $logger);
 $mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
 
 $reservedHTML = '';
@@ -69,12 +45,13 @@ foreach ($reservedEquipment as $r){
 			if (QueryUtils::isLate($latestPickupTime)){
 				// Mark as inactive
 				$r->setIsActive(FALSE);
-				$ok = $reservationDao->updateReservation($r);
+				// $ok = $reservationDao->updateReservation($r);
 			} 
 		} 
 
 }
 
+$emailsSent = 0;
 foreach ($checkedoutEquipment as $c){
 	$checkoutID = $c->getCheckoutID();
 	$reservationID = $c->getReservationID();
@@ -106,7 +83,9 @@ foreach ($checkedoutEquipment as $c){
 			$c->setStatusID(EquipmentCheckoutStatus::LATE);
 			$ok = $checkoutDao->updateCheckout($c);
 			if ($ok){
-				$mailer->sendEquipmentLateEmail($c, $user, $equipmentName);
+				$ok = $mailer->sendEquipmentLateEmail($c, $user, $equipmentName);
+				if($ok) 
+					$emailsSent++;
 			}
 			// Expiration - send email - mark as inactive
 			$notes = "Needs to expire";
@@ -124,11 +103,4 @@ foreach ($checkedoutEquipment as $c){
 
 
 
-?>
-<br/>
-<div id="page-top">
-
-
-<?php 
-include_once PUBLIC_FILES . '/modules/footer.php' ; 
 ?>

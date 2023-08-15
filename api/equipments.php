@@ -11,7 +11,7 @@ use DataAccess\EquipmentCheckoutDao;
 use Api\EquipmentActionHandler;
 use Email\ProjectMailer;
 
-session_start();
+if(!session_id()) session_start();
 
 // Setup our data access and handler classes
 $equipmentDao = new EquipmentDao($dbConn, $logger);

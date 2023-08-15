@@ -36,9 +36,10 @@ class Mailer {
      * @param string $subject the subject of the email
      * @param string $message the email content to send
      * @param boolean $html indicates whether the message content is HTML or plain text
+     * @param string $cc the email address or addresses to carbon-copy on the email
      * @return boolean true on success, false otherwise
      */
-    public function sendEmail($to, $subject, $message, $html = false) {
+    public function sendEmail($to, $subject, $message, $html = false, $cc = null) {
         if ($this->subjectTag != null) {
             $subject = '[' . $this->subjectTag . '] ' . $subject;
         }
@@ -64,6 +65,15 @@ class Mailer {
         }
 
         $headers[] = "From: $from";
+
+        if(!is_null($cc)) {
+            if (\is_array($cc)) {
+                $cc = \implode(',', $cc);
+            }
+            if(\is_string($cc)) {
+                $headers[] = 'Cc: '.$cc;
+            }
+        }
 
         $headersStr = \implode("\r\n", $headers);
         $headersStr .= "\r\n";
