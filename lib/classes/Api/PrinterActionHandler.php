@@ -17,8 +17,8 @@ use Model\Message;
  */
 class PrinterActionHandler extends ActionHandler {
 
-    /** @var \DataAccess\CoursePrintAllowanceDao */
-    private $coursePrintAllowanceDao;
+    /** @var \DataAccess\VoucherDao */
+    private $voucherDao;
 
     private $printFeeDao;
     /** @var \DataAccess\printerDao */
@@ -42,13 +42,13 @@ class PrinterActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($printerDao, $printFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $config, $logger) {
+    public function __construct($printerDao, $printFeeDao, $voucherDao, $userDao, $mailer, $messageDao, $config, $logger) {
         parent::__construct($logger);
         $this->printerDao = $printerDao;
         $this->mailer = $mailer;
         $this->config = $config;
         $this->userDao = $userDao;
-        $this->coursePrintAllowanceDao = $coursePrintAllowanceDao;
+        $this->voucherDao = $voucherDao;
         $this->printFeeDao = $printFeeDao;
 
         $this->messageDao = $messageDao;
@@ -294,7 +294,7 @@ class PrinterActionHandler extends ActionHandler {
 		
         if ($body['payment'] == "voucher"){
 			if($body['voucherCode']) {
-				$voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
+				$voucher = $this->voucherDao->getVoucher($body['voucherCode']);
 				// TODO: Fix if there are more services added
 				if($voucher && $voucher->getServiceID() == 2) {
 					
@@ -554,11 +554,11 @@ class PrinterActionHandler extends ActionHandler {
 		//Check if a voucher was used for this print. If so, mark it as used now.
 		if ($printJob->getPaymentMethod() == "voucher"){
 			if($printJob->getVoucherCode()) {
-				$voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+				$voucher = $this->voucherDao->getVoucher($printJob->getVoucherCode());
 				$dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
 				$voucher->setUserID($userID);
 				$voucher->setDateUsed($dateUsed);
-				$ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+				$ok = $this->voucherDao->updateVoucher($voucher);
 				if(!$ok) {
 					$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
 				}
@@ -677,12 +677,12 @@ class PrinterActionHandler extends ActionHandler {
 		//Check if a voucher was used for this print. If so, mark it as used now.
 		if ($printJob->getPaymentMethod() == "voucher"){
 			if($printJob->getVoucherCode()) {
-				$voucher = $this->coursePrintAllowanceDao->getVoucher($printJob->getVoucherCode());
+				$voucher = $this->voucherDao->getVoucher($printJob->getVoucherCode());
 				$dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
 				$userID = $body['userID'];
 				$voucher->setUserID($userID);
 				$voucher->setDateUsed($dateUsed);
-				$ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+				$ok = $this->voucherDao->updateVoucher($voucher);
 				if(!$ok) {
 					$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
 				}
@@ -791,7 +791,7 @@ class PrinterActionHandler extends ActionHandler {
 
         foreach($unprocessedJobs as $job) {
             if($job->getPaymentMethod() == 'voucher') {
-                $voucher = $this->coursePrintAllowanceDao->getVoucher($job->getVoucherCode());
+                $voucher = $this->voucherDao->getVoucher($job->getVoucherCode());
                 if(!$voucher) $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get account code for voucher: '.$job->getVoucherCode()));
                 $job->setAccountCode($voucher->getLinkedAccount());
             }

@@ -5,8 +5,8 @@
  */
 include_once '../bootstrap.php';
 
-use DataAccess\CoursePrintAllowanceDao;
-use Api\PrintCutGroupActionHandler;
+use DataAccess\VoucherDao;
+use Api\VoucherActionHandler;
 use Api\Response;
 
 if(!session_id()) {
@@ -14,8 +14,8 @@ if(!session_id()) {
 }
 
 // Setup our data access and handler classes
-$dao = new CoursePrintAllowanceDao($dbConn, $logger);
-$handler = new PrintCutGroupActionHandler($dao, $logger);
+$dao = new VoucherDao($dbConn, $logger);
+$handler = new VoucherActionHandler($dao, $logger);
 
 // Authorize the request
 if (verifyPermissions(['user', 'employee'])) {

@@ -10,7 +10,7 @@ use Email\TekBotsMailer;
 
 class LaserActionHandler extends ActionHandler {
 
-    private $coursePrintAllowanceDao;
+    private $voucherDao;
 
     /** @var \DataAccess\LaserDao */
     private $laserDao;
@@ -23,13 +23,13 @@ class LaserActionHandler extends ActionHandler {
 
     private $messageDao;
 
-    public function __construct($laserDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $config, $logger) {
+    public function __construct($laserDao, $voucherDao, $userDao, $mailer, $messageDao, $config, $logger) {
         parent::__construct($logger);
         $this->laserDao = $laserDao;
         $this->mailer = $mailer;
         $this->config = $config;
         $this->userDao = $userDao;
-        $this->coursePrintAllowanceDao = $coursePrintAllowanceDao;
+        $this->voucherDao = $voucherDao;
         $this->messageDao = $messageDao;
     }
 
@@ -121,7 +121,7 @@ class LaserActionHandler extends ActionHandler {
         $laserJob = new LaserJob();
 
         if($body['voucherCode']) {
-            $voucher = $this->coursePrintAllowanceDao->getVoucher($body['voucherCode']);
+            $voucher = $this->voucherDao->getVoucher($body['voucherCode']);
             // TODO: Fix if there are more services added
             if($voucher && $voucher->getServiceID() == 5) {
                 
@@ -465,12 +465,12 @@ class LaserActionHandler extends ActionHandler {
         if($laserJob->getVoucherCode()) {
 
             // If there ever is an issue here, vouchers is not a foreign key anymore. A possibile error is if there somehow happened to be 2 vouchers with the same id values
-            $voucher = $this->coursePrintAllowanceDao->getVoucher($laserJob->getVoucherCode());
+            $voucher = $this->voucherDao->getVoucher($laserJob->getVoucherCode());
             $dateUsed = (new \DateTime())->format('Y-m-d H:i:s');
             $userID = $body['userID'];
             $voucher->setUserID($userID);
             $voucher->setDateUsed($dateUsed);
-            $ok = $this->coursePrintAllowanceDao->updateVoucher($voucher);
+            $ok = $this->voucherDao->updateVoucher($voucher);
             if(!$ok) {
                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update voucher code'));
             }
@@ -532,7 +532,7 @@ class LaserActionHandler extends ActionHandler {
 
         foreach($unprocessedJobs as $job) {
             if($job->getPaymentMethod() == 'voucher') {
-                $voucher = $this->coursePrintAllowanceDao->getVoucher($job->getVoucherCode());
+                $voucher = $this->voucherDao->getVoucher($job->getVoucherCode());
                 if(!$voucher) $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get account code for voucher: '.$job->getVoucherCode()));
                 $job->setAccountCode($voucher->getLinkedAccount());
             }
@@ -540,7 +540,7 @@ class LaserActionHandler extends ActionHandler {
 
         $message = $this->messageDao->getMessageByID($body['messageID']); 
 
-        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message);
+        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message, 'bairdn@oregonstate.edu');
 
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send proccess fees email'));

@@ -9,7 +9,7 @@ use Api\Response;
 use DataAccess\PrinterDao;
 use DataAccess\PrinterFeeDao;
 use DataAccess\UsersDao;
-use DataAccess\CoursePrintAllowanceDao;
+use DataAccess\VoucherDao;
 use Api\PrinterActionHandler;
 use Email\TekBotsMailer;
 use DataAccess\MessageDao;
@@ -19,12 +19,12 @@ session_start();
 // Setup our data access and handler classes
 $printerDao = new PrinterDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
-$coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
+$voucherDao = new VoucherDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 
-$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $configManager, $logger);
+$handler = new PrinterActionHandler($printerDao, $printerFeeDao, $voucherDao, $userDao, $mailer, $messageDao, $configManager, $logger);
 
 // Authorize the request
 if (verifyPermissions(['user', 'employee'])) {

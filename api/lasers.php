@@ -8,7 +8,7 @@ include_once '../bootstrap.php';
 use Api\Response;
 use DataAccess\LaserDao;
 use DataAccess\UsersDao;
-use DataAccess\CoursePrintAllowanceDao;
+use DataAccess\VoucherDao;
 use Api\LaserActionHandler;
 use Email\TekBotsMailer;
 use DataAccess\MessageDao;
@@ -17,12 +17,12 @@ session_start();
 
 // Setup our data access and handler classes
 $laserDao = new LaserDao($dbConn, $logger);
-$coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
+$voucherDao = new VoucherDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 
-$handler = new LaserActionHandler($laserDao, $coursePrintAllowanceDao, $userDao, $mailer, $messageDao, $configManager, $logger);
+$handler = new LaserActionHandler($laserDao, $voucherDao, $userDao, $mailer, $messageDao, $configManager, $logger);
 
 // Authorize the request
 if (verifyPermissions(['user', 'employee'])) {

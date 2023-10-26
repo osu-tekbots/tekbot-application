@@ -1,7 +1,8 @@
 <?php
+
 include_once '../bootstrap.php';
 
-use DataAccess\CoursePrintAllowanceDao;
+use DataAccess\VoucherDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
@@ -29,10 +30,10 @@ $js = array(
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
-$coursePrintAllowanceDao = new CoursePrintAllowanceDao($dbConn, $logger);
+$voucherDao = new VoucherDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$vouchers = $coursePrintAllowanceDao->getAdminVoucherCodes();
-$services = $coursePrintAllowanceDao->getServices();
+$vouchers = $voucherDao->getAdminVouchers();
+$services = $voucherDao->getServices();
 $voucherCodeHTML = '';
 $printingCodesHTML = '';
 $laserCodesHTML = '';
@@ -151,7 +152,7 @@ foreach ($vouchers as $voucher){
 					<script>
 						$('#printingVoucherTable').DataTable(
 							{
-								aaSorting: [[2, 'desc']]
+								aaSorting: [[4, 'desc'], [2, 'desc']]
 							}
 
 						);

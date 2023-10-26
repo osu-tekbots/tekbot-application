@@ -3,7 +3,7 @@ namespace Model;
 
 use Util\IdGenerator;
 
-class VoucherCode {
+class Voucher {
 
     private $voucherID;
     private $dateUsed;

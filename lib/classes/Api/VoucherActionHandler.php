@@ -1,17 +1,18 @@
 <?php
-// Updated 11/5/2019
+
 namespace Api;
-use Model\VoucherCode;
-use Model\CourseGroup;
-use Model\CoursePrintAllowance;
+use Model\Voucher;
+// use Model\CourseGroup;
+// use Model\CoursePrintAllowance;
 
 
+// formerly PrintCutGroupActionHandler
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
  */
-class PrintCutGroupActionHandler extends ActionHandler {
+class VoucherActionHandler extends ActionHandler {
 
-    /** @var \DataAccess\CoursePrintAllowanceDao */
+    /** @var \DataAccess\VoucherDao */
     private $dao;
 
     public function __construct($dao, $logger)
@@ -20,77 +21,11 @@ class PrintCutGroupActionHandler extends ActionHandler {
         $this->dao = $dao;
     }
 
-    /**
-     * Updates profile information about a user in the database based on data in an HTTP request.
-     * 
-     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
-     *
-     * @return void
-     */
-    public function saveUserProfile() {
-        // Ensure the required parameters exist
-        $this->requireParam('uid');
-        $this->requireParam('firstName');
-        $this->requireParam('lastName');
-        $this->requireParam('email');
-        $this->requireParam('phone');
-
-        $body = $this->requestBody;
-
-        // Get the existing user. 
-        // TODO: If it isn't found, send a NOT_FOUND back to the client
-        $user = $this->dao->getUserByID($body['uid']);
-        if(!$user) {
-            $this->respond(new Response(Response::NOT_FOUND, 'Failed to find user'));
-        }
-
-        // Update the user
-        $user->setFirstName($body['firstName']);
-        $user->setLastName($body['lastName']);
-        $user->setEmail($body['email']);
-        $user->setPhone($body['phone']);
-
-        $ok = $this->dao->updateUser($user);
-
-        if(!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save user profile information'));
-        }
-
-        $this->respond(new Response(Response::OK, 'Successfully saved profile information'));
-
-    }
-
-    /**
-     * Request handler for updating the user type after a user has logged in for the first time.
-     *
-     * @return void
-     */
-    function handleUpdateUserType() {
-        $uid = $this->getFromBody('uid');
-        $admin = $this->getFromBody('admin');
-
-        $user = $this->dao->getUserByID($uid);
-        if ($admin) {
-            $user->getAccessLevelID()->setId(UserAccessLevel::EMPLOYEE);
-        } else {
-            $user->getAccessLevelID()->setId(UserAccessLevel::STUDENT);
-        }
-        $ok = $this->dao->updateUser($user);
-        if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update user type'));
-        }
-        $this->respond(new Response(
-            Response::OK,
-            'Successfully updated user type'
-        ));
-
-    }
-
     /*
     *   Handles the adding of additional voucher codes
     *   Returns a list with the voucher codes that were successfully added to the database
     */
-    public function handleAddVoucherCodes() {
+    public function handleAddVouchers() {
         // Ensure the required parameters exist
         $this->requireParam('num');
         $this->requireParam('accountCode'); // Needed for linking w/ a payment account
@@ -105,12 +40,12 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         $VoucherList = "";
         for ($i = 0; $i < $num; $i++){
-            $voucher = new VoucherCode();
+            $voucher = new Voucher();
             $voucher->setLinkedAccount($accountCode);
             $voucher->setDateExpired($dateExpired);
             $voucher->setServiceID($serviceID);
             $voucher->setDateCreated(new \DateTime());
-            $ok = $this->dao->addNewVoucherCode($voucher);
+            $ok = $this->dao->addNewVoucher($voucher);
             if ($ok){
                 $VoucherList .= $voucher->getVoucherID() . '&#13;&#10;';
             }
@@ -129,7 +64,8 @@ class PrintCutGroupActionHandler extends ActionHandler {
     *   Handles the adding of a new course
     *   
     */
-    public function handleAddCourse() {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function handleAddCourse() {
         // Ensure the required parameters exist
         $this->requireParam('courseName');
         $this->requireParam('numberallowedprints');
@@ -151,13 +87,14 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         $this->respond(new Response(Response::OK, 'Successfully added course'));
 
-    }
+    } */
 
     /*
     *   Handles the adding of a new group within a course
     *   
     */
-    public function handleAddCourseGroup() {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function handleAddCourseGroup() {
         // Ensure the required parameters exist
         $this->requireParam('groupName');
         $this->requireParam('allowanceID');
@@ -182,7 +119,7 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         $this->respond(new Response(Response::OK, 'Successfully added course group'));
 
-    }
+    } */
 
     function handleClearVouchers() {
         // $voucher->setDateCreated(new \DateTime());
@@ -237,31 +174,24 @@ class PrintCutGroupActionHandler extends ActionHandler {
 
         // Call the correct handler based on the action
         switch($this->requestBody['action']) {
-
-            case 'saveProfile':
-                $this->saveUserProfile();
-
-            case 'updateUserType':
-                $this->handleUpdateUserType();
-
             case 'addVoucherCodes':
-                $this->handleAddVoucherCodes();
-
+                $this->handleAddVouchers();
+                break;
             case 'clearVouchers':
                 $this->handleClearVouchers();
-            
+                break;
             case 'clearPrintVouchers':
                 $this->handleClearVouchers();
-
+                break;
             case 'clearCutVouchers':
                 $this->handleClearVouchers();
-
-            case 'addCourse':
+                break;
+            /* case 'addCourse':
                 $this->handleAddCourse();
-            
+                break;
             case 'addGroup':
                 $this->handleAddCourseGroup();
-
+                break; */
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on cut print group resource'));
         }

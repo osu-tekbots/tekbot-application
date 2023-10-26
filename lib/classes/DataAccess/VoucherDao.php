@@ -1,16 +1,15 @@
 <?php
-// Updated 11/5/2019
 namespace DataAccess;
 
-use Model\CoursePrintAllowance;
-use Model\CourseGroup;
-use Model\CourseStudent;
-use Model\VoucherCode;
+// use Model\CoursePrintAllowance;
+// use Model\CourseGroup;
+// use Model\CourseStudent;
+use Model\Voucher;
 use Model\Service;
 
 
 
-class CoursePrintAllowanceDao {
+class VoucherDao {
 
     /** @var DatabaseConnection */
     private $conn;
@@ -32,7 +31,8 @@ class CoursePrintAllowanceDao {
 
     /* Admin Functions */
 
-    public function getAdminCoursePrintAllowance($offset = 0, $limit = -1) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function getAdminCoursePrintAllowance($offset = 0, $limit = -1) {
         try {
             $sql = '
             SELECT * 
@@ -90,28 +90,29 @@ class CoursePrintAllowanceDao {
             $this->logger->error("Failed to fetch course students: " . $e->getMessage());
             return false;
         }
-    }
+    } */
 
-    public function getAdminVoucherCodes() {
+    public function getAdminVouchers() {
         try {
             $sql = 'SELECT * FROM voucher_code';
            
             $results = $this->conn->query($sql);
 
-            $voucherCodes = array();
+            $vouchers = array();
             foreach ($results as $row) {
-                $voucherCode = self::ExtractVoucherFromRow($row);
-                $voucherCodes[] = $voucherCode;
+                $voucher = self::ExtractVoucherFromRow($row);
+                $vouchers[] = $voucher;
             }
 
-            return $voucherCodes;
+            return $vouchers;
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch voucher codes: " . $e->getMessage());
             return false;
         }
     }
 
-    public function getGroupsForSpecificCourse($id) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function getGroupsForSpecificCourse($id) {
         try {
             $sql = '
             SELECT * 
@@ -133,12 +134,13 @@ class CoursePrintAllowanceDao {
             $this->logger->error('Failed to get any course groups for current course: ' . $e->getMessage());
             return false;
         }
-    }
+    } */
 
 
     /* Get specific entry from primary ID */
 
-    public function getCourseStudent($id) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function getCourseStudent($id) {
         try {
             $sql = 'SELECT * FROM course_student WHERE course_student_id = :id';
             $params = array(':id' => $id);
@@ -202,12 +204,13 @@ class CoursePrintAllowanceDao {
             $this->logger->error("Failed to fetch students with allowance id: $id: " . $e->getMessage());
             return false;
         }
-    }
+    } */
 
 
     /* Update Existing Entries */
     
-    public function updateCourseStudent($student) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function updateCourseStudent($student) {
         try {
             $sql = '
             UPDATE course_student SET
@@ -281,11 +284,12 @@ class CoursePrintAllowanceDao {
             $this->logger->error("Failed to update course group with id '$id': " . $e->getMessage());
             return false;
         }
-    }
+    } */
 
     /* Inserting new entries */
 
-    public function addNewCoursePrintAllowance($course) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public function addNewCoursePrintAllowance($course) {
         try {
             $sql = '
             INSERT INTO course_print_allowance 
@@ -368,9 +372,9 @@ class CoursePrintAllowanceDao {
             $this->logger->error('Failed to add new student to group: ' . $e->getMessage());
             return false;
         }
-    }
+    } */
 
-    public function addNewVoucherCode($voucher) {
+    public function addNewVoucher($voucher) {
         try {
             $sql = '
             INSERT INTO voucher_code  
@@ -483,10 +487,9 @@ class CoursePrintAllowanceDao {
 
     public function clearVouchers($currentDate) {
         try {
-            $sql = '
-            DELETE FROM voucher_code 
+            $sql = 'DELETE FROM voucher_code 
             WHERE (date_expired < :date OR date_used IS NOT NULL)
-            AND account_code IS NOT NULL
+            AND account_code IS NULL
             ';
             $params = array(
                 ':date' => QueryUtils::FormatDate($currentDate)
@@ -502,11 +505,11 @@ class CoursePrintAllowanceDao {
 
     public function clearPrintVouchers($currentDate) {
         try {
-            $sql = '
-            DELETE FROM voucher_code 
+            $sql = 'DELETE FROM voucher_code 
             WHERE (date_expired < :date
-            OR date_used IS NOT NULL)
+                OR date_used IS NOT NULL)
             AND voucher_code.service_id=2
+            AND account_code IS NULL
             ';
             $params = array(
                 ':date' => QueryUtils::FormatDate($currentDate)
@@ -515,18 +518,18 @@ class CoursePrintAllowanceDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to remove vouchers: ' . $e->getMessage());
+            $this->logger->error('Failed to remove print vouchers: ' . $e->getMessage());
             return false;
         }
     }
 
     public function clearCutVouchers($currentDate) {
         try {
-            $sql = '
-            DELETE FROM voucher_code 
+            $sql = 'DELETE FROM voucher_code 
             WHERE (date_expired < :date
-            OR date_used IS NOT NULL)
+                OR date_used IS NOT NULL)
             AND service_id=5
+            AND account_code IS NULL
             ';
             $params = array(
                 ':date' => QueryUtils::FormatDate($currentDate)
@@ -535,7 +538,7 @@ class CoursePrintAllowanceDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to remove vouchers: ' . $e->getMessage());
+            $this->logger->error('Failed to remove cut vouchers: ' . $e->getMessage());
             return false;
         }
     }
@@ -562,7 +565,8 @@ class CoursePrintAllowanceDao {
 
     /* Extract using models */
 
-    public static function ExtractCoursePrintAllowanceFromRow($row) {
+    // Removed 8/31/23 -- Never implemented this version of handling vouchers; just making sure nothing breaks before deleting entirely
+    /* public static function ExtractCoursePrintAllowanceFromRow($row) {
         $course = new CoursePrintAllowance($row['allowance_id']);
         $course->setCourseName($row['course_name']);
         $course->setNumberAllowedPrints($row['number_allowed_3dprints']);
@@ -599,10 +603,10 @@ class CoursePrintAllowanceDao {
         $student->setCourse(self::ExtractCoursePrintAllowanceFromRow($row));
        
         return $student;
-    }
+    } */
 
     public static function ExtractVoucherFromRow($row){
-        $voucher = new VoucherCode($row['voucher_id']);
+        $voucher = new Voucher($row['voucher_id']);
         $voucher->setVoucherID($row['voucher_id']);
         $voucher->setDateUsed($row['date_used']);
         $voucher->setUserID($row['user_id']);
