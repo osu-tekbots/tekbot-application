@@ -10,15 +10,19 @@ include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 
-session_start();
+if(!session_id()) session_start();
+
+// Make sure the user is logged in and allowed to be on this page
+include_once PUBLIC_FILES . '/lib/shared/authorize.php';
+allowIf(verifyPermissions('employee'), '../pages/index.php');
 
 $dao = new UsersDao($dbConn, $logger);
 
 $redirect = "<script>location.replace('../pages/index.php')</script>";
 
-$masqerading = isset($_SESSION['masq']);
-if ($masqerading) {
-    $user = $dao->getUser($_SESSION['userID']);
+$masquerading = isset($_SESSION['masq']);
+if ($masquerading) {
+    $user = $dao->getUserByID($_SESSION['userID']);
 }
 
 $action = isset($_POST['action']) ? $_POST['action'] : '';
@@ -80,16 +84,16 @@ function startMasquerade($user) {
         $_SESSION['masq']['accessLevel'] = $_SESSION['accessLevel'];
         $_SESSION['masq']['newUser'] = $_SESSION['newUser'];
     }
-    $_SESSION['userID'] = $user->getId();
-    $_SESSION['accessLevel'] = $user->getType()->getName();
+    $_SESSION['userID'] = $user->getUserID();
+    $_SESSION['accessLevel'] = $user->getAccessLevelID()->getName();
     $_SESSION['newUser'] = false;
 }
 ?>
 
 <h1>Senior Design Capstone: Masquerade as Another User</h1>
 
-<?php if ($masqerading): ?>
-    <p>Currently masqerading as <strong><?php echo $user->getFirstName() . ' ' . $user->getLastName(); ?></strong></p>
+<?php if ($masquerading): ?>
+    <p>Currently masquerading as <strong><?php echo $user->getFirstName() . ' ' . $user->getLastName(); ?></strong></p>
 <?php endif; ?>
 
 <?php if (isset($message)): ?>
