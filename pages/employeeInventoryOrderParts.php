@@ -91,8 +91,8 @@ $formHTML .= "<form action=''>";
 for($i=1;$i<11;$i++){
 	$formHTML .= "
 	<div class='form-row'>
-	<div class='form-group col-sm-4'><select id='typeselect$i' onchange='updateNames($i);'>$typeOptions</select></div>
-	<div class='form-group col-sm-4'><select id='nameselect$i' name='item$i'></select></div>
+	<div class='form-group col-sm-4'><select class='custom-select' id='typeselect$i' onchange='updateNames($i);'>$typeOptions</select></div>
+	<div class='form-group col-sm-4'><select class='custom-select' id='nameselect$i' name='item$i'></select></div>
 	<div class='form-group col-sm-2'><input name='qty$i' type='text'></div>
 	</div>";
 }			

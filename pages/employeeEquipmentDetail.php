@@ -146,35 +146,28 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 		<div id="content-wrapper">
 
 			<div class="container-fluid">
-
-				<!-- Breadcrumbs-->
-				<ol class="breadcrumb">
-					<li class="breadcrumb-item">
-						<a>Equipment Checkout</a>
-					</li>
-					<li class="breadcrumb-item active">Add</li>
-				</ol>
 			<?php 
-			if ($isPublic)
-			{
-				echo "
-				<div class='alert alert-warning' role='alert'>
-					This equipment is currently PUBLIC! Updates made here will reflect the live item on browse equipment.
-				</div>
-				";
-			}
-			else {
-				echo "
-				<div class='alert alert-info' role='alert'>
-					This equipment is currently HIDDEN! If you would like to make it public hit the 'make public' button!
-				</div>
-				";
-			}
+				if ($isPublic)
+				{
+					echo "
+					<div class='alert alert-warning' role='alert'>
+						This equipment is currently PUBLIC! Updates made here will reflect the live item on browse equipment.
+					</div>
+					";
+				}
+				else {
+					echo "
+					<div class='alert alert-info' role='alert'>
+						This equipment is currently HIDDEN! If you would like to make it public hit the 'make public' button.
+					</div>
+					";
+				}
 
 			?>
 
             <form id="formEquipment">
-			<input type="hidden" id="equipmentID" name="equipmentID" value="<?php echo $eID; ?>" />
+				<input type="hidden" id="equipmentID" name="equipmentID" value="<?php echo $eID; ?>" />
+
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="form-group">
@@ -226,7 +219,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
                         <div class="form-group">
 							<label for="equipmentHealthSelect"> Health <font size="2" style="color:red;">*</font>
                             </label>
-							<select class="form-control input" id="equipmentHealthSelect" name="equipmentHealthID" data-toggle="tooltip" 
+							<select class="custom-select input" id="equipmentHealthSelect" name="equipmentHealthID" data-toggle="tooltip" 
 								data-placement="bottom" title="Health based on functionality of the equipment.  Fully functional has no issues, broken does not work, and partial functionality is functional but has some quirks">
 								<?php
 								foreach ($healths as $h) {
@@ -246,7 +239,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
                         <div class="form-group">
 							<label for="equipmentNumberpartsSelect">(#) Parts <font size="2" style="color:red;">*</font>
                             </label>
-							<select class="form-control input" id="equipmentNumberpartsSelect" name="equipmentNumberparts" data-toggle="tooltip" 
+							<select class="custom-select input" id="equipmentNumberpartsSelect" name="equipmentNumberparts" data-toggle="tooltip" 
 								data-placement="bottom" title="Number of parts that come with the equipment.  Include manuals, cords, accesories in this count.">
 								<?php
 								for ($n = 1; $n <= 25; $n++) {
@@ -274,7 +267,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 						</div>
                     </div>
                     <div class="col-sm-4">
-                    <div class="form-group">
+						<div class="form-group">
 							<label for="equipmentNotesText">
 								Equipment Notes
 							</label>
@@ -330,73 +323,71 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 						</div>
                     </div>
                 </div>
-
-			</div>
-
-        
-
-
 	
-			<div class="row">
-				<div class="col-sm">
-			<?php
+				<div class="row">
+					<div class="col-sm">
+						<?php
 
-					echo("
-					<button id='saveEquipmentBtn' class='btn btn-success capstone-nav-btn' type='button' 
-					data-toggle='tooltip' data-placement='bottom' 
-					title='Updates the current information on the page'>
-					Update Information</button>
-					");
-					
-					if ($isPublic){
-						createEquipmentHideButton($eID);
-					}
-					else if (!$isPublic){
-						createShowEquipmentButton($eID);
-					}
+							echo("
+							<button id='saveEquipmentBtn' class='btn btn-success capstone-nav-btn' type='button' 
+							data-toggle='tooltip' data-placement='bottom' 
+							title='Updates the current information on the page'>
+							Update Information</button>
+							");
+							
+							if ($isPublic){
+								createEquipmentHideButton($eID);
+							}
+							else if (!$isPublic){
+								createShowEquipmentButton($eID);
+							}
 
-					createArchiveEquipmentButton($eID);
+							createArchiveEquipmentButton($eID);
 
-			?>
+						?>
+					</div>
 				</div>
-			</div>
 
             </form>
 	<br><br><br>
-					<h3 id="images">Images</h3>
-							<p><i class="fas fa-info-circle"></i><i>&nbsp;&nbsp;You can upload images to help showcase the equipment.
-								Images must be no larger than 5MB. The selected image will be the default image.</i>
-							</p>
-							<div class="edit-project-images-container">
-								<button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
-									<?php echo $pButtonImageDeleteStyle; ?>>
-									<i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
-								</button>
-								<div class="project-images-select-container">
-									<?php echo $pProjectImagesSelectHtml; ?>
-								</div>
-								<form id="formAddNewImage">
-									<input type="hidden" name="equipmentID" value="<?php echo $eID; ?>" />
-									<div class="form-group row custom-file-row" id="divNewArtifactFile">
-										<div class="custom-file col-md-4">
-											<input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
-											<label class="custom-file-label" for="imageFile" id="labelImageFile">
-												Choose a new image to upload
-											</label>
-										</div>
-									</div>
-									<div class="form-group row">
-										<div class="col-md-4 row-project-image-submit">
-											<button type="submit" id="btnUploadImage" class="btn btn-primary btn-sm">
-												<i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
-											</button>
-											<div class="loader" id="formAddNewImageLoader"></div>
-										</div>
-									</div>
-								</form>
-								<h6>Image Preview</h6>
-								<img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
-							</div>
+	<h3 id="images">Images</h3>
+	<p style="white-space: normal">
+		<i class="fas fa-info-circle"></i>
+		<i style="white-space: normal">
+			&nbsp;&nbsp;You can upload images to help showcase the equipment. Images must be no larger than 5MB. The 
+			selected image will be the default image.</i>
+	</p>
+
+	<div class="edit-project-images-container mx-2">
+		<button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
+			<?php echo $pButtonImageDeleteStyle; ?>>
+			<i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
+		</button>
+		<div class="project-images-select-container">
+			<?php echo $pProjectImagesSelectHtml; ?>
+		</div>
+		<form id="formAddNewImage">
+			<input type="hidden" name="equipmentID" value="<?php echo $eID; ?>" />
+			<div class="form-group row custom-file-row" id="divNewArtifactFile">
+				<div class="custom-file col-md-4">
+					<input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
+					<label class="custom-file-label" for="imageFile" id="labelImageFile">
+						Choose a new image to upload
+					</label>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-md-4 row-project-image-submit">
+					<button type="submit" id="btnUploadImage" class="btn btn-primary btn-sm">
+						<i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
+					</button>
+					<div class="loader" id="formAddNewImageLoader"></div>
+				</div>
+			</div>
+		</form>
+		<h6>Image Preview</h6>
+		<img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
+	</div>
 
 
 

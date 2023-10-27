@@ -113,10 +113,9 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 			<h1>Laser Cutter Submission Form</h1>
 			To check your currently queued or finished cuts, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>My Tekbots</a><br /><br />
 
-			<p>Using this form you can upload a .dxf or .svg file to be cut using the laser cutter. It produces final models made out of the material which you can chose from the material list below. Once a file is uploaded, we will review the model and email you with the cost to cut. Once you approve the charge, we will start cutting the model.
-			<br><strong>Note:</strong> DXF format is strongly recommended for all cuts. However, if your cut requires a raster engrave or you are struggling to make a DXF file, SVG format may be necessary. We will alert you if this change must be made.
-			</p>
-			<p>If you would like to pay via credit card, please submit your file with this form and enter 'Credit Card' in the account code field. We will reply with instructions on how to submit payment.
+			<p>Using this form, you can upload a .dxf or .svg file to be cut using the laser cutter. It produces final models made out of the material which you can chose from the material list below. Once a file is uploaded, we will review the model and email you with the cost to cut. Once you approve the charge, we will start cutting the model.
+				<br>If you would like to pay via credit card, we will reply with instructions on how to submit payment when we confirm your model.
+				<br><strong>Note:</strong> DXF format is strongly recommended for all cuts. However, if your cut requires a raster engrave or you are struggling to make a DXF file, SVG format may be necessary. We will alert you if this change must be made.
 			</p>
 			<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">
 				Laser Cutting FAQs
@@ -137,47 +136,54 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 
 		</div>
 		<div class='col-sm-6'>
-			<form id='submit' action="redirect.php">
 
-				<?php renderUserFixedInput($user) ?>
+			<?php renderUserFixedInput($user) ?>
 
-				<b>Payment Method:</b>
-				<BR />
-				<?php renderPaymentForm() ?>
-				<br /><b>Quantity</b><br />
-				<select id="quantitySelect" name="quantity" form="mainform">
-					<option value="1">1</option>
-					<option value="2">2</option>
-					<option value="3">3</option>
-					<option value="4">4</option>
-					<option value="5">5</option>
-					<option value="6">6</option>
-					<option value="7">7</option>
-					<option value="8">8</option>
-					<option value="9">9</option>
-					<option value="10">10</option>
-				</select>
-				<br /><b>Material</b>
-				<BR>Costs shown are reflective of the price after student discount. Code generated after order submission
-				<?php
-				renderSelector($laserMaterials, $laserMaterialIdGetter, $laserMaterialDescriptionGetter, "laserMaterialSelect");
-				?>
-				<br />
-				<b>Select Laser Cutter</b>
-				<?php
-				renderSelector($laserCutters, $laserIdGetter, $laserNameGetter, "laserSelect");
-				?>
-				<br />
-				<b>Notes</b>
-				<BR>Any special instructions or deadlines that you have should be entered here
-				<textarea name=notes id="specialNotes" rows="4" cols="50"></textarea><br />
-				<label id="fileFeedback"></label>
-				<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".dxf, .svg"> <!-- Not multiple bc the server's only processing 1 file-->
-			</form>
+			<b>Payment Method</b>
+			<BR />
+			<?php renderPaymentForm() ?>
+			<br />
+			
+			<b>Select Material</b>
+			<!-- <BR>Costs shown are reflective of the price after student discount. Code generated after order submission --> <!-- Not sure what this was (8/31/23)? -->
+			<?php
+			renderSelector($laserMaterials, $laserMaterialIdGetter, $laserMaterialDescriptionGetter, "laserMaterialSelect");
+			?>
+			<br />
+			
+			<b>Select Laser Cutter</b>
+			<?php
+			renderSelector($laserCutters, $laserIdGetter, $laserNameGetter, "laserSelect");
+			?>
+			<br />
+			
+			<b>Quantity</b><br />
+			<select id="quantitySelect" name="quantity" form="mainform" class="custom-select">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+				<option value="8">8</option>
+				<option value="9">9</option>
+				<option value="10">10</option>
+			</select>
+			<br />
+			<br>
+			
+			<b>Notes</b>
+			<BR>Any special instructions or deadlines that you have should be entered here
+			<textarea class="form-control" name="notes" id="specialNotes" rows="4" cols="50"></textarea><br />
+			
+			<label id="fileFeedback"></label>
+			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".dxf, .svg"> <!-- Not multiple bc the server's only processing 1 file-->
+
 			<div id="target"></div>
 
 			<br />
-			<button id="submitLaserCutBtn">Submit</button>
+			<button id="submitLaserCutBtn" class="btn btn-primary">Submit</button>
 			<br /><br />
 		</div>
 	</div>
@@ -187,7 +193,7 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 <script>
 	$('#submitLaserCutBtn').on('click', function() {
 		// let selectedPayment = $("input[type=radio][name=accounttype]:checked").val();
-		if (!isValidFile) alert("Please enter a valid DXF file of a size less than 10 MB");
+		if (!isValidFile) alert("Please enter a valid DXF or SVG file that's less than 10 MB");
 
 		let selectedPayment = getPaymentMethod();
 

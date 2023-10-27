@@ -68,9 +68,15 @@ foreach ($availableEquipment as $e){
 $newreservationHTML = '';
 $newreservationHTML .= "<form class='form-inline'>
 
-					<label for='user' class='d-inline-block'>User:</label><select id='user' class='form-control d-inline-block'>$user_option</select>
-					<label for='equipment' class='d-inline-block'>Equipment:</label><select id='equipment' class='form-control d-inline-block'>$equipment_option</select>
-					<button class='form-control' onclick='reserveEquipment();'>Make Reservation</button>
+					<div class='input-group mx-1'>
+						<div class='input-group-prepend'><label for='user' class='input-group-text'>User:</label></div>
+						<select id='user' class='custom-select'>$user_option</select>
+					</div>
+					<div class='input-group mx-1'>
+						<div class='input-group-prepend'><label for='equipment' class='input-group-text'>Equipment:</label></div>
+						<select id='equipment' class='custom-select'>$equipment_option</select>
+					</div>
+					<button class='form-control btn btn-outline-primary mx-1' onclick='reserveEquipment(); return false;'>Make Reservation</button>
 				
 				</form>";
 				

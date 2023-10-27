@@ -91,9 +91,9 @@ $printJobs = $printerDao->getPrintJobs();
                     // $dateUpdated = $p->getDateUpdated();
                                         
 
-                    $buttons = "<button id='delete$printJobID' onclick='deletePrint(\"$printJobID\", \"$name\", \"$stlFileName\")'><i class='fas fa-fw fa-trash'></i></button>";
+                    $buttons = "<button id='delete$printJobID' onclick='deletePrint(\"$printJobID\", \"$name\", \"$stlFileName\")' class='btn btn-outline-danger mr-1'><i class='fas fa-fw fa-trash'></i></button>";
 					if (!$completePrintDate)
-						$buttons .= "<button id='process$printJobID' onclick='processPrint(\"$printJobID\", \"$userID\", \"$name\", \"$stlFileName\")'><i class='fas fa-fw fa-thumbs-up'></i></button>";
+						$buttons .= "<button id='process$printJobID' onclick='processPrint(\"$printJobID\", \"$userID\", \"$name\", \"$stlFileName\")' class='btn btn-outline-success'><i class='fas fa-fw fa-thumbs-up'></i></button>";
 
                     // Show that no notes were left if necessary
                     if($customerNotes == '') $customerNotes = '<p style="text-align:center;">--</p>';

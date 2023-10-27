@@ -26,12 +26,13 @@ $js = array(
 	'assets/Madeleine.js/src/Madeleine.js',
 );
 
+$title = '3D Print Submission';
+
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/userHtml.php';
 include_once PUBLIC_FILES . '/modules/submissionPage.php';
 
-$title = '3D Print Submission';
 $printerDao = new PrinterDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
 $validFile = false;
@@ -67,7 +68,7 @@ $printTypeIdGetter = function ($printType) {
 
 	function Upload(action, id) {
 
-		var html = '<B>LOADING</B>';
+		var html = 'LOADING...';
 		// $('#uploadTextDiv').html(html).css('visibility','visible');
 		$('#fileFeedback').text(html);
 		var file_data = $('#uploadFileInput').prop('files')[0]
@@ -105,56 +106,52 @@ $printTypeIdGetter = function ($printType) {
 	}
 </script>
 
+<br /><br /><br />
 
 <div class="container-fluid">
-	<br /><br /><br />
-	<h1>3D Print Submission Form</h1>
-	To check your currently queued or finished prints, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
-
-	Using this form you can upload a 3D model to be created. Once a file is uploaded, we will review the model and email you with the cost to print. 
-	<br> Once you approve the charge, we will print the model and it can be picked up during store hours or in the TekBoxes after store hours (If the print fits).
-	<br>Be aware that our 3d printer build plate dimensions are 280 mm x 280 mm x 250mm (about the size of an average textbook and about the height of a piece of paper), <br> so we can only accomodate prints within those bounds.
-	<br> We only process prints during store hours, please be aware that there might also be other prints in queue.
-
-	<br /><br />
-	<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">
-		Printing FAQs
-	</button>
-	<br /><br />
-	<div class="collapse" id="collapseExample">
-		<div class="card card-body">
-			<i>Q: How big can your printer print?</i> <br />
-			A: Within 280 mm x 280 mm x 250mm <br />
-			<br />
-			<i>Q: How thick should my part's walls be?</i><br />
-			A: This is not a simple answer, as it depends on the size of the wall and the strength needed. We recommend at least .1" thick walls when feasible.<br />
-			<br />
-			<i>Q: How can I keep my printing costs down?</i>
-			<br />
-			A: One hidden cost often overlooked is the support material. To print an object with an 'overhang' the printer will insert a softer support material as it builds. This support will be from the bottom up until the overhang is reached often increasing the amount of material used by 10x. The best design methodology is to try to think of everything as a bowl where it be be built of the open side up.<br />
-
-		</div>
-
-	</div>
-	<p>If you would like to pay via credit card, after confirmation we will reply with instructions on how to submit payment.</p>
-	<p class="text-danger">NOTE We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p>
-
-
 	<div class="row">
+		<div class="col-sm-6">
+			<h1>3D Print Submission Form</h1>
+			To check your currently queued or finished prints, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
+
+			<p>Using this form, you can upload a 3D model to be printed. Once you upload a file, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model and it can be picked up during store hours or in the TekBoxes after store hours (if the print fits). We only process prints during store hours; please be aware that there might also be other prints in queue.
+				<br>Be aware that our 3d printer build plate dimensions are 280 mm x 280 mm x 250mm (about the size of an average textbook and about the height of a piece of paper), so we can only accomodate prints within those bounds.
+				<br>If you would like to pay via credit card, we will reply with instructions on how to submit payment when we confirm your model.
+			</p>
+			<!-- <p class="text-danger">NOTE: We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p> -->
+			<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseExample">
+				Printing FAQs
+			</button>
+			<br /><br />
+			<div class="collapse" id="collapseExample">
+				<div class="card card-body">
+					<i>Q: How big can your printer print?</i> <br /> A: Within 280 mm x 280 mm x 250mm <br /><br />
+					<i>Q: How thick should my part's walls be?</i><br /> A: This is not a simple answer, as it depends on the size of the wall and the strength needed. We recommend at least .1" thick walls when feasible.<br /><br />
+					<i>Q: How can I keep my printing costs down?</i><br /> A: One hidden cost often overlooked is the support material. To print an object with an 'overhang' the printer will insert a softer support material as it builds. This support will be from the bottom up until the overhang is reached often increasing the amount of material used by 10x. The best design methodology is to try to think of everything as a bowl where it be be built of the open side up.<br />
+				</div>
+			</div>
+		</div>
 		<div class="col-sm-6">
 			<?php renderUserFixedInput($user) ?>
 
-			Which Printer would you like to print on?: <br />
+			<b>Payment Method</b>
+			<br />
+			<?php renderPaymentForm() ?>
+			<br />
 
+			<b>Select Material</b>
+			<br />
+			<select id="printTypeSelect" name="printTypeSelect" class="custom-select">
+			</select>
+			<br />
+			<br />
+
+			<b>Select Printer</b>
+			<br />
 			<?php
 			renderSelector($printers, $printerIdGetter, $printerNameGetter, "printerSelect");
 			?>
-
-			What Print type would you like?: <br />
-
-			<select id="printTypeSelect" name="printTypeSelect">
-			</select>
-
+			<br />
 
 			<script>
 				/*
@@ -218,7 +215,7 @@ $printTypeIdGetter = function ($printType) {
 				});
 			</script>
 
-			<br /><b>Quantity</b><br />
+			<b>Quantity</b><br />
 			<select id="quantitySelect" class="custom-select" name="quantity" form="mainform">
 				<option value="1">1</option>
 				<option value="2">2</option>
@@ -232,19 +229,18 @@ $printTypeIdGetter = function ($printType) {
 				<option value="10">10</option>
 			</select>
 			<br />
-			<b>Payment Method:</b>
 			<br />
-			<?php renderPaymentForm() ?>
 
 			<b>Notes</b><br />
 			Any special instructions or deadlines that you have should be entered here<br />
 			<textarea class="form-control" id="specialNotes" name="notes" rows="4" cols="50"></textarea><br />
-		</div>
-		<div class="col-sm-6">
+			
 			<div id="targetDiv"></div>
 			<label id="fileFeedback"></label>
 			<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".stl"><!-- NOT multiple; Upload() fn only handles 1-->
 			<div id="uploadTextDiv"></div>
+			
+			<br />
 			<button id="submit3DPrintBtn" class="btn btn-primary">Submit</button>
 		</div>
 

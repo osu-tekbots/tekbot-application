@@ -73,7 +73,7 @@ function specialDeskNumber($deskNum) {
             snackbar(res.message, 'Ticket Resolved');
 
             // Rest of function is updating the page to display same as reload
-            document.querySelector('#row'+id+' > .btn-warning').remove();
+            document.querySelector('#row'+id+' > .btn-danger').remove();
             document.querySelector('#row'+id+' > .btn-success').remove();
             // TODO: Change 'created' time to 'resolved' time
             
@@ -186,9 +186,9 @@ function specialDeskNumber($deskNum) {
                     echo '<div class= "col-sm-1" style="margin-left: 10px; margin-right: 10px;"><b>Created:</b> ' .$created . '</div>';
                     echo '<div class="col"> '.$issue.'</div>';
                     //echo '<button class="btn col-sm-1" id="button'.$ticketId.'" style="border: 2px solid black;margin:5px; height: 60px; width: 80px;"><a href="./employeeTicketDetail.php?key='.$ticketId.'"> Details</a></button>';
-                    echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "border: 1px solid black !important; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
-                    echo '<button class="btn btn-warning" id="button" style="background-color: #d1ffcb; border: 1px solid black !important;" onclick="resolveTicket(\''.$ticketId.'\')">Resolve</button>';
-                    echo '<button class="btn btn-success" id="button" style="background-color: #ffcccb; color: black !important; border: 1px solid black !important;" onclick="escalateTicket(\''.$ticketId.'\')">Escalate</button>';
+                    echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "margin: 0 5px; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
+                    echo '<span><button class="btn btn-danger" id="button" style="margin: 0 5px; padding-top: 12px; padding-bottom: 12px;" onclick="resolveTicket(\''.$ticketId.'\')">Resolve</button></span>';
+                    echo '<span><button class="btn btn-success" id="button" style="margin: 0 5px; padding-top: 12px; padding-bottom: 12px;" onclick="escalateTicket(\''.$ticketId.'\')">Escalate</button></span>';
                     
                     echo '</div>';
                     echo '<hr>';
@@ -229,9 +229,9 @@ function specialDeskNumber($deskNum) {
                     echo '<div class= "col-sm-1" style="margin-left: 10px; margin-right: 10px;"><b>Created:</b> ' .$created . '</div>';
                     echo '<div class="col"> '.$issue.'</div>';
                     //echo '<button class="btn col-sm-1" id="button'.$ticketId.'" style="border: 2px solid black;margin:5px; height: 60px; width: 80px;"><a href="./employeeTicketDetail.php?key='.$ticketId.'"> Details</a></button>';
-                    echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "border: 1px solid black !important; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
-                    echo '<button class="btn btn-warning" id="button" style="background-color: #d1ffcb; border: 1px solid black !important;" onclick="resolveTicket(\''.$ticketId.'\')">Resolve</button>';
-                    echo '<button class="btn btn-success" id="button" style="background-color: #ffcccb; color: black !important; border: 1px solid black !important;" onclick="escalateTicket(\''.$ticketId.'\')">Escalate</button>';
+                    echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "margin: 0 5px; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
+                    echo '<span><button class="btn btn-danger" id="button" style="margin: 0 5px; padding-top: 12px; padding-bottom: 12px;" onclick="resolveTicket(\''.$ticketId.'\')">Resolve</button></span>';
+                    echo '<span><button class="btn btn-success" id="button" style="margin: 0 5px; padding-top: 12px; padding-bottom: 12px;" onclick="escalateTicket(\''.$ticketId.'\')">Escalate</button></span>';
                     
                     echo '</div>';
                     echo '<hr>';
@@ -271,7 +271,7 @@ function specialDeskNumber($deskNum) {
                 echo '<div class= "col-sm-1" style="margin-left: 10px; margin-right: 10px;"><b>Resolved:</b> ' .$resolved . '</div>';
                 echo '<div class="col">'.$issue.'</div>';
                 //echo '<button class="btn col-sm-1" id="button' .$ticketId. '" style="border: 2px solid black;margin:5px; height: 60px; width: 80px;""><a href="./employeeTicketDetail.php?key='.$ticketId.'"> Details</a></button>';
-                echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "border: 1px solid black !important; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
+                echo '<a href="./employeeTicketDetail.php?key='.$ticketId.'"><button class="btn btn-dark" id="button" style= "margin: 0 5px; padding-top: 12px; padding-bottom: 12px;">Details</button></a>';
                 echo '</div>';
                 echo '<hr>';
             }

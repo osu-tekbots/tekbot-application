@@ -155,7 +155,7 @@ function term2string($term){
 // Renders the course list dropdown 
 function renderCourseNames(){
     echo '
-    <select name="course" class="form-control">
+    <select name="course" class="custom-select">
         <option value=""></option> 
         <option value="ENGR103Udell">ENGR103 (C. Udell)</option>
         <option value="ENGR103Heer">ENGR103 (D. Heer)</option>

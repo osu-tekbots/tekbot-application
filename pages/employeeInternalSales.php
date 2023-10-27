@@ -71,7 +71,7 @@ $sales = $internalSalesDao->getSales();
 				</div>
 			";
 			echo "
-			<div class='admin-paper'>
+			<div class='admin-paper' style='overflow-x: scroll'>
 				<h3>Transactions:</h3><button id='billAllInternalSales' class= 'btn btn-primary btn-lg float-right mb-2' onclick='billAllInternalSales();'>Bill All</button>
 					<table class='table' id='internalSales'>
 						<thead>
@@ -84,7 +84,7 @@ $sales = $internalSalesDao->getSales();
 								<th>Buyer</th>
 								<th>Seller</th>
 								<th>Description</th>
-								<th>Billed?</th>
+								<th>Bill Date</th>
 								<th>Delete</th>
 							</tr>
 						</thead>
@@ -105,7 +105,7 @@ $sales = $internalSalesDao->getSales();
                 $buyer = $s->getBuyer();
                 $seller = $s->getSeller();
                 $description = $s->getDescription();
-                $processed = $s->getProcessed();
+                $processed = $s->getProcessed() == '0000-00-00 00:00:00' ? '<i>Not billed</i>' : $s->getProcessed();
                     
 				echo "
 				<tr>
@@ -113,12 +113,12 @@ $sales = $internalSalesDao->getSales();
 					<td>$timestamp</td>
 					<td><a href='mailto:$email'>$email</a></td>
 					<td>$account</td>
-					<td>$amount</td>
+					<td>$$amount</td>
 					<td>$buyer</td>
 					<td>$seller</td>
 					<td>$description</td>
 					<td>$processed</td>
-					<td><button id='deleteSale' onclick='deleteSale($saleId);'><i class='fas fa-fw fa-trash'></i></button></td>
+					<td><button id='deleteSale' onclick='deleteSale($saleId);' class='btn btn-outline-danger'><i class='fas fa-fw fa-trash'></i></button></td>
 				</tr>
 				";
                 }

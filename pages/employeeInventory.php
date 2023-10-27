@@ -124,7 +124,7 @@ foreach ($types as $t){
 
 $addpartHTML = "";
 $addpartHTML .= "<div class='form-row'>
-					<div class='col'><select class='form-control' id='addtype'><option value='0'></option>$types_select</select></div>
+					<div class='col'><select class='custom-select' id='addtype'><option value='0'></option>$types_select</select></div>
 					<div class='col'><input type='text' id='adddescription' class='form-control' placeholder='Part/Kit Description'></div>
 					<button id='addpart' class='btn btn-primary' onclick='addpart();'>Add Part/Kit</button>
 				  </div><BR>";
@@ -151,7 +151,7 @@ function printKitsUsedInt($kits) {
 
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
-			<div class='admin-paper'>
+			<div class='admin-paper' style="overflow-x: scroll">
             <?php 
 
                echo $addpartHTML;
@@ -177,10 +177,17 @@ function printKitsUsedInt($kits) {
 					}
 					
 					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived ':'')." ".($p->getStocked() == 1 ?'':'nonstock ')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
-						<td>$type</td><td>$description<BR>Stock: $stocknumber</td><td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td><td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".($p->getArchive() == 1 ?'Archived':'')."</td><td>"."-".$kitsUsedInStr."</td><td>\$".number_format(floatval($lastPrice),2)."</td><td>".studentPrice($lastPrice,2)."</td>
+						<td>$type</td>
+						<td>$description<BR>Stock: $stocknumber</td>
+						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
+						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
+						<td>".($p->getArchive() == 1 ?'Archived':'')."</td>
+						<td>"."-".$kitsUsedInStr."</td>
+						<td>\$".number_format(floatval($lastPrice),2)."</td>
+						<td>".studentPrice($lastPrice,2)."</td>
 						<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
-						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td><td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
+						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td>
+						<td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
                 }
 				
 				$log .= "Time spent in Loop: " . time_point() . " mS<BR>";
@@ -311,7 +318,7 @@ $('#InventoryTable').DataTable({
 		"autoWidth": true,
 		'scrollX':false, 
 		'paging':false, 
-		'order':[[0, 'asc'], [1, 'asc']],
+		'order':[[4, 'asc'], [0, 'asc'], [1, 'asc']],
 		"columns": [
 			null,
 			null,

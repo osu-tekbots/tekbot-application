@@ -96,7 +96,7 @@ $typeSelect .= "</select>";
 
 
 
-$kitsSELECT = "<form action=''><div class='form-row print-hide'><div class='form-group col-sm-9'><select name='stocknumber'>";
+$kitsSELECT = "<form action=''><div class='form-row print-hide'><div class='form-group col-sm-9'><select name='stocknumber' class='custom-select'>";
 $tempkits = $inventoryDao->getInventoryByTypeId(1); //Gets Kits
 $kits = array();
 $kitsarchived = array();

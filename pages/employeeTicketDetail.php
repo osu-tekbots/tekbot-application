@@ -44,7 +44,6 @@ $userImg = $ticket->getImage();
 
 $station = $stationDao->getStationById($ticket->getStationId());
 
-
 $history = $ticketDao->getStationHistory($station->getId());
 
 $historyContents = array();
@@ -89,9 +88,10 @@ $outputHTML .=
 		<br>
 	</form>';
 if($ticket->getStatus() != 1) {
+	// ADDED btn-success and btn-danger so we can remove other stylings
 	$outputHTML .=  '<div id="submit-buttons" style="display:flex; flex-direction: row">';
-	$outputHTML .=  '<button class="btn col-sm-1" id="button" style="background-color: #d1ffcb; border: 2px solid black; margin:10px; padding:20px 60px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="resolveTicket('.$key.')">Resolve</button>';
-	$outputHTML .=  '<button class="btn col-sm-1" id="button" style="background-color: #ffcccb; border: 2px solid black; margin: 10px; padding:20px 60px; font-size: 20px; display: flex; align-items: center; justify-content: center;" onclick="escalateTicket('.$key.')">Escalate</button>';
+	$outputHTML .=  '<button class="btn btn-success" id="button" style="margin: 10px; padding-top: 15px; padding-bottom: 15px" onclick="resolveTicket('.$key.')">Resolve</button>';
+	$outputHTML .=  '<button class="btn btn-danger" id="button" style="margin: 10px; padding-top: 15px; padding-bottom: 15px" onclick="escalateTicket('.$key.')">Escalate</button>';
 	$outputHTML .=  '</div>';
 }
 $outputHTML .=  '<h4>Station History</h4><ul>';
@@ -105,10 +105,28 @@ $outputHTML .=  '</div>';
 $outputHTML .= ' <div id="stationInfo" class = "flex-fill col-6">';
 $outputHTML .= '<h4>Room Layout</h4>';
 $outputHTML .= '<img src="../../labs/image/map/' . $station->getRoom()->getMap() . '" class="img-responsive" width="400" >';
-$outputHTML .= '<h4>Room Equipment</h4>';
+
+
+
+$outputHTML .= '<h4>Station Equipment</h4>';
+$equipment = $stationDao->getStationEquipment($station->getId(), 1);
+
+if ($equipment) {
+	$outputHTML .= '<ul>';
+	foreach ($equipment as $e) {
+		$outputHTML .= '<li>'.$e->getModel().'</li>';
+	}
+	$outputHTML .= '</ul>';
+}
+
+// TODO need to add station equipment
+// add link to edit room page
+// employeeEditLabs.php?roomid=:roomid
+$path = 'employeeEditLabStation.php?stationid=' . $station->getId();
+$outputHTML .= '<a href="'.$path.'"><button class="btn btn-primary">Edit Station Equipment</button></a>';
+//$outputHTML .= '<button class="btn btn-primary" onclick="location.href='.$path.'">Edit Station Equipment</button>';
 
 $outputHTML .=  '</div></div>';
-
 $outputHTML .=  '</div>'; //close admin paper div
 ?>
 

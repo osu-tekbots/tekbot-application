@@ -187,26 +187,26 @@ function emptyBox(id){
 							</div>';
 							
 					if ($fillDate == '0000-00-00 00:00:00'){ //Box is available for use
-						echo '<div class="form-group col-sm-4">User:<select id="name'.$boxKey.'" class="form-control" >'.$options.'</select></div>';
+						echo '<div class="form-group col-sm-4">User:<select id="name'.$boxKey.'" class="custom-select" >'.$options.'</select></div>';
 						echo '<div class="form-group col-sm-4">Contents:<input type="text" class="form-control" id="contents'.$boxKey.'"></div>';
-						echo '<button id="button'.$boxKey.'" onclick="fillBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Fill Box</button>';
+						echo '<button id="button'.$boxKey.'" onclick="fillBox(\''.$boxKey.'\')" class="btn btn-outline-success m-2 col-sm-1">Fill Box</button>';
 					} else {
 						if ($pickupDate != '0000-00-00 00:00:00'){ // This is likely available but we need to check.
 							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR><b>Picked Up: ' .$pickupDate.'</b><BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
 							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
-							echo '<button onclick="resetBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Reset Box</button>';
+							echo '<button onclick="resetBox(\''.$boxKey.'\')" class="btn btn-outline-primary m-2 col-sm-1">Reset Box</button>';
 							if ($locked == 1)
-								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Unlock Box</button>';
+								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Unlock Box</button>';
 							else
-								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Lock Box</button>';
+								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Lock Box</button>';
 						} else { // Box still has something in it (for sure)
 							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR>Box Filled: '.((time() - strtotime($fillDate)) > (2*24*60*60) ? "<span style='font-weight: bold;color:red !important;'>$fillDate</span>" : $fillDate).'<BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
 							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
-							echo '<button onclick="emptyBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Empty Box</button>';
+							echo '<button onclick="emptyBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Empty Box</button>';
 							if ($locked == 1)
-								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Unlock Box</button>';
+								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Unlock Box</button>';
 							else
-								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn col-sm-1" style="border: 2px solid black;margin:5px;">Lock Box</button>';
+								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Lock Box</button>';
 						}
 					}
 					echo '</div>';

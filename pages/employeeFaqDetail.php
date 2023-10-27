@@ -69,7 +69,7 @@ if ($faq) {
                 <h5>Category:</h5>
                 <?php 
                 echo '
-                <select name="category" class="form-control">
+                <select name="category" class="custom-select">
                     <option value=""></option>
                     <option '. ($category == '3D Printing' ? 'selected' : '') .' value="3D Printing">3D Printing</option>
                     <option '. ($category == 'Laser Cutting' ? 'selected' : '') .' value="Laser Cutting">Laser Cutting</option>
@@ -80,6 +80,7 @@ if ($faq) {
                 </select>
                 ';
                 ?>
+                <br>
                 <br>
                 <h5>Question:</h5>
                 <textarea class="form-control" rows="3" type="text" name="question"><?php echo ($question); ?></textarea>

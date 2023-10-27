@@ -86,9 +86,9 @@ $printJobs = $laserDao->getLaserJobs();
                     $quantity = $p->getQuantity();
                     // $dateUpdated = $p->getDateUpdated();
 
-                    $buttons = "<button id='delete$laserJobID' onclick='deleteCut(\"$laserJobID\", \"$name\", \"$dxfFileName\")'><i class='fas fa-fw fa-trash'></i></button>";
+                    $buttons = "<button id='delete$laserJobID' onclick='deleteCut(\"$laserJobID\", \"$name\", \"$dxfFileName\")' class='btn btn-outline-danger mr-1 mb-1'><i class='fas fa-fw fa-trash'></i></button>";
                     if(!$completeCutDate)
-                        $buttons .= "<button id='process$laserJobID' onclick='processCut(\"$laserJobID\", \"$userID\", \"$name\", \"$dxfFileName\")'><i class='fas fa-fw fa-thumbs-up'></i></button>";
+                        $buttons .= "<button id='process$laserJobID' onclick='processCut(\"$laserJobID\", \"$userID\", \"$name\", \"$dxfFileName\")' class='btn btn-outline-success mr-1'><i class='fas fa-fw fa-thumbs-up'></i></button>";
                                         
                     // Show that no notes were left if necessary
                     if($customerNotes == '') $customerNotes = '<p style="text-align:center;">--</p>';
