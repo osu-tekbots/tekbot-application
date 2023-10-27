@@ -18,7 +18,7 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 allowIf(verifyPermissions('employee'), 'index.php');
 
 
-$title = 'Employee Lockers';
+$title = 'Employee Locker Messages';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',

@@ -56,8 +56,15 @@ class LockerActionHandler extends ActionHandler {
 		$locker = $this->lockerDao->getLockerByID($body['lockerId']);
 		$message = $this->messageDao->getMessageByID($body['messageId']);
 
-		 // Update the Message
+        // Get locker due date
+        $thisMonth = intval(date('m'));
+        $thisYear = intval(date('Y'));
+        $dateString = "September 1 ".($thisYear + ($thisMonth < 9 ? 0 : 1));
+        $dueDate = new \DateTime($dateString);
+
+        // Update the locker
         $locker->setUserId($body['userId']);
+        $locker->setDueDate($dueDate);
         
         $ok = $this->lockerDao->updateLocker($locker);
         if(!$ok) {
@@ -97,6 +104,7 @@ class LockerActionHandler extends ActionHandler {
 
         // Update the Message
         $locker->setUserId('');
+        $locker->setDueDate(NULL);
         
         $ok = $this->lockerDao->updateLocker($locker);
         if(!$ok) {
@@ -144,6 +152,52 @@ class LockerActionHandler extends ActionHandler {
         $this->respond(new Response(Response::OK, 'Reminder Email Sent'));
 
     }
+	
+	/**
+     * Renews a locker for a user in the database based on data in an HTTP request.
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleRenewLocker() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('lockerId');
+		$this->requireParam('userId');
+        $body = $this->requestBody;
+
+        $messageID = 'ffhipohqwirytsey';
+
+		$user = $this->userDao->getUserbyId($body['userId']);
+		$locker = $this->lockerDao->getLockerByID($body['lockerId']);
+		$message = $this->messageDao->getMessageByID($messageID);
+
+        // Get new locker due date
+        $thisMonth = intval(date('m'));
+        $thisYear = intval(date('Y'));
+        $dateString = "September 1 ".($thisYear + ($thisMonth < 9 ? 0 : 1));
+        $dueDate = new \DateTime($dateString);
+
+        // Update the locker
+        $locker->setDueDate($dueDate);
+
+        $ok = $this->lockerDao->updateLocker($locker);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update Due Date'));
+        }
+        
+		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+        $ok = $mailer->sendLockerEmail($user, $locker, $message);
+		if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email Send Failed'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Locker Renewed'));
+
+    }
 
    
     /**
@@ -172,6 +226,10 @@ class LockerActionHandler extends ActionHandler {
 
 			case 'returnLocker':
                 $this->handleReturnLocker();
+				break;
+
+            case 'renewLocker':
+                $this->handleRenewLocker();
                 break;
 
             default:

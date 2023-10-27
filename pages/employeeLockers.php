@@ -47,59 +47,76 @@ foreach ($users as $user){
 
 ?>
 <script type='text/javascript'>
-function remindLocker(id){
-	var userid = $('#name'+id).attr("value");
-	
-	let content = {
-		action: 'remindLocker',
-		userId: userid,
-		messageId: 'dsfipuwitpjnvnz7',
-		lockerId: id
+	function renewLocker(id){
+		var userid = $('#name'+id).attr("value");
+		
+		let content = {
+			action: 'renewLocker',
+			userId: userid,
+			lockerId: id
+		}
+		
+		api.post('/lockers.php', content).then(res => {
+			snackbar(res.message, 'success');
+			$('#row'+id).html('');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
 	}
-	
-	api.post('/lockers.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-		$('#row'+id).html('');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
 
-function returnLocker(id){
-	var userid = $('#name'+id).attr("value");
-	
-	let content = {
-		action: 'returnLocker',
-		userId: userid,
-		messageId: 'ffhipohqwirytsre',
-		lockerId: id
+	function remindLocker(id){
+		var userid = $('#name'+id).attr("value");
+		
+		let content = {
+			action: 'remindLocker',
+			userId: userid,
+			messageId: 'dsfipuwitpjnvnz7',
+			lockerId: id
+		}
+		
+		api.post('/lockers.php', content).then(res => {
+			snackbar(res.message, 'success');
+			$('#row'+id).html('');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
 	}
-	
-	api.post('/lockers.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-		$('#row'+id).html('');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
 
-function checkoutLocker(id){
-	var userid = $('#name'+id).children(":selected").attr("value");
-	
-	let content = {
-		action: 'checkoutLocker',
-		userId: userid,
-		messageId: 'oigahsgipeqrhglk',
-		lockerId: id
+	function returnLocker(id){
+		var userid = $('#name'+id).attr("value");
+		
+		let content = {
+			action: 'returnLocker',
+			userId: userid,
+			messageId: 'ffhipohqwirytsre',
+			lockerId: id
+		}
+		
+		api.post('/lockers.php', content).then(res => {
+			snackbar(res.message, 'success');
+			$('#row'+id).html('');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
 	}
-	
-	api.post('/lockers.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-		$('#row'+id).html('');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
+
+	function checkoutLocker(id){
+		var userid = $('#name'+id).children(":selected").attr("value");
+		
+		let content = {
+			action: 'checkoutLocker',
+			userId: userid,
+			messageId: 'oigahsgipeqrhglk',
+			lockerId: id
+		}
+		
+		api.post('/lockers.php', content).then(res => {
+			snackbar(res.message, 'success');
+			$('#row'+id).html('');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
 </script>
 
 <br/>
@@ -130,20 +147,25 @@ function checkoutLocker(id){
 
                     if($free == 1 && $status == 1 && $userId == ''){
 						echo '<div class="form-group row" id="row'.$lockerId.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">
-								<div class="col-sm-1" style="text-align:right;"><h2>'.$lockerNumber.':</h2></div>
-								<div class="form-group col-sm-4"><select id="name'.$lockerId.'" class="form-control" >'.$options.'</select></div>
-								<button onclick="checkoutLocker(\''.$lockerId.'\')" class="btn col-sm-2" style="border: 2px solid black;">Check Out</button>
+								<div class="col-lg-1" style="text-align:right;"><h2>'.$lockerNumber.':</h2></div>
+								<div class="form-group col-sm-4"><select id="name'.$lockerId.'" class="custom-select" >'.$options.'</select></div>
+								<div class="col-sm-4"><button onclick="checkoutLocker(\''.$lockerId.'\')" class="btn btn-outline-success">Check Out</button></div>
 								</div>';
 					}else{
 						$user = $userDao->getUserByID($userId);
 						if ($user != false){
 							$email = $user->getEmail();
+							$dueDate = $l->getDueDate()?->format("M. Y");
 							echo '<div class="form-group row" id="row'.$lockerId.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">
-								<div class="col-sm-1" style="text-align:right;"><h2>'.$lockerNumber.':</h2></div>
-								<div class="col-sm-4"><h2><a href="mailto:'.$email.'">'. Security::HtmlEntitiesEncode($user->getFirstName()). ' ' . Security::HtmlEntitiesEncode($user->getLastName()) . '</a></h2></div>
-								<div class="col-sm-2"><input type="hidden" id="name'.$lockerId.'" value="'.$userId.'"></div>
-								<button onclick="returnLocker('.$lockerId.')" class="btn col-sm-2" style="border: 2px solid black;">Return Locker</button>&nbsp;&nbsp;&nbsp;
-								<button class="btn col-sm-2" style="border: 2px solid black;" onclick="remindLocker(\''.$lockerId.'\');">Renewal Reminder</button>
+								<div class="col-lg-1" style="text-align:right;"><h2>'.$lockerNumber.':</h2></div>
+								<div class="col-sm-2"><h2><a href="mailto:'.$email.'">'. Security::HtmlEntitiesEncode($user->getFirstName()). ' ' . Security::HtmlEntitiesEncode($user->getLastName()) . '</a></h2></div>
+								<div class="d-none"><input type="hidden" id="name'.$lockerId.'" value="'.$userId.'"></div>
+								<div class="col-sm-2"><h4>Due '.$dueDate.'</h4></div>
+								<div class="col-sm">
+									<button onclick="returnLocker('.$lockerId.')" class="btn btn-outline-danger">Return Locker</button>
+									<button class="btn btn-outline-warning" onclick="remindLocker(\''.$lockerId.'\');">Send Renewal Reminder</button>
+									<button class="btn btn-outline-success" onclick="renewLocker(\''.$lockerId.'\');">Renew Locker</button>
+								</div>
 								</div>';
 						} else {
 							echo '<div  class="row bg-danger"  id="row'.$lockerId.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">

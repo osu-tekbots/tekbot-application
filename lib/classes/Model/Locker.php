@@ -14,7 +14,7 @@ class Locker {
 	private $location;
 	private $free;
 	private $userId;
-	
+	private $dueDate;
 
     /**
      * Creates a new instance of an equipment reservation.
@@ -88,6 +88,14 @@ class Locker {
 	
 	public function setUserId($data){
 		$this->userId = $data;
+	}
+	
+	public function getDueDate(){
+		return $this->dueDate;
+	}
+	
+	public function setDueDate($data){
+		$this->dueDate = $data;
 	}
 }
 ?>

@@ -85,7 +85,8 @@ class LockerDao {
                 status = :status,
                 location = :location,
                 userId = :userId,
-                free = :free
+                free = :free,
+                dueDate = :dueDate
             WHERE ID = :id
             ';
             $params = array(
@@ -95,7 +96,8 @@ class LockerDao {
                 ':status' => $locker->getStatus(),
                 ':location' => $locker->getLocation(),
                 ':userId' => $locker->getUserId(),
-                ':free' => $locker->getFree()
+                ':free' => $locker->getFree(),
+                ':dueDate' => QueryUtils::FormatDate($locker->getDueDate())
             );
             $this->conn->execute($sql, $params);
             return true;
@@ -147,9 +149,12 @@ class LockerDao {
 		if(isset($row['free'])){
 			$locker->setFree($row['free']);
 		}
-       if(isset($row['userId'])){
+        if(isset($row['userId'])){
 			$locker->setUserId($row['userId']);
 		}
+        if(isset($row['dueDate'])) {
+            $locker->setDueDate(new \DateTime($row['dueDate']));
+        }
        
         return $locker;
     }
