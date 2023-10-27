@@ -22,7 +22,7 @@ $FAQs = $FaqDao->getAllFaqs();
  <?php 
 	if ($isEmployee){
 		echo '
-		<a class="btn btn-primary btn-lg" href="pages/employeeFaqDetail.php">Add new FAQ</a>
+		<a class="btn btn-info btn-lg" href="pages/employeeFaqDetail.php">Add new FAQ</a>
 		<br><br>
 		';
 	}
@@ -47,7 +47,7 @@ if (!empty($FAQs)){
 		<div class="panel panel-primary">
 		<div class="panel-heading" role="tab" id="heading'.$count.'">
 		  <h4 class="panel-title">
-		  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse'.$count.'" aria-expanded="false" aria-controls="collapse'.$count.'">
+		  <a class="text-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse'.$count.'" aria-expanded="false" aria-controls="collapse'.$count.'">
 			';
 
 			
@@ -56,13 +56,13 @@ if (!empty($FAQs)){
 		  </a>
 		  ';
 		  if ($isEmployee){
-			echo '<a style="color:blue" href="./pages/employeeFaqDetail.php?id='.$f->getFaqID().'">Edit</a>';
+			echo '<a class="text-info" href="./pages/employeeFaqDetail.php?id='.$f->getFaqID().'">Edit</a>';
 		}
 		echo '
 		</h4>
 		</div>
 		<div id="collapse'.$count.'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading'.$count.'">
-		  <div class="panel-body">
+		  <div class="panel-body" style="color: #bbb">
 			'.$f->getAnswer().'
 		  </div>
 		</div>
@@ -136,7 +136,6 @@ $(document).ready(function() {
 //  This function disables the enter button
 //  because we're using a form element to filter, if a user
 //  pressed enter, it would 'submit' a form and reload the page
-//  Probably not needed here on Codepen, but necessary elsewhere
 // 
 $('.noEnterSubmit').keypress(function(e) {
 if (e.which == 13) e.preventDefault();

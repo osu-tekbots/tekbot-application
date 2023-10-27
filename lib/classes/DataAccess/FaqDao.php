@@ -61,9 +61,9 @@ class FaqDao {
      */
     public function getAllFaqs() {
         try {
-            $sql = '
-            SELECT * 
-            FROM general_faq
+            $sql = 'SELECT * 
+                FROM general_faq
+                ORDER BY category ASC, id ASC
             ';
             $results = $this->conn->query($sql);
 
