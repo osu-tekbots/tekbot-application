@@ -39,7 +39,7 @@ class InventoryDao {
 				FROM `tekbots_parts`
 				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
 				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
-				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				ORDER BY tekbots_parts.archive ASC, tekbots_types.Description ASC, tekbots_parts.Name ASC
 				';
 				$results = $this->conn->query($sql);
 			} else {
