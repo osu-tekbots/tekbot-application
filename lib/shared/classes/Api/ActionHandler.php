@@ -76,6 +76,26 @@ class ActionHandler {
     }
 
     /**
+     * Allows the API call to continue if the user should have access, or sends an appropriate error message
+     * 
+     * Calls `verifyPermissions()` in authenticate.php to ensure the user has proper access for their desired action
+     * 
+     * @param string|string[] $allowedAccessLevels  The access level(s) that should be accepted. Options are:
+     *      * "public"
+     *      * "user"
+     *      * "employee"
+     * 
+     * @return bool|die True if the person who initiated the current request has one of the given access levels; exits the script otherwise
+     */
+    public function verifyAccessLevel($allowedAccessLevels) {
+        if(!verifyPermissions($allowedAccessLevels)) {
+            $this->respond(new Response(Response::UNAUTHORIZED, 'Access Denied'));
+        }
+
+        return true;
+    }
+
+    /**
      * Sends the provided response object to the client.
      * 
      * This function will exit the script after invocation.
@@ -84,7 +104,11 @@ class ActionHandler {
      * @return void
      */
     public function respond($response) {
-        $this->logger->info('Sending HTTP response: ' . $response->getCode() . ': ' . $response->getMessage());
+        if($response->getCode() < 300) {
+            $this->logger->info('Sending HTTP response: ' . $response->getCode() . ': ' . $response->getMessage());
+        } else {
+            $this->logger->warn('Sending HTTP response: ' . $response->getCode() . ': ' . $response->getMessage());
+        }
         \header('Content-Type: application/json; charset=UTF-8');
         $code = $response->getCode();
         header("X-PHP-Response-Code: $code", true, $code);
