@@ -33,7 +33,10 @@ if(isset($_SESSION['site']) && $_SESSION['site'] == 'tekbot') {
                 $_SESSION['userAccessLevel'] = NULL;
         }
     } else {
-        // Not logged in; don't need to do anything bc there's no user info in $_SESSION
+        // Not logged in; best to make sure everything's clear
+        $_SESSION['site'] = NULL;
+        $_SESSION['userID'] = NULL;
+        $_SESSION['userAccessLevel'] = NULL;
     }
 }
 
