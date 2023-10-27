@@ -186,6 +186,12 @@ function renderEmployeeSidebar() {
             </a>
         </li>
         <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeEmail.php">
+                <i class="far fa-fw fa-paper-plane"></i>
+                <span>Send Email</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://discord.gg/9YFafybAv6">
                 <i class="fab fa-discord"></i>
                 <span>Discord</span>
