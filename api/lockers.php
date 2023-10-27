@@ -21,10 +21,10 @@ $userDao = new UsersDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 $handler = new LockerActionHandler($lockerDao, $userDao, $messageDao, $logger);
 
-// Authorize the request
-if (verifyPermissions(['user', 'employee'])) {
+// Authorize the request -- done within each ActionHandler method as of 9/1/23
+// if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
     $handler->handleRequest();
-} else {
-    $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-}
+// } else {
+    // $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
+// }

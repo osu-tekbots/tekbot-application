@@ -6,7 +6,7 @@ use Email\TekBotsMailer;
 use DataAccess\UserDao;
 
 /**
- * Defines the logic for how to handle AJAX requests made to modify user information.
+ * Defines the logic for how to handle AJAX requests made to modify TekBox information.
  */
 class BoxActionHandler extends ActionHandler {
 
@@ -16,14 +16,15 @@ class BoxActionHandler extends ActionHandler {
 	private $messageDao;
 	
 	/******
-	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
+	$replacements is an array that contains items that should be accessible for emails/template replacement. General things are filled here with overwriting when needed in document
 	***/
 	private $replacements;
 
     /**
-     * Constructs a new instance of the action handler for requests on user resources.
+     * Constructs a new instance of the action handler for requests on TekBox resources.
      *
-     * @param \DataAccess\UsersDao $dao the data access object for users
+     * @param \DataAccess\BoxDao  $boxDao  the data access object for TekBoxes
+     * @param \DataAccess\UserDao $userDao the data access object for users
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
     public function __construct($boxDao, $userDao, $messageDao, $logger)
@@ -42,6 +43,9 @@ class BoxActionHandler extends ActionHandler {
      * @return void
      */
     public function handleFillBox() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('userId');
 		$this->requireParam('boxId');
@@ -54,7 +58,7 @@ class BoxActionHandler extends ActionHandler {
 		$box = $this->boxDao->getBoxById($body['boxId']);
 		$message = $this->messageDao->getMessageByID($body['messageId']);
 
-		 // Update the Message
+        // Update the Message
         $box->setUserId($body['userId']);
         $box->setContents($body['contents']);
         $box->setFillBy($body['fillById']);
@@ -77,6 +81,9 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleResetBox() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
 		$body = $this->requestBody;
@@ -91,6 +98,9 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleLockBox() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
 		$body = $this->requestBody;
@@ -105,13 +115,15 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleLock() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
-		$this->requireParam('uId');
 		$body = $this->requestBody;
         
 		$box = $this->boxDao->getBoxById($body['boxId']);
-		if ($box->getUserId() == $body['uId']){
+		if ($_SESSION['userID'] == $body['uId']){
 			$ok = $this->boxDao->lockBox($body['boxId']);
 			if(!$ok) {
 				$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box not Locked.'));
@@ -123,6 +135,9 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleUnlockBox() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
 		$body = $this->requestBody;
@@ -137,13 +152,15 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleUnlock() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
-		$this->requireParam('uId');
 		$body = $this->requestBody;
         
 		$box = $this->boxDao->getBoxById($body['boxId']);
-		if ($box->getUserId() == $body['uId']){
+		if ($_SESSION['userID'] == $body['uId']){
 			$ok = $this->boxDao->unlockBox($body['boxId']);
 			if(!$ok) {
 				$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box not Unlocked.'));
@@ -154,6 +171,9 @@ class BoxActionHandler extends ActionHandler {
     }
 	
 	public function handleEmptyBox() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('boxId');
 		$this->requireParam('messageId');

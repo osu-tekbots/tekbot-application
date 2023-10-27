@@ -24,12 +24,12 @@ $mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger)
 
 $handler = new InternalSalesActionHandler($internalSalesDao, $mailer, $userDao, $messageDao, $logger);
 
-// Authorize the request
-if (verifyPermissions(['user', 'employee'])) {
+// Authorize the request -- done within each ActionHandler method as of 8/31/23
+// if (verifyPermissions(['user', 'employee'])) {
     // Handle the request
 	$handler->handleRequest();
-} else {
-    $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-}
+// } else {
+    // $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
+// }
 
 ?>

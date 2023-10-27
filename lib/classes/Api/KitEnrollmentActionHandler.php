@@ -39,6 +39,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateEnrollments() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure all the requred parameters are present
         $this->requireParam('htmlData');
         $this->requireParam('termData');
@@ -130,6 +133,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleParseInput() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure all the requred parameters are present
         $this->requireParam('jsonData');
         $count = 1;
@@ -175,6 +181,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleHandoutKitEnrollment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('kid');
         $this->requireParam('status');
 
@@ -214,6 +223,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateSingleEnrollment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure all the requred parameters are present
         $body = $this->requestBody;
         $osuID = $body['idnumber'];
@@ -248,6 +260,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleShowKitsRemaining() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('termID');
         $body = $this->requestBody;
         $kits = getKitEnrollmentsByTerm($body['termID']);
@@ -266,6 +281,10 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleMakeHiddenEquipment() {
+        // Carryover from copying EquipmentActionHandler? -- Noticed 09/01/23
+        /* // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
@@ -284,7 +303,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::OK,
             'Successfully hid equipment'
-        ));
+        )); */
     }
 
     /**
@@ -293,6 +312,10 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleShowEquipment() {
+        // Carryover from copying EquipmentActionHandler? -- Noticed 09/01/23
+        /* // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
@@ -311,7 +334,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::OK,
             'Successfully made equipment public'
-        ));
+        )); */
     }
 
     /**
@@ -320,7 +343,8 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleDefaultImageSelected() {
-        $imageId = $this->getFromBody('imageID');
+        // Carryover from copying EquipmentActionHandler? -- Noticed 09/01/23
+        /* $imageId = $this->getFromBody('imageID');
 
         $image = $this->equipmentDao->getEquipmentImage($imageId);
         if (empty($image)){
@@ -338,7 +362,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
             Response::OK,
             'Successfully updated default capstone image',
             array('name' => $image->getImageName())
-        ));
+        )); */
     }
 
  
@@ -348,7 +372,8 @@ class KitEnrollmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleArchiveEquipment() {
-        $id = $this->getFromBody('equipmentID');
+        // Carryover from copying EquipmentActionHandler? -- Noticed 09/01/23
+        /* $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
         if (empty($equipment)){
@@ -365,7 +390,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::OK,
             'Successfully removed equipment'
-        ));
+        )); */
     }
 
     
@@ -398,7 +423,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
             case 'createSingleKitEnrollment':
                 $this->handleCreateSingleEnrollment();
 
-            case 'makeEquipmentShown':
+            /* case 'makeEquipmentShown':
                 $this->handleShowEquipment();
 
             case 'makeEquipmentArchive':
@@ -408,7 +433,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
                 $this->handleMakePublicEquipment();
 
             case 'defaultImageSelected':
-                $this->handleDefaultImageSelected();
+                $this->handleDefaultImageSelected(); */
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on equipment resource'));

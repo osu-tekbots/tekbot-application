@@ -35,6 +35,8 @@ class GeneralFaqActionHandler extends ActionHandler {
      * @return void
      */
     public function handleUpdateGeneralFaq() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
 
         $body = $this->requestBody;
         $id = $body['id'];
@@ -68,6 +70,9 @@ class GeneralFaqActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateGeneralFaq() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure all the requred parameters are present
         $body = $this->requestBody;
         $id = $body['id'];
@@ -90,11 +95,6 @@ class GeneralFaqActionHandler extends ActionHandler {
             'Successfully created faq'
         ));
     }
-
- 
-
-
-
     
 
     /**

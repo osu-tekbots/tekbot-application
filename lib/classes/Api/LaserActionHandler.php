@@ -39,6 +39,9 @@ class LaserActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateLaserCutter() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure all the requred parameters are present
         $this->requireParam('title');
         $body = $this->requestBody;
@@ -62,6 +65,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleRemoveLaserCutter() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('laserID');
         $body = $this->requestBody;
         $ok = $this->laserDao->deleteLaserByID($body['laserID']);
@@ -81,6 +87,8 @@ class LaserActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSaveLaserCutter() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
 
         $id = $this->getFromBody('laserId');
         $name = $this->getFromBody('laserName');
@@ -109,6 +117,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleCreateLaserJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+        
 		$this->requireParam('userId');
         $this->requireParam('cutterId');
         $this->requireParam('quantity');
@@ -204,6 +215,9 @@ class LaserActionHandler extends ActionHandler {
     }
     
     public function handleUpdateEmployeeNotes() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
 
 		$this->requireParam('laserJobID');
@@ -233,6 +247,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleSendCustomerConfirm() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('laserJobID');
 		$this->requireParam('userID');
 		$this->requireParam('cutCost');
@@ -277,6 +294,9 @@ class LaserActionHandler extends ActionHandler {
     }
     
     function handleCustomerConfirmCutJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+        
         $body = $this->requestBody;
 
 		$this->requireParam('laserJobID');
@@ -310,6 +330,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleVerifyCutPayment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
         $this->requireParam('laserJobID');
         $laserJobID = $body['laserJobID'];
@@ -332,8 +355,9 @@ class LaserActionHandler extends ActionHandler {
         );
     }
 
-
     public function handleDeleteCutJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
 
         $body = $this->requestBody;
         $this->requireParam('laserJobID');
@@ -351,6 +375,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleProcessCutJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
 
         $this->requireParam('laserJobID');
@@ -381,6 +408,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     public function handleCreateLaserMaterial(){
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
 
         $printType = new LaserMaterial();
@@ -402,6 +432,9 @@ class LaserActionHandler extends ActionHandler {
 	}
 	
 	public function handleSaveLaserMaterial(){
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
 		$id = $this->getFromBody('id');
 		$name = $this->getFromBody('name');
 		$description = $this->getFromBody('description');
@@ -428,8 +461,10 @@ class LaserActionHandler extends ActionHandler {
         ));
     }
     
-
-        public function handleRemoveLaserMaterial() {
+    public function handleRemoveLaserMaterial() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('materialID');
         $body = $this->requestBody;
         $ok = $this->laserDao->deleteLaserMaterialByID($body['materialID']);
@@ -443,6 +478,9 @@ class LaserActionHandler extends ActionHandler {
     }
 
     function handleCompleteCutJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('laserJobID');
 		$this->requireParam('userID');
 		// $this->requireParam('messageID');
@@ -504,6 +542,9 @@ class LaserActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSendUserEmail() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('laserJobID');
         $this->requireParam('email');
         $this->requireParam('message');
@@ -525,6 +566,9 @@ class LaserActionHandler extends ActionHandler {
      * @return void
      */
     public function handleProcessAllFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('messageID');
         $body = $this->requestBody;
 
@@ -539,7 +583,7 @@ class LaserActionHandler extends ActionHandler {
         }
 
         $message = $this->messageDao->getMessageByID($body['messageID']); 
-
+        /// TODO: Figure out why I added my email
         $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message, 'bairdn@oregonstate.edu');
 
         if(!$ok) {

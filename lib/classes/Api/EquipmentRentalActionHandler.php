@@ -69,6 +69,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateEquipmentCheckout() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure all the requred parameters are present
         $this->requireParam('contractID');
         $this->requireParam('reservationID');
@@ -133,6 +136,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleReturnEquipmentCheckout() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure all the requred parameters are present
         $this->requireParam('checkoutID');
         $this->requireParam('checkoutNotes');
@@ -182,134 +188,135 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * Handles when 'Handout' button is called.  Creates a modal on the employeeEquipment page
      */
     public function handleEquipmentModalHandout() {
-          // Ensure all the requred parameters are present
-          $this->requireParam('reservationID');
-          $body = $this->requestBody;
+        // Not in use? -- noticed 8/28/23
+        /* // Ensure all the requred parameters are present
+        $this->requireParam('reservationID');
+        $body = $this->requestBody;
 
-          $reservation = $this->EquipmentReservationDao->getReservation($body['reservationID']);
-          if (empty($reservation)) {
+        $reservation = $this->EquipmentReservationDao->getReservation($body['reservationID']);
+        if (empty($reservation)) {
             $this->respond(new Response(Response::BAD_REQUEST, 'Unable to obtain reservation from ID'));
         }
-          
-          $hours = QueryUtils::timeAddToCurrent("24:00:00");
-          $reservationID = $reservation->getReservationID();
-          $equipmentID = $reservation->getEquipmentID();
-          $userID = $reservation->getUserID();
-          $contracts = $this->ContractDao->getEquipmentCheckoutContracts();
-          
-          $user = $this->userDao->getUserByID($userID);
-          $equipment = $this->EquipmentDao->getEquipment($equipmentID);
-      
-          $equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
-          $equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
-          $equipmentNotes = Security::HtmlEntitiesEncode($equipment->getNotes());
-          $equipmentHealth = $equipment->getHealthID()->getName();
-      
-          $email = Security::HtmlEntitiesEncode($user->getEmail());
-          $name = Security::HtmlEntitiesEncode($user->getFirstName()) 
-          . ' ' 
-          . Security::HtmlEntitiesEncode($user->getLastName());
-          $phoneNumber = Security::HtmlEntitiesEncode($user->getPhone()); 
-          $onid = Security::HtmlEntitiesEncode($user->getOnid());
-      
-          $modal = "
-              <div class='modal fade' id='newHandoutModal$reservationID'>
-                  <br><br><br><br>
-              <div class='modal-dialog modal-lg'>
-                  <div class='modal-content'>
-      
-                          <!-- Modal Header -->
-                          <div class='modal-header'>
-                          <h4 class='modal-title'>Hand out $equipmentName to $name</h4>
-                          <button type='button' class='close' data-dismiss='modal'>&times;</button>
-                          </div>
-              
-                          <!-- Modal body -->
-                          <div class='modal-body'>
-                              <h4 id='projectNameApplicationHeader'>$equipmentName</h4>
-                              <p><b>Location:</b> $equipmentLocation</p>
-                              <p><b>Health:</b> $equipmentHealth</p>
-                              ";
-                              if (!empty($equipmentNotes)){
-                                  $modal .= "<p><b>Notes:</b> $equipmentNotes</p>";
-                              }
-                              $modal .= "
-                              <h4 id='projectNameApplicationHeader'>$name</h4>
-                              <p><b>ONID:</b> $onid</p>
-                              <p><b>Email:</b> $email</p>
-                              <br>
-                              <select class='contract' id='$reservationID'>";
-                                  foreach($contracts as $c){
-                                      $contractID = $c->getContractID();
-                                      $contractTitle = $c->getTitle();
-                                      $modal .= "<option value='$contractID'>$contractTitle</option>";
-                                  }
-                              $modal .= "
-                              </select>
-                              <h5>Deadline Time:  <div style='display:inline-block;' id='deadline$reservationID'>$hours</div></h5>
-                              <h6 class='text-secondary'>Weekends are accounted for, holidays are not.</h6>
-                          </div>
-      
-                          <!-- Modal footer -->
-                          <div class='modal-footer'>
-                          <button type='button' class='btn btn-success' data-dismiss='modal' id='handoutEquipmentBtn$reservationID'>Handout</button>
-                          <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cancel</button>
-                          </div>
-      
-                      </div>
-                  </div>
-              </div>
-
-              <script type='text/javascript'>
-        $('.contract').on('change', function() {
-            let reservationID = $(this).attr('id');
-            let contractID = $(this).attr('value');
-            let deadlineID = '#deadline' + reservationID;
-            $('#contract$reservationID').val();
-            let data = {
-                action: 'updateDeadlineText',
-                contractID: contractID
-            };
-            api.post('/equipmentrental.php', data).then(res => {
-                $(deadlineID).html(res.message);
-            }).catch(err => {
-                snackbar(err.message, 'error');
-            });
-
-        });
-
+        
+        $hours = QueryUtils::timeAddToCurrent("24:00:00");
+        $reservationID = $reservation->getReservationID();
+        $equipmentID = $reservation->getEquipmentID();
+        $userID = $reservation->getUserID();
+        $contracts = $this->ContractDao->getEquipmentCheckoutContracts();
+        
+        $user = $this->userDao->getUserByID($userID);
+        $equipment = $this->EquipmentDao->getEquipment($equipmentID);
     
- 		$('#handoutEquipmentBtn$reservationID').on('click', function() {
-            let reservationID = '$reservationID';
-            let contractID = $('#contract$reservationID').val();
-            let userID = '$userID';
-            let equipmentID = '$equipmentID';
- 			let data = {
- 				action: 'checkoutEquipment',
-                reservationID: reservationID,
-                contractID: contractID,
-                userID: userID,
-                equipmentID: equipmentID
- 			};
- 			api.post('/equipmentrental.php', data).then(res => {
- 				$('#activeReservation$listNumber').remove();
-                 snackbar(res.message, 'success');
-                 setTimeout(function(){
-                    window.location.reload(1);
-                 }, 2000);
- 			}).catch(err => {
- 				snackbar(err.message, 'error');
- 			});
-         });
-         
-        </script>
-      
-          ";
+        $equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
+        $equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
+        $equipmentNotes = Security::HtmlEntitiesEncode($equipment->getNotes());
+        $equipmentHealth = $equipment->getHealthID()->getName();
+    
+        $email = Security::HtmlEntitiesEncode($user->getEmail());
+        $name = Security::HtmlEntitiesEncode($user->getFirstName()) 
+        . ' ' 
+        . Security::HtmlEntitiesEncode($user->getLastName());
+        $phoneNumber = Security::HtmlEntitiesEncode($user->getPhone()); 
+        $onid = Security::HtmlEntitiesEncode($user->getOnid());
+    
+        $modal = "
+            <div class='modal fade' id='newHandoutModal$reservationID'>
+                    <br><br><br><br>
+                <div class='modal-dialog modal-lg'>
+                    <div class='modal-content'>
 
-          $this->respond(new Response(
+                        <!-- Modal Header -->
+                        <div class='modal-header'>
+                        <h4 class='modal-title'>Hand out $equipmentName to $name</h4>
+                        <button type='button' class='close' data-dismiss='modal'>&times;</button>
+                        </div>
+            
+                        <!-- Modal body -->
+                        <div class='modal-body'>
+                            <h4 id='projectNameApplicationHeader'>$equipmentName</h4>
+                            <p><b>Location:</b> $equipmentLocation</p>
+                            <p><b>Health:</b> $equipmentHealth</p>
+                            ";
+                            if (!empty($equipmentNotes)){
+                                $modal .= "<p><b>Notes:</b> $equipmentNotes</p>";
+                            }
+                            $modal .= "
+                            <h4 id='projectNameApplicationHeader'>$name</h4>
+                            <p><b>ONID:</b> $onid</p>
+                            <p><b>Email:</b> $email</p>
+                            <br>
+                            <select class='contract' id='$reservationID'>";
+                                foreach($contracts as $c){
+                                    $contractID = $c->getContractID();
+                                    $contractTitle = $c->getTitle();
+                                    $modal .= "<option value='$contractID'>$contractTitle</option>";
+                                }
+                            $modal .= "
+                            </select>
+                            <h5>Deadline Time:  <div style='display:inline-block;' id='deadline$reservationID'>$hours</div></h5>
+                            <h6 class='text-secondary'>Weekends are accounted for, holidays are not.</h6>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class='modal-footer'>
+                        <button type='button' class='btn btn-success' data-dismiss='modal' id='handoutEquipmentBtn$reservationID'>Handout</button>
+                        <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cancel</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <script type='text/javascript'>
+                $('.contract').on('change', function() {
+                    let reservationID = $(this).attr('id');
+                    let contractID = $(this).attr('value');
+                    let deadlineID = '#deadline' + reservationID;
+                    $('#contract$reservationID').val();
+                    let data = {
+                        action: 'updateDeadlineText',
+                        contractID: contractID
+                    };
+                    api.post('/equipmentrental.php', data).then(res => {
+                        $(deadlineID).html(res.message);
+                    }).catch(err => {
+                        snackbar(err.message, 'error');
+                    });
+
+                });
+
+            
+                $('#handoutEquipmentBtn$reservationID').on('click', function() {
+                    let reservationID = '$reservationID';
+                    let contractID = $('#contract$reservationID').val();
+                    let userID = '$userID';
+                    let equipmentID = '$equipmentID';
+                    let data = {
+                        action: 'checkoutEquipment',
+                        reservationID: reservationID,
+                        contractID: contractID,
+                        userID: userID,
+                        equipmentID: equipmentID
+                    };
+                    api.post('/equipmentrental.php', data).then(res => {
+                        $('#activeReservation$listNumber').remove();
+                        snackbar(res.message, 'success');
+                        setTimeout(function(){
+                            window.location.reload(1);
+                        }, 2000);
+                    }).catch(err => {
+                        snackbar(err.message, 'error');
+                    });
+                });
+            
+            </script>
+    
+        ";
+
+        $this->respond(new Response(
             Response::OK, 
             $modal            
-        ));
+        )); */
     }
 
 
@@ -320,7 +327,8 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleUpdateDeadlineText() {
-        $contractID = $this->requireParam('contractID');
+        // Not in use? -- noticed 8/28/23
+        /* $contractID = $this->requireParam('contractID');
 
         $body = $this->requestBody;
         $id = $body['contractID'];
@@ -339,7 +347,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::CREATED, 
             $new_deadline            
-        ));
+        )); */
     }
 
 
@@ -350,6 +358,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateEquipmentReservation() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+
         $reserveDuration = 1;
         $this->requireParam('equipmentID');
         $this->requireParam('userID');
@@ -393,6 +404,10 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleEquipmentCancelReservation(){
+        // Ensure the user has permission to make the change
+        // Don't allow users, but maybe should? Page to cancel a reservation?
+        $this->verifyAccessLevel('employee');
+
         $this->requireParam('reservationID');
 
         $body = $this->requestBody;
@@ -423,6 +438,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
      * @return void
      */
     public function handleAssignEquipmentFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $this->requireParam('reservationID');
         $this->requireParam('checkoutID');
         $this->requireParam('feeAmount');
@@ -464,6 +482,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
     }
 
     public function handlePayEquipmentFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+
         $this->requireParam('touchnetID');
         $this->requireParam('feeID');
 
@@ -500,6 +521,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
 
 
     public function handleApproveEquipmentFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $this->requireParam('feeID');
         $body = $this->requestBody;
         $feeID = $body['feeID'];
@@ -528,6 +552,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
     }
 
     public function handleRejectEquipmentFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $this->requireParam('feeID');
         $body = $this->requestBody;
         $feeID = $body['feeID'];
@@ -583,8 +610,8 @@ class EquipmentRentalActionHandler extends ActionHandler {
             case 'returnEquipment':
                 $this->handleReturnEquipmentCheckout();
 
-            case 'updateDeadlineText':
-                $this->handleUpdateDeadlineText();
+            // case 'updateDeadlineText':
+                // $this->handleUpdateDeadlineText();
 
             case 'assignEquipmentFees':
                 $this->handleAssignEquipmentFees();
@@ -598,8 +625,8 @@ class EquipmentRentalActionHandler extends ActionHandler {
             case 'rejectEquipmentFees':
                 $this->handleRejectEquipmentFees();
             
-            case 'equipmentModalHandout':
-                $this->handleEquipmentModalHandout();
+            // case 'equipmentModalHandout':
+                // $this->handleEquipmentModalHandout();
 
             
             default:

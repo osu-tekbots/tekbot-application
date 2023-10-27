@@ -48,6 +48,9 @@ class InternalSalesActionHandler extends ActionHandler {
      * @return void
      */
     public function handleAddSale() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('buyer');
 		$this->requireParam('email');
@@ -79,6 +82,8 @@ class InternalSalesActionHandler extends ActionHandler {
      * @return void
      */
     public function handleDeleteSale() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
         
         $this->requireParam('saleId');
         $body = $this->requestBody; 
@@ -101,6 +106,8 @@ class InternalSalesActionHandler extends ActionHandler {
      * @return void
      */
     public function handleInternalSalesBillAll() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
         
         $this->requireParam('messageID');
         $body = $this->requestBody; 

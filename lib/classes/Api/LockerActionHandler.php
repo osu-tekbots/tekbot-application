@@ -43,6 +43,9 @@ class LockerActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCheckoutLocker() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('lockerId');
 		$this->requireParam('userId');
@@ -79,6 +82,9 @@ class LockerActionHandler extends ActionHandler {
      * @return void
      */
     public function handleReturnLocker() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('lockerId');
 		$this->requireParam('userId');
@@ -115,6 +121,9 @@ class LockerActionHandler extends ActionHandler {
      * @return void
      */
     public function handleRemindLocker() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('lockerId');
 		$this->requireParam('userId');
@@ -163,7 +172,7 @@ class LockerActionHandler extends ActionHandler {
 
 			case 'returnLocker':
                 $this->handleReturnLocker();
-				break;
+                break;
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Locker resource'));

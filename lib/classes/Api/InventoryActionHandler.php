@@ -46,6 +46,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
     public function handleUpdateLocation() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('location');
@@ -76,6 +79,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
     public function handleUpdateQuantity() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('amount');
@@ -107,6 +113,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
 	public function handleUpdateType() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('typeId');
@@ -126,6 +135,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
 	public function handleUpdateLastPrice() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('lastPrice');
@@ -145,6 +157,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
 	public function handleUpdateDescription() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('description');
@@ -164,6 +179,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
 	public function handleUpdateLastSupplier() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('lastSupplier');
@@ -183,6 +201,9 @@ class InventoryActionHandler extends ActionHandler {
      * @return void
      */
 	public function handleUpdateManufacturer() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('manufacturer');
@@ -196,6 +217,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Manufacturer Updated'));
     }
 	public function handleUpdateManufacturerNumber() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('manufacturerNumber');
@@ -209,6 +233,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Manufacturer Part Number Updated'));
     }
 	public function handleUpdateTouchnetId() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('touchnetId');
@@ -222,6 +249,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Touchnet ID Updated'));
     }
 	public function handleUpdateMarketPrice() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('marketPrice');
@@ -235,6 +265,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Market Price Updated'));
     }
 	public function handleCalculateMarketPrice() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $markup = .4;
 		
 		// Ensure the required parameters exist
@@ -250,7 +283,12 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Market Price Calculated: ' . $body['lastPrice'] . ' *  ' . (1+$markup) . ' = ' . ((1+$markup)*$body['lastPrice'])));
     }
 	
-	public function handleCalculateLastPrice() { //This is only used for kits
+	public function handleCalculateLastPrice() {
+        //This is only used for kits
+
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $kitfee = 1.25;
 		
 		// Ensure the required parameters exist
@@ -276,6 +314,9 @@ class InventoryActionHandler extends ActionHandler {
     }
 	
 	public function handleUpdatePartMargin() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('partMargin');
@@ -289,6 +330,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Part Margin Updated'));
     }
 	public function handleAddPart() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('type');
 		$this->requireParam('desc');
@@ -304,6 +348,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Part Added'));
     }
 	public function handleUpdateArchived() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('archived');
@@ -317,6 +364,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Status Updated'));
     }
 	public function handleUpdateStocked() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('stocked');
@@ -330,6 +380,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Status Updated'));
     }
 	public function handleUpdateComment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('comment');
@@ -343,6 +396,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Comment Updated'));
     }
 	public function handleUpdatePublicDesc() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('publicDescription');
@@ -356,6 +412,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Public Description Updated'));
     }
 	public function handleUpdateKitQuantity() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('childid');
@@ -369,6 +428,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Quantity Updated'));
     }
 	public function handleAddKitContents() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('childid');
@@ -382,6 +444,9 @@ class InventoryActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::OK, 'Quantity Updated'));
     }
 	public function handleAddSupplierForPart() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('link');
@@ -397,6 +462,9 @@ class InventoryActionHandler extends ActionHandler {
     }
 	
 	public function handleRemoveSupplierForPart() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
 		$this->requireParam('id');
         $body = $this->requestBody;
@@ -409,6 +477,9 @@ class InventoryActionHandler extends ActionHandler {
     }
 	
 	public function handleRemoveKitContents() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('childid');
@@ -422,6 +493,9 @@ class InventoryActionHandler extends ActionHandler {
     }
 
     public function handleSendRecountEmail() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('stockNumber');
         $this->requireParam('messageId');

@@ -42,6 +42,9 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreateEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure all the requred parameters are present
         $this->requireParam('title');
 
@@ -70,6 +73,9 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSaveEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $id = $this->getFromBody('equipmentID');
         $name = $this->getFromBody('equipmentName');
         //$categoryID = $this->getFromBody('equipmentCategoryID');
@@ -123,7 +129,8 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleMakePublicEquipment() {
-        $id = $this->getFromBody('equipmentID');
+        // Not in use? -- noticed 8/28/23
+        /* $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
         if (empty($equipment)){
@@ -140,7 +147,7 @@ class EquipmentActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::OK,
             'Successfully made equipment public'
-        ));
+        )); */
     }
 
     /**
@@ -149,6 +156,9 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleMakeHiddenEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
@@ -176,6 +186,9 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleShowEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
@@ -214,12 +227,12 @@ class EquipmentActionHandler extends ActionHandler {
 
         $ok = $this->equipmentDao->updateDefaultEquipmentImage($image);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update equipment image'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update default equipment image'));
         }
 
         $this->respond(new Response(
             Response::OK,
-            'Successfully updated default capstone image',
+            'Successfully updated default equipment image',
             array('name' => $image->getImageName())
         ));
     }
@@ -231,6 +244,9 @@ class EquipmentActionHandler extends ActionHandler {
      * @return void
      */
     public function handleArchiveEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         $id = $this->getFromBody('equipmentID');
 
         $equipment = $this->equipmentDao->getEquipment($id);
@@ -284,8 +300,8 @@ class EquipmentActionHandler extends ActionHandler {
             case 'makeEquipmentArchive':
                 $this->handleArchiveEquipment();
 
-            case 'makeEquipmentPublic':
-                $this->handleMakePublicEquipment();
+            // case 'makeEquipmentPublic':
+                // $this->handleMakePublicEquipment();
 
             case 'defaultImageSelected':
                 $this->handleDefaultImageSelected();
