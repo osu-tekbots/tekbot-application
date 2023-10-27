@@ -195,6 +195,15 @@ class MessageActionHandler extends ActionHandler {
         }
     }
 
+    /**
+     * Fills the given object with the HTML markup for an italicized string "<test>". Operates directly on the object
+     * instead of creating a duplicate, and uses `set__()` methods to fill the object.
+     * 
+     * Used for sending test emails.
+     * 
+     * @param \Model\* $object The object to fill with the string "<test>"
+     * @param string[] $exceptions Setter methods to ignore when filling the object (eg "setPurpose")
+     */
     private function fillObject(&$object, $exceptions=[]) {
         foreach(get_class_methods($object) as $method) {
             if(str_contains(strtolower($method), 'set') && !in_array($method, $exceptions)) {
