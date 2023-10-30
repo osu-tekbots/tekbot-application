@@ -131,7 +131,7 @@ class InventoryDao {
             $contents = Array();
 			foreach ($results as $row) {
 				$contents[$row['ChildID']] = $row['Quantity'];
-//				$contents[] = $row;
+				// $contents[] = $row;
             }
 			
             return $contents;

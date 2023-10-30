@@ -4,6 +4,7 @@ namespace DataAccess;
 
 use Model\Station;
 use Model\StationContents;
+use Model\StationEquipment;
 use Model\Room;
 
 /**
@@ -139,22 +140,43 @@ class LabDao {
      * @return \Model\Lab|array station contents info with specified Id
      */
 
-    public function getStationContents($stationid) {
+    public function getStationEquipment($stationid, $status=null) {
         try {
-            $sql = '
-            SELECT *
-            FROM `labs_stationcontents`
-            WHERE labs_stationcontents.stationid = :stationid
-            ';
+            if (!is_null($status)) {
+                // only need to select 
+                $sql = '
+                SELECT DISTINCT labs_equipment.id, labs_equipment.model, labs_equipment.type, labs_equipment.manual, labs_equipment.image
+                FROM labs_stationcontents
+                INNER JOIN labs_equipment
+                ON labs_stationcontents.equipmentid = labs_equipment.id
+                WHERE labs_stationcontents.stationid = :stationid AND labs_stationcontents.status=:status; 
+                ';
 
-            $params = array(':id' => $stationid);
-            $results = $this->conn->query($sql, $params);
-            //return \array_map('self::ExtractStationContentsFromRow', $results);
-            $contents = self::ExtractStationFromRow($results[0]);
+                $params = array(
+                    ':stationid' => $stationid,
+                    ':status' => $status
+                );
+                $results = $this->conn->query($sql, $params);
 
-            return $contents;
+                return \array_map('self::ExtractStationEquipmentFromRow', $results);
+            }
+            else {
+                $sql = '
+                SELECT DISTINCT labs_equipment.id, labs_equipment.model, labs_equipment.type, labs_equipment.manual, labs_equipment.image
+                FROM labs_stationcontents
+                INNER JOIN labs_equipment
+                ON labs_stationcontents.equipmentid = labs_equipment.id
+                WHERE labs_stationcontents.stationid = :stationid; 
+                ';
+
+                $params = array(':stationid' => $stationid);
+                $results = $this->conn->query($sql, $params);
+                //return \array_map('self::ExtractStationContentsFromRow', $results);
+
+                return \array_map('self::ExtractStationEquipmentFromRow', $results);
+            }
         } catch(\Exception $e) {
-            $this->logger->error('Failed to get Station contents by ID: ' . $e->getMessage());
+            $this->logger->error('Failed to get Station equipment by ID ' . $stationid . ': ' . $e->getMessage());
             return false;
         }
     }
@@ -175,6 +197,94 @@ class LabDao {
             $this->logger->error('Failed to get Station ID by Room ID and Bench ID: ' . $e->getMessage());
             return false;
         }
+    }
+
+    public function updateEquipmentStatus($equipmentid, $status) {
+        try {
+            $sql = 'UPDATE labs_stationcontents SET status=:status WHERE equipmentid=:equipmentid;';
+            $params = array(
+                ':equipmentid' => $equipmentid,
+                ':status' => $status
+            );
+            $this->conn->execute($sql, $params);
+            
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update equipment type' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateEquipmentType($equipmentid, $newType) {
+        try {
+            $sql = 'UPDATE labs_equipment SET type=:newType WHERE id=:equipmentid;';
+            $params = array(
+                ':equipmentid' => $equipmentid,
+                ':newType' => $newType
+            );
+            $this->conn->execute($sql, $params);
+            
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update equipment type' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateEquipmentModel($equipmentid, $newModel) {
+        try {
+            $sql = 'UPDATE labs_equipment SET model=:model WHERE id=:equipmentid;';
+            $params = array(
+                ':equipmentid' => $equipmentid,
+                ':model' => $newModel
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update equipment model' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateEquipmentManual($equipmentid, $newManual) {
+        try {
+            $sql = 'UPDATE labs_equipment SET manual=:newManual WHERE id=:equipmentid;';
+            $params = array(
+                ':equipmentid' => $equipmentid,
+                ':newManual' => $newManual
+            );
+            $this->conn->execute($sql, $params);
+            
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update equipment manual' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public static function ExtractStationEquipmentFromRow($row) {
+        $equipment = new StationEquipment($row['id']);
+        if(isset($row['id'])) {
+            $equipment->setId($row['id']);
+        }
+
+        if(isset($row['model'])) {
+            $equipment->setModel($row['model']);
+        }
+
+        if(isset($row['type'])) {
+            $equipment->setType($row['type']);
+        }
+
+        if(isset($row['manual'])) {
+            $equipment->setManual($row['manual']);
+        }
+
+        if(isset($row['image'])) {
+            $equipment->setImage($row['image']);
+        }
+        return $equipment;
     }
 
     public static function ExtractStationFromRow($row) {

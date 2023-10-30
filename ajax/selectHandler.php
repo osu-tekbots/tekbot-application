@@ -2,6 +2,9 @@
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
+
+// TODO
+// THIS IS UNUSED SHOULD DELETE THE FILE
 require_once('../../../includes/config.php');
 session_start();
 if (isset($_POST['selectData'])) {

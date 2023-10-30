@@ -32,34 +32,34 @@ function renderEmployeeSidebar() {
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
         <li class="nav-item dropdown">
-             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-tools"></i>
-                <span>Equipment</span>
-             </a>
-             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                 <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
-                 <div class="dropdown-divider"></div>
-                 <h6 class="dropdown-header">Adjust Content:</h6>
-                 <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                 <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
-				 <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
-             </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-tools"></i>
+            <span>Equipment</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Adjust Content:</h6>
+                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
+            </div>
         </li>
 
         <li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-hand-rock"></i>
-            <span>Kit Handout</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <h6 class="dropdown-header">Handout:</h6>
-             <a class="dropdown-item" href="pages/employeeKitHandout.php">Kit Handout</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">View:</h6>
-             <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
-             <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
-             <a class="dropdown-item" href="blank.html">Info</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-hand-rock"></i>
+                <span>Kit Handout</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <h6 class="dropdown-header">Handout:</h6>
+                <a class="dropdown-item" href="pages/employeeKitHandout.php">Kit Handout</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">View:</h6>
+                <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
+                <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
+                <a class="dropdown-item" href="blank.html">Info</a>
+            </div>
         </li>
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -92,85 +92,85 @@ function renderEmployeeSidebar() {
             </div>
         </li>
         <li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-warehouse"></i>
-            <span>Inventory</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="pages/employeeInventory.php">Inventory List</a>
-             <a class="dropdown-item" href="pages/employeeInventoryKits.php">Configure Kits</a>
-             <a class="dropdown-item" href="pages/employeeInventoryOrderParts.php">Order Parts</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">Options:</h6>
-             <a class="dropdown-item" href="pages/employeeInventoryMessages.php">Edit Messages</a>
-			 <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-warehouse"></i>
+                <span>Inventory</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeInventory.php">Inventory List</a>
+                <a class="dropdown-item" href="pages/employeeInventoryKits.php">Configure Kits</a>
+                <a class="dropdown-item" href="pages/employeeInventoryOrderParts.php">Order Parts</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeInventoryMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
+            </div>
         </li>
         <li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-door-closed"></i>
-            <span>Lockers</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="pages/employeeLockers.php">Lockers Page</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">Options:</h6>
-             <a class="dropdown-item" href="pages/employeeLockersMessages.php">Edit Messages</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-door-closed"></i>
+                <span>Lockers</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeLockers.php">Lockers Page</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeLockersMessages.php">Edit Messages</a>
+            </div>
         </li>
 		
 		<li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-globe"></i>
-            <span>Touchnet</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
-             <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-globe"></i>
+                <span>Touchnet</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
+                <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
+            </div>
         </li>
 		
 		<li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-lock"></i>
-            <span>TekBox</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="pages/employeeBoxes.php">TekBoxes Page</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">Options:</h6>
-             <a class="dropdown-item" href="pages/employeeBoxMessages.php">Edit Messages</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-lock"></i>
+                <span>TekBox</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeBoxes.php">TekBoxes Page</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeBoxMessages.php">Edit Messages</a>
+            </div>
         </li>
 
         <!-- Turned Lab tickets into a drop down with employeeTicketList as the main and QR codes and edit equipement as options-->
         <li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-ticket-alt"></i>
-            <span>Lab Tickets</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="pages/employeeTicketList.php">Ticket List</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">Options:</h6>
-             <a class="dropdown-item" href="pages/employeeTicketLabels.php">QR Codes</a>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-ticket-alt"></i>
+                <span>Lab Tickets</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeTicketList.php">Ticket List</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeTicketLabels.php">QR Codes</a>
              <a class="dropdown-item" href="../../store/labs/ajax/equipment_page.php">Edit Equipment</a>
-             <a class="dropdown-item" href="pages/employeeTicketMessages.php">Edit Messages</a>
-         </div>
+                <a class="dropdown-item" href="pages/employeeTicketMessages.php">Edit Messages</a>
+            </div>
         </li>
 
         <!-- Internal Sales Page with Bill All implemented, still need to work on message editing-->
         <li class="nav-item dropdown">
-         <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-money-check-alt"></i>
-            <span>Internal Sales</span>
-         </a>
-         <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-             <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
-             <div class="dropdown-divider"></div>
-             <h6 class="dropdown-header">Options:</h6>
-             <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
-         </div>
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-money-check-alt"></i>
+                <span>Internal Sales</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
+            </div>
         </li>
 
         <li class="nav-item">

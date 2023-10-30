@@ -113,6 +113,8 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 	}
 
 	function Select(action){
+		// TODO
+		// This is unused and should be deleted
 		var html = '<B>LOADING</B>';
 		$('#fileFeedback').text(html);
 		var file_data = $('#uploadFileInput').prop('files')[0]
@@ -162,13 +164,12 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 
 	<div id="wrapper">
         <div class="container-fluid">
-			<div class='col-9'>
+			<div class='col-sm-5'> <!-- Provides nice indentation -->
 				<br />
-				<h3>EECS Lab Reporting Tool</h3><br />
-				<p>Thank you for using this tool. You can report problems with equipment and stations here. If you don't report it no one will know!</p>
-			<!-- </div><div class='col-3'></div> -->
+				<h3>EECS Lab Issue Reporting Tool</h3>
+				<p>Thank you for using this tool. You can report problems with equipment and stations here and we will address them as soon as possible. Please provide an email address in case we need to follow up! <!-- If you don't report it no one will know! --></p>
 			</div>
-			<div class = 'row col-9'>
+			<div class = 'row col'>
 				<form method="post">
 					<div class="form-group col-sm-9">
 						<b>Room:</b>
@@ -186,9 +187,9 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 							//renderSelectorOnChange($stations, $stationIdGetter, $stationNameGetter, "BenchId", "benchChange()")
 						?>
 						<!-- <p id="roomid"></p> -->
-						<select id="RoomId" name="RoomId" form="mainform" class="form-control" onchange="roomChange()">
+						<select id="RoomId" name="RoomId" form="mainform" class="custom-select" onchange="roomChange()">
 							<?php echo $roomOptions;?>
-						</select>
+						</select><br />
 						<br />
 						<b>Station:</b>
 						<?php
@@ -219,24 +220,25 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 							}
 							//renderSelectorOnChange($stations, $stationIdGetter, $stationNameGetter, "BenchId", "benchChange()")
 						?>
-						<select id="BenchId" name="BenchId" form="mainform" class="form-control" onchange="benchChange()">
+						<select id="BenchId" name="BenchId" form="mainform" class="custom-select" onchange="benchChange()">
 							<?php echo $stationOptions;?>
-						</select>
+						</select><br />
 						<br />
 						<label for="email"><b>Enter your email:</b></label>
-						<input type="email" id="email" name="email"> 
+						<input type="email" id="email" name="email" class="form-control"> 
 						<br />
 						<label for="notes"><b>Issue:</b></label>
-						<textarea name="notes" id="notes" rows="4" cols="20"></textarea><br />
+						<textarea name="notes" id="notes" rows="4" cols="20" class="form-control"></textarea><br />
 						<label id="fileFeedback"></label>
 						<label for="uploadFileInput"><b>Add pictures:</b></label>
-						<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".jpeg,.jpg,.png,.bmp,.JPG,.JPEG,.PNG,.BMP,.heic,.HEIC" multiple>
-						<div class="form-group col-sm-9">
-							<button id="submitTicketBtn" class="btn btn-primary" onclick="return false">Submit Ticket</button>
-						</div>
-						<div class="form-group col-sm-9">
-							<p>If you have trouble using this page contact us at: <a href="mailto: 	tekbot-worker@engr.oregonstate.edu">Tekbot Worker</a></p>
-						</div>
+						<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".jpeg,.jpg,.png,.bmp,.JPG,.JPEG,.PNG,.BMP,.heic,.HEIC">
+						<br />
+
+						<button id="submitTicketBtn" class="btn btn-primary" onclick="return false">Submit Ticket</button>
+
+						<br /><br />
+						<p>If you have trouble using this page, please contact us at: <a href="mailto: tekbot-worker@engr.oregonstate.edu">tekbot-worker@engr.oregonstate.edu</a></p>
+
 					</div>
 				</form>
 				</div>

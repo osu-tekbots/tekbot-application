@@ -103,9 +103,9 @@ $Data = array();
 					$Data["successful"] = 1;
 					$Data["string"] = $dbfilename;
 					$Data["path"] = $dbfilename; //"images/tickets/".
-				} catch(err) {
+				} catch(\Exception $err) {
 					$Data["successful"] = 0;
-					$Data["string"] = err;
+					$Data["string"] = $err;
 				}
 				
 			}else{
