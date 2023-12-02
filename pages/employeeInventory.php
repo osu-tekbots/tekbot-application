@@ -175,6 +175,7 @@ function printKitsUsedInt($kits) {
 						//$kitsUsedInStr .= $k['kitNames'];
 						$kitsUsedInStr .= "".$k['kitNames']." ";
 					}
+					$dateUpdated = $p->getLastUpdated();
 					
 					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived ':'')." ".($p->getStocked() == 1 ?'':'nonstock ')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
 						<td>$type</td>
@@ -187,6 +188,7 @@ function printKitsUsedInt($kits) {
 						<td>".studentPrice($lastPrice,2)."</td>
 						<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
 						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td>
+						<td>".$dateUpdated."</td>
 						<td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
                 }
 				
@@ -211,6 +213,7 @@ echo $filterDiv;
                         <th>Student<BR>Price</th>
                         <th>Location</th>
                         <th>Quantity</th>
+						<th>Last Updated</th>
 						<th></th>
                     </tr>
                 </thead>
@@ -330,6 +333,7 @@ $('#InventoryTable').DataTable({
 			null,
 			{ "orderable": false },
 			{ "orderable": false },
+			null,
 			{ "orderable": false }
 		  ]
 		});
