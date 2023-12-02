@@ -154,7 +154,8 @@ function renderEmployeeSidebar() {
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Options:</h6>
                 <a class="dropdown-item" href="pages/employeeTicketLabels.php">QR Codes</a>
-             <a class="dropdown-item" href="../../store/labs/ajax/equipment_page.php">Edit Equipment</a>
+                <!-- Commented out because this isn't the current site -->
+                <!-- <a class="dropdown-item" href="../../store/labs/ajax/equipment_page.php">Edit Equipment</a> -->
                 <a class="dropdown-item" href="pages/employeeTicketMessages.php">Edit Messages</a>
             </div>
         </li>

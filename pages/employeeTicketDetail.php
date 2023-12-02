@@ -104,7 +104,7 @@ $outputHTML .=  '</div>';
 
 $outputHTML .= ' <div id="stationInfo" class = "flex-fill col-6">';
 $outputHTML .= '<h4>Room Layout</h4>';
-$outputHTML .= '<img src="../../labs/image/map/' . $station->getRoom()->getMap() . '" class="img-responsive" width="400" >';
+$outputHTML .= '<img src="images/maps/' . $station->getRoom()->getMap() . '" class="img-responsive" width="400" >';
 
 
 

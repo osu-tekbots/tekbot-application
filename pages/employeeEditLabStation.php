@@ -59,7 +59,7 @@ foreach($activeEquipment as $ae) {
     $outputHTML .= '<div class="col-sm-2"><input id="type'.$ae->getId().'" class="form-control" type="text" value="'.$ae->getType().'" onchange="updateType('.$ae->getId().');"></div>';
     $outputHTML .= '<div class="col-sm-2"><input id="model'.$ae->getId().'" class="form-control" type="text" value="'.$ae->getModel().'" onchange="updateModel('.$ae->getId().');"></div>'; // model
     $outputHTML .= '<div class="col-md-3"><input id="manual'.$ae->getId().'" class="form-control" type="text" value="'.$ae->getManual().'" onchange="updateManual('.$ae->getId().');"></div>'; // manual
-    $outputHTML .= '<div class="col-md-3"><img src="../../labs/image/equipment/'.$ae->getImage().'" class="img-fluid"></div>'; // image
+    $outputHTML .= '<div class="col-md-3"><img src="images/lab_equipment/'.$ae->getImage().'" class="img-fluid"></div>'; // image
     $outputHTML .= '<div class="d-flex col-sm-2 justify-content-center align-items-center"><button class="btn btn-outline-warning" onclick="updateStatus('.$ae->getId().', 0)">Deactivate</button></div>'; // deactivate
     $outputHTML .= '</div><BR>';
 }
@@ -76,7 +76,7 @@ if ($inactiveEquipment) {
         $outputHTML .= '<div class="col-sm-2" style="word-break: break-all">'.$ie->getType().'</div>'; // type
         $outputHTML .= '<div class="col-sm-2" style="word-break: break-all">'.$ie->getModel().'</div>'; // model
         $outputHTML .= '<div class="col-sm-3" style="word-break: break-all"><a href="'.$ie->getManual().'" target="_blank">'.$ie->getManual().'</a></div>'; // manual
-        $outputHTML .= '<div class="col-lg-3"><img src="../../labs/image/equipment/'.$ie->getImage().'" class="img-fluid"></div>'; // image
+        $outputHTML .= '<div class="col-lg-3"><img src="images/lab_equipment/'.$ie->getImage().'" class="img-fluid"></div>'; // image
         $outputHTML .= '<div class="col-sm-1"><button class="btn btn-outline-warning" onclick="updateStatus('.$ie->getId().', 1)">Activate</button></div>'; // activate
         $outputHTML .= '</div><BR>';
     }
