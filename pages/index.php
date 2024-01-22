@@ -21,9 +21,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <h2><strong><a href="./pages/userPrints.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="./pages/publicInventory.php" target="_blank">Inventory</a></strong></h2>
                     <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="./pages/publicEquipmentList.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="./pages/info.php">Technical Help</strong></h2> </a>
                     <h3>KEC 1110 Hours: </h3>
-					<h2><strong>Fall Term (9/27-12/8): M,W,F 2-4:50pm / T,Th 9-11:50am</strong></h2><BR><BR>
+					<h2><strong>Winter Term (1/8-3/15): M,W,F 12-2:50pm / T,Th 10am-12:50pm</strong></h2><BR>Finals Week by Appointment<BR>
                     <td><a href='mailto:tekbot-worker@engr.orst.edu'> Email Us Here</a></td><BR></h2>
-                    
+                   
                     <a class="arrowLink" href="#about"><div class="arrow bounce"></div></a>
 
                </div>
