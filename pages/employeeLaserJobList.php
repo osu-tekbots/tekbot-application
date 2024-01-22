@@ -115,7 +115,7 @@ $printJobs = $laserDao->getLaserJobs();
                     switch($paymentMethod) {
                         case "cc":
                             $paymentValidation = "<button id='ccpayment$laserJobID' onClick='verifyCCPayment(\"$laserJobID\", \"$name\")' class='btn btn-primary'>Card Payment Checked/Started Cut</button>";
-                            $payment .= "Paid thru TouchNet";
+                            $payment .= "TouchNet Order";
                             break;
                         case "account":
                             $paymentValidation = "<button id='acountpayment$laserJobID' onClick='startCut(\"$laserJobID\", \"$name\")' class='btn btn-primary'>Started Cut</button>";

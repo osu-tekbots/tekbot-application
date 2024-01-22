@@ -112,7 +112,7 @@ $printJobs = $printerDao->getPrintJobs();
                     switch($paymentMethod) {
                         case "cc":
                             $paymentValidation = "<button id='ccpayment$printJobID' onClick='verifyCCPayment(\"$printJobID\", \"$name\")' class='btn btn-primary'>Card Payment Checked/Started Print</button>";
-                            $payment .= "Paid thru TouchNet";
+                            $payment .= "TouchNet Order";
                             break;
                         case "account":
                             $paymentValidation = "<button id='accountpayment$printJobID' onClick='startPrint(\"$printJobID\", \"$name\")' class='btn btn-primary'>Started Print</button>";
