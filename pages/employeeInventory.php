@@ -321,7 +321,7 @@ $('#InventoryTable').DataTable({
 		"autoWidth": true,
 		'scrollX':false, 
 		'paging':false, 
-		'order':[[4, 'asc'], [0, 'asc'], [1, 'asc']],
+		'order':[[0, 'asc'], [1, 'asc']],
 		"columns": [
 			null,
 			null,
