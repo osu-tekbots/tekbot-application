@@ -5,10 +5,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// use DataAccess\UsersDao;
+use DataAccess\TaskDao; //Added 2/21/2024
 use DataAccess\EquipmentFeeDao;
-// use DataAccess\EquipmentDao;
-// use DataAccess\EquipmentCheckoutDao; // Not in use? Noticed 8/15/23
 use DataAccess\EquipmentReservationDao;
 use DataAccess\KitEnrollmentDao;
 use DataAccess\PrinterDao;
@@ -24,15 +22,13 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 allowIf(verifyPermissions('employee'));
 
 $checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-// $equipmentDao = new EquipmentDao($dbConn, $logger);
-// $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
 $printerJobsDao = new PrinterDao($dbConn, $logger);
 $laserJobsDao = new LaserDao($dbConn, $logger);
 $ticketDao = new TicketDao($dbConn, $logger);
+$taskDao = new TaskDao($dbConn, $logger);
 $configurationDao = new ConfigurationDao($dbConn, $logger);
-//added new ticket DAO
 
 /**
  * Uses the ConfigurationDao to check when the last cron emails were sent, & if it's time to send more
@@ -75,6 +71,7 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 }
 
 $remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
+$tasks = $taskDao->getAllIncompleteTasks();
 $equipmentReservationCount = $reservationDao->getReservationCountForAdmin();
 $equipmentFeeCount =  $checkoutFeeDao->getPendingAdminFeesCount();
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
@@ -106,6 +103,34 @@ if (count($tickets) > 1)
 else if (count($tickets) > 0)
 	$dashboardText .= "<li>There is 1 <a href='./pages/employeeTicketList.php'>ticket</a> that requires employee actions.</li>";
 
+$tasksSelector = '<option value="">-</option>';
+$users = $usersDao->getAllUsersByType("Employee");
+foreach ($users as $u)
+	$tasksSelector .= '<option value="'.$u->getUserID().'">'.$u->getFirstname().' '.$u->getLastname().'</option>';
+	
+$tasksText = '';
+if (count($tasks) != 0){
+	$tasksText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th></th></tr>';
+	foreach ($tasks as $t){
+			$tasksText .= "<tr><td>".$t->getCreated()."</td><td>".$t->getDescription()."</td><td><select id='user_".$t->getId()."'>$tasksSelector</select></td><td><button class='btn btn-info btn-small' onclick='completeTask(".$t->getId().");'>Complete</button></td></tr>";
+	}
+	$tasksText .= '</table>';
+}
+
+$tasks = $taskDao->getAllCompleteTasks();
+$tasksCompletedText = '';
+if (count($tasks) != 0){
+	$tasksCompletedText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th>Completed</th></tr>';
+	foreach ($tasks as $t){
+		$completer = $usersDao->getUserById($t->getCompleter());
+		$tasksCompletedText .= "<tr><td>".$t->getCreated()."</td><td>".$t->getDescription()."</td><td>".$completer->getFirstname()."</td><td>".$t->getCompleted()."</td></tr>";
+	}
+	$tasksCompletedText .= '</table>';
+}
+	
+$tasksText .= '<strong>New Task Input</strong><form class="form"><textarea id="newtask" class="form-control"></textarea></form>';
+$tasksText .= "<button id='addtask' class='btn btn-info' onclick='addtask();'>Add New Task</button>";
+
 $title = 'Employee Interface';
 $css = array(
 	'assets/css/sb-admin.css',
@@ -133,10 +158,22 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 		<div id="content-wrapper">
 
 			<div class="container-fluid">
+			<div class="row">
+				<div class="col">
+					<a class="btn btn-danger" href="https://osu-prod.wta-us8.wfs.cloud/workforce/WebClock.do" target="_blank">Go To My Timeclock</a>
+				</div>
+			</div>
+
 			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
-				<h2>To-Do List</h2>
+				<h2>Automated To-Do List</h2>
 				<?php 
 					echo (($dashboardText != "") ? "<ul>".$dashboardText."</ul>" : "Nothing curently on the to-do list.");
+				?>
+			</div></div>
+			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
+				<h2>Assigned Tasks</h2>
+				<?php 
+					echo ($tasksText);
 				?>
 			</div></div>
 			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
@@ -147,6 +184,12 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 						: ($cronEmails === false ? 
 							"Automatic reminder emails were already sent recently." 
 							: "No automatic reminder emails to send today.");
+				?>
+			</div></div>
+			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
+				<h2>Completed Tasks</h2>
+				<?php 
+					echo ($tasksCompletedText);
 				?>
 			</div></div>
 			<BR><BR>
@@ -160,6 +203,48 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 		</div>
 	</div>
 </div>
+
+
+<script type='text/javascript'>
+function addtask(){
+	let desc =  $('#newtask').val().trim();
+	let data = {
+		user: '<?php echo $_SESSION['userID'];?>',
+		desc: desc,
+		action: 'addTask'
+	};
+
+	if (desc != ''){
+		api.post('/task.php', data).then(res => {
+			snackbar(res.message, 'info');
+			location.reload();
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		alert('Description field is empty or type is not selected. No changes made');
+	}
+}
+
+function completeTask(task){
+	let user =  $('#user_'+task).val();
+	let data = {
+		user: user,
+		task: task,
+		action: 'completeTask'
+	};
+	if (user != ''){
+		api.post('/task.php', data).then(res => {
+			snackbar(res.message, 'info');
+			location.reload();
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+		alert('Select the person who has completed this task.');
+	}
+}
+</script>
 
 <?php 
 include_once PUBLIC_FILES . '/modules/footer.php' ; 

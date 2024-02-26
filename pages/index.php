@@ -69,11 +69,6 @@ include_once PUBLIC_FILES . '/modules/header.php';
           
 
 <!--
-               <div class="content-wrapper" id="calendar">
-                    
-                    <iframe src="https://calendar.google.com/calendar/embed?title=TekBots%20&amp;showTitle=0&amp;showNav=0&amp;showDate=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;mode=WEEK&amp;bgcolor=%23000000&amp;src=oregonstate.edu_0053u0kv5bf6l7lube27096lls%40group.calendar.google.com&amp;color=%23865A5A&amp;ctz=America%2FLos_Angeles/#disable-mouse-scroll" style="border-width:0" frameborder="0" scrolling="no"></iframe>     
-               </div>
-
 
                <div class="content-wrapper" id="contactUs">
                     <br><br>

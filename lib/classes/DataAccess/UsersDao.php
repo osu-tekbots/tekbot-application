@@ -56,6 +56,32 @@ class UsersDao {
             return false;
         }
     }
+	
+	/**
+     * Fetches all the users from the database with requested type.
+     * 
+     * If an error occurs during the fetch, the function will return `false`.
+     *
+     * @return User[]|boolean an array of User objects if the fetch succeeds, false otherwise
+     */
+    public function getAllUsersByType($levelName) {
+        try {
+            $sql = 'SELECT * FROM user, user_access_level 
+					WHERE access_level_id = user_access_level.user_access_level_id 
+					AND user_access_level.user_access_name = :levelName 
+					ORDER BY last_name ASC
+					';
+            
+			$params = array(':levelName' => $levelName);
+			$result = $this->conn->query($sql,$params);
+
+            return \array_map('self::ExtractUserFromRow', $result);
+        } catch (\Exception $e) {
+            $this->logError('Failed to fetch users: ' . $e->getMessage());
+
+            return false;
+        }
+    }
 
     /**
      * Fetches a single user with the given ID from the database.
