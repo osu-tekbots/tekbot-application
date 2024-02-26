@@ -122,7 +122,8 @@ $printJobs = $laserDao->getLaserJobs();
                             if($accountCode == "") {
                                 // Get account code from notes (for old prints before accountCode field)
                                 $offset = strpos($employeeNotes, "Account code: ") + strlen("Account code: ");
-                                $accountCode = substr($employeeNotes, $offset, (strpos($employeeNotes, "\n", $offset) ?: strlen($employeeNotes)) - $offset);
+                                if($offset > 0)
+                                    $accountCode = substr($employeeNotes, $offset, (strpos($employeeNotes, "\n", $offset) ?: strlen($employeeNotes)) - $offset);
                             }
                             $payment .= "Account: $accountCode";
                             break;
