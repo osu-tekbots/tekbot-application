@@ -1,4 +1,6 @@
 <?php
+//This page is linked to https://beav.es/ScG
+
 include_once '../bootstrap.php';
 
 use DataAccess\TicketDao;
@@ -87,7 +89,6 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 			url: './ajax/Handler.php',
 			type: 'POST',
 			dataType: 'json',
-			/*what we are expecting back*/
 			contentType: false,
 			processData: false,
 			data: form_data,
@@ -167,7 +168,7 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 			<div class='col-sm-5'> <!-- Provides nice indentation -->
 				<br />
 				<h3>EECS Lab Issue Reporting Tool</h3>
-				<p>Thank you for using this tool. You can report problems with equipment and stations here and we will address them as soon as possible. Please provide an email address in case we need to follow up! <!-- If you don't report it no one will know! --></p>
+				<p>Thank you for using this tool. You can report problems with equipment and stations here and we will address them as soon as possible. You must provide an email address in case we need to follow up! <!-- If you don't report it no one will know! --></p>
 			</div>
 			<div class = 'row col'>
 				<form method="post">
@@ -225,10 +226,10 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 						</select><br />
 						<br />
 						<label for="email"><b>Enter your email:</b></label>
-						<input type="email" id="email" name="email" class="form-control"> 
+						<input type="email" id="email" name="email" class="form-control" required> 
 						<br />
-						<label for="notes"><b>Issue:</b></label>
-						<textarea name="notes" id="notes" rows="4" cols="20" class="form-control"></textarea><br />
+						<label for="notes"><b>Description of Concern:</b></label>
+						<textarea name="notes" id="notes" rows="4" cols="20" class="form-control" required></textarea><br />
 						<label id="fileFeedback"></label>
 						<label for="uploadFileInput"><b>Add pictures:</b></label>
 						<input type="file" id="uploadFileInput" class="form-control" name="uploadFileInput" onchange="Upload();" accept=".jpeg,.jpg,.png,.bmp,.JPG,.JPEG,.PNG,.BMP,.heic,.HEIC">
@@ -250,7 +251,7 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 		email = $("#email").val();
 		issue = $("#notes").val();
 
-		if ((email != null) && (issue != null)) {
+		if ((email != '') && (issue != '')) {
 
 			let filePath = dbFileName;
 			var filename = filePath.replace(/^.*\\/, "");
@@ -277,7 +278,7 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 			});
 		}
 		else{
-			alert("Email and reason for ticket are required.");
+			alert("Email and description of concern are required.");
 		}
 	});
 </script>
