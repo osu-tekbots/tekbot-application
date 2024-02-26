@@ -198,7 +198,7 @@ if (!$isPublic) {
 		</address>
 		<address>
 			<strong>Replacement Cost:</strong>
-			<p><?php echo($replacement_cost);?></p>
+			<p>$<?php echo(number_format($replacement_cost,2));?></p>
 		</address>
 		<address>
 			<strong>Number of units:</strong>
