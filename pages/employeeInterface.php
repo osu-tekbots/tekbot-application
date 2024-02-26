@@ -110,9 +110,27 @@ foreach ($users as $u)
 	
 $tasksText = '';
 if (count($tasks) != 0){
-	$tasksText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th></th></tr>';
+	$tasksText = '<table class="table">
+		<tr class="row">
+			<th class="col-1">Created</th>
+			<th class="col">Description</th>
+			<th class="col-2">Who Did It?</th>
+			<th class="col-auto">
+				<!== For ensuring the columns align correctly ==>
+				<button class="btn btn-small invisible" style="height: 1px" disabled>Completed</button>
+				<button class="btn btn-small invisible" style="height: 1px" disabled>Urgent</button>
+			</th>
+		</tr>';
 	foreach ($tasks as $t){
-			$tasksText .= "<tr><td>".$t->getCreated()."</td><td>".$t->getDescription()."</td><td><select id='user_".$t->getId()."'>$tasksSelector</select></td><td><button class='btn btn-info btn-small' onclick='completeTask(".$t->getId().");'>Complete</button></td></tr>";
+			$tasksText .= "<tr class='row".($t->getUrgent() ? " alert-danger" : "")."'>
+				<td class='col-1'>".$t->getCreated()->format('m/d/Y')."</td>
+				<td class='col'>".$t->getDescription()."</td>
+				<td class='col-2'><select id='user_".$t->getId()."' class='custom-select'>$tasksSelector</select></td>
+				<td class='col-auto'>
+					<button class='btn btn-info btn-small' onclick='completeTask(".$t->getId().");'>Completed</button>
+					<button class='btn btn-warning btn-small' type='button' onclick='markUrgentTask(".$t->getId().");'>Urgent</button>
+				</td>
+			</tr>";
 	}
 	$tasksText .= '</table>';
 }
@@ -123,13 +141,13 @@ if (count($tasks) != 0){
 	$tasksCompletedText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th>Completed</th></tr>';
 	foreach ($tasks as $t){
 		$completer = $usersDao->getUserById($t->getCompleter());
-		$tasksCompletedText .= "<tr><td>".$t->getCreated()."</td><td>".$t->getDescription()."</td><td>".$completer->getFirstname()."</td><td>".$t->getCompleted()."</td></tr>";
+		$tasksCompletedText .= "<tr><td>".$t->getCreated()->format('m/d/Y')."</td><td>".$t->getDescription()."</td><td>".$completer->getFirstname()."</td><td>".$t->getCompleted()->format('m/d/Y')."</td></tr>";
 	}
 	$tasksCompletedText .= '</table>';
 }
 	
 $tasksText .= '<strong>New Task Input</strong><form class="form"><textarea id="newtask" class="form-control"></textarea></form>';
-$tasksText .= "<button id='addtask' class='btn btn-info' onclick='addtask();'>Add New Task</button>";
+$tasksText .= "<button id='addTask' class='btn btn-info' onclick='addTask();'>Add New Task</button>";
 
 $title = 'Employee Interface';
 $css = array(
@@ -206,7 +224,7 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 
 <script type='text/javascript'>
-function addtask(){
+function addTask(){
 	let desc =  $('#newtask').val().trim();
 	let data = {
 		user: '<?php echo $_SESSION['userID'];?>',
@@ -236,13 +254,27 @@ function completeTask(task){
 	if (user != ''){
 		api.post('/task.php', data).then(res => {
 			snackbar(res.message, 'info');
-			location.reload();
+			setTimeout(() => location.reload(), 1000);
 		}).catch(err => {
 			snackbar(err.message, 'error');
 		});
 	} else {
 		alert('Select the person who has completed this task.');
 	}
+}
+
+function markUrgentTask(task){
+	let data = {
+		task: task,
+		action: 'markTaskUrgent'
+	};
+
+	api.post('/task.php', data).then(res => {
+		snackbar(res.message, 'info');
+			setTimeout(() => location.reload(), 1000);
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
 }
 </script>
 

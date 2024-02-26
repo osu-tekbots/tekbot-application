@@ -14,10 +14,10 @@ class Task {
     /** @var int */
     private $description;
 
-    /** @var string */
+    /** @var \DateTime */
     private $created;
 
-    /** @var string */
+    /** @var \DateTime */
     private $completed;
 
     /** @var string */
@@ -25,6 +25,9 @@ class Task {
 
     /** @var string */
     private $completer;
+
+    /** @var bool */
+    private $urgent;
 
     /**
      *  Creates new instance of a Task
@@ -90,6 +93,14 @@ class Task {
 
     public function setCompleter($data) {
         $this->completer = $data;
+    }
+
+    public function getUrgent() {
+        return $this->urgent;
+    }
+
+    public function setUrgent($data) {
+        $this->urgent = $data;
     }
 }
 ?>

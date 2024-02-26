@@ -53,11 +53,10 @@ class TaskDao {
 
     public function getAllIncompleteTasks() {
         try {
-            $sql = '
-            SELECT * 
-            FROM `tekbots_tasks`
-            WHERE completed IS NULL 
-			ORDER BY created ASC
+            $sql = 'SELECT * 
+                FROM `tekbots_tasks`
+                WHERE completed IS NULL 
+                ORDER BY is_urgent DESC, created ASC
             ';
             $results = $this->conn->query($sql);
             return \array_map('self::ExtractTaskFromRow', $results);
@@ -74,11 +73,10 @@ class TaskDao {
 
     public function getAllCompleteTasks() {
         try {
-            $sql = '
-            SELECT * 
-            FROM `tekbots_tasks`
-            WHERE completed IS NOT NULL 
-			ORDER BY created ASC
+            $sql = 'SELECT * 
+                FROM `tekbots_tasks`
+                WHERE completed IS NOT NULL 
+                ORDER BY completed DESC, created ASC
             ';
             $results = $this->conn->query($sql);
             return \array_map('self::ExtractTaskFromRow', $results);
@@ -142,22 +140,23 @@ class TaskDao {
 
     public function updateTask($task) {
         try {
-            $sql = '
-            UPDATE  tekbots_tasks 
-			SET description = :description, 
-            created = :created, 
-            completed = :completed, 
-            creator = :creator, 
-            completer = :completer
-			WHERE tekbots_tasks.id = :id
+            $sql = 'UPDATE  tekbots_tasks 
+                SET description = :description, 
+                    created = :created, 
+                    completed = :completed, 
+                    creator = :creator, 
+                    completer = :completer,
+                    is_urgent = :urgent
+                WHERE tekbots_tasks.id = :id
             ';
 
             $params = array(':id' => $task->getId(),
                             ':description' => $task->getDescription(),
-                            ':created' => $task->getCreated(),
-                            ':completed' => $task->getCompleted(),
+                            ':created' => $task->getCreated()?->format('Y-m-d'),
+                            ':completed' => $task->getCompleted()?->format('Y-m-d'),
                             ':creator' => $task->getCreator(),
-                            ':completer' => $task->getCompleter());
+                            ':completer' => $task->getCompleter(),
+                            ':urgent' => $task->getUrgent());
             $this->conn->execute($sql, $params);
 
             return true;
@@ -181,21 +180,24 @@ class TaskDao {
                 created,
                 completed,
                 creator,
-                completer
+                completer,
+                is_urgent
             )
             VALUES (
                 :description,
                 :created,
                 :completed,
                 :creator,
-                :completer
+                :completer,
+                :urgent
             )
             ';
             $params = array(':description' => $task->getDescription(),
-                            ':created' => $task->getCreated(),
-                            ':completed' => $task->getCompleted(),
+                            ':created' => $task->getCreated()?->format('Y-m-d'),
+                            ':completed' => $task->getCompleted()?->format('Y-m-d'),
                             ':creator' => $task->getCreator(),
-                            ':completer' => $task->getCompleter());
+                            ':completer' => $task->getCompleter(),
+                            ':urgent' => $task->getUrgent());
             $this->conn->execute($sql, $params);
             return true;
         } catch (\Exception $e) {
@@ -224,11 +226,11 @@ class TaskDao {
         }
 
         if(isset($row['created'])) {
-            $task->setCreated($row['created']);
+            $task->setCreated(new \DateTime($row['created']));
         }
 
         if(isset($row['completed'])) {
-            $task->setCompleted($row['completed']);
+            $task->setCompleted(new \DateTime($row['completed']));
         }
 
         if(isset($row['creator'])) {
@@ -237,6 +239,10 @@ class TaskDao {
 
         if(isset($row['completer'])) {
             $task->setCompleter($row['completer']);
+        }
+
+        if(isset($row['is_urgent'])) {
+            $task->setUrgent($row['is_urgent']);
         }
 
         return $task;
