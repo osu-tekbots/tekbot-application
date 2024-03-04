@@ -115,7 +115,8 @@ class TaskActionHandler extends ActionHandler {
 		$task = new Task();
         $task->setCreator($body['user']);
         $task->setDescription($body['desc']);
-        $task->setCreated(new \DateTime('now')); 
+        $task->setCreated(new \DateTime('now'));
+        $task->setUrgent(false); 
         $ok = $this->taskDao->addNewTask($task);
 		
         if(!$ok) {
