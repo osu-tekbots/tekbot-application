@@ -583,8 +583,8 @@ class LaserActionHandler extends ActionHandler {
         }
 
         $message = $this->messageDao->getMessageByID($body['messageID']); 
-        /// TODO: Figure out why I added my email
-        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, $message, 'bairdn@oregonstate.edu');
+
+        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, 'Cuts', $message);
 
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send proccess fees email'));

@@ -154,14 +154,14 @@ class TekBotsMailer extends Mailer {
 		return $this->sendEmail($replacements['email'], $subject, $body, true);
 	}
 
-	public function sendToolProcessFeesEmail($unprocessed, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
+	public function sendToolProcessFeesEmail($unprocessed, $type, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
         $replacements = Array();
 		$replacements['email'] = $email;
 		$replacements['date'] = date("m/d/y", time());	
 		$replacements['transactions'] = '
 		<table>
 			<tr>
-				<th style="padding: 0 10px"># of Prints</th>
+				<th style="padding: 0 10px"># of '.$type.'</th>
 				<th style="padding: 0 10px">Amount</th>
 				<th style="padding: 0 10px">Account Code</th>
 			</tr>';
