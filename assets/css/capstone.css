@@ -923,3 +923,23 @@ CSS FOR laserCutting.php animation
   from, 30% { clip-path: polygon(-20% 0%, -15% 0%, -15% 100%, -20% 100%) }
   70%, to { clip-path: polygon(115% 0%, 120% 0%, 120% 100%, 115% 100%) }
 }
+
+
+.sidebar .nav-label {
+  color: lightblue;
+  font-size: .9rem;
+
+  margin: 1rem;
+  margin-right: 3rem;
+  margin-bottom: 0;
+
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid lightblue;
+}
+
+@media (max-width: 768px) {
+  .sidebar .nav-label {
+    margin-right: 1rem;
+    font-size: .8rem;
+  }
+}

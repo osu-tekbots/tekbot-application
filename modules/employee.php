@@ -31,66 +31,21 @@ function renderEmployeeSidebar() {
     <br><br>
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-tools"></i>
-            <span>Equipment</span>
+        <!-- Home -->
+        <li class="nav-item pt-2">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeInterface.php">
+                <i class="fas fa-fw fa-home"></i>
+                <span>Employee Home</span>
             </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Adjust Content:</h6>
-                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
-            </div>
         </li>
 
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-hand-rock"></i>
-                <span>Kit Handout</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <h6 class="dropdown-header">Handout:</h6>
-                <a class="dropdown-item" href="pages/employeeKitHandout.php">Kit Handout</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">View:</h6>
-                <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
-                <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
-                <a class="dropdown-item" href="blank.html">Info</a>
-            </div>
-        </li>
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-print"></i>
-                <span>3D Printing</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <h6 class="dropdown-header">Print Jobs:</h6>
-                <a class="dropdown-item" href="pages/employeePrintJobList.php">All Print Jobs</a>
-                <a class="dropdown-item" href="pages/employeePrinterVouchers.php">Print Vouchers</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Modifying Print Tools:</h6>
-				 <a class="dropdown-item" href="pages/employeePrinterMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeAddPrinter.php">Printers/Print Types</a>
-            </div>
-        </li>
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                 <i class="fas fa-fw fa-cut"></i>
-                <span>Laser Cutting</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <h6 class="dropdown-header">Laser Cut Jobs:</h6>
-                <a class="dropdown-item" href="pages/employeeLaserJobList.php">All Cut Jobs</a>
-                <a class="dropdown-item" href="pages/employeeCutVouchers.php">Cut Vouchers</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Modifying Laser Tools:</h6>
-                <a class="dropdown-item" href="pages/employeeLaserMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeAddLaser.php">Laser Cutters/Materials</a>
-            </div>
-        </li>
+
+        <!-- Section Description -->
+        <div class="nav-label">
+            Sales
+        </div>
+
+        <!-- Inventory -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-warehouse"></i>
@@ -106,19 +61,41 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
             </div>
         </li>
+
+        <!-- Kit Handout -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-door-closed"></i>
-                <span>Lockers</span>
+                <i class="fas fa-fw fa-hand-rock"></i>
+                <span>Kit Handout</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeLockers.php">Lockers Page</a>
+                <h6 class="dropdown-header">Handout:</h6>
+                <a class="dropdown-item" href="pages/employeeKitHandout.php">Kit Handout</a>
                 <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Options:</h6>
-                <a class="dropdown-item" href="pages/employeeLockersMessages.php">Edit Messages</a>
+                <h6 class="dropdown-header">View:</h6>
+                <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
+                <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
+                <a class="dropdown-item" href="blank.html">Info</a>
+            </div>
+        </li>
+
+        <!-- Equipment -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-tools"></i>
+            <span>Equipment</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Adjust Content:</h6>
+                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
             </div>
         </li>
 		
+        <!-- Touchnet -->
 		<li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-globe"></i>
@@ -129,7 +106,22 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
             </div>
         </li>
+
+        <!-- Internal Sales -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-money-check-alt"></i>
+                <span>Internal Sales</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
+            </div>
+        </li>
 		
+        <!-- TekBoxes -->
 		<li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-lock"></i>
@@ -143,7 +135,47 @@ function renderEmployeeSidebar() {
             </div>
         </li>
 
-        <!-- Turned Lab tickets into a drop down with employeeTicketList as the main and QR codes and edit equipement as options-->
+
+        <!-- Section Description -->
+        <div class="nav-label">
+            Services
+        </div>
+
+        <!-- 3D Printing -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-print"></i>
+                <span>3D Printing</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <h6 class="dropdown-header">Print Jobs:</h6>
+                <a class="dropdown-item" href="pages/employeePrintJobList.php">All Print Jobs</a>
+                <a class="dropdown-item" href="pages/employeePrinterVouchers.php">Print Vouchers</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Modifying Print Tools:</h6>
+				 <a class="dropdown-item" href="pages/employeePrinterMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeAddPrinter.php">Printers/Print Types</a>
+            </div>
+        </li>
+
+        <!-- Laser Cutting -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                 <i class="fas fa-fw fa-cut"></i>
+                <span>Laser Cutting</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <h6 class="dropdown-header">Laser Cut Jobs:</h6>
+                <a class="dropdown-item" href="pages/employeeLaserJobList.php">All Cut Jobs</a>
+                <a class="dropdown-item" href="pages/employeeCutVouchers.php">Cut Vouchers</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Modifying Laser Tools:</h6>
+                <a class="dropdown-item" href="pages/employeeLaserMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeAddLaser.php">Laser Cutters/Materials</a>
+            </div>
+        </li>
+
+        <!-- Lab Tickets -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-fw fa-ticket-alt"></i>
@@ -160,59 +192,67 @@ function renderEmployeeSidebar() {
             </div>
         </li>
 
-        <!-- Internal Sales Page with Bill All implemented, still need to work on message editing-->
+        <!-- Lockers -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-money-check-alt"></i>
-                <span>Internal Sales</span>
+                <i class="fas fa-fw fa-door-closed"></i>
+                <span>Lockers</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
+                <a class="dropdown-item" href="pages/employeeLockers.php">Lockers Page</a>
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Options:</h6>
-                <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeLockersMessages.php">Edit Messages</a>
             </div>
         </li>
 
-        <li class="nav-item">
-            <a style="color: lightblue;" class="nav-link" href="pages/employeeFees.php">
-                <i class="fas fa-fw fa-dollar-sign"></i>
-                <span>Fees</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a style="color: lightblue;" class="nav-link" href="pages/employeeUser.php">
-                <i class="fas fa-fw fa-users"></i>
-                <span>Users</span>
-            </a>
-        </li>
+
+        <!-- Section Description -->
+        <div class="nav-label">
+            Utilities
+        </div>
+
+        <!-- Send Email -->
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="pages/employeeEmail.php">
                 <i class="far fa-fw fa-paper-plane"></i>
                 <span>Send Email</span>
             </a>
         </li>
+
+        <!-- Fees -->
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeFees.php">
+                <i class="fas fa-fw fa-dollar-sign"></i>
+                <span>Fees</span>
+            </a>
+        </li>
+
+        <!-- Users -->
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeUser.php">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+
+        <!-- Discord -->
         <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://discord.gg/9YFafybAv6">
                 <i class="fab fa-discord"></i>
                 <span>Discord</span>
             </a>
         </li>
-        <!--
-        <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://trello.com/b/XUktYdsk/tekbots/">
-                <i class="fab fa-fw fa-trello"></i>
-                <span>Trello</span>
-            </a>
-        </li>
-        -->
         
+        <!-- HWeekend -->
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
                 <i class="fas fa-fw fa-project-diagram"></i>
                 <span>HWeekend</span>
             </a>
         </li>
+
+        <!-- Store Procedures -->
         <li class="nav-item">
             <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://docs.google.com/document/d/1ec17hL1cNvOtv9CpPJCzAewM0tlJ4FV-OH18Fo4_MXM">
                 <i class="fas fa-book"></i>
