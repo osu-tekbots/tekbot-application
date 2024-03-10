@@ -49,21 +49,21 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
                 several people simultaneously, seperate their email addresses with commas.
             </div>
 
-            <div class="input-group my-2">
-                <div class="input-group-prepend"><h6 class="input-group-text">To</h6></div>
-                <input id="emailAddresses" class="form-control form-control-lg">
+            <div class="form-group row my-4">
+                <label for="emailAddresses" class="col-xl-1">Recipients</label>
+                <input id="emailAddresses" class="form-control form-control-lg col-xl-8">
             </div>
-            <div class="input-group my-2">
-                <div class="input-group-prepend"><h6 class="input-group-text">Subject</h6></div>
-                <input id="emailSubject" class="form-control form-control-lg">
+            <div class="form-group row my-4">
+                <label for="emailSubject" class="col-xl-1">Subject</label>
+                <input id="emailSubject" class="form-control form-control-lg col-xl-8">
             </div>
-            <div class="input-group my-2" style=" text-align: center;">
-                <div class="input-group-prepend"><h6 class="input-group-text">Body</h6></div>
-                <textarea id="emailBody" class="form-control form-control-lg" rows="6"></textarea>
+            <div class="form-group row my-4">
+                <label for="emailBody" class="col-xl-1">Body</label>
+                <textarea id="emailBody" class="form-control form-control-lg col-xl-8" rows="6"></textarea>
             </div>
             <div class="row pt-2">
                 <div class="col">
-                    <button type="button" class="btn btn-primary float-right" onclick="sendEmail(this)">Send</button>
+                    <button type="button" class="btn btn-primary" onclick="sendEmail(this)">Send</button>
                 </div>
             </div>
         </div>
