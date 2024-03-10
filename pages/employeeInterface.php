@@ -112,7 +112,7 @@ $tasksText = '';
 if (count($tasks) != 0){
 	$tasksText = '<table class="table">
 		<tr class="row">
-			<th class="col-1">Created</th>
+			<th class="col-xs-1">Created</th>
 			<th class="col">Description</th>
 			<th class="col-2">Who Did It?</th>
 			<th class="col-auto">
@@ -123,7 +123,7 @@ if (count($tasks) != 0){
 		</tr>';
 	foreach ($tasks as $t){
 			$tasksText .= "<tr class='row".($t->getUrgent() ? " alert-danger" : "")."'>
-				<td class='col-1'>".$t->getCreated()->format('m/d/Y')."</td>
+				<td class='col-xs-1'>".$t->getCreated()->format('m/d/Y')."</td>
 				<td class='col'>".$t->getDescription()."</td>
 				<td class='col-2'><select id='user_".$t->getId()."' class='custom-select'>$tasksSelector</select></td>
 				<td class='col-auto'>
@@ -135,7 +135,7 @@ if (count($tasks) != 0){
 	$tasksText .= '</table>';
 }
 
-$tasks = $taskDao->getAllCompleteTasks();
+$tasks = $taskDao->getAllCompleteTasks($_REQUEST['start'] ?? null, $_REQUEST['end'] ?? null);
 $tasksCompletedText = '';
 if (count($tasks) != 0){
 	$tasksCompletedText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th>Completed</th></tr>';
@@ -146,8 +146,13 @@ if (count($tasks) != 0){
 	$tasksCompletedText .= '</table>';
 }
 	
-$tasksText .= '<strong>New Task Input</strong><form class="form"><textarea id="newtask" class="form-control"></textarea></form>';
-$tasksText .= "<button id='addTask' class='btn btn-info' onclick='addTask();'>Add New Task</button>";
+$tasksText .= '<strong>New Task Input</strong>
+	<form class="mt-2 form row">
+		<textarea id="newtask" class="col-10 form-control"></textarea>
+		<div class="col-2 d-flex justify-content-center align-items-center">
+			<button id="addTaskBtn" type="button" class="btn btn-info" onclick="addTask();">Add New Task</button>
+		</div>
+	</form>';
 
 $title = 'Employee Interface';
 $css = array(
@@ -204,12 +209,25 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 							: "No automatic reminder emails to send today.");
 				?>
 			</div></div>
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
-				<h2>Completed Tasks</h2>
-				<?php 
-					echo ($tasksCompletedText);
-				?>
-			</div></div>
+			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
+				<div class='col-lg-4'><h2>Completed Tasks</h2></div>
+				<div class='col-lg form-inline justify-content-end'>
+					<label for='completedStartDate' class='mr-2'>Start Date</label>
+					<input id='completedStartDate' type='date' value='<?= $_REQUEST['start'] ?>' class='form-control'>
+					
+					<span class='ml-4'></span>
+					<label for='completedEndDate' class='mr-2'>End Date</label>
+					<input id='completedEndDate' type='date' value='<?= $_REQUEST['end'] ?>' class='form-control'>
+					
+					<span class='ml-5'></span>
+					<button onclick='setDates();' class='btn btn-outline-primary'>Filter</button>
+				</div>
+			</div>
+			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
+				<div class='col'>
+					<?php echo ($tasksCompletedText); ?>
+				</div>
+			</div>
 			<BR><BR>
 			<!-- <div class='row' style='margin-left:2em;margin-right:2em;'><div class='col-6'><h2>Special Links</h2>
 				<a href='https://docs.google.com/spreadsheets/d/1GnwYpOxxhOTz1xppm4-5vOdpuhsF5Rh4GB75oPCFSP4/edit#gid=436106946' target='_blank'>ECE272 Spring 2021 Kits to be shipped</a><BR>
@@ -235,7 +253,7 @@ function addTask(){
 	if (desc != ''){
 		api.post('/task.php', data).then(res => {
 			snackbar(res.message, 'info');
-			location.reload();
+			setTimeout(() => location.reload(), 1000);
 		}).catch(err => {
 			snackbar(err.message, 'error');
 		});
@@ -276,6 +294,24 @@ function markUrgentTask(task){
 		snackbar(err.message, 'error');
 	});
 }
+
+function setDates() {
+	const urlPieces = [location.protocol, '//', location.host, location.pathname];
+	let url = urlPieces.join('');
+	
+	const startDate = document.getElementById('completedStartDate').value;
+	const endDate = document.getElementById('completedEndDate').value;
+
+	if(startDate && endDate)
+		url += `?start=${startDate}&end=${endDate}`;
+	else if(startDate)
+		url += `?start=${startDate}`;
+	else if(endDate)
+		url += `?end=${endDate}`;
+
+	window.location.replace(url);
+}
+
 </script>
 
 <?php 

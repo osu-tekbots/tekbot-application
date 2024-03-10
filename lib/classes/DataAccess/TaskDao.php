@@ -71,14 +71,55 @@ class TaskDao {
      * @return an array of tasks on success, false otherwise
      */
 
-    public function getAllCompleteTasks() {
+    public function getAllCompleteTasks($startDate, $endDate) {
         try {
-            $sql = 'SELECT * 
-                FROM `tekbots_tasks`
-                WHERE completed IS NOT NULL 
-                ORDER BY completed DESC, created ASC
-            ';
-            $results = $this->conn->query($sql);
+            if($startDate && $endDate) {
+                $this->logger->info('Fetching all completed tasks between '.$startDate.' and '.$endDate);
+                $sql = 'SELECT * 
+                    FROM `tekbots_tasks`
+                    WHERE completed IS NOT NULL 
+                        AND `completed` >= :startDate
+                        AND `completed` <= :endDate
+                    ORDER BY completed DESC, created ASC
+                ';
+                $params = array(
+                    ':startDate' => $startDate,
+                    ':endDate' => $endDate
+                );
+                $results = $this->conn->query($sql, $params);
+            } else if($startDate) {
+                $this->logger->info('Fetching all completed tasks after '.$startDate);
+                $sql = 'SELECT * 
+                    FROM `tekbots_tasks`
+                    WHERE completed IS NOT NULL 
+                        AND `completed` >= :startDate
+                    ORDER BY completed DESC, created ASC
+                ';
+                $params = array(
+                    ':startDate' => $startDate
+                );
+                $results = $this->conn->query($sql, $params);
+            } else if($endDate) {
+                $this->logger->info('Fetching all completed tasks before '.$endDate);
+                $sql = 'SELECT * 
+                    FROM `tekbots_tasks`
+                    WHERE completed IS NOT NULL 
+                        AND `completed` <= :endDate
+                    ORDER BY completed DESC, created ASC
+                ';
+                $params = array(
+                    ':endDate' => $endDate
+                );
+                $results = $this->conn->query($sql, $params);
+            } else {
+                $this->logger->info('Fetching all completed tasks');
+                $sql = 'SELECT * 
+                    FROM `tekbots_tasks`
+                    WHERE completed IS NOT NULL 
+                    ORDER BY completed DESC, created ASC
+                ';
+                $results = $this->conn->query($sql);
+            }
             return \array_map('self::ExtractTaskFromRow', $results);
         } catch(\Exception $e) {
             $this->logger->error('Failed to get any incomplete tasks: ' . $e->getMessage());
