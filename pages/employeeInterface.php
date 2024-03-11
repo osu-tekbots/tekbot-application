@@ -124,7 +124,7 @@ if (count($tasks) != 0){
 	foreach ($tasks as $t){
 			$tasksText .= "<tr class='row".($t->getUrgent() ? " alert-danger" : "")."'>
 				<td class='col-xs-1'>".$t->getCreated()->format('m/d/Y')."</td>
-				<td class='col'>".$t->getDescription()."</td>
+				<td class='col' style='word-break: break-word;'>".$t->getDescription()."</td>
 				<td class='col-2'><select id='user_".$t->getId()."' class='custom-select'>$tasksSelector</select></td>
 				<td class='col-auto'>
 					<button class='btn btn-info btn-small' onclick='completeTask(".$t->getId().");'>Completed</button>
@@ -141,7 +141,7 @@ if (count($tasks) != 0){
 	$tasksCompletedText = '<table class="table"><tr><th>Created</th><th>Description</th><th>Who Did It?</th><th>Completed</th></tr>';
 	foreach ($tasks as $t){
 		$completer = $usersDao->getUserById($t->getCompleter());
-		$tasksCompletedText .= "<tr><td>".$t->getCreated()->format('m/d/Y')."</td><td>".$t->getDescription()."</td><td>".$completer->getFirstname()."</td><td>".$t->getCompleted()->format('m/d/Y')."</td></tr>";
+		$tasksCompletedText .= "<tr><td>".$t->getCreated()->format('m/d/Y')."</td><td style='overflow-wrap: break-word;'>".$t->getDescription()."</td><td>".$completer->getFirstname()."</td><td>".$t->getCompleted()->format('m/d/Y')."</td></tr>";
 	}
 	$tasksCompletedText .= '</table>';
 }
