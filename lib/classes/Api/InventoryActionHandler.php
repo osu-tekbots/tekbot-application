@@ -3,6 +3,7 @@
 namespace Api;
 
 use Model\Part;
+use Model\InventoryType;
 use Email\TekBotsMailer;
 use DataAccess\UserDao;
 
@@ -15,9 +16,6 @@ class InventoryActionHandler extends ActionHandler {
     private $inventoryDao;
 	private $userDao;
 	private $messageDao;
-	
-	/** @var \Util\Logger */
- //   private $logger;
 	
 	/******
 	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
@@ -120,6 +118,12 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('stockNumber');
 		$this->requireParam('typeId');
         $body = $this->requestBody;
+
+
+        $type = $this->inventoryDao->getTypeById($body['typeId']);
+        if($type->getArchived())
+        $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Type is unavaliable'));
+
 		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
         $part->setTypeId($body['typeId']);
         $ok = $this->inventoryDao->updatePart($part);
@@ -337,6 +341,10 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('type');
 		$this->requireParam('desc');
         $body = $this->requestBody;
+
+        $type = $this->inventoryDao->getTypeById($body['type']);
+        if($type->getArchived())
+        $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Type is unavaliable'));
 		
 		$part = new Part();
         $part->setTypeId($body['type']);
@@ -512,8 +520,75 @@ class InventoryActionHandler extends ActionHandler {
         else
             $this->respond(new Response(Response::OK, 'Email Sent'));
     }
+
+	public function handleAddType() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('description');
+        $body = $this->requestBody;
+
+        $type = new InventoryType();
+
+        $type->setDescription($body['description']);
+        $type->setArchived(false);
+
+        $ok = $this->inventoryDao->addType($type);
+
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Add'));
+        else
+            $this->respond(new Response(Response::OK, 'Type Added'));
+            
+    
+    }
+    public function handleUpdateTypeDescription() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('id');
+        $this->requireParam('description');
+        $body = $this->requestBody;
+
+        $type = $this->inventoryDao->getTypeById($body['id']);
+
+        $type->setDescription($body['description']);
+        $type->setDateUpdated(new \DateTime());
+
+        $ok = $this->inventoryDao->updateType($type);
+
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+        else
+            $this->respond(new Response(Response::OK, 'Type Updated'));
+    }
 	
-	
+	public function handleToggleArchiveType() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('id');
+        $body = $this->requestBody;
+
+        $type = $this->inventoryDao->getTypeById($body['id']);
+
+        $type->setArchived(!$type->getArchived());
+        $type->setDateUpdated(new \DateTime());
+
+        $ok = $this->inventoryDao->updateType($type);
+
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Archive'));
+        else
+            if($type->getArchived())
+                $this->respond(new Response(Response::OK, 'Type Archived'));
+            else
+                $this->respond(new Response(Response::OK, 'Type Unarchived'));
+    
+    }
    
     /**
      * Handles the HTTP request on the API resource. 
@@ -627,6 +702,17 @@ class InventoryActionHandler extends ActionHandler {
                 $this->handleSendRecountEmail();
                 break;
 
+            case 'addType':
+                $this->handleAddType();
+                break;
+
+            case 'toggleArchiveType':
+                $this->handleToggleArchiveType();
+                break;
+
+            case 'updateTypeDescription':
+                $this->handleUpdateTypeDescription();
+                break;
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Part resource'));

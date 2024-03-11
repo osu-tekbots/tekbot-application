@@ -96,6 +96,8 @@ $lastCounted = $part->getLastCounted();
 
 $types_select = '';
 foreach ($types as $t){
+	if($t['archived'])
+		continue;
 	$types_select .= "<option value='".$t['typeId']."' ".($t['typeId'] == $typeId ?'selected':'').">".$t['type']."</option>";
 }
 

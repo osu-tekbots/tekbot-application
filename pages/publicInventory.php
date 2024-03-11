@@ -51,7 +51,6 @@ $js = array(
 include_once PUBLIC_FILES . '/modules/header.php';
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $parts = $inventoryDao->getInventory();
-$types = $inventoryDao->getTypes();
 ?>
 
 

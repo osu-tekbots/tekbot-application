@@ -60,8 +60,6 @@ if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $part = $inventoryDao->getPartByStocknumber($stocknumber);
-$types = $inventoryDao->getTypes();
-$suppliers = $inventoryDao->getSuppliers();
 
 $stocknumber = $part->getStocknumber();//
 $description = $part->getName();//

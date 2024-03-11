@@ -119,6 +119,8 @@ $filterDiv .= 'Select Category: <select id="categorySelect" onchange="loadCatego
 
 $types_select = '';
 foreach ($types as $t){
+	if($t['archived'])
+		continue;
 	$types_select .= "<option value='".$t['typeId']."'>".$t['type']."</option>";
 }
 

@@ -4,6 +4,7 @@ namespace DataAccess;
 
 use Model\Part;
 use Model\Kit;
+use Model\InventoryType;
 
 /**
  * Handles all of the logic related to queries on loading/editing messages in the database.
@@ -271,19 +272,51 @@ class InventoryDao {
     }
 	
 	/**
+     * Gets the types/ categories that inventory items can have
+     *  
+     * @param $useModel If `true` returns an Inventory Type model. Else returns pure SQL results.
      * 
      * @return an array of rows on success, false otherwise
      */
-    public function getTypes() {
+    public function getTypes($useModel = false) {
         try {
             $sql = '
-            SELECT tekbots_types.id AS typeId, tekbots_types.Description AS type
+            SELECT tekbots_types.id AS typeId, tekbots_types.Description AS type, tekbots_types.archived, tekbots_types.dateUpdated
 			FROM `tekbots_types`
 			ORDER BY type ASC
             ';
             $result = $this->conn->query($sql);
 
+            if($useModel)
+                return array_map('self::ExtractTypeFromRow', $result);
             return $result;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any types: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * Gets a specific types/ categories that inventory items can have
+     *  
+     * @param $id The type to get
+     * 
+     * @return \Model\InventoryType
+     */
+    public function getTypeById($id) {
+        try {
+            $sql = '
+            SELECT tekbots_types.id AS typeId, tekbots_types.Description AS type, tekbots_types.archived, tekbots_types.dateUpdated
+			FROM `tekbots_types`
+            WHERE id = :id
+			ORDER BY type ASC
+            ';
+            $params = array(
+                ':id' => $id
+            );
+            $result = $this->conn->query($sql, $params);
+
+            return self::ExtractTypeFromRow($result[0]);
         } catch (\Exception $e) {
             $this->logger->error('Failed to get any types: ' . $e->getMessage());
             return false;
@@ -425,6 +458,37 @@ class InventoryDao {
             return false;
         }
     }
+
+    /**
+     * Updates the inventory type in the database
+     * 
+     * @param \Model\InventoryType The type to update
+     * 
+     * @return bool Whether the update succeeded
+     */
+    public function updateType($type) {
+        try {
+            $sql = 'UPDATE tekbots_types 
+            SET
+                Description = :Description,
+                archived = :archived,
+				dateUpdated = :dateUpdated
+            WHERE ID = :id
+            ';
+            $params = array(
+                ':id' => $type->getId(),
+				':Description' => $type->getDescription(),
+                ':archived' => $type->getArchived(),
+                ':dateUpdated' => $type->getDateUpdated()->format('Y-m-d H:i:s')
+            );
+            $this->conn->execute($sql, $params);
+			
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update type: ' . $e->getMessage());
+            return false;
+        }
+    }
 	
 	public function addPart($part) {
         try {
@@ -456,6 +520,44 @@ class InventoryDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to update part: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Adds the inventory type to the database
+     * 
+     * @param \Model\InventoryType The type to add
+     * 
+     * @return bool Whether the insertion succeeded
+     */
+    public function addType($type) {
+        try {
+            $sql = 'INSERT INTO `tekbots_types`
+                (
+                    `ID`, 
+                    `Description`, 
+                    `archived`, 
+                    `dateUpdated`
+                ) 
+                VALUES 
+                (
+                    :id,
+                    :Description,
+                    :archived,
+                    :dateUpdated)
+            ';
+            $params = array(
+                ':id' => $type->getId(),
+				':Description' => $type->getDescription(),
+                ':archived' => $type->getArchived(),
+                ':dateUpdated' => $type->getDateUpdated()?->format('Y-m-d H:i:s')
+            );
+            $this->conn->execute($sql, $params);
+			
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add type: ' . $e->getMessage());
             return false;
         }
     }
@@ -581,7 +683,21 @@ class InventoryDao {
         return $kit;
     }
 
-   
+    public static function ExtractTypeFromRow($row) {
+        $type = new InventoryType($row['typeId']);
+
+		if(isset($row['type'])){
+			$type->setDescription($row['type']);
+		}
+		if(isset($row['archived'])){
+			$type->setArchived($row['archived']);
+		}
+		if(isset($row['dateUpdated'])){
+			$type->setDateUpdated(new \DateTime($row['dateUpdated']));
+		}
+       
+        return $type;
+    }
 }
 
 ?>
