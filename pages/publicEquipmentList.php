@@ -102,14 +102,15 @@ foreach ($equipments as $e){
 		<h1>Equipment Available to Borrow</h1>
 		<div class="row">
 			<div class="col-7">
-			<p class="lead mb-0">OSU students, employees, and staff can borrow a variety of equipment from the TekBots store in KEC1110. Equipment is available on a varying number of day loans. To pick up equipment, browse the listing below and make a reservation for the equipment you want, A reservation is good for an hour so travel quickly to pickup your item from KEC1110. IN the event that you can not make it to our hours, it maybe possible to leave the item for you in one of our TekBox lockers. Contact us for more details.</p>
+                <p class="lead mb-0">OSU students, employees, and staff can borrow a variety of equipment from the TekBots store in KEC1110. Equipment is available on a varying number of day loans. To pick up equipment, browse the listing below and make a reservation for the equipment you want, A reservation is good for an hour so travel quickly to pickup your item from KEC1110. In the event that you can not make it to our hours, it maybe possible to leave the item for you in one of our TekBox lockers. Contact us for more details.</p>
 			</div>
-			<div class="col-5"><img class="img-fluid rounded" src="./assets/img/rect1.png">
+			<div class="col-5">
+                <img class="img-fluid rounded" src="./assets/img/rect1.png">
 			</div>
 		</div>
 		</div>
 		<table class='table' id='equipmentList'>
-        <caption>Equipments For Rental</caption>
+        <caption>Equipment For Checkout</caption>
 			<thead>
 				<tr>
 					<th>Image</th>
