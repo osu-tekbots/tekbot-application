@@ -66,6 +66,7 @@ foreach($types as $type) {
 
 			<div class="container-fluid">
                 <div class="admin-paper">
+                    <div class="alert alert-warning">Please let Don know if you add a new type.</div>
                     <form class="form-inline d-flex justify-content-center" style="gap: 16px">
                         <span class="form-inline d-flex" style="gap: 8px">
                             <label for="new-name">Name</label>
