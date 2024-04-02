@@ -528,7 +528,7 @@ function recountEmail(id){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'Email Sent');
+		snackbar(res.message, 'success');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});

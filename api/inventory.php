@@ -7,7 +7,7 @@ include_once '../bootstrap.php';
 
 use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
-use DataAccess\MessageDao;
+use DataAccess\TaskDao;
 use Api\InventoryActionHandler;
 use Api\Response;
 
@@ -18,8 +18,8 @@ if(!session_id()) {
 // Setup our data access and handler classes
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$messageDao = new MessageDao($dbConn, $logger);
-$handler = new InventoryActionHandler($inventoryDao, $userDao, $messageDao, $logger);
+$taskDao = new TaskDao($dbConn, $logger);
+$handler = new InventoryActionHandler($inventoryDao, $userDao, $taskDao, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 9/1/23
 // if (verifyPermissions(['user', 'employee'])) {

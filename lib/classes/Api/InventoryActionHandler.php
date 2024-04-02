@@ -3,8 +3,8 @@
 namespace Api;
 
 use Model\Part;
+use Model\Task;
 use Model\InventoryType;
-use Email\TekBotsMailer;
 use DataAccess\UserDao;
 
 /**
@@ -14,8 +14,8 @@ class InventoryActionHandler extends ActionHandler {
 
     /** @var \DataAccess\* */
     private $inventoryDao;
+    private $taskDao;
 	private $userDao;
-	private $messageDao;
 	
 	/******
 	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
@@ -25,15 +25,17 @@ class InventoryActionHandler extends ActionHandler {
     /**
      * Constructs a new instance of the action handler for requests on user resources.
      *
+     * @param \DataAccess\InventoryDao $dao the data access object for inventory items
      * @param \DataAccess\UsersDao $dao the data access object for users
+     * @param \DataAccess\TaskDao $dao the data access object for tasks
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($inventoryDao, $userDao, $messageDao, $logger)
+    public function __construct($inventoryDao, $userDao, $taskDao, $logger)
     {
         parent::__construct($logger);
         $this->inventoryDao = $inventoryDao;
 		$this->userDao = $userDao;
-		$this->messageDao = $messageDao;
+        $this->taskDao = $taskDao;
     }
 
 	/**
@@ -510,15 +512,18 @@ class InventoryActionHandler extends ActionHandler {
         $body = $this->requestBody;
 
         $part = $this->inventoryDao->getPartByStockNumber($body['stockNumber']);
-        $message = $this->messageDao->getMessageByID($body['messageId']);
 
-        $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendRecountEmail($part, $message);
+        $task = new Task();
+        $task->setCreator($_SESSION['userID']);
+        $task->setDescription("Update inventory count for <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/employeeInventoryPart.php?stocknumber=".$part->getStocknumber()."'>".$part->getName()."</a>");
+        $task->setCreated(new \DateTime('now'));
+        $task->setUrgent(false);
+        $ok = $this->taskDao->addNewTask($task);
 
         if (!$ok)
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Send'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add task'));
         else
-            $this->respond(new Response(Response::OK, 'Email Sent'));
+            $this->respond(new Response(Response::OK, 'Task added'));
     }
 
 	public function handleAddType() {
