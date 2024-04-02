@@ -243,6 +243,9 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 <script type='text/javascript'>
 function addTask(){
+	if(!confirm('Are you sure this task applies to all employees and is contains enough detail that anyone could complete it without clarification?'))
+		return;
+
 	let desc =  $('#newtask').val().trim();
 	let data = {
 		user: '<?php echo $_SESSION['userID'];?>',
