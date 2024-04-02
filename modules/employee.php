@@ -79,22 +79,6 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="blank.html">Info</a>
             </div>
         </li>
-
-        <!-- Equipment -->
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-tools"></i>
-            <span>Equipment</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Adjust Content:</h6>
-                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
-            </div>
-        </li>
 		
         <!-- Touchnet -->
 		<li class="nav-item dropdown">
@@ -193,6 +177,22 @@ function renderEmployeeSidebar() {
             </div>
         </li>
 
+        <!-- Equipment -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-tools"></i>
+            <span>Equipment</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Adjust Content:</h6>
+                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
+            </div>
+        </li>
+
         <!-- Lockers -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -210,7 +210,7 @@ function renderEmployeeSidebar() {
 
         <!-- Section Description -->
         <div class="nav-label">
-            Utilities
+            Other
         </div>
 
         <!-- Send Email -->
