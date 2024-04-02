@@ -62,6 +62,18 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeInventoryLabels.php">Print Labels</a>
             </div>
         </li>
+		
+        <!-- Touchnet -->
+		<li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-globe"></i>
+                <span>Touchnet</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
+                <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
+            </div>
+        </li>
 
         <!-- Kit Handout -->
         <li class="nav-item dropdown">
@@ -77,18 +89,6 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
                 <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
                 <a class="dropdown-item" href="blank.html">Info</a>
-            </div>
-        </li>
-		
-        <!-- Touchnet -->
-		<li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-globe"></i>
-                <span>Touchnet</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
-                <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
             </div>
         </li>
 
@@ -237,19 +237,11 @@ function renderEmployeeSidebar() {
             </a>
         </li>
 
-        <!-- Discord -->
+        <!-- Slack -->
         <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://discord.gg/9YFafybAv6">
-                <i class="fab fa-discord"></i>
-                <span>Discord</span>
-            </a>
-        </li>
-        
-        <!-- HWeekend -->
-        <li class="nav-item">
-            <a style="color: lightblue;" class="nav-link" href="../../store/hweekend/index.php">
-                <i class="fas fa-fw fa-project-diagram"></i>
-                <span>HWeekend</span>
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://app.slack.com/client/T06L04JH5C7/C06M3ESL1FA">
+                <i class="fab fa-slack"></i>
+                <span>Slack</span>
             </a>
         </li>
 
