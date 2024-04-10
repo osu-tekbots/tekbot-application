@@ -10,10 +10,6 @@ if (!session_id()) {
     session_start();
 }
 
-// TODO: Remove this for production
-include_once PUBLIC_FILES . '/lib/shared/authorize.php';
-allowIf(verifyPermissions('employee'), 'index.php');
-
 $title = "Seminars";
 
 $css = array(
@@ -29,9 +25,9 @@ $upcomingSeminars = [
   [
     'title'  => 'KiCad Overview: Linear Regulators',
     'time' => 'Wednesday, April 17 at 6:00pm',
-    'location' => 'Location TBD',
+    'location' => 'Location: WNGR 149',
     'image' => 'https://placehold.co/600x400',
-    'details' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Numquam dignissimos odit eos ex dolore, et eaque corrupti inventore nihil. Odit quasi officia accusantium et ut incidunt modi optio quisquam veniam.'
+    'details' => 'Join TekBots for an introduction to KiCad and PCB development for Linear Voltage Regulators. During this 1 hour session, we will discuss the basics of schematic entry and layout. Attendees will be given the opportunity for free components to build their own supply once they have completed their design! Design schematic can be found here (<a href="https://drive.google.com/file/d/1Kk9PPzLCA2-kYXbhFXEEAvyV3OcdFMm7/view">schematic.pdf</a>) and the bill of materials is found here (<a href="https://drive.google.com/file/d/1MGYdwOwrlyGHpibb6aiXqtRquPJCdn-B/view">BOM.csv</a>). Attendees will get the most out of the seminar if they bring a laptop with <a href="https://www.kicad.org/download/">KiCad v8.0</a> installed and have a mouse.'
   ]
 ];
 
@@ -60,32 +56,17 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 $image = $seminar['image'];
                 $details = $seminar['details'];
 
-                if($index % 4 == 0)
+                if($index % 3 == 0)
                     echo '</div><div class="card-deck mx-4 mb-4">';
 
                 echo <<< HTML
-                    <!-- Option 1: No image -->
-                    <div class="col-md-3">
-                        <div class="card" style="height: 400px !important; min-height: fit-content;">
+                    <div class="col-lg-4">
+                        <div class="card" style="height: fit-content !important;">
                             <div class="card-body">
                                 <h5 class="card-title">$title</h5>
                                 <h6 class="card-subtitle mb-2">$time</h6>
                                 <h6 class="card-subtitle mb-2 text-secondary">$location</h6>
                                 <p class="card-text">$details</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Option 2: Image -->
-                    <div class="col-md-3">
-                        <div class="card" style="height: 400px !important; min-height: fit-content;">
-                            <img class="card-img-top" src="$image">
-                            <div class="card-body">
-                                <h5 class="card-title">$title</h5>
-                                <h6 class="card-subtitle mb-2">$time</h6>
-                                <h6 class="card-subtitle mb-2 text-secondary">$location</h6>
-                            </div>
-                            <div class="card-footer">
-                                <button data-title="$title" data-details="$details" type="button" data-toggle="modal" data-target="#detailsModal" class="btn btn-link card-link p-0">Details</button>
                             </div>
                         </div>
                     </div>
