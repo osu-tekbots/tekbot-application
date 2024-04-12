@@ -10,6 +10,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 
 ?>
+<div style="position: relative; top: 25px; padding: 16px; background: black;">
+     Check out our new TekBots Seminars <a href="publicSeminars.php">here</a>!
+</div>
           <!-- Main header -->
           <header class="maincenter">
                <!-- First replaceble image -->
@@ -18,8 +21,22 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <!--<h1><strong>Tek</strong>bots</h1>-->
                     <img class="tekbotslogo" src="assets/img/resize_tekbots.png">
                     <h2 class="logotext">Creating Platforms For Learning. <br>
-                    <h2><strong><a href="./pages/userPrints.php" target="_blank">3D Printing</a> <span style="font-size:35px;">·</span> <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a> <span style="font-size:35px;">·</span> <a href="./pages/publicInventory.php" target="_blank">Inventory</a></strong></h2>
-                    <h2><strong><a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a> <span style="font-size:35px;">·</span> <a href="./pages/publicEquipmentList.php" target="_blank">Reserve Equipment</a> <span style="font-size:35px;">·</span> <a href="./pages/info.php">Technical Help</strong></h2> </a>
+                    <h2><strong>
+                         <a href="./pages/userPrints.php" target="_blank">3D Printing</a>
+                         <span style="font-size:35px;">·</span>
+                         <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a>
+                         <span style="font-size:35px;">·</span>
+                         <a href="./pages/publicInventory.php" target="_blank">Inventory</a>
+                         <span style="font-size:35px;">·</span>
+                         <a href="./pages/publicSeminars.php">Seminars</a>
+                    </strong></h2>
+                    <h2><strong>
+                         <a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a>
+                         <span style="font-size:35px;">·</span>
+                         <a href="./pages/publicEquipmentList.php" target="_blank">Reserve Equipment</a>
+                         <span style="font-size:35px;">·</span>
+                         <a href="./pages/info.php">Technical Help</a>
+                    </strong></h2> 
                     <h3>KEC 1110 Hours: </h3>
 					<h2><strong>Spring Term (4/1-6/7): M,W,F 10am-12:50pm / T,Th 2pm-4:50pm</strong></h2><BR>Finals Week by Appointment<BR>
                     <td><a href='mailto:tekbot-worker@engr.orst.edu'> Email Us Here</a></td><BR></h2>
