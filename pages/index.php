@@ -10,7 +10,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 
 ?>
-<div style="position: relative; top: 25px; padding: 16px; background: black;">
+<div style="position: relative; top: 25px; padding: 16px; background: black; font-size: 20px; text-align: center; padding-top: 0">
      Check out our new TekBots Seminars <a href="publicSeminars.php">here</a>!
 </div>
           <!-- Main header -->
