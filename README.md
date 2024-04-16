@@ -54,6 +54,7 @@ checked into source control. The file should have the following contents:
 private_files = ; directory containing private files (outside the web root)
 
 [server]
+environment = ; dev|prod
 display_errors = ; yes|no
 display_errors_severity = ; all|warning|error
 auth_providers_config_file = ; auth.ini
