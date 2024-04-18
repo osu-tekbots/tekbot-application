@@ -39,17 +39,19 @@ $seminars = [
             <a href="https://www.kicad.org/download/">KiCad v8.0</a> installed and have a mouse.
         '
     ],
-    // [
-    //     'title'  => 'Datasheet Basics',
-    //     'time' => new \DateTime('2024-04-24 18:00:00'),
-    //     'location' => 'TBD',
-    //     'image' => '',
-    //     'details' => ''
-    // ]
+	[
+         'title'  => 'Datasheet Basics',
+         'time' => new \DateTime('2024-04-24 18:00:00'),
+         'location' => 'KEC1005 (Limited Space)',
+         'image' => '',
+         'details' => 'Join Tekbots by looking over various datasheets for common components. We will 
+			discuss what many of the terms and sections mean for them as it applies to 
+			designing your own circuits.'
+    ]
 ];
 
-$now = new \DateTime('tomorrow');
-$upcomingSeminars = array_filter($seminars, fn($elmt) => $elmt['time'] > $now);
+$now = new \DateTime('today');
+$upcomingSeminars = array_filter($seminars, fn($elmt) => $elmt['time'] >= $now);
 $pastSeminars = array_filter($seminars, fn($elmt) => $elmt['time'] < $now);
 rsort($upcomingSeminars);
 sort($pastSeminars);
@@ -90,7 +92,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                                     <h5 class="card-title">$title</h5>
                                     <h6 class="card-subtitle mb-2">$time</h6>
                                     <h6 class="card-subtitle mb-2 text-secondary">Location: $location</h6>
-                                    <p class="card-text" style="white-space: collapse;">$details</p>
+                                    <p class="card-text" style="white-space: normal;">$details</p>
                                 </div>
                             </div>
                         </div>
@@ -119,7 +121,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                                 <div class="card-body">
                                     <h5 class="card-title">$title</h5>
                                     <h6 class="card-subtitle mb-2 text-secondary">$time</h6>
-                                    <p class="card-text" style="white-space: collapse;">$details</p>
+                                    <p class="card-text" style="white-space: normal;">$details</p>
                                 </div>
                             </div>
                         </div>
