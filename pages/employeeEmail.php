@@ -82,7 +82,6 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
         thisVal.disabled = true;
 
         api.post('/email.php', data).then(res => {
-            document.getElementById('closeEmailModal').click();
             document.getElementById('emailAddresses').value = '';
             document.getElementById('emailSubject').value = '';
             document.getElementById('emailBody').value = '';
