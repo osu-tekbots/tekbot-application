@@ -770,7 +770,7 @@ class PrinterActionHandler extends ActionHandler {
 
         if($body['message'] == '') $this->respond(new Response(Response::BAD_REQUEST, "Email body is empty"));
 
-        $ok = $this->mailer->sendEmail($body['email'], '3D Print Submission Follow-up', $body['message'], false);
+        $ok = $this->mailer->sendEmail($body['email'], '3D Print Submission Follow-up', $body['message'], false, $this->config->getWorkerMaillist());
 		if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }
