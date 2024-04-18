@@ -799,7 +799,7 @@ class PrinterActionHandler extends ActionHandler {
 
         $message = $this->messageDao->getMessageByID($body['messageID']);
 
-        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, 'Prints', $message);
+        $ok = $this->mailer->sendToolProcessFeesEmail($unprocessedJobs, 'Prints', $message, $this->config->getWorkerMaillist());
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send proccess fees email'));
         }

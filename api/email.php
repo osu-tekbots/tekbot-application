@@ -14,8 +14,8 @@ if(!session_id()) {
     session_start();
 }
 
-$mailer = new Mailer('tekbot-worker@engr.oregonstate.edu', 'TekBots', $logger);
+$mailer = new Mailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), 'TekBots', $logger);
 
-$handler = new EmailActionHandler($mailer, $logger);
+$handler = new EmailActionHandler($mailer, $configManager, $logger);
 
 $handler->handleRequest();

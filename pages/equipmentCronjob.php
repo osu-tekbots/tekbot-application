@@ -17,7 +17,7 @@ $reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 // $messageDao = new MessageDao($dbConn, $logger);
-$mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
+$mailer = new EquipmentRentalMailer($configManager->getWorkerMaillist(), $configManager->get('email.subject_tag'));
 
 $reservedHTML = '';
 $listNumber = 0;

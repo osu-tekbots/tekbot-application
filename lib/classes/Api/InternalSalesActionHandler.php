@@ -18,6 +18,9 @@ class InternalSalesActionHandler extends ActionHandler {
     private $mailer;
 	private $userDao;
 	private $messageDao;
+
+    /** @var \Util\ConfigManager */
+	private $configManager;
 	
 	/** @var \Util\Logger */
  //   private $logger;
@@ -33,13 +36,14 @@ class InternalSalesActionHandler extends ActionHandler {
      * @param \DataAccess\UsersDao $dao the data access object for users
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($internalSalesDao, $mailer, $userDao, $messageDao, $logger)
+    public function __construct($internalSalesDao, $mailer, $userDao, $messageDao, $configManager, $logger)
     {
         parent::__construct($logger);
         $this->internalSalesDao = $internalSalesDao;
         $this->mailer = $mailer;
 		$this->userDao = $userDao;
 		$this->messageDao = $messageDao;
+        $this->configManager = $configManager;
     }
 
 	/**
@@ -114,7 +118,7 @@ class InternalSalesActionHandler extends ActionHandler {
 
         $message = $this->messageDao->getMessageByID($body['messageID']);
         $unprocessedsales = $this->internalSalesDao->getUnprocessed();
-        $ok = $this->mailer->sendBillAllEmail($unprocessedsales, $message);        
+        $ok = $this->mailer->sendBillAllEmail($unprocessedsales, $message, $this->configManager->getWorkerMaillist());        
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send bill all email'));
         }

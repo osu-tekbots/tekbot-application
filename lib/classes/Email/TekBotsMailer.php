@@ -10,10 +10,12 @@ class TekBotsMailer extends Mailer {
      * Constructs a new instance of a mailer specifically for capstone project-related emails
      *
      * @param string $from the from address for emails
+	 * @param string $bounceAddress the email address to direct notices about emails that bounced to
      * @param string|null $subjectTag an optional subject tag to prefix the provided subject tag with
+	 * @param \Util\Logger|null $logger an optional logger to capture error messages from the mail() function
      */
-    public function __construct($from, $subjectTag = null, $logger = null) {
-        parent::__construct($from, $subjectTag, $logger);
+    public function __construct($from, $bounceEmail, $subjectTag = null, $logger = null) {
+        parent::__construct($from, $bounceEmail, $subjectTag, $logger);
     }
 
     public function sendLockerEmail($user, $locker, $message) {
@@ -154,7 +156,7 @@ class TekBotsMailer extends Mailer {
 		return $this->sendEmail($replacements['email'], $subject, $body, true);
 	}
 
-	public function sendToolProcessFeesEmail($unprocessed, $type, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
+	public function sendToolProcessFeesEmail($unprocessed, $type, $message, $email) {
         $replacements = Array();
 		$replacements['email'] = $email;
 		$replacements['date'] = date("m/d/y", time());	
@@ -202,7 +204,7 @@ class TekBotsMailer extends Mailer {
         return $this->sendEmail($replacements['email'], $subject, $body, true);
     }
 
-	public function sendBillAllEmail($unprocessed, $message, $email = "tekbot-worker@engr.oregonstate.edu") {
+	public function sendBillAllEmail($unprocessed, $message, $email) {
         $replacements = Array();
 		$replacements['email'] = $email;
 		$replacements['date'] = date("m/d/y", time());	

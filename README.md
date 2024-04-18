@@ -60,8 +60,10 @@ auth_providers_config_file = ; auth.ini
 
 [email]
 subject_tag = ; optional tag to prepend all email subjects with
-from_address = ; main from address used when sending email from the server
-admin_addresses[] = ; array of email addresses of admins that need important site notifications
+worker_maillist = ; main from address used when sending email from the server and address used to send email to all employees
+bounce_address = ; email address to catch bounced emails
+admin_address = ; email address for the website's developers/ admins
+cron_frequency = ; how often to check for and send automatic emails
 
 [client]
 base_url = ; base URL used by the frontend (e.g. http://eecs.oregonstate.edu/capstone/)

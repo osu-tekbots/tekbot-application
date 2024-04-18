@@ -15,7 +15,6 @@ if(!session_id()) session_start();
 
 // Setup our data access and handler classes
 $equipmentDao = new EquipmentDao($dbConn, $logger);
-//$mailer = new ProjectMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
 $handler = new EquipmentActionHandler($equipmentDao, $configManager, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 8/31/23

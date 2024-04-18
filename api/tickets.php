@@ -20,8 +20,8 @@ if(!session_id()) {
 $ticketDao = new TicketDao($dbConn, $logger);
 $labDao = new LabDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
-$mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
-$handler = new TicketsActionHandler($ticketDao, $labDao, $messageDao, $mailer, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
+$handler = new TicketsActionHandler($ticketDao, $labDao, $messageDao, $mailer, $configManager, $logger);
 $handler->handleRequest();
 
 // Authorize the request

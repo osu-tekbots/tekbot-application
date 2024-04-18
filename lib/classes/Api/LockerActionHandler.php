@@ -24,15 +24,19 @@ class LockerActionHandler extends ActionHandler {
     /**
      * Constructs a new instance of the action handler for requests on user resources.
      *
-     * @param \DataAccess\UsersDao $dao the data access object for users
+     * @param \DataAccess\LockerDao $lockerDao the data access object for lockers
+     * @param \DataAccess\UsersDao $userDao the data access object for users
+     * @param \DataAccess\MessageDao $messageDao the data access object for messages
+     * @param \Email\TekBotsMailer $mailer the object for sending TekBots site emails
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($lockerDao, $userDao, $messageDao, $logger)
+    public function __construct($lockerDao, $userDao, $messageDao, $mailer, $logger)
     {
         parent::__construct($logger);
         $this->lockerDao = $lockerDao;
 		$this->userDao = $userDao;
 		$this->messageDao = $messageDao;
+        $this->mailer = $mailer;
     }
 
 	/**
@@ -71,8 +75,7 @@ class LockerActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Locker Failed to Checkout'));
         }
 
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendLockerEmail($user, $locker, $message);
+        $ok = $this->mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email sned Failed'));
         }
@@ -111,8 +114,7 @@ class LockerActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Locker Failed to Return'));
         }
 
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendLockerEmail($user, $locker, $message);
+        $ok = $this->mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -143,8 +145,7 @@ class LockerActionHandler extends ActionHandler {
 		$message = $this->messageDao->getMessageByID($body['messageId']);
 
         
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendLockerEmail($user, $locker, $message);
+        $ok = $this->mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -189,8 +190,7 @@ class LockerActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update Due Date'));
         }
         
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendLockerEmail($user, $locker, $message);
+        $ok = $this->mailer->sendLockerEmail($user, $locker, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email Send Failed'));
         }

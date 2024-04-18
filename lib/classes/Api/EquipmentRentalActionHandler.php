@@ -120,7 +120,6 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $user = $this->userDao->getUserByID($body['userID']);
         $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-		// $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 		
         $this->respond(new Response(
@@ -175,7 +174,6 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $equipmentID = $checkout->getEquipmentID();
 		$equipment = $this->EquipmentDao->getEquipment($equipmentID);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-		// $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 		
         $this->respond(new Response(
@@ -388,7 +386,6 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $user = $this->userDao->getUserByID($body['userID']);
         $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-		//$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
         $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
 
         $this->respond(new Response(

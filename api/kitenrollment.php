@@ -14,7 +14,7 @@ session_start();
 
 // Setup our data access and handler classes
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);
-$mailer = new EquipmentRentalMailer($configManager->get('email.from_address'), $configManager->get('email.subject_tag'));
+$mailer = new EquipmentRentalMailer($configManager->getWorkerMaillist(), $configManager->get('email.subject_tag'));
 $handler = new KitEnrollmentActionHandler($kitEnrollmentDao, $mailer, $configManager, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 9/1/23

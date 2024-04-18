@@ -238,7 +238,7 @@ if ($roomInput != NULL && isset($_GET['bench'])) {
 						<button id="submitTicketBtn" class="btn btn-primary" onclick="return false">Submit Ticket</button>
 
 						<br /><br />
-						<p>If you have trouble using this page, please contact us at: <a href="mailto: tekbot-worker@engr.oregonstate.edu">tekbot-worker@engr.oregonstate.edu</a></p>
+						<p>If you have trouble using this page, please contact us at: <a href="mailto:<?= $configManager->getWorkerMaillist() ?>"><?= $configManager->getWorkerMaillist() ?></a></p>
 
 					</div>
 				</form>

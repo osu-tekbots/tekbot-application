@@ -25,14 +25,17 @@ class BoxActionHandler extends ActionHandler {
      *
      * @param \DataAccess\BoxDao  $boxDao  the data access object for TekBoxes
      * @param \DataAccess\UserDao $userDao the data access object for users
+     * @param \DataAccess\MessageDao $messageDao the data access object for messages
+     * @param \Email\TekBotsMailer $mailer the object for sending TekBots site emails
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($boxDao, $userDao, $messageDao, $logger)
+    public function __construct($boxDao, $userDao, $messageDao, $mailer, $logger)
     {
         parent::__construct($logger);
         $this->boxDao = $boxDao;
 		$this->userDao = $userDao;
 		$this->messageDao = $messageDao;
+		$this->mailer = $mailer;
     }
 
 	/**
@@ -70,8 +73,7 @@ class BoxActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box failed to fill.'));
         }
 
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendBoxEmail($user, $box, $message);
+        $ok = $this->mailer->sendBoxEmail($user, $box, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -188,8 +190,7 @@ class BoxActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Box failed to empty.'));
         }
 
-		$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        $ok = $mailer->sendBoxEmail($user, $box, $message);
+        $ok = $this->mailer->sendBoxEmail($user, $box, $message);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }

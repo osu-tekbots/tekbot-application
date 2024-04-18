@@ -53,7 +53,7 @@ if ($user){
 	$uAccessLevel = $user->getAccessLevelID()->getName();
 } else {
 	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
-	echo "Please send us an email <a href='mailto:tekbot-worker@engr.oregonstate.edu'>here</a> to report the issue.";
+	echo "Please send us an email <a href='mailto:".$configManager->getAdminEmail()."'>here</a> to report the issue.";
 	exit();
 }
 

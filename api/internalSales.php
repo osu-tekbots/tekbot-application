@@ -20,9 +20,9 @@ if(!session_id()) {
 $internalSalesDao = new InternalSalesDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
-$mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
 
-$handler = new InternalSalesActionHandler($internalSalesDao, $mailer, $userDao, $messageDao, $logger);
+$handler = new InternalSalesActionHandler($internalSalesDao, $mailer, $userDao, $messageDao, $configManager, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 8/31/23
 // if (verifyPermissions(['user', 'employee'])) {

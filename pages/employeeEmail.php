@@ -45,7 +45,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
             <div class="alert alert-info mt-2">
                 <i class="fa fa-info-circle"></i>
-                Allows you to send an email from <code>tekbot-worker@engr.oregonstate.edu</code>. To send an email to
+                Allows you to send an email from <code><?= $configManager->getWorkerMaillist() ?></code>. To send an email to
                 several people simultaneously, seperate their email addresses with commas.
             </div>
 

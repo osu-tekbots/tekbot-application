@@ -26,7 +26,7 @@ $usersDao = new UsersDao($dbConn, $logger);
 $contractDao = new ContractDao($dbConn, $logger);
 $equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
 $equipmentDao = new EquipmentDao($dbConn, $logger);
-$mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail());
 $messageDao = new MessageDao($dbConn, $logger);
 
 $handler = new EquipmentRentalActionHandler($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $equipmentDao , $mailer, $configManager, $logger, $messageDao);

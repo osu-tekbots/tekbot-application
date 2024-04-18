@@ -8,6 +8,7 @@ include_once '../bootstrap.php';
 use DataAccess\BoxDao;
 use DataAccess\UsersDao;
 use DataAccess\MessageDao;
+use Email\TekBotsMailer;
 use Api\BoxActionHandler;
 use Api\Response;
 
@@ -19,7 +20,8 @@ if(!session_id()) {
 $boxDao = new BoxDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
-$handler = new BoxActionHandler($boxDao, $userDao, $messageDao, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
+$handler = new BoxActionHandler($boxDao, $userDao, $messageDao, $mailer, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 8/28/23
 // if (verifyPermissions(['user', 'employee'])) {

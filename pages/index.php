@@ -39,7 +39,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     </strong></h2> 
                     <h3>KEC 1110 Hours: </h3>
 					<h2><strong>Spring Term (4/1-6/7): M,W,F 10am-12:50pm / T,Th 2pm-4:50pm</strong></h2><BR>Finals Week by Appointment<BR>
-                    <td><a href='mailto:tekbot-worker@engr.orst.edu'> Email Us Here</a></td><BR></h2>
+                    <td><a href='mailto:<?= $configManager->getWorkerMaillist() ?>'> Email Us Here</a></td><BR></h2>
                    
                     <a class="arrowLink" href="#about"><div class="arrow bounce"></div></a>
 

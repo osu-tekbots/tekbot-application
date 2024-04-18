@@ -31,15 +31,17 @@ class MessageActionHandler extends ActionHandler {
     private $dao;
 
     /**
-     * Constructs a new instance of the action handler for requests on user resources.
+     * Constructs a new instance of the action handler for requests on messages.
      *
-     * @param \DataAccess\UsersDao $dao the data access object for users
+     * @param \DataAccess\MessageDao $dao the data access object for messages
+     * @param \Email\TekBotsMailer $mailer the object for sending TekBots site emails
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($dao, $logger)
+    public function __construct($dao, $mailer, $logger)
     {
         parent::__construct($logger);
         $this->dao = $dao;
+        $this->mailer = $mailer;
     }
 
     /**
@@ -97,8 +99,6 @@ class MessageActionHandler extends ActionHandler {
         // NEW -- Use the functions in TekBotsMailer to follow DRY principles & make it a true test of the email
         $toolId = $message->getToolId();
 
-        $mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-
         $user = new User();
         $user->setFirstName('John');
         $user->setLastName('Doe');
@@ -110,41 +110,41 @@ class MessageActionHandler extends ActionHandler {
             case 1: // Lockers
                 $locker = new Locker();
                 $this->fillObject($locker);
-                $ok = $mailer->sendLockerEmail($user, $locker, $message);
+                $ok = $this->mailer->sendLockerEmail($user, $locker, $message);
                 break;
             case 2: // 3D Prints
                 $printJob = new PrintJob();
                 $this->fillObject($printJob, ['setPrintTypeID', 'setPrinterId']);
                 $printType = new PrintType();
                 $this->fillObject($printType, ['setPrinterId']);
-                $ok = $mailer->sendPrinterEmail($user, $printJob, $printType, $message);
+                $ok = $this->mailer->sendPrinterEmail($user, $printJob, $printType, $message);
                 break;
             case 4: // TekBoxes
                 $box = new Box();
                 $this->fillObject($box);
-                $ok = $mailer->sendBoxEmail($user, $box, $message);
+                $ok = $this->mailer->sendBoxEmail($user, $box, $message);
                 break;
             case 5: // Laser Cuts
                 $laserJob = new LaserJob();
                 $this->fillObject($laserJob, ['setLaserCutterId', 'setLaserCutMaterialId']);
                 $laserMaterial = new LaserMaterial();
                 $this->fillObject($laserMaterial);
-                $ok = $mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
+                $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
                 break;
             case 6: // Equipment
                 $equipment = new Equipment();
                 $this->fillObject($equipment);
-                $ok = $mailer->sendEquipmentEmail($user, null, $equipment, $message);
+                $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
                 break;
             case 7: // Tickets
                 $ticket = new Ticket();
                 $this->fillObject($ticket);
-                $ok = $mailer->sendTicketEmail($ticket, $message, $user->getEmail(), $user->getEmail());
+                $ok = $this->mailer->sendTicketEmail($ticket, $message, $user->getEmail(), $user->getEmail());
                 break;
             case 8: // Inventory
                 $part = new Part();
                 $this->fillObject($part);
-                $ok = $mailer->sendRecountEmail($part, $message, $user->getEmail());
+                $ok = $this->mailer->sendRecountEmail($part, $message, $user->getEmail());
                 break;
             case 9: // Internal billing
                 $unprocessed = Array();
@@ -156,7 +156,7 @@ class MessageActionHandler extends ActionHandler {
                         array_push($unprocessed, $internalSale);
                     }
                 }
-                $ok = $mailer->sendBillAllEmail($unprocessed, $message, $user->getEmail());
+                $ok = $this->mailer->sendBillAllEmail($unprocessed, $message, $user->getEmail());
                 break;
             default:
                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Tool not found; failed to fill email'));

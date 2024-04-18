@@ -10,12 +10,14 @@ class EmailActionHandler extends ActionHandler {
      * Constructs a new instance of the action handler for email requests.
      *
      * @param \Email\Mailer  $mailer  the class for sending emails
+     * @param \Util\ConfigManger $configManager the class for getting site configuration information
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($mailer, $logger)
+    public function __construct($mailer, $configManager, $logger)
     {
         parent::__construct($logger);
         $this->mailer = $mailer;
+        $this->configManager = $configManager;
     }
 
     /**
@@ -38,7 +40,7 @@ class EmailActionHandler extends ActionHandler {
         $body = $this->requestBody;
 
         //  Send the email
-		$ok = $this->mailer->sendEmail($body['addresses'], $body['subject'], $body['body'], NULL, 'tekbot-worker@engr.oregonstate.edu');
+		$ok = $this->mailer->sendEmail($body['addresses'], $body['subject'], $body['body'], NULL, $this->configManager->getWorkerMaillist());
         
         // Use Response object to send email action results 
         if(!$ok) {

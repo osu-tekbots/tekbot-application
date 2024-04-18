@@ -6,6 +6,7 @@
 include_once '../bootstrap.php';
 
 use DataAccess\MessageDao;
+use Email\TekBotsMailer;
 use Api\MessageActionHandler;
 use Api\Response;
 
@@ -15,7 +16,8 @@ if(!session_id()) {
 
 // Setup our data access and handler classes
 $dao = new MessageDao($dbConn, $logger);
-$handler = new MessageActionHandler($dao, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
+$handler = new MessageActionHandler($dao, $mailer, $logger);
 
 // Authorize the request
 if (verifyPermissions(['user', 'employee'])) {

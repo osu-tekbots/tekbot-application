@@ -16,6 +16,8 @@ class TicketsActionHandler extends ActionHandler {
     private $ticketDao;
 	private $labDao;
 	private $messageDao;
+    /** @var \Util\ConfigManager */
+    private $configManager;
     /** @var \Email\TekBotsMailer */
     private $mailer;
 	
@@ -27,15 +29,20 @@ class TicketsActionHandler extends ActionHandler {
     /**
      * Constructs a new instance of the action handler for requests on user resources.
      *
-     * @param \DataAccess\LabDao $dao the data access object for users
+     * @param \DataAccess\TicketDao $ticketDao the data access object for tickets
+     * @param \DataAccess\LabDao $labDao the data access object for lab stations
+     * @param \DataAccess\MessageDao $messageDao the data access object for messages
+     * @param \Email\TekbotsMailer $mailer the class for sending TekBots site emails
+     * @param \Util\ConfigManger $configManager the class for getting site configuration information
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($ticketDao, $labDao, $messageDao, $mailer, $logger)
+    public function __construct($ticketDao, $labDao, $messageDao, $mailer, $configManager, $logger)
     {
         parent::__construct($logger);
         $this->ticketDao = $ticketDao;
 		$this->labDao = $labDao;
 		$this->messageDao = $messageDao;
+        $this->configManager = $configManager;
         $this->mailer = $mailer;
     }
 
@@ -78,8 +85,6 @@ class TicketsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Ticket Failed to Resolve.'));
         }
 
-		//$mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        //$okay = $mailer->sendTicketEmail($ticket, $message);
         $ok = $this->mailer->sendTicketEmail($ticket, $message, $ticket->getEmail());
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
@@ -134,10 +139,7 @@ class TicketsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Ticket Failed to Escalate.'));
         }
 
-        // TODO: This needs to send to Don & tekbot-worker, NOT the submiitter
-		// $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        // $okay = $mailer->sendTicketEmail($ticket, $message);
-        $ok = $this->mailer->sendTicketEmail($ticket, $message, 'tekbot-worker@engr.oregonstate.edu', $body['empEmail']);
+        $ok = $this->mailer->sendTicketEmail($ticket, $message, $this->configManager->getWorkerMaillist(), $body['empEmail']);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -170,11 +172,8 @@ class TicketsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new ticket'));
         }
 
-		//$user = $body['email'];
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-        // $mailer = New TekBotsMailer('tekbot-worker@engr.oregonstate.edu');
-        // $okay = $mailer->sendTicketEmail($ticket, $message);
-        $ok = $this->mailer->sendTicketEmail($ticket, $message, 'tekbot-worker@engr.oregonstate.edu');
+        $ok = $this->mailer->sendTicketEmail($ticket, $message, $this->configManager->getWorkerMaillist());
 		if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
         }

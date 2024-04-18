@@ -19,7 +19,7 @@ session_start();
 $laserDao = new LaserDao($dbConn, $logger);
 $voucherDao = new VoucherDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$mailer = new TekBotsMailer('tekbot-worker@engr.oregonstate.edu', null, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 
 $handler = new LaserActionHandler($laserDao, $voucherDao, $userDao, $mailer, $messageDao, $configManager, $logger);

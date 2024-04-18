@@ -11,6 +11,9 @@ class Mailer {
     private $from;
 
     /** @var string */
+    private $bounceAddress;
+
+    /** @var string */
     private $subjectTag;
 
     /** @var \Util\Logger */
@@ -20,11 +23,13 @@ class Mailer {
      * Creates a new mailer to send emails.
      *
      * @param string $from the from address for the email
+     * @param string $bounceAddress the email address to direct notices about emails that bounced to
      * @param string|null $subjectTag an optional tag to prefix the email subject with
      * @param \Util\Logger|null $logger an optional logger to capture error messages from the mail() function
      */
-    public function __construct($from, $subjectTag = null, $logger = null) {
+    public function __construct($from, $bounceAddress, $subjectTag = null, $logger = null) {
         $this->from = $from;
+        $this->bounceAddress = $bounceAddress;
         $this->subjectTag = $subjectTag;
         $this->logger = $logger;
     }
@@ -82,7 +87,7 @@ class Mailer {
             $to = \implode(',', $to);
         }
 
-        $accepted = mail($to, $subject, $message, $headersStr);
+        $accepted = mail($to, $subject, $message, $headersStr, "-f".$this->bounceAddress);
         if (!$accepted) {
             $lastError = error_get_last();
             if ($this->logger != null) {

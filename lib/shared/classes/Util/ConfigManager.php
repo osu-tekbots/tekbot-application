@@ -195,6 +195,33 @@ class ConfigManager {
     }
 
     /**
+     * Fetches the email address for sending emails to all TekBots employees.
+     *
+     * @return string
+     */
+    public function getWorkerMaillist() {
+        return $this->get('email.worker_maillist');
+    }
+
+    /**
+     * Fetches the email address for sending emails to the website admins.
+     *
+     * @return string
+     */
+    public function getAdminEmail() {
+        return $this->get('email.admin_address');
+    }
+
+    /**
+     * Fetches the email address that bounced emails should go to.
+     *
+     * @return string
+     */
+    public function getBounceEmail() {
+        return $this->get('email.bounce_address');
+    }
+
+    /**
      * Fetches the configuration associated with the provided key.
      * 
      * This function allows for nested keys. The keys must be separated by a period (.). If there is not value for

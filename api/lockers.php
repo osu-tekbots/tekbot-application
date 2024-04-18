@@ -8,6 +8,7 @@ include_once '../bootstrap.php';
 use DataAccess\LockerDao;
 use DataAccess\UsersDao;
 use DataAccess\MessageDao;
+use Email\TekBotsMailer;
 use Api\LockerActionHandler;
 use Api\Response;
 
@@ -19,7 +20,8 @@ if(!session_id()) {
 $lockerDao = new LockerDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
-$handler = new LockerActionHandler($lockerDao, $userDao, $messageDao, $logger);
+$mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
+$handler = new LockerActionHandler($lockerDao, $userDao, $messageDao, $mailer, $logger);
 
 // Authorize the request -- done within each ActionHandler method as of 9/1/23
 // if (verifyPermissions(['user', 'employee'])) {
