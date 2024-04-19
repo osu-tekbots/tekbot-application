@@ -71,32 +71,46 @@ $test = "";
             $onid = $_REQUEST['onid'];
         } else { $onid = ""; }
         echo '
-        <div class="col-sm-6">
-        <div class="jumbotron primaryColor seethrough"><center>
-            <h2 class="kitFont"><b>Add Kit For Student</h2></b><i>Adds course kit for the specified student</i></center><br>
-                <form id="formAddCourse">
-                <h5><b>ID Number:</b></h5>
-                <i>(ex: 932XXXXXX)</i>
-                <input class="form-control" type="number" name="idnumber" value="'.$_REQUEST['studentid'].'"><br>
-                <h5><b>Student Name:</b></h5>
-                <i>(ex: Last, First Middle)</i>
-                <input class="form-control" type="text" name="lfm" value="'.$name.'"><br>
-                <h5><b>ONID:</b></h5>
-                <i>(ex: namt)</i>
-                <input class="form-control" type="text" name="onid" value="'.$onid.'"><br>
-                <input style="display:none;" name="term" value="'.$currentTerm.'">
-                <h5><b>Course Name:</b></h5>
-                ';
+            <div class="col-sm-6">
+                <div class="jumbotron primaryColor seethrough"><center>
+                    <h2 class="kitFont"><b>Add Kit For Student</h2></b><i>Adds course kit for the specified student</i></center><br>
+                        <form id="formAddCourse">
+                        <h5><b>ID Number:</b></h5>
+                        <i>(ex: 932XXXXXX)</i>
+                        <input class="form-control" type="number" name="idnumber" value="'.$_REQUEST['studentid'].'"><br>
+                        <h5><b>Student Name:</b></h5>
+                        <i>(ex: Last, First Middle)</i>
+                        <input class="form-control" type="text" name="lfm" value="'.$name.'"><br>
+                        <h5><b>ONID:</b></h5>
+                        <i>(ex: namt)</i>
+                        <input class="form-control" type="text" name="onid" value="'.$onid.'"><br>
+                        <input style="display:none;" name="term" value="'.$currentTerm.'">
+                        <h5><b>Course Name:</b></h5>
+        ';
                 
-                renderCourseNames();
+        echo '
+            <select name="course" class="custom-select">
+                <option value=""></option>
+        ';
 
-                echo'<br><br>
+        $termKits = $kitEnrollmentDao->getRemainingKitEnrollmentsByTerm($currentTerm);
+        $readyArray = [];
+        foreach ($termKits as $k){
+                array_push($readyArray, $k->getCourseCode());
+        }
+        $numValues = array_count_values($readyArray);
+        foreach($numValues as $key => $value){
+            echo '
+                <option value="'.$key.'">'.$key.'</option>
+            ';
+        }
+        echo '
+            </select>
+        ';
+
+        echo '  <br><br>
                 <center><input type="submit" value="Submit" class="btn btn-lg btn-primary" onclick="onAddCourseClick();"/><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
-                
-        
-            
                 </form>
-        
             </div>
         </div>
         
