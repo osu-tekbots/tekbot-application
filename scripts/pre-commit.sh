@@ -5,23 +5,29 @@
 # from the browser. Copy this file as `pre-commit` into `.git/hooks` and make it
 # executable.
 #
+clear
+
 echo "Starting pre-commit..."
 
 echo "Making sure permissions for files and directories are public"
-for f in $(find . -not -path "./.git/*"); do
-    if [ "$f" = "." ] || [ "$f" = ".." ] || [ "$f" ]; then
+
+find . -not -path "*/assets*" -not -path "*/composer.lock" -not -path "./images*" -not -path "./old/*" -not -path "./scripts/*" -not -path "./uploads/*" -not -path "./vendor/*" -not -path "./.*" -not -path "*.md" | while read f;
+do
+    if [ "$f" = "." ] || [ "$f" = "./.git" ] || [ "$f" = "./uploads" ] || [ "$f" = "./scripts" ] || [ "$f" = "./.private" ] || [ "$f" = "./docs" ]; then
         continue
     fi
-    FILE_PERMISSIONS=$(stat -c "%a" $f)
-    if [ -d $f ] && [ "$FILE_PERMISSIONS" != '755' ]; then
-        echo "Found directory '$f' with incorrect permissions '$FILE_PERMISSIONS'"
-        echo "Run 'sh scripts/allow.sh' from the repository root before committing"
+
+    FILE_PERMISSIONS=$(stat -c "%a" "$f")
+
+    if [ -d "$f" ] && [ "$FILE_PERMISSIONS" != '2775' ]; then
+        echo "ERROR: Found directory '$f' with incorrect permissions '$FILE_PERMISSIONS'"
+        echo "Run 'chmod 775 \"$f\"' (or 'sh scripts/allow.sh' to fix all permissions) from the repository root before committing."
         exit 1
-    elif [ -f $f ] && [ "$FILE_PERMISSIONS" -ne '664' ]; then
-        echo "Found file '$f' with incorrect permissions '$FILE_PERMISSIONS'"
-        echo "Run 'sh scripts/allow.sh' from the repository root before committing"
+    elif [ -f "$f" ] && [ "$FILE_PERMISSIONS" != '775' ]; then
+        echo "ERROR: Found file '$f' with incorrect permissions '$FILE_PERMISSIONS'"
+        echo "Run 'chmod 775 \"$f\"' (or 'sh scripts/allow.sh' to fix all permissions) from the repository root before committing."
         exit 1
     fi
 done
 
-echo "Pre-commit done"
+echo "Pre-commit done."
