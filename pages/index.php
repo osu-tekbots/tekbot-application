@@ -11,7 +11,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 ?>
 <div style="position: relative; top: 25px; padding: 16px; background: black; font-size: 20px; text-align: center; padding-top: 0">
-     Check out our new TekBots Seminars <a href="publicSeminars.php">here</a>!
+     Check out our new <a href="publicTekBotsAcademy.php">TekBots Academy seminars</a>!
 </div>
           <!-- Main header -->
           <header class="maincenter">
@@ -28,7 +28,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <span style="font-size:35px;">·</span>
                          <a href="./pages/publicInventory.php" target="_blank">Inventory</a>
                          <span style="font-size:35px;">·</span>
-                         <a href="./pages/publicSeminars.php">Seminars</a>
+                         <a href="./pages/publicTekBotsAcademy.php">TekBots Academy</a>
                     </strong></h2>
                     <h2><strong>
                          <a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a>

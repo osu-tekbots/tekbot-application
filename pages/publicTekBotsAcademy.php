@@ -10,7 +10,7 @@ if (!session_id()) {
     session_start();
 }
 
-$title = "Seminars";
+$title = "TekBots Academy";
 
 $css = array(
     'assets/css/sb-admin.css',
@@ -67,7 +67,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <div class="container-fluid">
 			<div class="col-md-5">
 				<br />
-				<h3>TekBots Seminars</h3>
+				<h3>TekBots Academy</h3>
 			</div>
 			<div class="col-md-5 mt-4">
 				<h4 class="h5">Upcoming</h4>
