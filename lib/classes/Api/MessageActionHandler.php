@@ -7,7 +7,6 @@ namespace Api;
 // Updated 11/5/2019
 
 use Model\Message;
-// NEW
 use Email\TekBotsMailer;
 use Model\User;
 use Model\Locker;
@@ -20,7 +19,8 @@ use Model\Equipment;
 use Model\Ticket;
 use Model\Part;
 use Model\InternalSale;
-// END NEW
+use Model\Station;
+use Model\Room;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
@@ -138,8 +138,13 @@ class MessageActionHandler extends ActionHandler {
                 break;
             case 7: // Tickets
                 $ticket = new Ticket();
+                $room = new Room();
+                $station = new Station();
                 $this->fillObject($ticket);
-                $ok = $this->mailer->sendTicketEmail($ticket, $message, $user->getEmail(), $user->getEmail());
+                $this->fillObject($room);
+                $this->fillObject($station);
+                $station->setRoom($room);
+                $ok = $this->mailer->sendTicketEmail($ticket, $station, $message, $user->getEmail(), $user->getEmail());
                 break;
             case 8: // Inventory
                 $part = new Part();

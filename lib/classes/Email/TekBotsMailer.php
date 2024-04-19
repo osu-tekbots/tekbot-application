@@ -128,13 +128,17 @@ class TekBotsMailer extends Mailer {
 	 * 
 	 * @return bool Whether the email sent successfully
 	 */
-	public function sendTicketEmail($ticket, $message, $recieverEmail, $employeeEmail="") {
+	public function sendTicketEmail($ticket, $station, $message, $recieverEmail, $employeeEmail="") {
 		$replacements = Array();
 		// TODO: maybe add contents from action handler
 		$replacements['email'] = $ticket->getEmail();
 		$replacements['empEmail'] = $employeeEmail;
 		$replacements['contents'] = $ticket->getIssue();
 		$replacements['response'] = $ticket->getResponse();
+		if($station) {
+			$replacements['room'] = $station->getRoom()->getName();
+			$replacements['benchNum'] = $station->getName();
+		}
 		$replacements['id'] = $ticket->getId();
 
 		$subject = $message->fillTemplateSubject($replacements);

@@ -36,7 +36,7 @@ class LabDao {
      * @return \Model\Station|array station contents info with specified Id
      */
 
-     public function getRooms(){
+    public function getRooms(){
         try {
             $sql = '
             SELECT *
@@ -58,9 +58,8 @@ class LabDao {
 
     /**
      * Fetches station by labs_stations.id
-     * @return \Model\Station|array station contents info with specified Id
+     * @return \Model\Station|false station contents info with specified Id
      */
-    
     public function getStationById($id) {
         try {
             $sql = '
@@ -84,10 +83,39 @@ class LabDao {
             return false;
         }
     }
+
     /**
-    * Fetches all info for stations model
-    * @return \Model\Station|array station contents info with specified Id
-    */
+     * Fetches station by room and bench ids
+     * @return \Model\Station|false station contents info for specified room and bench
+     */
+    public function getStationByRoomAndBench($roomid, $benchid) {
+        try {
+            $sql = '
+            SELECT 
+			labs_stations.*, 
+			labs_rooms.id AS room_id, 
+			labs_rooms.map AS map, 
+			labs_rooms.name AS room_name
+            FROM `labs_stations`
+            INNER JOIN `labs_rooms`
+            ON labs_stations.roomid = labs_rooms.id
+            WHERE labs_rooms.id=:roomid AND labs_stations.name=:benchid;
+            ';
+            $params = array(':roomid' => $roomid, ':benchid' => $benchid);
+            $results = $this->conn->query($sql, $params);
+            $station = self::ExtractStationFromRow($results[0]);
+
+            return $station;
+        } catch(\Exception $e) {
+            $this->logger->error('Failed to get Station by room and bench: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches all info for stations model
+     * @return \Model\Station|array station contents info with specified Id
+     */
     public function getStations(){
         try {
             $sql = '

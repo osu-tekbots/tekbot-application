@@ -85,7 +85,7 @@ class TicketsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Ticket Failed to Resolve.'));
         }
 
-        $ok = $this->mailer->sendTicketEmail($ticket, $message, $ticket->getEmail());
+        $ok = $this->mailer->sendTicketEmail($ticket, NULL, $message, $ticket->getEmail());
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -139,7 +139,7 @@ class TicketsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Ticket Failed to Escalate.'));
         }
 
-        $ok = $this->mailer->sendTicketEmail($ticket, $message, $this->configManager->getWorkerMaillist(), $body['empEmail']);
+        $ok = $this->mailer->sendTicketEmail($ticket, NULL, $message, $this->configManager->getWorkerMaillist(), $body['empEmail']);
 		if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Email send Failed'));
         }
@@ -158,8 +158,8 @@ class TicketsActionHandler extends ActionHandler {
 		$body = $this->requestBody;
 
         $ticket = new Ticket();
-        $stationId = $this->labDao->getStationIdFromRoomAndBench($body['roomId'], $body['benchId']);
-        $ticket->setStationId($stationId);
+        $station = $this->labDao->getStationByRoomAndBench($body['roomId'], $body['benchId']);
+        $ticket->setStationId($station->getId());
         $ticket->setImage($body['image']);
         $ticket->setIssue($body['issue']);
         $ticket->setEmail($body['email']);
@@ -173,9 +173,9 @@ class TicketsActionHandler extends ActionHandler {
         }
 
 		$message = $this->messageDao->getMessageByID($body['messageID']);
-        $ok = $this->mailer->sendTicketEmail($ticket, $message, $this->configManager->getWorkerMaillist());
+        $ok = $this->mailer->sendTicketEmail($ticket, $station, $message, $this->configManager->getWorkerMaillist());
 		if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to send email to user'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to email employees'));
         }
 
         $this->respond(new Response(

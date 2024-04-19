@@ -129,6 +129,8 @@ function sendTestMessage(id) {
 							{{email}}: Submitter Email<BR>
 							{{empEmail}}: Employee (who escalated ticket) Email<BR>
 							{{id}}: The Ticket ID<BR>
+							{{room}}: The affected room (eg DB120)
+							{{benchNum}}: The affected bench (eg 3)
 							{{contents}}: Ticket Contents<BR>
 							{{response}}: Employee Response<BR></div>
 						  </div>';

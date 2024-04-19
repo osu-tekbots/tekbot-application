@@ -32,7 +32,7 @@ class Station {
      *  if param = null generate ID
      */
 
-    public function __construct($stationId) {
+    public function __construct($stationId = null) {
         if ($stationId == null) {
             $this->setId($stationId);
         }
