@@ -70,7 +70,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 				<h3>TekBots Academy</h3>
 			</div>
 			<div class="col-md-5 mt-4">
-				<h4 class="h5">Upcoming</h4>
+				<h4 class="h5">Upcoming Seminars</h4>
 			</div>
             <div><!-- Closed by first iteration of loop below -->
                 <?php
@@ -101,7 +101,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 ?>
             <!-- Closed by last iteration of loop above --></div>
 			<div class="col-md-5 mt-4">
-				<h4 class="h5">Past</h4>
+				<h4 class="h5">Past Seminars</h4>
 			</div>
             <div>
                 <?php
