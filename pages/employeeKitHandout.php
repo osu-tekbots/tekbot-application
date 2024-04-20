@@ -93,7 +93,7 @@ $test = "";
                 <option value=""></option>
         ';
 
-        $termKits = $kitEnrollmentDao->getRemainingKitEnrollmentsByTerm($currentTerm);
+        $termKits = $kitEnrollmentDao->getKitEnrollmentsByTerm($currentTerm);
         $readyArray = [];
         foreach ($termKits as $k){
                 array_push($readyArray, $k->getCourseCode());

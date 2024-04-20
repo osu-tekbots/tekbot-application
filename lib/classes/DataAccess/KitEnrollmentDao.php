@@ -153,6 +153,12 @@ class KitEnrollmentDao {
         }
     }
 
+    /**
+     * Fetches the REMAINING kit enrollments with the provided termID
+     *
+     * @param string $termID representing the term of interest
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
     public function getRemainingKitEnrollmentsByTerm($termID) {
         try {
             $sql = '
@@ -182,6 +188,12 @@ class KitEnrollmentDao {
         }
     }
 
+    /**
+     * Fetches the DISTRIBUTED kit enrollments with the provided termID
+     *
+     * @param string $termID representing the term of interest
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
     public function getDistributedKitEnrollmentsByTerm($termID) {
         try {
             $sql = '
@@ -195,6 +207,39 @@ class KitEnrollmentDao {
             $params = array(
                 ':term' => $termID,
                 ':status' => KitEnrollmentStatus::PICKED_UP
+            );
+            $results = $this->conn->query($sql, $params);
+            
+            $kits = array();
+            foreach ($results as $row) {
+                $kit = self::ExtractKitFromRow($row);
+                $kits[] = $kit;
+            }
+           
+            return $kits;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch kit with course code '$course': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches ALL kit enrollments with the provided termID
+     *
+     * @param string $termID representing the term of interest
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
+     */
+    public function getKitEnrollmentsByTerm($termID) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM kit_enrollment, kit_enrollment_status
+            WHERE kit_enrollment.kit_status_id = kit_enrollment_status.id 
+            AND kit_enrollment.term_id = :term
+            
+            ';
+            $params = array(
+                ':term' => $termID
             );
             $results = $this->conn->query($sql, $params);
             
