@@ -5,9 +5,6 @@ use DataAccess\FaqDao;
 use Util\Security;
 
 $title = 'TekBot FAQ';
-$css = array(
-	'assets/css/homepage.css'
-);
 include_once PUBLIC_FILES . '/modules/header.php';
 $isEmployee = verifyPermissions('employee');
 
@@ -45,24 +42,27 @@ if (!empty($FAQs)){
 	foreach ($FAQs as $f){
 		echo '
 		<div class="panel panel-primary">
-		<div class="panel-heading" role="tab" id="heading'.$count.'">
-		  <h4 class="panel-title">
-		  <a class="text-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse'.$count.'" aria-expanded="false" aria-controls="collapse'.$count.'">
-			';
+			<div class="panel-heading" role="tab" id="heading'.$count.'">
+				<h4 class="panel-title d-flex justify-content-between align-items-center">
+					<a class="text-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse'.$count.'" aria-expanded="false" aria-controls="collapse'.$count.'">
+		';
 
-			
 		echo '['.$f->getCategory().'] '. $f->getQuestion().'
-		
-		  </a>
-		  ';
-		  if ($isEmployee){
-			echo '<a class="text-info" href="./pages/employeeFaqDetail.php?id='.$f->getFaqID().'">Edit</a>';
+					</a>
+		';
+		if ($isEmployee){
+			echo '
+				<a class="btn btn-outline-primary" href="./pages/employeeFaqDetail.php?id='.$f->getFaqID().'">
+					<i class="fas fa-pencil-alt mr-1"></i>
+					Edit
+				</a>
+			';
 		}
 		echo '
 		</h4>
 		</div>
 		<div id="collapse'.$count.'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading'.$count.'">
-		  <div class="panel-body" style="color: #bbb">
+		  <div class="panel-body">
 			'.$f->getAnswer().'
 		  </div>
 		</div>
