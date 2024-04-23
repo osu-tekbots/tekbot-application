@@ -27,7 +27,8 @@ $seminars = [
         'time' => new \DateTime('2024-04-17 18:00:00'),
         'location' => 'WNGR 149',
         'image' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/KiCad-Logo.svg/2560px-KiCad-Logo.svg.png',
-        'details' => '
+        'state' => '',
+		'details' => '
             Join TekBots for an introduction to KiCad and PCB development for Linear Voltage Regulators. During this 1
             hour session, we will discuss the basics of schematic entry and layout. Attendees will be given the
             opportunity for free components to build their own supply once they have completed their design! Design 
@@ -44,6 +45,7 @@ $seminars = [
          'time' => new \DateTime('2024-04-24 18:00:00'),
          'location' => 'KEC1005 (Limited Space)',
          'image' => '',
+         'state' => 'canceled',
          'details' => 'Join Tekbots by looking over various datasheets for common components. We will 
 			discuss what many of the terms and sections mean for them as it applies to 
 			designing your own circuits.'
@@ -76,9 +78,15 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <?php
                 foreach($upcomingSeminars as $index => $seminar) {
                     $title = $seminar['title'];
-                    $time = $seminar['time']->format('l, F j \a\t g:ia');
-                    $location = $seminar['location'];
-                    $image = $seminar['image'];
+                    $state = $seminar['state'];
+                    if ($state == 'canceled'){
+						$time = "Canceled";
+						$location = "Canceled";
+					} else {
+						$time = $seminar['time']->format('l, F j \a\t g:ia');
+						$location = $seminar['location'];
+                    }
+					$image = $seminar['image'];
                     $details = $seminar['details'];
 
                     if($index % 3 == 0)
