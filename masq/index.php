@@ -107,7 +107,7 @@ function startMasquerade($user) {
 <?php endif; ?>
 
 <h3>Masquerade as Existing</h3>
-<form method="post">
+<form method="post" spellcheck="false">
     <input type="hidden" name="action" value="start" />
     <label for="onid">ONID</label>
     <input required type="text" id="eonid" name="onid" autocomplete="off" />
