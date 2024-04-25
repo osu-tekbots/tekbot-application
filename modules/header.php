@@ -104,7 +104,10 @@ $buttons['FAQ'] = 'pages/info.php';
 if ($loggedIn) {
     $buttons['Logout'] = 'pages/logout.php';
 } else {
-    $buttons['Login'] = 'pages/login.php';
+    if($configManager->getEnvironment() == 'dev')
+        $buttons['Login'] = 'masq/index.php';
+    else
+        $buttons['Login'] = 'pages/login.php';
 }
 
 ?>
