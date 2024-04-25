@@ -69,6 +69,7 @@ function stopMasquerade() {
             $_SESSION['accessLevel'] = $_SESSION['masq']['accessLevel'];
             $_SESSION['newUser'] = $_SESSION['masq']['newUser'];
             $_SESSION['site'] = $_SESSION['masq']['site'];
+            $_SESSION['auth'] = $_SESSION['masq']['auth'];
         }
         unset($_SESSION['masq']);
     }
@@ -88,11 +89,19 @@ function startMasquerade($user) {
         $_SESSION['masq']['accessLevel'] = $_SESSION['accessLevel'];
         $_SESSION['masq']['newUser'] = $_SESSION['newUser'];
         $_SESSION['masq']['site'] = $_SESSION['site'];
+        $_SESSION['masq']['auth'] = $_SESSION['auth'];
     }
     $_SESSION['userID'] = $user->getUserID();
     $_SESSION['userAccessLevel'] = $user->getAccessLevelID()->getName();
     $_SESSION['newUser'] = false;
     $_SESSION['site'] = 'tekbot';
+    $_SESSION['auth'] = [
+        'method' => 'onid',
+        'id' => strtolower($user->getOnid()),
+        'firstName' => $user->getFirstName(), 
+        'lastName' => $user->getLastName(),
+        'email' => $user->getEmail()
+    ];
 }
 ?>
 
