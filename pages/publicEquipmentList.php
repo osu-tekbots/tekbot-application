@@ -20,7 +20,7 @@ include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 $dao = new EquipmentDao($dbConn, $logger);
 $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
 
-$isEmployee = verifyPermissions('employee');
+$isEmployee = verifyPermissions('employee', $logger);
 
 /* 
 * Populates page with information from the Equipment DAO

@@ -16,7 +16,7 @@ if(!session_id()) session_start();
 if ($configManager->getEnvironment() != 'dev') {
     // Make sure the user is an employee
     include_once PUBLIC_FILES . '/lib/shared/authorize.php';
-    allowIf(verifyPermissions('employee'), '../pages/index.php');
+    allowIf(verifyPermissions('employee', $logger), '../pages/index.php');
 }
 
 $dao = new UsersDao($dbConn, $logger);

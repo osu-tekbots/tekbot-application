@@ -16,7 +16,7 @@ if (!session_id()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-allowIf(verifyPermissions('employee'), 'index.php');
+allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 
 $title = 'Employee Add Printer';

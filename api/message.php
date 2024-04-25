@@ -20,7 +20,7 @@ $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager-
 $handler = new MessageActionHandler($dao, $mailer, $logger);
 
 // Authorize the request
-if (verifyPermissions(['user', 'employee'])) {
+if (verifyPermissions(['user', 'employee'], $logger)) {
     // Handle the request
     $handler->handleRequest();
 } else {

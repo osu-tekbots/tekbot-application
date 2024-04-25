@@ -37,7 +37,7 @@ function studentPrice($price){
 return $price;
 }
 
-allowIf(verifyPermissions('employee'), 'index.php');
+allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 
 $title = 'Employee Inventory List';

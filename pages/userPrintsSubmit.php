@@ -12,7 +12,7 @@ if (!session_id()) {
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-allowIf(verifyPermissions(['user', 'employee']), $configManager->getBaseUrl() . 'pages/login.php');
+allowIf(verifyPermissions(['user', 'employee'], $logger), $configManager->getBaseUrl() . 'pages/login.php');
 
 $css = array(
 	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css',

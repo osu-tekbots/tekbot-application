@@ -26,9 +26,9 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/header.php';
 
 
-$isEmployee = verifyPermissions('employee');
+$isEmployee = verifyPermissions('employee', $logger);
 
-$isLoggedIn = verifyPermissions(['user', 'employee']);
+$isLoggedIn = verifyPermissions(['user', 'employee'], $logger);
 
 $dao = new EquipmentDao($dbConn, $logger);
 $equipment = $dao->getEquipment($eID);

@@ -18,7 +18,7 @@ $dao = new VoucherDao($dbConn, $logger);
 $handler = new VoucherActionHandler($dao, $logger);
 
 // Authorize the request
-if (verifyPermissions(['user', 'employee'])) {
+if (verifyPermissions(['user', 'employee'], $logger)) {
     // Handle the request
     $handler->handleRequest();
 } else {

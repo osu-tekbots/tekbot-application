@@ -7,7 +7,7 @@ session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-allowIf(verifyPermissions('employee'));
+allowIf(verifyPermissions('employee', $logger));
 
 
 $title = 'Add Kit Enrollments';

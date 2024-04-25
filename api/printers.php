@@ -27,7 +27,7 @@ $messageDao = new MessageDao($dbConn, $logger);
 $handler = new PrinterActionHandler($printerDao, $printerFeeDao, $voucherDao, $userDao, $mailer, $messageDao, $configManager, $logger);
 
 // Authorize the request
-if (verifyPermissions(['user', 'employee'])) {
+if (verifyPermissions(['user', 'employee'], $logger)) {
     // Handle the request
     $handler->handleRequest();
 } else {

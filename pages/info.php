@@ -6,7 +6,7 @@ use Util\Security;
 
 $title = 'TekBot FAQ';
 include_once PUBLIC_FILES . '/modules/header.php';
-$isEmployee = verifyPermissions('employee');
+$isEmployee = verifyPermissions('employee', $logger);
 
 $FaqDao = new FaqDao($dbConn, $logger);
 $FAQs = $FaqDao->getAllFaqs();

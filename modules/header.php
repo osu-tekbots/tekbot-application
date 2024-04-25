@@ -76,7 +76,7 @@ $css = array_merge(
     $css
 );
 
-$loggedIn = verifyPermissions(['user', 'employee']);
+$loggedIn = verifyPermissions(['user', 'employee'], $logger);
 
 
 // Setup the buttons to use in the header
@@ -91,7 +91,7 @@ if ($loggedIn) {
 
     
     // Employee only
-    if (verifyPermissions('employee')) {
+    if (verifyPermissions('employee', $logger)) {
         $buttons['Employee'] = 'pages/employeeInterface.php';
     }
 }

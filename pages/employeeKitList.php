@@ -13,7 +13,7 @@ if (!session_id()) {
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 include_once PUBLIC_FILES . '/modules/renderTermData.php';
 
-allowIf(verifyPermissions('employee'), 'index.php');
+allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 
 $title = 'Employee Kit Listing';

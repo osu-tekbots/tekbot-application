@@ -88,7 +88,7 @@ class ActionHandler {
      * @return bool|die True if the person who initiated the current request has one of the given access levels; exits the script otherwise
      */
     public function verifyAccessLevel($allowedAccessLevels) {
-        if(!verifyPermissions($allowedAccessLevels)) {
+        if(!verifyPermissions($allowedAccessLevels, $this->logger)) {
             $this->respond(new Response(Response::UNAUTHORIZED, 'Access Denied'));
         }
 

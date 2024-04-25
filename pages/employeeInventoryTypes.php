@@ -7,7 +7,7 @@ if(!session_id()) session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-allowIf(verifyPermissions('employee'));
+allowIf(verifyPermissions('employee', $logger));
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 

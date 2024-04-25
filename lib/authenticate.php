@@ -50,7 +50,7 @@ if(isset($_SESSION['site']) && $_SESSION['site'] == 'tekbot') {
  * 
  * @return bool Whether the person who initiated the current request has one of the given access levels
  */
-function verifyPermissions($allowedAccessLevels) {
+function verifyPermissions($allowedAccessLevels, $logger) {
     try {
         $isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
         $isEmployee = $isLoggedIn && isset($_SESSION['userAccessLevel']) && $_SESSION['userAccessLevel'] == 'Employee';
