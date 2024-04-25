@@ -150,10 +150,29 @@ class UsersDao {
      */
     public function addNewUser($user) {
         try {
-            $sql = 'INSERT INTO user ';
-            $sql .= '(user_id, first_name, last_name, email, phone, onid, access_level_id, ';
-            $sql .= 'date_created) ';
-            $sql .= 'VALUES (:id,:fname,:lname,:email,:phone,:onid,:type,:datec)';
+            $sql = 'INSERT INTO user 
+                (
+                    user_id, 
+                    first_name, 
+                    last_name,
+                    email,
+                    phone,
+                    onid,
+                    access_level_id,
+                    date_created,
+                    last_login_date
+                ) 
+                VALUES (
+                    :id,
+                    :fname,
+                    :lname,
+                    :email,
+                    :phone,
+                    :onid,
+                    :type,
+                    :datec,
+                    :datel
+                )';
             $params = array(
                 ':id' => $user->getUserID(),
                 ':type' => $user->getAccessLevelID()->getId(),
@@ -162,7 +181,8 @@ class UsersDao {
                 ':email' => $user->getEmail(),
                 ':phone' => $user->getPhone(),
                 ':onid' => $user->getOnid(),
-                ':datec' => QueryUtils::FormatDate($user->getDateCreated())
+                ':datec' => QueryUtils::FormatDate($user->getDateCreated()),
+                ':datel' => QueryUtils::FormatDate($user->getDateLastLogin()),
             );
             $this->conn->execute($sql, $params);
 
@@ -185,15 +205,17 @@ class UsersDao {
      */
     public function updateUser($user) {
         try {
-            $sql = 'UPDATE user SET ';
-            $sql .= 'access_level_id = :type,';
-            $sql .= 'first_name = :fname, ';
-            $sql .= 'last_name = :lname, ';
-            $sql .= 'email = :email, ';
-			$sql .= 'onid = :onid, ';
-            $sql .= 'phone = :phone, ';
-            $sql .= 'date_updated = :dateu ';
-            $sql .= 'WHERE user_id = :id';
+            $sql = 'UPDATE user
+                SET 
+                    access_level_id = :type,
+                    first_name = :fname, 
+                    last_name = :lname, 
+                    email = :email, 
+                    onid = :onid, 
+                    phone = :phone, 
+                    date_updated = :dateu,
+                    last_login_date = :datel
+                WHERE user_id = :id';
             $params = array(
                 ':type' => $user->getAccessLevelID()->getId(),
                 ':fname' => $user->getFirstName(),
@@ -202,6 +224,7 @@ class UsersDao {
 				':onid' => $user->getOnid(),
                 ':phone' => $user->getPhone(),
                 ':dateu' => QueryUtils::FormatDate($user->getDateUpdated()),
+                ':date;' => QueryUtils::FormatDate($user->getDateLastLogin()),
                 ':id' => $user->getUserID()
             );
             $this->conn->execute($sql, $params);
