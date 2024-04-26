@@ -224,7 +224,7 @@ class UsersDao {
 				':onid' => $user->getOnid(),
                 ':phone' => $user->getPhone(),
                 ':dateu' => QueryUtils::FormatDate($user->getDateUpdated()),
-                ':datel;' => QueryUtils::FormatDate($user->getDateLastLogin()),
+                ':datel' => QueryUtils::FormatDate($user->getDateLastLogin()),
                 ':id' => $user->getUserID()
             );
             $this->conn->execute($sql, $params);

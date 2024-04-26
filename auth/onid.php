@@ -27,6 +27,8 @@ function authenticateStudent() {
         $_SESSION['userID'] = $u->getUserID();
         $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = false;
+        $u->setDateLastLogin(new DateTime());
+        $dao->updateUser($u);
     } else {
         $u = new User();
         $u->setAccessLevelID(new UserAccessLevel(UserAccessLevel::STUDENT, 'Student'));
@@ -34,6 +36,7 @@ function authenticateStudent() {
         $u->setFirstName($_SESSION['auth']['firstName']);
         $u->setLastName($_SESSION['auth']['lastName']);
         $u->setEmail($_SESSION['auth']['email']);
+        $u->setDateLastLogin(new DateTime());
         $ok = $dao->addNewUser($u);
         // TODO: handle error
 

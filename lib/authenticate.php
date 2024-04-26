@@ -17,6 +17,8 @@ if(isset($_SESSION['site']) && $_SESSION['site'] == 'tekbot') {
                 // Logged in with ONID on another site; storing this site's user info in $_SESSION...
 
                 $user = $usersDao->getUserByONID($_SESSION['auth']['id']);
+                $user->setDateLastLogin(new DateTime());
+                $usersDao->updateUser($user);
                 
                 $_SESSION['site'] = 'tekbot';
                 $_SESSION['userID'] = $user->getUserId();
