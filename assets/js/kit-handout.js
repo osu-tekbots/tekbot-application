@@ -79,7 +79,11 @@ function onAddCourseClick() {
     };
     api.post('/kitenrollment.php', body)
         .then(res => {
-            window.location.replace('pages/employeeKitHandout.php?studentid=' + res.content.id);
+            const oldParams = new URLSearchParams(window.location.search);
+            const newParams = new URLSearchParams();
+            newParams.set('studentid', res.content.id);
+            newParams.set('term', oldParams.get('term'));
+            window.location.search = newParams;
         })
         .catch(err => {
             snackbar(err.message, 'error');
@@ -101,7 +105,9 @@ function onShowKitsRemaining() {
     };
     api.post('/kitenrollment.php', body)
         .then(res => {
-            window.location.replace('pages/employeeKitHandout.php?studentid=' + res.content.id);
+            const params = new URLSearchParams(window.location.search);
+            params.set('studentid', res.content.id);
+            window.location.search = params;
         })
         .catch(err => {
             snackbar(err.message, 'error');

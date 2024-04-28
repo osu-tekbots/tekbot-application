@@ -5,6 +5,10 @@ use DataAccess\KitEnrollmentDao;
 use Model\KitEnrollmentStatus;
 use Util\Security;
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 if (!session_id()) {
     session_start();
 }
@@ -58,6 +62,9 @@ $test = "";
     // Grabs current term data using OSU Term API within modules/termData.php
 	//TODO: Is returning Summer 2021 during Spring break. WIll disable temporarily
     $currentTerm = getCurrentTermId();
+    if (isset($_REQUEST['term'])){
+        $currentTerm = $_REQUEST['term'];
+    } 
 	
 //	$currentTerm = 202203;
 
@@ -225,6 +232,7 @@ $test = "";
                         <input style="display:none" name="studentid" value="'.$studentid.'">
                         <input style="display:none" name="name" value="'.$name.'">
                         <input style="display:none" name="onid" value="'.$onid.'">
+                        <input type="hidden" name="term" value="'.$currentTerm.'">
                         <input style="display:none" name="action" value="addStudent">
                         <a class="btn btn-lg" style="margin-left: 20px; background-color: #FFB500; border: none; border-bottom: solid 4px #D3832B; border-radius: .5em; color: white; font-weight: bold; font-size:1.1em; padding: .7em 3em" href="pages/employeeKitHandout.php">Done</a><br><input type="submit" value="Add Kit" class="btn btn-lg btnReturn"></center>
                         </form>
@@ -277,6 +285,7 @@ $test = "";
                         <br>
                         <form autocomplete="off" action="pages/employeeKitHandout.php" method="get">
                             <input style="display:none" name="studentid" value="'.$studentid.'">
+                            <input type="hidden" name="term" value="'.$currentTerm.'">
                             <input style="display:none" name="action" value="addStudent">
                         <center><input type="submit" value="Add Kit" class="btn btn-lg btn-primary"><a class="btn btn-lg btnReturn" style="margin-left: 20px;" href="pages/employeeKitHandout.php">Restart</a></center>
                         </form>
@@ -295,6 +304,7 @@ $test = "";
                     <h2 class="kitFont"><b>Enter ID Number</h2></b><i>(ex: 932XXXXXX)</i></center><br><br>
                     <form autocomplete="off" name="idnumber" action="pages/employeeKitHandout.php" method="get">
                         <input type="text" class="form-control" autofocus="" name="studentid" style="border:1px solid red;" id="studentidinput">
+                        <input type="hidden" name="term" value="'.$currentTerm.'">
                         <br><center>
                         <input id="studentidsubmit" type="submit" class="btn btn-lg btn-primary"></center>
                     </form>
@@ -311,10 +321,10 @@ $test = "";
         <div class="jumbotron primaryColor seethrough"><center>
             <h2 class="kitFont"><b>Enter ID Number</h2></b><i>(ex: 932XXXXXX)</i></center><br><br>
             <form autocomplete="off" name="idnumber" action="pages/employeeKitHandout.php" method="get">
-                
                 <input type="text" class="form-control" autofocus="" name="studentid" id="studentidinput">
                 <br><center>
                 <input id="studentidsubmit" type="submit" class="btn btn-lg btn-primary"></center>
+                <input type="hidden" name="term" value="'.$currentTerm.'">
             </form>
         </div>
     </div>
@@ -327,9 +337,10 @@ $test = "";
  <div class="col-sm">
     <div class="jumbotron primaryColor seethrough" style="font-weight:bold;font-size:large;">
     <?php 
-    echo "<h2>".(term2string($currentTerm))."</h2>";    
-   
+    renderTermSelect(20, $currentTerm, 'custom-select');
+    
     ?>
+    <br>
     <br>
     <h4 class="kitFont"><b>Remaining Kits:
     </b></h4><div>
@@ -408,8 +419,18 @@ $test = "";
 
 <script>
 
-
-
+$('#termSelect').on('input', function() {
+	let getTerm = document.getElementById("termSelect").value;
+    if (getTerm === ""){
+        document.getElementById("termSelect").style.borderColor = "red";
+        return;
+    } else {
+        document.getElementById("termSelect").style.borderColor = "";
+    }
+    const params = new URLSearchParams(window.location.search);
+    params.set('term', getTerm);
+    window.location.search = params;
+})
 
 </script>
 
