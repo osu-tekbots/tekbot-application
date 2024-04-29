@@ -51,6 +51,7 @@ if ($user){
 	$uEmail = $user->getEmail();
 	$uOnid = $user->getOnid();
 	$uAccessLevel = $user->getAccessLevelID()->getName();
+	$lastLogin = $user->getDateLastLogin();
 } else {
 	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
 	echo "Please send us an email <a href='mailto:".$configManager->getAdminEmail()."'>here</a> to report the issue.";
@@ -132,6 +133,7 @@ $uID = $_SESSION['userID'];
 						<hr class="my-4">
 						<div class="form-group">
 							<p class="form-control-static">User Type: <?php echo $uAccessLevel . '<BR>'; ?> </p>
+							<p class="form-control-static">Last login: <?php echo $lastLogin . '<BR>'; ?> </p>
 							<div class="col">
 
 							</div>
