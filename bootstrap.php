@@ -28,8 +28,5 @@ try {
     $logger = null;
 }
 
-// Add handlers for uncaught errors/exceptions
-include PUBLIC_FILES . '/lib/handleUncaught.php';
-
 // Set $_SESSION variables to be for this site
 include PUBLIC_FILES . '/lib/authenticate.php';
