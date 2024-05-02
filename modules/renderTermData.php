@@ -96,17 +96,15 @@ function getTerms(){
 }
 
 // Renders a select of the last 20 terms by default
-function renderTermSelect($limit = 20, $defaultTerm = NULL, $className = ''){
+function renderTermSelect($limit = 20){
     $terms = getTerms();
-    $termSelectHTML = "<select id='termSelect' class='$className'>";
-    if($defaultTerm == NULL)
-        $defaultTerm = getCurrentTermId();
+    $termSelectHTML = "<select id='termSelect'>";
 
     foreach (array_slice($terms, 0, $limit) as $term){
         $description = $term->attributes->description;
         $termID = $term->id;
         if ($termID != "999999"){
-            if ($termID == $defaultTerm){
+            if ($termID == getCurrentTermId()){
                 $termSelectHTML .= '<option selected value="'.$termID.'">'.$description.'</option>';
             } else {
                 $termSelectHTML .= '<option value="'.$termID.'">'.$description.'</option>';
