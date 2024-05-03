@@ -144,6 +144,7 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 			<?php renderPaymentForm() ?>
 			<br />
 			
+			<div class="alert alert-danger"><b>Note:</b> We are unable to cut acryllic at this time. If wood is not an option for your project, please check back soon.</div>
 			<b>Select Material</b>
 			<!-- <BR>Costs shown are reflective of the price after student discount. Code generated after order submission --> <!-- Not sure what this was (8/31/23)? -->
 			<?php
