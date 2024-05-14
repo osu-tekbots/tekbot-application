@@ -23,10 +23,6 @@ $messageDao = new MessageDao($dbConn, $logger);
 $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
 $handler = new BoxActionHandler($boxDao, $userDao, $messageDao, $mailer, $logger);
 
-// Authorize the request -- done within each ActionHandler method as of 8/28/23
-// if (verifyPermissions(['user', 'employee'])) {
-    // Handle the request
-    $handler->handleRequest();
-// } else {
-    // $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-// }
+
+// Handle the request
+$handler->handleRequest();

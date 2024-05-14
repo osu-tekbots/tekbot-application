@@ -6,8 +6,6 @@ namespace Api;
 // error_reporting(E_ALL);
 // Updated 11/5/2019
 
-use Model\Message;
-use Email\TekBotsMailer;
 use Model\User;
 use Model\Locker;
 use Model\PrintJob;
@@ -29,6 +27,9 @@ class MessageActionHandler extends ActionHandler {
 
     /** @var \DataAccess\MessageDao */
     private $dao;
+
+    /** @var \Email\TekBotsMailer */
+    private $mailer;
 
     /**
      * Constructs a new instance of the action handler for requests on messages.
@@ -52,6 +53,9 @@ class MessageActionHandler extends ActionHandler {
      * @return void
      */
     public function updateMessageDB() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('message_id');
 		$this->requireParam('subject');
@@ -89,6 +93,9 @@ class MessageActionHandler extends ActionHandler {
      * @return result of attempt
      */ // CHANGE TO sendTestMessage()
     public function sendMessage() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
         // Ensure the required parameters exist
         $this->requireParam('message_id');
         $this->requireParam('email');

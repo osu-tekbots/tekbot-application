@@ -33,6 +33,9 @@ class UsersActionHandler extends ActionHandler {
      * @return void
      */
     public function saveUserProfile() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+        
         // Ensure the required parameters exist
         $this->requireParam('uid');
         $this->requireParam('firstName');
@@ -46,6 +49,9 @@ class UsersActionHandler extends ActionHandler {
         $user = $this->dao->getUserByID($body['uid']);
         if(!$user) {
             $this->respond(new Response(Response::NOT_FOUND, 'Failed to find user'));
+        }
+        if($user->getUserID() != $_SESSION['userID']) {
+            $this->respond(new Response(Response::UNAUTHORIZED, 'Access Denied'));
         }
 
         // Update the user
@@ -72,6 +78,9 @@ class UsersActionHandler extends ActionHandler {
      * @return void
      */
     public function handleAddUser() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('onid');
         $this->requireParam('firstName');
@@ -103,6 +112,9 @@ class UsersActionHandler extends ActionHandler {
      * @return void
      */
     function handleUpdateUserType() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $uid = $this->getFromBody('uid');
         $admin = $this->getFromBody('admin');
 

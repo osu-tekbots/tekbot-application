@@ -21,12 +21,7 @@ $userDao = new UsersDao($dbConn, $logger);
 $taskDao = new TaskDao($dbConn, $logger);
 $handler = new InventoryActionHandler($inventoryDao, $userDao, $taskDao, $logger);
 
-// Authorize the request -- done within each ActionHandler method as of 9/1/23
-// if (verifyPermissions(['user', 'employee'])) {
-    // Handle the request
-	$handler->handleRequest();
-// } else {
-//     $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-// }
+// Handle the request
+$handler->handleRequest();
 
 ?>

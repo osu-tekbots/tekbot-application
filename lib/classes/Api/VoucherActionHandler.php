@@ -26,6 +26,9 @@ class VoucherActionHandler extends ActionHandler {
     *   Returns a list with the voucher codes that were successfully added to the database
     */
     public function handleAddVouchers() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters exist
         $this->requireParam('num');
         $this->requireParam('accountCode'); // Needed for linking w/ a payment account
@@ -122,6 +125,9 @@ class VoucherActionHandler extends ActionHandler {
     } */
 
     function handleClearVouchers() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // $voucher->setDateCreated(new \DateTime());
         $date = new \DateTime();
         $ok = $this->dao->clearVouchers($date);
@@ -134,6 +140,9 @@ class VoucherActionHandler extends ActionHandler {
 
     
     function handleClearPrintVouchers() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // $voucher->setDateCreated(new \DateTime());
         $date = new \DateTime();
         $ok = $this->dao->clearPrintVouchers($date);
@@ -146,6 +155,9 @@ class VoucherActionHandler extends ActionHandler {
 
     
     function handleClearCutVouchers() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // $voucher->setDateCreated(new \DateTime());
         $date = new \DateTime();
         $ok = $this->dao->clearCutVouchers($date);

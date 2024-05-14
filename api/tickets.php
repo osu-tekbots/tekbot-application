@@ -22,13 +22,7 @@ $labDao = new LabDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail(), null, $logger);
 $handler = new TicketsActionHandler($ticketDao, $labDao, $messageDao, $mailer, $configManager, $logger);
-$handler->handleRequest();
 
-// Authorize the request
-// if (verifyPermissions(['user', 'employee'])) {
-//     // Handle the request
-    
-// } else {
-//     $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-// }
+// Handle the request
+$handler->handleRequest();
 ?>

@@ -5,12 +5,6 @@ use Model\Printer;
 use Model\PrintFee;
 use Model\PrintJob;
 use Model\PrintType;
-use DataAccess\QueryUtils;
-use Util\Security;
-use Email\TekBotsMailer;
-
-// Temporary; just for setting up processAllFees
-use Model\Message;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify printer information.
@@ -60,7 +54,10 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreatePrinter() {
-        // Ensure all the requred parameters are present
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        // Ensure all the required parameters are present
         $this->requireParam('title');
         $body = $this->requestBody;
 
@@ -83,6 +80,9 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleRemovePrinter() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('printerID');
         $body = $this->requestBody;
         $ok = $this->printerDao->deletePrinterByID($body['printerID']);
@@ -96,6 +96,9 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleRemovePrintType() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('printTypeID');
         $body = $this->requestBody;
         $ok = $this->printerDao->deletePrintTypeByID($body['printTypeID']);
@@ -115,6 +118,8 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSavePrinter() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
 
         $id = $this->getFromBody('printerId');
         $name = $this->getFromBody('printerName');
@@ -143,7 +148,10 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     // This returns the information to be stored within the view print modal
-    public function handleGeneratePrintModal() {
+    // Unused: removed 05/13/2024 to see if anything breaks
+    /* public function handleGeneratePrintModal() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
 
         $id = $this->getFromBody('printID');
          
@@ -180,7 +188,7 @@ class PrinterActionHandler extends ActionHandler {
             Response::OK,
             'Successfully saved printer'
         ));
-    }
+    } */
 	
 
 
@@ -190,6 +198,8 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreatePrintFee() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
 
         $this->requireParam('print_fee_id');
         $this->requireParam('print_job_id');
@@ -208,9 +218,9 @@ class PrinterActionHandler extends ActionHandler {
         $printFee->setCustomerNotes($body['customer_notes']);
         $printFee->setDateCreated($body['date_created']);
         $printFee->setPaymentInfo($body['payment_info']);
-        $printFee->setIs_pending($body['is_pending']);
-        $printFee->setIs_paid($body['is_paid']);
-        $printFee->setDate_updated(new \DateTime());
+        $printFee->setIsPending($body['is_pending']);
+        $printFee->setIsPaid($body['is_paid']);
+        $printFee->setDateUpdated(new \DateTime());
 
         //AddNewPrinterFee not implemented
         $ok = $this->printFeeDao->addNewPrinterFee($printFee);
@@ -221,7 +231,7 @@ class PrinterActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::CREATED, 
             'Successfully created new printer resource', 
-            array('id' => $printerFee->getPrintFeeId())
+            array('id' => $printFee->getPrintFeeId())
         ));
     }
 
@@ -232,20 +242,15 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSavePrintFee() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
 		
 		$body = $this->requestBody;
 		
         $printFeeID = $this->getFromBody('print_fee_id');
-        $printJobID = $this->getFromBody('print_job_id');
-        $userID = $this->getFromBody('user_id');
-        $customerNotes = $this->getFromBody('customer_notes');
-        $dateCreated = $this->getFromBody('date_created');
-        $paymentInfo = $this->getFromBody('payment_info');
-        $isPending = $this->getFromBody('is_pending');
-        $isPaid = $this->getFromBody('is_paid');
 
         //Dao function to be implemented
-        $printFee = $this->printerFeeDao->getPrinterFeeByID($printFeeID);
+        $printFee = $this->printFeeDao->getPrinterFeeByID($printFeeID);
         if (empty($printFee)){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain print fee from ID'));
         }
@@ -278,6 +283,9 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleCreatePrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+        
 		$this->requireParam('userId');
         $this->requireParam('printerId');
         $this->requireParam('printTypeId');
@@ -388,9 +396,10 @@ class PrinterActionHandler extends ActionHandler {
      *
      * @return void
      */
-    public function handleSavePrintJob() {
-
-		$body = $this->requestBody;
+    // Unused: removed 05/13/2024 to see if anything breaks
+    /* public function handleSavePrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
 		
 		//FIXME: Fill out once you do client side
         $printJobId = $this->getFromBody('print_job_id');
@@ -433,7 +442,7 @@ class PrinterActionHandler extends ActionHandler {
 		$printJob->setPendingCustomerResponse($pendingCustomerResponse);
 		$printJob->setDateUpdated($dateUpdated);
 
-        $ok = $this->printerFeeDao->updatePrintJob($printJob);
+        $ok = $this->printerDao->updatePrintJob($printJob);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save print fee'));
         }
@@ -442,10 +451,12 @@ class PrinterActionHandler extends ActionHandler {
             Response::OK,
             'Successfully saved print job'
         ));
-    }
+    } */
     
     
     public function handleDeletePrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
 
         $body = $this->requestBody;
         // $printJob = $this->printerDao->getPrintJobsByID($body['printJobID']);
@@ -463,6 +474,9 @@ class PrinterActionHandler extends ActionHandler {
 	
 	
 	public function handleCreatePrintType(){
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
 
         $printer = $this->printerDao->getPrinterByID($body['printerID']);
@@ -490,6 +504,9 @@ class PrinterActionHandler extends ActionHandler {
 	}
 	
 	public function handleSavePrintType(){
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
 		$id = $this->getFromBody('id');
 		$name = $this->getFromBody('name');
 		$description = $this->getFromBody('description');
@@ -525,6 +542,9 @@ class PrinterActionHandler extends ActionHandler {
     }
     
     public function handleProcessPrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('printJobID');
         $this->requireParam('userID');
 
@@ -572,6 +592,9 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleSendCustomerConfirm() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
 		// $this->requireParam('printCost');
@@ -619,6 +642,9 @@ class PrinterActionHandler extends ActionHandler {
     
  
     function handleCustomerConfirmPrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['user', 'employee']);
+        
         $body = $this->requestBody;
 
 		$this->requireParam('printJobID');
@@ -652,6 +678,9 @@ class PrinterActionHandler extends ActionHandler {
     }
  
     function handleCompletePrintJob() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
 		$this->requireParam('printJobID');
 		$this->requireParam('userID');
 		$this->requireParam('messageID');
@@ -706,6 +735,9 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleUpdateEmployeeNotes() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
 
 		$this->requireParam('printJobID');
@@ -735,6 +767,9 @@ class PrinterActionHandler extends ActionHandler {
     }
 
     public function handleVerifyPrintPayment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $body = $this->requestBody;
         $this->requireParam('printJobID');
         $printJobID = $body['printJobID'];
@@ -763,6 +798,9 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleSendUserEmail() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('printJobID');
         $this->requireParam('email');
         $this->requireParam('message');
@@ -784,6 +822,9 @@ class PrinterActionHandler extends ActionHandler {
      * @return void
      */
     public function handleProcessAllFees() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         $this->requireParam('messageID');
         $body = $this->requestBody;
 
@@ -839,13 +880,13 @@ class PrinterActionHandler extends ActionHandler {
                 $this->handleSavePrinter();
 			case 'removeprinter':
             	$this->handleRemovePrinter();
-            case 'renderprintmodal':
-                $this->handleGeneratePrintModal();
+            // case 'renderprintmodal':
+            //     $this->handleGeneratePrintModal();
 				
 			case 'createprintjob':
 				$this->handleCreatePrintJob();
-			case 'saveprintjob':
-				$this->handleSavePrintJob();
+			// case 'saveprintjob':
+			// 	$this->handleSavePrintJob();
 
             case 'deletePrintJob':
                 $this->handleDeletePrintJob();
@@ -889,9 +930,5 @@ class PrinterActionHandler extends ActionHandler {
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }
 		
-    }
-
-    private function getAbsoluteLinkTo($path) {
-        return $this->config->getBaseUrl() . $path;
     }
 }

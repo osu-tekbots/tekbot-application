@@ -3,9 +3,6 @@
 namespace Api;
 
 use Model\Ticket;
-use Email\TekBotsMailer;
-use DataAccess\TicketDao;
-use DataAccess\LabDao;
 
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
@@ -55,6 +52,9 @@ class TicketsActionHandler extends ActionHandler {
      */
 
     public function handleResolveTicket() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters are set
         $this->requireParam('id');
         $this->requireParam('messageId');
@@ -95,6 +95,9 @@ class TicketsActionHandler extends ActionHandler {
     }
 
     public function handleUpdateResponse() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters are set
         $this->requireParam('id');
         $this->requireParam('message');
@@ -111,6 +114,9 @@ class TicketsActionHandler extends ActionHandler {
     }
 
     public function handleUpdateComment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters are set
         $this->requireParam('id');
         $this->requireParam('message');
@@ -125,6 +131,9 @@ class TicketsActionHandler extends ActionHandler {
     }
 
     public function handleEscalateTicket() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
         // Ensure the required parameters are set
         $this->requireParam('id');
         $this->requireParam('messageId');
@@ -148,6 +157,9 @@ class TicketsActionHandler extends ActionHandler {
     }
 
     public function handleCreateTicket() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel(['public', 'user', 'employee']);
+        
 		$this->requireParam('roomId');
         $this->requireParam('benchId');
         $this->requireParam('email');

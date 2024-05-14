@@ -15,12 +15,7 @@ session_start();
 $dao = new FaqDao($dbConn, $logger);
 $handler = new GeneralFaqActionHandler($dao, $configManager, $logger);
 
-// Authorize the request -- done within each ActionHandler method as of 8/31/23
-// if (verifyPermissions(['user', 'employee'])) {
-    // Handle the request
-    $handler->handleRequest();
-// } else {
-    // $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-// }
+// Handle the request
+$handler->handleRequest();
 
 ?>

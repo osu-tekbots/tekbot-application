@@ -124,7 +124,6 @@ class BoxActionHandler extends ActionHandler {
         $this->requireParam('boxId');
 		$body = $this->requestBody;
         
-		$box = $this->boxDao->getBoxById($body['boxId']);
 		if ($_SESSION['userID'] == $body['uId']){
 			$ok = $this->boxDao->lockBox($body['boxId']);
 			if(!$ok) {
@@ -161,7 +160,6 @@ class BoxActionHandler extends ActionHandler {
         $this->requireParam('boxId');
 		$body = $this->requestBody;
         
-		$box = $this->boxDao->getBoxById($body['boxId']);
 		if ($_SESSION['userID'] == $body['uId']){
 			$ok = $this->boxDao->unlockBox($body['boxId']);
 			if(!$ok) {

@@ -17,10 +17,5 @@ if(!session_id()) {
 $dao = new VoucherDao($dbConn, $logger);
 $handler = new VoucherActionHandler($dao, $logger);
 
-// Authorize the request
-if (verifyPermissions(['user', 'employee'], $logger)) {
-    // Handle the request
-    $handler->handleRequest();
-} else {
-    $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));
-}
+// Handle the request
+$handler->handleRequest();

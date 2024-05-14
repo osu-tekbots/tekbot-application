@@ -19,10 +19,6 @@ class TaskActionHandler extends ActionHandler {
 	/** @var \Util\Logger */
  //   private $logger;
 	
-	/******
-	$replacements is an array that contains items that should be accessable for emails/template replacement. General things are filled here with overwriting when needed in document
-	***/
-	private $replacements;
 
     /**
      * Constructs a new instance of the action handler for requests on user resources.
