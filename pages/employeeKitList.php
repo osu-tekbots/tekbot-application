@@ -36,6 +36,17 @@ include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);
 $kits = $kitEnrollmentDao->getKitsForAdmin();
 
+if (isset($_REQUEST['term'])){
+	$termfilter = $_REQUEST['term'];
+} else {
+	$termfilter = getCurrentTermId();
+}
+if (isset($_REQUEST['status'])){
+	$statusfilter = $_REQUEST['status'];
+} else {
+	$statusfilter = 1;
+}
+
 $kitHTML = '';
 $listNumber = 0;
 foreach ($kits as $k){
@@ -56,20 +67,30 @@ foreach ($kits as $k){
 		$selectHTML .= "<option value='".$s->getId()."' ".($s->getName() == $status ?'selected':'').">".$s->getName()."</option>";
 	}
 
-	$kitHTML .= "
-	<tr id='row$kitID'>
-		<td>$osuID</td>
-		<td>$onid</td>
-		<td>$name</td>
-		<td>$courseCode</td>
-		<td>$term</td>
-		<td>$status</td>
-		<td><select id='status$kitID' onchange='updateStatus(\"$kitID\");'>$selectHTML</select></td>
-	</tr>
-	";
-	$listNumber++;
-}
+	if ($statusfilter == 1) {
+		$statusfilter = 'Ready';
+	} else if ($statusfilter == 2) {
+		$statusfilter = 'Handed Out';
+	} else if ($statusfilter == 3) {
+		$statusfilter = 'Refunded';
+	} 
 
+	if (($termfilter == $termID || $termfilter == 'All') && ($statusfilter == $status || $statusfilter == 'All')){
+		$kitHTML .= "
+		<tr id='row$kitID'>
+			<td><button id='deleteKitEnrollmentButton$kitID' class='btn btn-outline-danger btn-sm' onclick='deleteSelectedKitEnrollment(\"$kitID\");'>Delete</button></td>
+			<td>$osuID</td>
+			<td>$onid</td>
+			<td>$name</td>
+			<td>$courseCode</td>
+			<td>$term</td>
+			<td>$status</td>
+			<td><select id='status$kitID' onchange='updateStatus(\"$kitID\");'>$selectHTML</select></td>
+		</tr>
+		";
+		$listNumber++; 
+	}
+}
 
 
 
@@ -94,10 +115,45 @@ foreach ($kits as $k){
 	
 				<div class='admin-paper'>
 				<h3>Kit Enrollments</h3>
+				<div display: inline-block>
+				<table>
+					<tr>
+					<td style='width:15%'>
+					Select Status Filter: 
+					</td>
+					<td>
+						<select id='statusFilterSelect' class='w-25 form-control input-sm'>
+							<option selected disabled hidden>".$statusfilter."</option>
+							<option value='All'>Show All</option>
+							<option value='1'>Ready</option>
+							<option value='2'>Handed Out</option>
+							<option value='3'>Refunded</option>
+						</select>
+					</td>
+					<tr>
+					<td>
+					Select Term Filter:
+					</td>
+					<td>
+					<select id='termFilterSelect' class='w-25 form-control input-sm'>
+						<option value='0'>".term2string($termfilter)."</option>
+						<option value='All'>Show All</option>
+					";
+
+					$kitEnrollmentTerms = $kitEnrollmentDao->getKitEnrollmentTerms();
+					foreach($kitEnrollmentTerms as $kitEnrollmentTerm){
+						echo "<option value =".$kitEnrollmentTerm.">".term2string($kitEnrollmentTerm)."</option>";
+					};
+
+					echo "
+					</td>
+					</select>
+				</table>
 					<table class='table' id='kitEnrollmentList'>
 					<caption>Kit Enrollments</caption>
 						<thead>
 							<tr>
+								<th></th>
 								<th>Student ID</th>
 								<th>Onid</th>
 								<th>Last, First Middle Name</th>
@@ -144,6 +200,36 @@ function updateStatus(id){
 	});
 }
 
+function deleteSelectedKitEnrollment(id){
+	let content = {
+		action: 'deleteHandoutKitEnrollment',
+		kid: id
+	}
+
+	api.post('/kitenrollment.php', content).then(res => {
+		snackbar(res.message, 'success');
+//		$('#row'+id).html('');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
+$('#statusFilterSelect').on('input', function() {
+	let getStatusFilter = document.getElementById("statusFilterSelect").value;
+    
+    const params = new URLSearchParams(window.location.search);
+    params.set('status', getStatusFilter);
+    window.location.search = params;
+})
+
+$('#termFilterSelect').on('input', function() {
+	let getTermFilter = document.getElementById("termFilterSelect").value;
+    
+    const params = new URLSearchParams(window.location.search);
+    params.set('term', getTermFilter);
+    window.location.search = params;
+})
+
 $('#kitEnrollmentList').DataTable(
 	{
 		"autoWidth": true,
@@ -151,6 +237,7 @@ $('#kitEnrollmentList').DataTable(
 		'paging':false, 
 		'order':[[5, 'desc'], [4, 'asc'], [3, 'asc']],
 		"columns": [
+			{ "orderable": false },
 			{ "orderable": false },
 			null,
 			null,

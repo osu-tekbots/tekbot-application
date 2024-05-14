@@ -1,5 +1,10 @@
 <?php 
 
+/**
+ * Creates an api token for api calls
+ * 
+ * @return $token holds access token value
+ */
 function generateAccessToken(){
     $ch = curl_init();
 
@@ -23,6 +28,11 @@ function generateAccessToken(){
     
 }
 
+/**
+ * Fetches terms using an api call of terms with status current
+ * 
+ * @return [int] $currentTerm[0]->id term id of current term in format year + term (ex. 202401)
+ */
 function getCurrentTermId(){
     $accessToken = generateAccessToken();
     $ch = curl_init();
@@ -72,6 +82,11 @@ function getCurrentTermId(){
     }
 }
 
+/**
+ * Fetches terms using an api call of all terms
+ * 
+ * @return [array] $terms 
+ */
 function getTerms(){
     $accessToken = generateAccessToken();
     $ch = curl_init();
@@ -95,7 +110,15 @@ function getTerms(){
     return $terms;
 }
 
-// Renders a select of the last 20 terms by default
+
+/**
+ * Renders a select for terms with termID as option values
+ * 
+ * Renders the last 20 terms by default
+ * 
+ * @param [int] $limit the number of terms shown
+ * @return void
+ */
 function renderTermSelect($limit = 20){
     $terms = getTerms();
     $termSelectHTML = "<select id='termSelect'>";
@@ -124,7 +147,7 @@ function renderTermSelect($limit = 20){
 /**
  * Converts the term ID to a readable string
  *
- * @param [int] $term
+ * @param [int] $term term id in format year + term (ex. 202401)
  * @return void
  */
 function term2string($term){
@@ -150,6 +173,8 @@ function term2string($term){
     
     return $termname . ' ' . $year;
 }
+
+// To-Do: check if the method below is used anywhere other than kit handout (delete if not)
 
 /** IF YOU NEED TO ADD ANOTHER COURSE ADD IT HERE */
 // Renders the course list dropdown 

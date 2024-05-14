@@ -217,6 +217,36 @@ class KitEnrollmentActionHandler extends ActionHandler {
         ));
     }
 
+    /**
+     * Deletes a kit enrollment, removing it using a database call from KitEnrollmentDao
+     *
+     * @return void
+     */
+    public function handleDeleteKitEnrollment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        $this->requireParam('kid');
+
+        $body = $this->requestBody;
+        $id = $body['kid'];
+
+        $kit = $this->kitEnrollmentDao->getKitEnrollment($id);
+        if (empty($kit)){
+            $this->respond(new Response(Response::NOT_FOUND, 'Unable to obtain kit with this ID'));
+        }
+
+        $ok = $this->kitEnrollmentDao->deleteKitEnrollment($kit);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete kit enrollment'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully deleted kit'
+        ));
+    }
+
      /**
      * Creates a new enrollment single entry in the database.
      *
@@ -419,6 +449,9 @@ class KitEnrollmentActionHandler extends ActionHandler {
 
             case 'updateHandoutKitEnrollments':
                 $this->handleHandoutKitEnrollment();
+
+            case 'deleteHandoutKitEnrollment':
+                $this->handleDeleteKitEnrollment();
 
             case 'createSingleKitEnrollment':
                 $this->handleCreateSingleEnrollment();

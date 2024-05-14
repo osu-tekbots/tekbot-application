@@ -30,7 +30,7 @@ class KitEnrollmentDao {
 
 
     /**
-     * Fetches the equipment kit with the provided ID
+     * Fetches the equipment kit with the provided ID.
      *
      * @param string $id
      * @return \Model\EquipmentCheckout|boolean the equipment on success, false otherwise
@@ -60,7 +60,7 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Fetches the kit enrollments with the provided student ID
+     * Fetches the kit enrollments with the provided student ID.
      *
      * @param string $id
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -91,7 +91,7 @@ class KitEnrollmentDao {
     }
 	
 	/**
-     * Fetches the kit enrollments with the provided student ID
+     * Fetches the kit enrollments with the provided student ID.
      *
      * @param string $id
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -122,7 +122,7 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Fetches the kit enrollments with the provided onid
+     * Fetches the kit enrollments with the provided onid.
      *
      * @param string $id
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -154,7 +154,7 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Fetches the REMAINING kit enrollments with the provided termID
+     * Fetches the REMAINING kit enrollments with the provided termID.
      *
      * @param string $termID representing the term of interest
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -189,7 +189,7 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Fetches the DISTRIBUTED kit enrollments with the provided termID
+     * Fetches the DISTRIBUTED kit enrollments with the provided termID.
      *
      * @param string $termID representing the term of interest
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -224,7 +224,7 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Fetches ALL kit enrollments with the provided termID
+     * Fetches ALL kit enrollments with the provided termID.
      *
      * @param string $termID representing the term of interest
      * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
@@ -389,6 +389,30 @@ class KitEnrollmentDao {
     }
 
     /**
+     * Deletes a kit enrollment entry from the database.
+     *
+     * @param \Model\KitEnrollment $kit the kit to delete
+     * @return boolean true if successful, false otherwise
+     */
+    public function deleteKitEnrollment($kit) {
+        try {
+            $sql = '
+            DELETE FROM kit_enrollment
+            WHERE kit_id = :id
+            ';
+            $params = array(
+                ':id' => $kit->getKitEnrollmentID()
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $id = $kit->getKitEnrollmentID();
+            $this->logger->error("Failed to delete kit with id '$id': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches a list of categories for kit enrollment
      *
      * @return \Model\KitEnrollmentStatus[]|boolean an array of categories on success, false otherwise
@@ -411,7 +435,34 @@ class KitEnrollmentDao {
     }
 
     /**
-     * Extracts Checkout object using information from the database row
+     * Fetches a list of term_id values used for kit enrollments.
+     *
+     * @return $terms[]|boolean an array of term_id strings on success, false otherwise
+     */
+    public function getKitEnrollmentTerms() {
+        try {
+            $sql = '
+            SELECT term_id 
+            FROM `kit_enrollment`
+            GROUP BY term_id
+            ORDER BY term_id DESC;
+            ';
+            $results = $this->conn->query($sql);
+
+            $terms = array();
+            foreach ($results as $row) {
+                $terms[] = $row['term_id'];
+            }
+
+            return $terms;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get kit enrollment terms: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Extracts Checkout object using information from the database row.
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
      * @return \Model\KitEnrollment
