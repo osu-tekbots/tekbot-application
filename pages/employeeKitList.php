@@ -135,8 +135,16 @@ foreach ($kits as $k){
 					Select Term Filter:
 					</td>
 					<td>
-					<select id='termFilterSelect' class='w-25 form-control input-sm'>
-						<option value='0'>".term2string($termfilter)."</option>
+					<select id='termFilterSelect' class='w-25 form-control input-sm'>";
+
+					if ($termfilter == 'All'){
+						$termFilterString = $termfilter;
+					} else {
+						$termFilterString = term2string($termfilter);
+					}
+
+					echo 
+						"<option selected disabled hidden>".$termFilterString."</option>
 						<option value='All'>Show All</option>
 					";
 
