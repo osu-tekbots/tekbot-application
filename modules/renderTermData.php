@@ -148,7 +148,7 @@ function renderTermSelect($limit = 20){
  * Converts the term ID to a readable string
  *
  * @param [int] $term term id in format year + term (ex. 202401)
- * @return void
+ * @return [string] readable version of term id
  */
 function term2string($term){
     $year = floor($term / 100);
@@ -172,6 +172,37 @@ function term2string($term){
     }
     
     return $termname . ' ' . $year;
+}
+
+/**
+ * Gets the next two term IDs from a selected term (in the order [two terms ahead, one term ahead])
+ *
+ * @param [int] $term term id in format year + term (ex. 202401)
+ * @return [array] $terms 
+ */
+function nextTwoTerms($term){
+    $year = floor($term / 100);
+    switch ($term - ($year * 100))
+    {
+    case 0:
+        $nextTerm1 = $term + 1;
+        $nextTerm2 = $term + 2;
+        break;
+    case 1:
+        $nextTerm1 = $term + 1;
+        $nextTerm2 = $term + 2;
+        break;
+    case 2:
+        $nextTerm1 = $term + 1;
+        $nextTerm2 = $term + 98;
+        break;
+    case 3:
+        $nextTerm1 = $term + 97;
+        $nextTerm2 = $term + 98;
+        break;
+    }
+    
+    return [$nextTerm2,$nextTerm1];
 }
 
 // To-Do: check if the method below is used anywhere other than kit handout (delete if not)

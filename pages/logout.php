@@ -6,6 +6,7 @@ unset($_SESSION['site']);
 unset($_SESSION['userID']);
 unset($_SESSION['accessLevel']);
 unset($_SESSION['newUser']);
+unset($_SESSION['tekbotSiteTerm']);
 session_unset();
 session_destroy();
 

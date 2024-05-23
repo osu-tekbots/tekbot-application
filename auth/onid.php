@@ -1,5 +1,6 @@
 <?php
 include_once '../bootstrap.php';
+include_once '../modules/renderTermData.php';
 
 use DataAccess\UsersDao;
 use Model\User;
@@ -27,6 +28,7 @@ function authenticateStudent() {
         $_SESSION['userID'] = $u->getUserID();
         $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = false;
+        $_SESSION['tekbotSiteTerm'] = getCurrentTermId();
         $u->setDateLastLogin(new DateTime());
         $dao->updateUser($u);
     } else {
@@ -43,6 +45,7 @@ function authenticateStudent() {
         $_SESSION['userID'] = $u->getUserID();
         $_SESSION['userAccessLevel'] = $u->getAccessLevelID()->getName();
         $_SESSION['newUser'] = true;
+        $_SESSION['tekbotSiteTerm'] = getCurrentTermId();
     }
     return true;
 }

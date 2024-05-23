@@ -7,6 +7,7 @@
  * Essentially, we are masquerading as another user while we do development offline.
  */
 include_once '../bootstrap.php';
+include_once '../modules/renderTermData.php';
 
 use DataAccess\UsersDao;
 
@@ -64,12 +65,14 @@ function stopMasquerade() {
         unset($_SESSION['userID']);
         unset($_SESSION['accessLevel']);
         unset($_SESSION['newUser']);
+        unset($_SESSION['tekbotSiteTerm']);
         if (isset($_SESSION['masq']['savedPreviousUser'])) {
             $_SESSION['userID'] = $_SESSION['masq']['userID'];
             $_SESSION['accessLevel'] = $_SESSION['masq']['accessLevel'];
             $_SESSION['newUser'] = $_SESSION['masq']['newUser'];
             $_SESSION['site'] = $_SESSION['masq']['site'];
             $_SESSION['auth'] = $_SESSION['masq']['auth'];
+            $_SESSION['tekbotSiteTerm'] = $_SESSION['masq']['tekbotSiteTerm'];
         }
         unset($_SESSION['masq']);
     }
@@ -90,6 +93,7 @@ function startMasquerade($user) {
         $_SESSION['masq']['newUser'] = $_SESSION['newUser'];
         $_SESSION['masq']['site'] = $_SESSION['site'];
         $_SESSION['masq']['auth'] = $_SESSION['auth'];
+        $_SESSION['masq']['tekbotSiteTerm'] = $_SESSION['tekbotSiteTerm'];
     }
     $_SESSION['userID'] = $user->getUserID();
     $_SESSION['userAccessLevel'] = $user->getAccessLevelID()->getName();
@@ -102,6 +106,7 @@ function startMasquerade($user) {
         'lastName' => $user->getLastName(),
         'email' => $user->getEmail()
     ];
+    $_SESSION['tekbotSiteTerm'] = getCurrentTermId();
 }
 ?>
 

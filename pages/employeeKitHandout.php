@@ -57,9 +57,9 @@ $test = "";
 <?php 
     // Grabs current term data using OSU Term API within modules/termData.php
 	//TODO: Is returning Summer 2021 during Spring break. WIll disable temporarily
-    $currentTerm = getCurrentTermId();
+    $selectedTerm = $_SESSION['tekbotSiteTerm'];
 	
-//	$currentTerm = 202203;
+//	$selectedTerm = 202203;
 
     if (isset($_REQUEST['studentid']) && isset($_REQUEST['action'])){
         // No courses found for ID or wanting to add student
@@ -84,7 +84,7 @@ $test = "";
                         <h5><b>ONID:</b></h5>
                         <i>(ex: namt)</i>
                         <input class="form-control" type="text" name="onid" value="'.$onid.'"><br>
-                        <input style="display:none;" name="term" value="'.$currentTerm.'">
+                        <input style="display:none;" name="term" value="'.$selectedTerm.'">
                         <h5><b>Course Name:</b></h5>
         ';
                 
@@ -93,7 +93,7 @@ $test = "";
                 <option value=""></option>
         ';
 
-        $termKits = $kitEnrollmentDao->getKitEnrollmentsByTerm($currentTerm);
+        $termKits = $kitEnrollmentDao->getKitEnrollmentsByTerm($selectedTerm);
         $readyArray = [];
         foreach ($termKits as $k){
                 array_push($readyArray, $k->getCourseCode());
@@ -144,7 +144,7 @@ $test = "";
                     $kid = $k->getKitEnrollmentID();
                     if (($kitStatus == KitEnrollmentStatus::READY || $kitStatus == KitEnrollmentStatus::PICKED_UP))
                     {
-                        if ($termID == $currentTerm){
+                        if ($termID == $selectedTerm){
                             // Kits for current term
                             $switchList .= '
                             <div class="enrollment"><h3>Handed Out?</h3>';
@@ -162,7 +162,7 @@ $test = "";
                             </div>
                             </div>
                             ';
-                        } else if ($termID > $currentTerm){
+                        } else if ($termID > $selectedTerm){
                             // Future kits
                             $futureList .= '
                             <div class="enrollment">';
@@ -206,7 +206,7 @@ $test = "";
                         ';
                         if (empty($switchList)){
                             echo'
-                                <h3>No Courses Found for '.term2string($currentTerm).'</h3>
+                                <h3>No Courses Found for '.term2string($selectedTerm).'</h3>
                                 <h4>Please do the following: </h4>
                         <ol>
                             <li>Make sure that the ID was entered correctly.</li>
@@ -327,15 +327,34 @@ $test = "";
  <div class="col-sm">
     <div class="jumbotron primaryColor seethrough" style="font-weight:bold;font-size:large;">
     <?php 
-    echo "<h2>".(term2string($currentTerm))."</h2>";    
-   
+    echo "<select id='termSelectDropdown' class='w-50 form-control input-sm'>";
+
+        
+        $termFilterString = term2string($_SESSION['tekbotSiteTerm']);
+
+        $currentTerm = getCurrentTermId();
+        $nextTerms = nextTwoTerms($currentTerm);
+
+        echo 
+            "<option selected disabled hidden>".$termFilterString."</option>
+        ";
+
+        foreach($nextTerms as $upcomingTerm){
+            echo "<option value =".$upcomingTerm.">".term2string($upcomingTerm)."</option>";
+        };
+
+        $kitEnrollmentTerms = $kitEnrollmentDao->getKitEnrollmentTerms();
+        foreach($kitEnrollmentTerms as $kitEnrollmentTerm){
+            echo "<option value =".$kitEnrollmentTerm.">".term2string($kitEnrollmentTerm)."</option>";
+        };
     ?>
+    </select>
     <br>
     <h4 class="kitFont"><b>Remaining Kits:
     </b></h4><div>
     <ul class="list-group">
     <?php 
-    $termKits = $kitEnrollmentDao->getRemainingKitEnrollmentsByTerm($currentTerm);
+    $termKits = $kitEnrollmentDao->getRemainingKitEnrollmentsByTerm($selectedTerm);
     $readyArray = [];
     foreach ($termKits as $k){
             array_push($readyArray, $k->getCourseCode());
@@ -366,7 +385,7 @@ $test = "";
     <h4 class="kitFont"><b>Distributed Kits:</b></h4><div style="overflow:auto;">
     <ul class="list-group">
     <?php 
-    $termKits = $kitEnrollmentDao->getDistributedKitEnrollmentsByTerm($currentTerm);
+    $termKits = $kitEnrollmentDao->getDistributedKitEnrollmentsByTerm($selectedTerm);
     $readyArray = [];
     foreach ($termKits as $k){
             array_push($readyArray, $k->getCourseCode());
@@ -407,10 +426,21 @@ $test = "";
 </div>
 
 <script>
-
-
-
-
+    $(document).ready(function(){
+        $('#termSelectDropdown').change(function(){
+            var selectedTerm = $(this).val();
+            let data =  {
+                action: 'setTermID',
+                termID: selectedTerm
+            }
+            api.post('/session.php', data)
+                .then(res => {
+                    window.location.reload();
+                }).catch(err => {
+                    snackbar(err.message, 'error');
+                })
+        });
+    });
 </script>
 
 <?php 
