@@ -92,7 +92,7 @@ $stations = $labDao->getStations();
 		$j = 0;
 		$labelsHTML .= "<div class='printpagelarge'>";
 		foreach ($stations AS $s){
-				$qrCode = "<img src='https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/publicTicketSubmit.php?station=".$s->getId()."'>";
+				$qrCode = "<img src='https://qrcode.tec-it.com/API/QRCode?size=small&data=https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/publicTicketSubmit.php?station=".$s->getId()."'>";
 
 				if ($j == 10){
 					$labelsHTML .= '</div><div class="printpagelarge">';
