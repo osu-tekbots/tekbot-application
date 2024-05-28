@@ -132,6 +132,8 @@ if (count($tasks) != 0){
 			</tr>";
 	}
 	$tasksText .= '</table>';
+} else {
+	$tasksText = "<div class='row alert alert-success' colspan='4'>All items are complete!</div>";
 }
 
 $tasks = $taskDao->getAllCompleteTasks($_REQUEST['start'] ?? null, $_REQUEST['end'] ?? null);
