@@ -48,7 +48,7 @@ class TaskDao {
 	
 	/**
      * Fetches all Tasks that do not have a completed date.
-     * @return an array of tasks on success, false otherwise
+     * @return \Model\Task[] an array of tasks on success, false otherwise
      */
 
     public function getAllIncompleteTasks() {
@@ -68,7 +68,7 @@ class TaskDao {
 	
 	/**
      * Fetches all Tasks that have a completed date.
-     * @return an array of tasks on success, false otherwise
+     * @return \Model\Task[] an array of tasks on success, false otherwise
      */
 
     public function getAllCompleteTasks($startDate, $endDate) {

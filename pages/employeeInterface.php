@@ -13,7 +13,6 @@ use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
 use DataAccess\TicketDao;
 use DataAccess\ConfigurationDao;
-use Util\Security;
 
 if(!session_id()) session_start();
 

@@ -1,24 +1,19 @@
 <?php
 namespace Api;
 
-use Model\Box;
-use Email\TekBotsMailer;
-use DataAccess\UserDao;
-
 /**
  * Defines the logic for how to handle AJAX requests made to modify TekBox information.
  */
 class BoxActionHandler extends ActionHandler {
 
-    /** @var \DataAccess\* */
+    /** @var \DataAccess\BoxDao */
     private $boxDao;
+    /** @var \DataAccess\UserDao */
 	private $userDao;
+    /** @var \DataAccess\MessageDao */
 	private $messageDao;
-	
-	/******
-	$replacements is an array that contains items that should be accessible for emails/template replacement. General things are filled here with overwriting when needed in document
-	***/
-	private $replacements;
+    /** @var \Email\TekBotsMailer */
+    private $mailer;
 
     /**
      * Constructs a new instance of the action handler for requests on TekBox resources.

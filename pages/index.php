@@ -142,7 +142,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                               </div>
                          </div>
                          <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
-                         <input type="hidden" name="ip" value="<?php echo $ip; ?>">
+                         <input type="hidden" name="ip" value="<?php /* echo $ip; */ ?>">
                     </form>
                </div>
 		-->
