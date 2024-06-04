@@ -133,7 +133,7 @@ $uID = $_SESSION['userID'];
 						<hr class="my-4">
 						<div class="form-group">
 							<p class="form-control-static">User Type: <?php echo $uAccessLevel . '<BR>'; ?> </p>
-							<p class="form-control-static">Last login: <?php echo $lastLogin . '<BR>'; ?> </p>
+							<p class="form-control-static">Last login: <?php echo $lastLogin->format('m-d-Y H:i:s') . '<BR>'; ?> </p>
 							<div class="col">
 
 							</div>
