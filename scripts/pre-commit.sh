@@ -22,7 +22,7 @@ do
     if [ -d "$f" ] && [ "$FILE_PERMISSIONS" != '2775' ]; then
         echo
         echo "ERROR: Found directory '$f' with incorrect permissions '$FILE_PERMISSIONS'"
-        echo "Would you like to update this directory's permissions?"
+        echo "Would you like to update this directory's permissions to rwxrwxr-x??"
         read -p "y/n: " yn < /dev/tty
 
         if [ "$yn" = "y" ] || [ "$yn" = "yes" ]; then
