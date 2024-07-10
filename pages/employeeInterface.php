@@ -118,6 +118,9 @@ if (count($tasks) != 0){
 				<!== For ensuring the columns align correctly ==>
 				<button class="btn btn-small invisible" style="height: 1px" disabled>Completed</button>
 				<button class="btn btn-small invisible" style="height: 1px" disabled>Urgent</button>
+				<button class="btn btn-small invisible" style="height: 1px" disabled>
+					<i class="fas fa-solid fa-trash"></i>
+				</button>
 			</th>
 		</tr>';
 	foreach ($tasks as $t){
@@ -128,6 +131,9 @@ if (count($tasks) != 0){
 				<td class='col-auto'>
 					<button class='btn btn-info btn-small' onclick='completeTask(".$t->getId().");'>Completed</button>
 					<button class='btn btn-warning btn-small' type='button' onclick='markUrgentTask(".$t->getId().");'>Urgent</button>
+					<button class='btn btn-danger btn-small' type='button' onclick='deleteTask(".$t->getId().");'>
+						<i class='fas fa-solid fa-trash'></i>
+					</button>
 				</td>
 			</tr>";
 	}
@@ -297,6 +303,23 @@ function markUrgentTask(task){
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
+}
+
+function deleteTask(task){
+	if (confirm('Are you sure you want to delete this To-Do?')) {
+		let data = {
+			task: task,
+			action: 'deleteTask'
+		};
+
+		api.post('/task.php', data).then(res => {
+			snackbar(res.message, 'info');
+			setTimeout(() => location.reload(), 1000);
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	} else {
+	}
 }
 
 function setDates() {

@@ -91,6 +91,31 @@ class TaskActionHandler extends ActionHandler {
 		$this->logger->info('Task Updated: '.$body['task']);
         $this->respond(new Response(Response::OK, 'Task Updated: '.$body['task']));
     }
+
+    /**
+     * Deletes a task by its task id.
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleDeleteTask() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('task');
+        $body = $this->requestBody;
+		
+		// Delete the task
+        $ok = $this->taskDao->deleteTaskById($body['task']);
+		
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Task Failed to Delete'));
+        }
+		$this->logger->info('Task Deleted: '.$body['task']);
+        $this->respond(new Response(Response::OK, 'Task Deleted: '.$body['task']));
+    }
 	
 	/**
      * Completes a task inserting current time and the user id for the person completing it.

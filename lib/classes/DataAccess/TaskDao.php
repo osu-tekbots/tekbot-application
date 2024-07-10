@@ -153,7 +153,7 @@ class TaskDao {
 	/**
      * Deletes the task by id
      * @param int $id Id number for the task
-     * @return treu on success, false otherwise
+     * @return true on success, false otherwise
      */
 
     public function deleteTaskById($id) {
