@@ -57,7 +57,10 @@ $test = "";
 <?php 
     // Grabs current term data using OSU Term API within modules/termData.php
 	//TODO: Is returning Summer 2021 during Spring break. WIll disable temporarily
-    $selectedTerm = $_SESSION['tekbotSiteTerm'];
+    if (isset($_SESSION['tekbotSiteTerm']))
+		$selectedTerm = $_SESSION['tekbotSiteTerm'];
+	else
+		$selectedTerm = getCurrentTermId();
 	
 //	$selectedTerm = 202203;
 
@@ -329,10 +332,12 @@ $test = "";
     <?php 
     echo "<select id='termSelectDropdown' class='w-50 form-control input-sm'>";
 
-        
-        $termFilterString = term2string($_SESSION['tekbotSiteTerm']);
-
         $currentTerm = getCurrentTermId();
+        if (isset($_SESSION['tekbotSiteTerm']))
+			$termFilterString = term2string($_SESSION['tekbotSiteTerm']);
+		else 
+			$termFilterString = term2string($currentTerm);
+
         $nextTerms = nextTwoTerms($currentTerm);
 
         echo 
