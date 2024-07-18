@@ -163,13 +163,15 @@ foreach($studentLaserJobs as $p) {
 			<!-- Students can see status (pending, printing, etc) -->
 			<!-- Students can see a render of the print they submitted -->
 			<br><br>
+			<!--
 			<div class="alert alert-danger mx-2">
 				<b>Note:</b> We are unable to process any further laser cuts until further notice. We apologize for the inconvenience.
 				If you have any questions, please <a href="./pages/info.php">see the FAQ</a> or <a href="mailto:tekbot-worker@engr.oregonstate.edu">send us an email</a>.
 			</div>
+			-->
 			<br>
 			<div class='admin-paper'>
-			<h3>Laser Cut Jobs &nbsp&nbsp&nbsp&nbsp<!-- <a href='./pages/userCutsSubmit.php'><button class='btn btn-info'>New Laser Cut</button></a> --></h3>
+			<h3>Laser Cut Jobs &nbsp&nbsp&nbsp&nbsp<a href='./pages/userCutsSubmit.php'><button class='btn btn-info'>New Laser Cut</button></a></h3>
 				<table class='table' id='printJobs'>
 					<thead>
 						<tr>

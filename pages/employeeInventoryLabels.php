@@ -154,7 +154,7 @@ if (count($items) > 0) { //Need to render labels
 				$labelsHTML .= '
 				<div class="printlabellarge">
 					<div style="float:left;width:45%;min-height:130px;margin-top:.5em;"><BR>
-						<img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="https://qrcode.tec-it.com/API/QRCode?size=small&data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
+						<img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
 					</div>
 					<div style="float:right;width:55%;min-height:130px;margin-top:.5em;">
 						<BR>
@@ -193,7 +193,7 @@ if (count($items) > 0) { //Need to render labels
 				$j++;
 				$labelsHTML .= "<div class='printlabelsmall'>
 						<div style='float:left;width:55%;'>
-							<img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='https://qrcode.tec-it.com/API/QRCode?size=small&data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
+							<img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
 						</div>
 						<div style='float:left;width:40%;'>
 							<BR>
@@ -222,7 +222,7 @@ if (count($items) > 0) { //Need to render labels
 						<div>
 							<div style="float:left;width:50%;min-height:130px;margin-top:1em;">
 								<BR>
-								'.($p->getTouchnetId() != '' ? '<img style="height:1.4in;display:block;margin-left: auto;margin-right: auto;margin-top:-.2in" src="https://qrcode.tec-it.com/API/QRCode?size=small&data=https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=' . $p->getTouchnetId() . '">' : '').'
+								'.($p->getTouchnetId() != '' ? '<img style="height:1.4in;display:block;margin-left: auto;margin-right: auto;margin-top:-.2in" src="createqr.php?data=https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=' . $p->getTouchnetId() . '">' : '').'
 							</div>
 							<div style="float:right;width:50%;min-height:130px;margin-top:1em;">
 								<img src="../../../inventory_images/'.$p->getImage().'" style="max-width:1.5in;height:13em;">

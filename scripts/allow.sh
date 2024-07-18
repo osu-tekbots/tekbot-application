@@ -9,6 +9,6 @@ for f in $(find . -not -path "./.git/*"); do
     # if [ -d "$f" ]; then
     #     chmod 755 "$f"
     # else
-        chmod 755 "$f"
-    fi
+        chmod 775 "$f"
+    # fi
 done
