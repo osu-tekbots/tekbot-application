@@ -570,6 +570,27 @@ class InventoryActionHandler extends ActionHandler {
             $this->respond(new Response(Response::OK, 'Type Updated'));
     }
 	
+	public function handleDeletePart() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+        $body = $this->requestBody;
+
+//TODO: Remove from all existing kits
+//TODO: Locate and delete images and datasheets
+
+//      $part = $this->inventoryDao->getPartByStockNumber($body['stockNumber']);
+//		$ok = $this->inventoryDao->removePartFromAllKits($body['stockNumber']);
+		$ok = $this->inventoryDao->deletePart($body['stockNumber']);
+
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Delete'));
+        else
+            $this->respond(new Response(Response::OK, 'Part Deleted'));
+    }
+	
 	public function handleToggleArchiveType() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
@@ -717,6 +738,10 @@ class InventoryActionHandler extends ActionHandler {
 
             case 'updateTypeDescription':
                 $this->handleUpdateTypeDescription();
+                break;
+			
+			case 'deletePart':
+                $this->handleDeletePart();
                 break;
 
             default:

@@ -3,7 +3,8 @@
 use DataAccess\UsersDao;
 $usersDao = new UsersDao($dbConn, $logger);
 
-if (!session_id()) session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 $user = NULL;
 

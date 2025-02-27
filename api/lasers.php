@@ -13,7 +13,8 @@ use Api\LaserActionHandler;
 use Email\TekBotsMailer;
 use DataAccess\MessageDao;
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 // Setup our data access and handler classes
 $laserDao = new LaserDao($dbConn, $logger);

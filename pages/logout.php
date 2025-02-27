@@ -1,7 +1,9 @@
 <?php
 include_once '../bootstrap.php';
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
+
 unset($_SESSION['site']);
 unset($_SESSION['userID']);
 unset($_SESSION['accessLevel']);

@@ -14,9 +14,8 @@ error_reporting(E_ALL);
 use DataAccess\BoxDao;
 
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 if (isset($_REQUEST['box_key']) && !empty($_REQUEST['box_key'])) {
 	$boxDao = new BoxDao($dbConn, $logger); // Make new DataAccess Object

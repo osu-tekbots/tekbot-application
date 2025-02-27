@@ -9,7 +9,8 @@ use Api\Response;
 use DataAccess\FaqDao;
 use Api\GeneralFaqActionHandler;
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 // Setup our data access and handler classes
 $dao = new FaqDao($dbConn, $logger);

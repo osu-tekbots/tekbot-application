@@ -1,8 +1,7 @@
 <?php
 
-if (!isset($_SESSION)) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 /**
  * Authenticate a user using Oregon State University's CAS server.

@@ -5,9 +5,8 @@ use DataAccess\EquipmentDao;
 use Model\EquipmentStatus;
 use Util\Security;
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 /*
 If we ever decide to implement the category for equipment

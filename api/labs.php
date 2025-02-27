@@ -9,9 +9,8 @@ include_once '../bootstrap.php';
 use DataAccess\LabDao;
 use Api\LabActionHandler;
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Setup our data access and handler classes
 $labDao = new LabDao($dbConn, $logger);

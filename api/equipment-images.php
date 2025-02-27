@@ -9,9 +9,8 @@ use DataAccess\EquipmentDao;
 use Model\EquipmentImage;
 use Api\Response;
 
-if (!isset($_SESSION)) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';

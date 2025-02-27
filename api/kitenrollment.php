@@ -10,7 +10,8 @@ use DataAccess\KitEnrollmentDao;
 use Api\KitEnrollmentActionHandler;
 use Email\EquipmentRentalMailer;
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 // Setup our data access and handler classes
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);

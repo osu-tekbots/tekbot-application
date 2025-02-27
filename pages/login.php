@@ -1,9 +1,8 @@
 <?php
 include_once '../bootstrap.php';
 
-if(!isset($_SESSION)) {
+if (PHP_SESSION_ACTIVE != session_status())
     @session_start();
-}
 
 
 $isLoggedIn = verifyPermissions(['user', 'employee'], $logger);

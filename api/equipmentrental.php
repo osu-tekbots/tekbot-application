@@ -17,7 +17,8 @@ use Api\EquipmentRentalActionHandler;
 use Email\TekBotsMailer;
 use DataAccess\MessageDao;
 
-if(!session_id()) session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 // Setup our data access and handler classes
 $equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);

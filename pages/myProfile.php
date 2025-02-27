@@ -14,7 +14,8 @@ use Model\KitEnrollmentStatus;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
-if(!session_id()) session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+	session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 

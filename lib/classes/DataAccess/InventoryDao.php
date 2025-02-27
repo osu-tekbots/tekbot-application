@@ -251,6 +251,25 @@ class InventoryDao {
         }
     }
 	
+	
+	public function removePartFromAllKits($id) {
+        try {
+            $sql = '
+			DELETE FROM tekbots_kitcontents
+			WHERE ChildID = :id
+			';
+            $params = array(
+				':id' => $id	
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
 	public function removeKitContents($parentid, $childid) {
         try {
             $sql = '
@@ -267,6 +286,24 @@ class InventoryDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	public function deletePart($stockNumber) {
+        try {
+            $sql = '
+			DELETE FROM tekbots_parts
+			WHERE `StockNumber` = :stockNumber 
+			';
+            $params = array(
+                ':stockNumber' => $stockNumber
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete part: ' . $e->getMessage());
             return false;
         }
     }

@@ -4,9 +4,8 @@
  */
 include_once '../bootstrap.php';
 
- if (!isset($_SESSION)) {
-     session_start();
- }
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 $provider = isset($_GET['provider']) 
                 ? $_GET['provider'] 

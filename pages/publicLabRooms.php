@@ -6,9 +6,8 @@ include_once '../bootstrap.php';
 use DataAccess\TicketDao;
 use DataAccess\LabDao;
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 $title = "Lab Room";
 

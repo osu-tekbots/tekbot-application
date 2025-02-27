@@ -7,9 +7,8 @@ include_once '../bootstrap.php';
 
 use Api\SessionActionHandler;
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Setup our data access and handler classes
 $handler = new SessionActionHandler($logger);

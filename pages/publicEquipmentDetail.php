@@ -9,8 +9,11 @@ include PUBLIC_FILES . '/lib/shared/authorize.php';
 $title = 'Single Equipment';
 
 
-$eID = $_GET['id'];
-allowIf($eID . '' != '');
+$eID = null;
+if(isset($_GET['id']))
+	$eID = $_GET['id'];
+
+allowIf(isset($_GET['id']));
 
 $css = array(
     'assets/css/slideshow.css'
@@ -198,7 +201,7 @@ if (!$isPublic) {
 		</address>
 		<address>
 			<strong>Replacement Cost:</strong>
-			<p>$<?php echo(number_format($replacement_cost,2));?></p>
+			<p>$<?php printf('%0.2f', $replacement_cost);?></p>
 		</address>
 		<address>
 			<strong>Number of units:</strong>

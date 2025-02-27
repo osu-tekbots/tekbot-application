@@ -33,9 +33,8 @@ return $price;
 }
 
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
@@ -142,8 +141,8 @@ if (isset($stocknumber)){ // Display single kit information
 	
 	//added current kit stock 07/26/2023 by Travis
 	$quantity = $kit->getQuantity();
-	$contentsHTML = " <h4>Current Stock: ".$quantity."</h4>
-				<h4>Contents as of ". date("m-d-y",time()) . "</h4>Student Price: ".studentPrice($lastPrice) ."
+	$contentsHTML = " <h4>Stock: ".$quantity." Location: " . $kit->getLocation() . 
+				" Date: ". date("m-d-y",time()) . "</h4>Student Price: ".studentPrice($lastPrice) ."
 				<button type='button' onclick='calculateLastPrice(\"$stocknumber\")'>Update</button><table id='ContentsTable'>
                 <thead>
                     <tr>
@@ -334,7 +333,7 @@ function addKitContents(id){
 
 	api.post('/inventory.php', content).then(res => {
 		snackbar(res.message, 'Added');
-		window.location.reload();
+		window.location.reload(true);
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -406,7 +405,7 @@ function updatePartImage(id){
 
 
 /*
- * explain the funcationality - include version of DT that works with this. 
+ * explain the functionality - include version of DT that works with this. 
 */
 var printButtonExtension = {
     exportOptions: {
@@ -451,8 +450,8 @@ $(document).ready(function() {
 			'dom': 'Bft',
 			'buttons': [
 				$.extend( true, {}, printButtonExtension, {
-            extend: 'print'
-        } )
+					extend: 'print'
+				} )
 			], 
 			"autoWidth": true,
 			"searching": false,

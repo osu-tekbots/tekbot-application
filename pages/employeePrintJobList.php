@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include_once '../bootstrap.php';
 
 use DataAccess\PrinterDao;
@@ -6,9 +10,8 @@ use DataAccess\UsersDao;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
@@ -116,19 +119,21 @@ $printJobs = $printerDao->getPrintJobs();
                             break;
                         case "account":
                             $paymentValidation = "<button id='accountpayment$printJobID' onClick='startPrint(\"$printJobID\", \"$name\")' class='btn btn-primary'>Started Print</button>";
-                            if($accountCode == "") {
+                    // This section was causing page to not load. Removed now and can be deleted on 1/2025
+					/*        if($accountCode == "") {
                                 // Get account code from notes (for old prints before accountCode field)
                                 $offset = strpos($employeeNotes, "Account code: ") + strlen("Account code: ");
                                 $accountCode = substr($employeeNotes, $offset, (strpos($employeeNotes, "\n", $offset) ?: strlen($employeeNotes)) - $offset);
                             }
-                            $payment .= "Account: $accountCode";
+                     */     $payment .= "Account: $accountCode";
                             break;
                         case "voucher":
                             $paymentValidation = "<button id='voucherpayment$printJobID' onClick='startPrint(\"$printJobID\", \"$name\")' class='btn btn-primary'>Started Print</button>";
                             $payment .= "Voucher: $voucherCode";
-
                             break;
-                    };
+						default:
+							break;
+                    }
 
                     $currentStatus .= "<a data-toggle='tool-tip' data-placement='top' title='$paymentConfirmed'>$payment</a><br/>";
                     
@@ -148,7 +153,7 @@ $printJobs = $printerDao->getPrintJobs();
 						
                     }
 
-                    
+               
                     $status = '';
                     $status .= $dateCreated;
                     $status .= "<br/>";

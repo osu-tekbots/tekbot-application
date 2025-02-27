@@ -12,9 +12,8 @@ use Email\TekBotsMailer;
 use Api\InternalSalesActionHandler;
 use Api\Response;
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Setup our data access and handler classes
 $internalSalesDao = new InternalSalesDao($dbConn, $logger);

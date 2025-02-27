@@ -5,13 +5,12 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL); 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL); 
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
@@ -147,9 +146,9 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 			<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
 				<div class='form-row'>
 					<div class='form-group col-sm-3'>
-					<label for='type'>Type</label><select onchange='updateType(\"$stocknumber\");' id='type$stocknumber' class='form-control'>$types_select</select></div>
+					<label for='type$stocknumber'>Type</label><select onchange='updateType(\"$stocknumber\");' id='type$stocknumber' class='form-control'>$types_select</select></div>
 					<div class='form-group col-sm-9'>
-					<label for='description' >Description</label><input type='text' class='form-control' onchange='updateDescription(\"$stocknumber\");' id='description$stocknumber' value='".Security::HtmlEntitiesEncode($description)."'></div>
+					<label for='description$stocknumber' >Description</label><input type='text' class='form-control' onchange='updateDescription(\"$stocknumber\");' id='description$stocknumber' value='".Security::HtmlEntitiesEncode($description)."'></div>
 				</div>
 				<div class='form-row'>
 					<div class='form-group col-sm-3'><label for='lastSupplier' >Last Supplier</label><input type='text' class='form-control' onchange='updateLastSupplier(\"$stocknumber\");' id='lastSupplier$stocknumber' value='".Security::HtmlEntitiesEncode($lastSupplier)."'></div>
@@ -166,8 +165,9 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 					<div class='col-sm-7'>
 						<div class='form-row'>
 							<div class='form-group col-sm-6'><label for='partMargin'>Part Margin</label><input type='text' class='form-control' onchange='updatePartMargin(\"$stocknumber\")'id='partMargin$stocknumber' value='".Security::HtmlEntitiesEncode($partMargin)."'></div>
-							<div class='form-group col-sm-3'><div class='form-check'><input type='checkbox' class='form-check-input' onchange='updateStocked(\"$stocknumber\");' id='stocked' ".($stocked == 1 ? 'checked' : '' )."><label for='stocked' class='form-check-label'>Stocked</label></div></div>
-							<div class='form-group col-sm-3'><div class='form-check'><input type='checkbox' class='form-check-input' onchange='updateArchived(\"$stocknumber\");' id='archived' ".($archive == 1 ? 'checked' : '' )."><label for='archived' class='form-check-label'>Archived</label></div></div>
+							<div class='form-group col-sm-2'><div class='form-check'><input type='checkbox' class='form-check-input' onchange='updateStocked(\"$stocknumber\");' id='stocked' ".($stocked == 1 ? 'checked' : '' )."><label for='stocked' class='form-check-label'>Stocked</label></div></div>
+							<div class='form-group col-sm-2'><div class='form-check'><input type='checkbox' class='form-check-input' onchange='updateArchived(\"$stocknumber\");' id='archived' ".($archive == 1 ? 'checked' : '' )."><label for='archived' class='form-check-label'>Archived</label></div></div>
+							<div class='form-group col-sm-2'><button type='button' onclick='deletePart(\"$stocknumber\");' class='btn-info'>Delete</button></div>
 						</div>
 						<div class='form-row'>
 							<div class='form-group col-sm-6'><label for='location$stocknumber'>Location</label><input class='form-control' type='text' id='location$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></div>
@@ -518,6 +518,21 @@ function updatePublicDesc(id){
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
+}
+
+function deletePart(id){
+	let content = {
+		action: 'deletePart',
+		stockNumber: id
+	}
+	
+	if(confirm("This will delete this item from the inventory including all referecnes to it inside of existing and former kits. Are you sure?")){
+		api.post('/inventory.php', content).then(res => {
+			snackbar(res.message, 'success');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
 }
 
 function recountEmail(id){

@@ -2,9 +2,8 @@
 require 'http.php';
 require 'oauth_client.php';
 
-if (!isset($_SESSION)) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 /**
  * Authenticate a user using OAuth2.0 authentication with the provided servers.

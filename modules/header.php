@@ -9,7 +9,7 @@
  */
 include_once PUBLIC_FILES . '/modules/button.php';
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status()) {
   $ok = @session_start();
   if(!$ok){
     session_regenerate_id(true); // replace the Session ID

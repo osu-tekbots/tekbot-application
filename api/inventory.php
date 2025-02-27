@@ -11,9 +11,8 @@ use DataAccess\TaskDao;
 use Api\InventoryActionHandler;
 use Api\Response;
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Setup our data access and handler classes
 $inventoryDao = new InventoryDao($dbConn, $logger);

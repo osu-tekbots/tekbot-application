@@ -5,9 +5,8 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-if (!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
@@ -318,8 +317,30 @@ function toggleStocked(){
 		
 }
 
+/*
+ * explain the functionality - include version of DT that works with this. 
+*/
+var printButtonExtension = {
+    exportOptions: {
+        format: {
+            body: function ( data, row, column, node ) {
+                //check if type is input using jquery
+                return node.firstChild.tagName === "INPUT" ?
+                        node.firstElementChild.value :
+                        data;
+
+            }
+        }
+    }
+};
 
 $('#InventoryTable').DataTable({
+		'dom': 'Bft',
+		'buttons': [
+			$.extend( true, {}, printButtonExtension, {
+				extend: 'print'
+			} )
+		], 
 		"autoWidth": true,
 		'scrollX':false, 
 		'paging':false, 

@@ -6,7 +6,8 @@ use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
 use Util\Security;
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+	session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 

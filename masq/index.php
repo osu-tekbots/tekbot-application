@@ -11,7 +11,8 @@ include_once '../modules/renderTermData.php';
 
 use DataAccess\UsersDao;
 
-if(!session_id()) session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+    session_start();
 
 // Make sure the user is allowed on this page
 if ($configManager->getEnvironment() != 'dev') {

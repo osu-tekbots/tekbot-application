@@ -10,9 +10,8 @@ use Email\TekBotsMailer;
 use Api\MessageActionHandler;
 use Api\Response;
 
-if(!session_id()) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 // Setup our data access and handler classes
 $dao = new MessageDao($dbConn, $logger);

@@ -5,9 +5,8 @@ use DataAccess\UsersDao;
 use Model\User;
 use Model\UserAuthProvider;
 
-if (!isset($_SESSION)) {
+if (PHP_SESSION_ACTIVE != session_status())
     session_start();
-}
 
 include_once PUBLIC_FILES . '/lib/shared/auth/oauth.php';
 

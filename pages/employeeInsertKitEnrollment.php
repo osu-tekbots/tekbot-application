@@ -3,7 +3,8 @@ include_once '../bootstrap.php';
 
 use DataAccess\KitEnrollmentDao;
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+	session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 

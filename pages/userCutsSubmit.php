@@ -9,7 +9,8 @@ use DataAccess\LaserDao;
 use DataAccess\EquipmentDao;
 
 
-session_start();
+if (PHP_SESSION_ACTIVE != session_status())
+	session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
@@ -113,12 +114,12 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 			<h1>Laser Cutter Submission Form</h1>
 			To check your currently queued or finished cuts, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>My Tekbots</a><br /><br />
 
-			<div class="alert alert-danger">
+			<!--<div class="alert alert-danger">
 				<b>Note:</b> We are unable to process any further laser cuts until further notice. We apologize for the inconvenience.
 				If you have any questions, please <a href="./pages/info.php">see the FAQ</a> or <a href="mailto:tekbot-worker@engr.oregonstate.edu">send us an email</a>.
 			</div>
-			<?php die(); ?>
-
+			<?php //die(); ?>
+			-->
 			<p>Using this form, you can upload a .dxf or .svg file to be cut using the laser cutter. It produces final models made out of the material which you can chose from the material list below. Once a file is uploaded, we will review the model and email you with the cost to cut. Once you approve the charge, we will start cutting the model.
 				<br>If you would like to pay via credit card, we will reply with instructions on how to submit payment when we confirm your model.
 				<br><strong>Note:</strong> DXF format is strongly recommended for all cuts. However, if your cut requires a raster engrave or you are struggling to make a DXF file, SVG format may be necessary. We will alert you if this change must be made.
