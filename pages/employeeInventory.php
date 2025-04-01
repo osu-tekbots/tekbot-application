@@ -170,8 +170,11 @@ function printKitsUsedInt($kits) {
 					$quantity = $p->getQuantity();
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
-					$kitsUsedIn = $inventoryDao->getKitsUsedInByStocknumber($stocknumber);
+					$finalPrice = studentPrice($lastPrice,2);
+					if ($p->getMarketPrice() != 0)
+							$finalPrice = '$' . number_format(floatval($p->getMarketPrice()),2);
 					$kitsUsedInStr = '';
+					$kitsUsedIn = $inventoryDao->getKitsUsedInByStocknumber($stocknumber);
 					foreach($kitsUsedIn as $k){
 						//$kitsUsedInStr .= $k['kitNames'];
 						$kitsUsedInStr .= "".$k['kitNames']." ";
@@ -179,15 +182,15 @@ function printKitsUsedInt($kits) {
 					$dateUpdated = $p->getLastUpdated();
 					
 					$inventoryHTML .= "<tr class='".($p->getArchive() == 1 ?'archived ':'')." ".($p->getStocked() == 1 ?'':'nonstock ')."' style='".($p->getArchive() == 1 ?'background-color: rgb(255, 230, 230);':'')."'>
-						<td>$type</td>
+						<td>$type<BR><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a> / <a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>Public</a></td>
 						<td>$description<BR>Stock: $stocknumber</td>
 						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
 						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
 						<td>".($p->getArchive() == 1 ?'Archived':'')."</td>
-						<td>"."-".$kitsUsedInStr."</td>
-						<td>\$".number_format(floatval($lastPrice),2)."</td>
-						<td>".studentPrice($lastPrice,2)."</td>
-						<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
+						<td>"."-".$kitsUsedInStr."</td>" . 
+						//<td>\$".number_format(floatval($lastPrice),2)."</td>
+						//<td>$finalPrice</td>
+						"<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
 						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td>
 						<td>".$dateUpdated."</td>
 						<td><a href='./pages/employeeInventoryPart.php?stocknumber=$stocknumber'>Edit</a></td></tr>";
@@ -210,8 +213,8 @@ echo $filterDiv;
 						<td></td>
 						<td></td>
 						<th>Kits<BR>Used In</th>
-                        <th>Last Price</th>
-                        <th>Student<BR>Price</th>
+                        <!--th>Last Price</th>
+                        <th>Student<BR>Price</th>-->
                         <th>Location</th>
                         <th>Quantity</th>
 						<th>Last Updated</th>
@@ -352,8 +355,8 @@ $('#InventoryTable').DataTable({
 			{ "orderable": false },
 			{ "orderable": false },
 			null,
-			null,
-			null,
+//			null,
+//			null,
 			{ "orderable": false },
 			{ "orderable": false },
 			null,

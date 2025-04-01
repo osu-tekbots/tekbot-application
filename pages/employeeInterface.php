@@ -221,11 +221,11 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 				<div class='col-lg-4'><h2>Completed Tasks</h2></div>
 				<div class='col-lg form-inline justify-content-end'>
 					<label for='completedStartDate' class='mr-2'>Start Date</label>
-					<input id='completedStartDate' type='date' value='<?= $_REQUEST['start'] ?>' class='form-control'>
+					<input id='completedStartDate' type='date' value='<?= $_REQUEST['start'] ?? null ?>' class='form-control'>
 					
 					<span class='ml-4'></span>
 					<label for='completedEndDate' class='mr-2'>End Date</label>
-					<input id='completedEndDate' type='date' value='<?= $_REQUEST['end'] ?>' class='form-control'>
+					<input id='completedEndDate' type='date' value='<?= $_REQUEST['end'] ?? null ?>' class='form-control'>
 					
 					<span class='ml-5'></span>
 					<button onclick='setDates();' class='btn btn-outline-primary'>Filter</button>

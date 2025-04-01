@@ -247,7 +247,7 @@ function renderEmployeeSidebar() {
 
         <!-- Store Procedures -->
         <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://docs.google.com/document/d/1ec17hL1cNvOtv9CpPJCzAewM0tlJ4FV-OH18Fo4_MXM">
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://docs.google.com/document/d/1awkeaImJgMPAy5k3k22faxHv0JKlVe6-37omVu_1Dp4/edit?tab=t.0#heading=h.z0agvft6ftd">
                 <i class="fas fa-book"></i>
                 <span>Store Procedures</span>
             </a>

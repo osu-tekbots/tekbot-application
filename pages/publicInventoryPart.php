@@ -57,6 +57,8 @@ if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
 	$stocknumber = $_REQUEST['stocknumber'];
 }
 
+allowIf($stocknumber, $configManager->getBaseUrl() . 'pages/index.php');
+
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $part = $inventoryDao->getPartByStocknumber($stocknumber);
 
@@ -110,9 +112,10 @@ if (count($contents) > 0){
 	$contentsHTML .= "</tbody></table>";
 }
 
-$partHTML = '';
+$partHTML = "<div class='admin-paper' " . ($archive == 1 ? "style='background-color: PaleGoldenRod;'" : "") .">
+			<a href='./pages/publicInventory.php'>Back to Inventory List</a>";
 
-$partHTML .= "<h3>".Security::HtmlEntitiesEncode($description)."</h3>
+$partHTML .= "<h3>".Security::HtmlEntitiesEncode($description) . ($archive == 1 ? " (Archived)" : "") . "</h3>
 			<form>
 			<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
 				<div class='form-row'>
@@ -143,6 +146,8 @@ $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description)."</h3>
 				$contentsHTML
 			</div>
 			</form>";
+			
+$partHTML .= "</div>";
 
 ?>
 <script type='text/javascript'>
@@ -156,11 +161,10 @@ $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description)."</h3>
 	<div id="wrapper">
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
-			<div class='admin-paper'>
-			<a href='./pages/publicInventory.php'>Back to Inventory List</a>
+			
 			<?php echo $partHTML;?>
 
-			</div>
+			
         </div>
     </div>
 

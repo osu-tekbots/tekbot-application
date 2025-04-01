@@ -76,7 +76,12 @@ $css = array_merge(
     $css
 );
 
-$loggedIn = verifyPermissions(['user', 'employee'], $logger);
+if ($logger) {
+    $loggedIn = verifyPermissions(['user', 'employee'], $logger);
+} else {
+    $loggedIn = False;
+}
+
 
 
 // Setup the buttons to use in the header
