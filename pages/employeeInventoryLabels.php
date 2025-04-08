@@ -50,6 +50,17 @@ $js = array(
 );
 
 
+if (isset($_REQUEST['location'])){
+	if ($_REQUEST['location'] == 'all')
+		unset($_SESSION['location']);
+	else
+		$_SESSION['location'] = $_REQUEST['location'];
+	}
+
+//TODO: We need to add a selector to this page to set the location. This should be handled similar to how we handle
+// the type selection on the main inventory page.
+//$_SESSION['location'] = 'A1';
+
 $items = array_keys($_POST);
 $labelsHTML = "";
 if (count($items) > 0) { //Need to render labels
@@ -267,7 +278,11 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$parts = $inventoryDao->getInventory();
+
+if (isset($_SESSION['location']))
+	$parts = $inventoryDao->getInventoryByLocation($_SESSION['location']);
+else
+	$parts = $inventoryDao->getInventory();
 
 
 $options = "";
@@ -326,41 +341,7 @@ $formHTML .= "</tbody>
 
 ?>
 <script type='text/javascript'>
-function updateLocation(id){
-	var location = $('#location'+id).val();
-	
-	let content = {
-		action: 'updateLocation',
-		stockNumber: id,
-		location: location
-	}
-
-	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-//Updated 12-13-2021 by Don, not needed on this page.
-//		$('#row'+id).html('');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
-
-function updateQuantity(id){
-	var amount = $('#quantity'+id).val();
-	
-	let content = {
-		action: 'updateQuantity',
-		stockNumber: id,
-		amount: amount
-	}
-	
-	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'Updated');
-		$('#row'+id).html('');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
-
+//We need to add a select all function to this page to check all displayed boxes.
 </script>
 
 <br/>
@@ -385,44 +366,6 @@ function updateQuantity(id){
     </div>
 
 <script>
-
-
-
-
-function toggleArchived(){
-	
-	var archivedItems = document.getElementsByClassName('archived');
-	var checkBox = document.getElementById("archived_checkbox");
-	
-	if (checkBox.checked == true){
-		for (var i = 0; i < archivedItems.length; i ++) {
-			archivedItems[i].style.display = '';
-		}
-	} else {
-		for (var i = 0; i < archivedItems.length; i ++) {
-			archivedItems[i].style.display = 'none';
-		}
-	} 
-		
-}
-
-function toggleStocked(){
-	
-	var nonstockItems = document.getElementsByClassName('nonstock');
-	var checkBox = document.getElementById("nonstock_checkbox");
-	
-	if (checkBox.checked == true){
-		for (var i = 0; i < nonstockItems.length; i ++) {
-			nonstockItems[i].style.display = '';
-		}
-	} else {
-		for (var i = 0; i < nonstockItems.length; i ++) {
-			nonstockItems[i].style.display = 'none';
-		}
-	} 
-		
-}
-
 
 $('#InventoryTable').DataTable({
 		"autoWidth": true,

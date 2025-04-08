@@ -113,7 +113,50 @@ class InventoryDao {
     }
 	
 	/**
-     * Fetches all Parts by typeId.
+     * Fetches all Parts by location.
+	 * @param $location The location of the inventory items to be queried. If null, returns all locations
+     * @return an array of parts on success, false otherwise
+     */
+    public function getInventoryByLocation($location, $archive = null) {
+        try {
+            if ($archive === null){
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				WHERE tekbots_inventory.Location = :location 
+				ORDER BY tekbots_parts.archive ASC, tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$params = array(':location' => $location);
+				$results = $this->conn->query($sql, $params);
+			} else {
+				$sql = '
+				SELECT tekbots_parts.*, tekbots_types.Description AS type, tekbots_inventory.Quantity AS Quantity, tekbots_inventory.Location AS Location, tekbots_inventory.lastupdated AS lastcounted 
+				FROM `tekbots_parts`
+				INNER JOIN `tekbots_types` ON tekbots_types.ID = tekbots_parts.TypeID
+				INNER JOIN `tekbots_inventory` ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+				WHERE tekbots_inventory.Location = :location AND tekbots_parts.archive = :archive
+				ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+				';
+				$params = array(':location' => $location, ':archive' => $archive);
+				$results = $this->conn->query($sql, $params);
+			}
+            
+            $parts = array();
+            foreach ($results as $row) {
+                $part = self::ExtractPartFromRow($row);
+                $parts[] = $part;
+            }
+            return $parts;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any parts: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * Fetches kit contents by the StockNumber of the kit.
      * @return an array of parts on success, false otherwise
      */
     public function getKitContentsByStocknumber($stockNumber) {
