@@ -74,6 +74,7 @@ class InventoryActionHandler extends ActionHandler {
 	/**
      * Updates part location information  in the database based on data in an HTTP request.
      * 
+     * 
      * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
      *
      * @return void
@@ -270,6 +271,17 @@ class InventoryActionHandler extends ActionHandler {
 		else
 			$this->respond(new Response(Response::OK, 'Market Price Updated'));
     }
+
+    public function updateLocationState() {
+        
+        $body = $this->requestBody; 
+       
+        $_SESSION["location"] = $body["location"];
+        
+		$this->respond(new Response(Response::OK, "Location State updated"));
+    }
+
+    
 	public function handleCalculateMarketPrice() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
@@ -711,6 +723,10 @@ class InventoryActionHandler extends ActionHandler {
 			case 'addPart':
                 $this->handleAddPart();
 				break;
+            
+            case 'updateLocationState':
+                $this ->updateLocationState();
+                break;
 
 			case 'addSupplierForPart':
                 $this->handleAddSupplierForPart();

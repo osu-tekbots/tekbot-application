@@ -422,7 +422,23 @@ class InventoryDao {
             return false;
         }
     }
+    
+    public function getAllUniquePartLocations() {
+        try {
+            $sqlQuery = 'SELECT DISTINCT tekbots_inventory.Location FROM `tekbots_inventory` ORDER BY tekbots_inventory.Location ASC';
+            $result = $this->conn->query($sqlQuery);
 
+            $newArr = Array();
+            foreach($result as $row) {
+                array_push($newArr, $row['Location']);
+            }
+            return $newArr;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any Locations: ' . $e->getMessage());
+            return false;
+        }
+    }
+        
     /**
      * Fetches a single part by StockNumber.
      * @return \Model\Part|boolean a part on success, false otherwise

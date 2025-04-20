@@ -115,7 +115,7 @@ $printTypeIdGetter = function ($printType) {
 			To check your currently queued or finished prints, visit <a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/userDashboard.php'>MyTekbots</a><br /><br />
 
 			<p>Using this form, you can upload a 3D model to be printed. Once you upload a file, we will review the model and email you with the cost to print. Once you approve the charge, we will print the model and it can be picked up during store hours or in the TekBoxes after store hours (if the print fits). We only process prints during store hours; please be aware that there might also be other prints in queue.
-				<br>Be aware that our 3d printer build plate dimensions are 280 mm x 280 mm x 250mm (about the size of an average textbook and about the height of a piece of paper) and our maximum print weight is 500 grams, so we can only accomodate prints within those bounds.
+				<br>Be aware that our 3d printer build plate dimensions are 280 mm x 280 mm x 250mm (about the size of an average textbook and about the height of a piece of paper), so we can only accomodate prints within those bounds.
 				<br>If you would like to pay via credit card, we will reply with instructions on how to submit payment when we confirm your model.
 			</p>
 			<!-- <p class="text-danger">NOTE: We only accept files of the 'Stereo Lithography Type' (.stl) and the attachment file size must be smaller than 10Mb</p> -->
@@ -126,7 +126,6 @@ $printTypeIdGetter = function ($printType) {
 			<div class="collapse" id="collapseExample">
 				<div class="card card-body">
 					<i>Q: How big can your printer print?</i> <br /> A: Within 280 mm x 280 mm x 250mm <br /><br />
-					<i>Q: How much can your printer print weigh?</i> <br /> A: At most 500 grams <br /><br />
 					<i>Q: How thick should my part's walls be?</i><br /> A: This is not a simple answer, as it depends on the size of the wall and the strength needed. We recommend at least .1" thick walls when feasible.<br /><br />
 					<i>Q: How can I keep my printing costs down?</i><br /> A: One hidden cost often overlooked is the support material. To print an object with an 'overhang' the printer will insert a softer support material as it builds. This support will be from the bottom up until the overhang is reached often increasing the amount of material used by 10x. The best design methodology is to try to think of everything as a bowl where it be be built of the open side up.<br />
 				</div>

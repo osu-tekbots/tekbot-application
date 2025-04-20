@@ -50,7 +50,7 @@ $js = array(
 );
 
 
-if (isset($_REQUEST['location'])){
+if (isset($_REQUEST['location'])|| $_SESSION["location"] == 'all'){
 	if ($_REQUEST['location'] == 'all')
 		unset($_SESSION['location']);
 	else
@@ -279,11 +279,43 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 
+
 if (isset($_SESSION['location']))
 	$parts = $inventoryDao->getInventoryByLocation($_SESSION['location']);
 else
 	$parts = $inventoryDao->getInventory();
 
+//Setting up basic dropdown for locations
+$locationsHTML = "";
+$locationsHTML .= "<div class='form-row'>
+				<div class='form-group col-sm-3'>
+					<label for = 'locationType'> Select Location: <select name='locationType' id='locationType' class='form-control' onChange = updateLocation(locationType.value) >
+					</label>";
+
+$locationsArray = $inventoryDao->getAllUniquePartLocations();
+
+$selectedString = '';
+if(!isset($_SESSION["location"]) || $_SESSION["location"] == 'all') {
+	$selectedString = 'selected';
+}
+$locationsHTML .= "<option value = 'all' id = 'all' ".$selectedString.">All</option>";
+
+//Adds every option with unique locatiomn
+foreach($locationsArray AS $location) {
+	$selectedBool = (isset($_SESSION['location']) && $location == $_SESSION['location']);
+	$selectedString = '';
+	if($selectedBool) {
+		$selectedString = 'selected';
+	}
+	$locationsHTML .= "<option id = ".$location." value='".$location."' ".$selectedString.">".$location."</option>";
+}
+
+
+//finishes location dropdown
+$locationsHTML .= "</select>
+				</div>
+			</div>";
+			
 
 $options = "";
 $options .= "<div class='form-row'>
@@ -299,6 +331,13 @@ $options .= "<div class='form-row'>
 					<button class='btn btn-info' type='submit' form='mainform'>Get Selected Labels</button>
 				</div>
 			</div>";
+$selectAllHTML = "<label for='selectAll'>
+                     <input 
+                       type='checkbox' 
+                       id='selectAll' 
+                       onclick='handleSelectAllClick(this)'
+                     > Select All
+                   </label>";
 
 $formHTML = "<form method='post' target='_blank' id='mainform'>
 				$options
@@ -306,7 +345,7 @@ $formHTML = "<form method='post' target='_blank' id='mainform'>
                 <caption>Current Inventory</caption>
                 <thead>
                     <tr>
-						<th></th>
+						<th>".$selectAllHTML."</th>
                         <th>Type</th>
                         <th>Description</th>
 						<th>Touchnet ID</th>
@@ -326,7 +365,7 @@ foreach ($parts as $p) {
 	
 	if ($p->getArchive() == 0)
 		$formHTML .= "<tr>
-		<td><input type='checkbox' id='checkbox$stocknumber' name='$stocknumber'></td>
+		<td><input type='checkbox' id='checkbox$stocknumber' name='$stocknumber' class = 'selectButtons'></td>
 		<td>$type</td>
 		<td>Stock: $stocknumber<BR>$description</td>
 		<td>$touchnetId</td>
@@ -342,6 +381,30 @@ $formHTML .= "</tbody>
 ?>
 <script type='text/javascript'>
 //We need to add a select all function to this page to check all displayed boxes.
+	function handleSelectAllClick(selectAll) {
+		console.log("IN HANDLE SELECT ALL");
+		const elements = document.getElementsByClassName('selectButtons');
+		Array.from(elements).forEach(element => {
+			element.checked = selectAll.checked;
+		});
+	}
+
+	function updateLocation(location) {
+		let data = {
+			location: location,
+			action: 'updateLocationState'
+		};
+		
+		api.post('/inventory.php', data).then(res => {
+            snackbar(res.message, 'info');
+			setTimeout(() => window.location.reload(), 500);
+			console.log(document.getElementByValue(location).selected);
+			document.getElementById(location).selected = true;
+		}).catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+	} 
 </script>
 
 <br/>
@@ -358,8 +421,11 @@ $formHTML .= "</tbody>
         <div class="container-fluid">
 			<div class='admin-paper'>
             <?php 
+				echo $locationsHTML;
+				
 				echo $formHTML;   
 				echo $labelsHTML;
+				
             ?>                
 			</div>
         </div>
