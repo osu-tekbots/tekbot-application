@@ -94,7 +94,7 @@ $parts = $inventoryDao->getInventory();
 				}
             ?>
 			
-			<table class='table' id='InventoryTable' style='margin: 0 auto !important;'>
+			<table class='table' id='InventoryTable' style='width: 100%; max-width: 100%; margin: 0 auto !important;'>
                 <caption>Current Inventory</caption>
                 <thead>
                     <tr>
