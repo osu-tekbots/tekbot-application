@@ -48,6 +48,16 @@ class PrinterActionHandler extends ActionHandler {
         $this->messageDao = $messageDao;
     }
 
+    public function handlePurgingOldPrints() {
+        $ok = $this->printerDao->purgeOldPrintFilesAndJobs();
+        
+        if ($ok) {
+            $this->respond(new Response(Response::OK, 'Old prints purged successfully'));
+        } else {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to purge old prints'));
+        }
+    }
+
     /**
      * Creates a new printer entry in the database.
      *
@@ -876,56 +886,76 @@ class PrinterActionHandler extends ActionHandler {
 
             case 'createprinter':
                 $this->handleCreatePrinter();
+                return;
             case 'saveprinter':
                 $this->handleSavePrinter();
+                return;
 			case 'removeprinter':
             	$this->handleRemovePrinter();
+                return;
             // case 'renderprintmodal':
             //     $this->handleGeneratePrintModal();
-				
+			case 'purgeOldPrintJobs':
+                $this -> handlePurgingOldPrints();
+                return;
 			case 'createprintjob':
 				$this->handleCreatePrintJob();
+                return;
 			// case 'saveprintjob':
 			// 	$this->handleSavePrintJob();
 
             case 'deletePrintJob':
                 $this->handleDeletePrintJob();
+                return;
             case 'processPrintJob':
                     $this->handleProcessPrintJob();
+                    return;
 			
 			case 'createprinttype':
 				$this->handleCreatePrintType();
+                return;
 			case 'saveprinttype':
                 $this->handleSavePrintType();
+                return;
             case 'removeprinttype':
                 $this->handleRemovePrintType();
+                return;
 
             case 'createprintfee':
                 $this->handleCreatePrintFee();
+                return;
             case 'saveprintfee':
                 $this->handleSavePrintFee();
+                return;
 
             
             case 'customerConfirmPrint':
                 $this->handleCustomerConfirmPrintJob();
+                return;
 
             case 'sendCustomerConfirm':
                 $this->handleSendCustomerConfirm();
+                return;
 
             case 'completePrintJob':
                 $this->handleCompletePrintJob();
+                return;
             
             case 'updateEmployeeNotes':
                 $this->handleUpdateEmployeeNotes();
+                return;
 
             case 'verifyPrintPayment':
                 $this->handleVerifyPrintPayment();
+                return;
 
             case 'sendUserEmail':
                 $this->handleSendUserEmail();
+                return;
             
             case 'processAllFees':
                 $this->handleProcessAllFees();
+                return;
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on printer resource'));
         }

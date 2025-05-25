@@ -189,7 +189,7 @@ $printJobs = $laserDao->getLaserJobs();
                 }
 
                 echo "
-						
+
                     <h3>Laser Jobs</h3>
                     <p><strong>IMPORTANT:</strong> You must process the order in touchnet before approving fees!</p>
 
@@ -248,6 +248,7 @@ $printJobs = $laserDao->getLaserJobs();
 
         </div>
         <script>
+            
             function processAllFees() {
                 let data = {
                     action: 'processAllFees',

@@ -290,5 +290,97 @@ class UsersDao {
             echo "$message\n";
         }
     }
+
+    //works tested 5/6/25
+    public function deleteUserCompletelyByID($id) {
+        try {
+            
+            $sql = '
+            DELETE FROM `3d_job_fees`        WHERE `user_id` = :id;
+            DELETE FROM `3d_jobs`            WHERE `user_id` = :id;
+            DELETE FROM `course_student`     WHERE `user_id` = :id;
+            DELETE FROM `equipment_checkout` WHERE `user_id` = :id;
+            DELETE FROM `equipment_fee`      WHERE `user_id` = :id;
+            DELETE FROM `equipment_reservation` WHERE `user_id` = :id;
+            DELETE FROM `laser_jobs`         WHERE `user_id` = :id;
+            DELETE FROM `voucher_code`       WHERE `user_id` = :id;
+            DELETE FROM `user`               WHERE `user_id` = :id
+            ';
+
+            $params = array(':id' => $id);
+            $result = $this->conn->query($sql, $params);
+            if (\count($result) == 0) {
+                return false;
+            }
+
+            return self::ExtractUserFromRow($result[0]);
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete single user by ID: ' . $e->getMessage());
+
+            return false;
+        }
+    }
+
+    //works tested 5/6/25
+    public function deleteUserCompletelyByONID($ONID) {
+        try {
+            $sql = '
+            DELETE `3d_job_fees`
+            FROM `3d_job_fees`
+            JOIN `user` ON `3d_job_fees`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `3d_jobs`
+            FROM `3d_jobs`
+            JOIN `user` ON `3d_jobs`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `course_student`
+            FROM `course_student`
+            JOIN `user` ON `course_student`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `equipment_checkout`
+            FROM `equipment_checkout`
+            JOIN `user` ON `equipment_checkout`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `equipment_fee`
+            FROM `equipment_fee`
+            JOIN `user` ON `equipment_fee`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `equipment_reservation`
+            FROM `equipment_reservation`
+            JOIN `user` ON `equipment_reservation`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `laser_jobs`
+            FROM `laser_jobs`
+            JOIN `user` ON `laser_jobs`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE `voucher_code`
+            FROM `voucher_code`
+            JOIN `user` ON `voucher_code`.`user_id` = `user`.`user_id`
+            WHERE `user`.`onid` = :onid;
+
+            DELETE FROM `user`
+            WHERE `onid` = :onid;
+            ';
+
+            $params = array(':onid' => $ONID);
+            $result = $this->conn->query($sql, $params);
+            if (\count($result) == 0) {
+                return false;
+            }
+
+            return self::ExtractUserFromRow($result[0]);
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete single user by ONID: ' . $e->getMessage());
+
+            return false;
+        }
+    }
 }
 ?>

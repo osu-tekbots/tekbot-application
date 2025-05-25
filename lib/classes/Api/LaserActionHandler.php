@@ -64,6 +64,7 @@ class LaserActionHandler extends ActionHandler {
         ));
     }
 
+
     public function handleRemoveLaserCutter() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
@@ -80,6 +81,15 @@ class LaserActionHandler extends ActionHandler {
         );
     }
 
+    public function handlePurgingOldLaserCuts() {
+        $ok = $this->laserDao->purgeOldLaserCutsAndFiles();
+        
+        if ($ok) {
+            $this->respond(new Response(Response::OK, 'Old laser cuts purged successfully'));
+        } else {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to purge old laser cuts'));
+        }
+    }
     
     /**
      * Updates fields editable from the user interface in a printer entry in the database.
@@ -622,46 +632,64 @@ class LaserActionHandler extends ActionHandler {
 
             case 'createLaserCutter':
                 $this->handleCreateLaserCutter();
+                return;
             case 'saveLaserCutter':
                 $this->handleSaveLaserCutter();
+                return;
 			case 'removeLaserCutter':
             	$this->handleRemoveLaserCutter();
-
+                return;
+            case 'purgeOldLaserCuts':
+                $this -> handlePurgingOldLaserCuts();
+                return;
 
             case 'createLaserMaterial':
                 $this->handleCreateLaserMaterial();
+                return;
             case 'saveLaserMaterial':
                 $this->handleSaveLaserMaterial();
+                return;
             case 'removeLaserMaterial':
                 $this->handleRemoveLaserMaterial();
+                return;
 
             case 'createCutJob':
                 $this->handleCreateLaserJob();
+                return;
 
             case 'updateEmployeeNotes':
                 $this->handleUpdateEmployeeNotes();
+                return;
 
             case 'sendCustomerConfirm':
                 $this->handleSendCustomerConfirm();
+                return;
             case 'customerConfirmCut':
                 $this->handleCustomerConfirmCutJob();
+                return;
 
             case 'verifyCutPayment':
                 $this->handleVerifyCutPayment();
+                return;
 
             case 'deleteCutJob':
                 $this->handleDeleteCutJob();
+                return;
             case 'processCutJob':
                     $this->handleProcessCutJob();
+                    return;
 
             case 'completeCutJob':
                 $this->handleCompleteCutJob();
+                return;
                 
             case 'sendUserEmail':
                 $this->handleSendUserEmail();
+                return;
             
             case 'processAllFees':
                 $this->handleProcessAllFees();
+                return;
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on laser resource'));

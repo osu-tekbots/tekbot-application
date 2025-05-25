@@ -155,7 +155,70 @@ class TicketDao {
             return false;
         }
     }
+    
+    public function getTicketFilesToKeep() {
+        try {
+            $sql = '
+                SELECT image
+                FROM `labs_tickets`
+                WHERE resolved >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+            ';
+           
+            $results = $this->conn->query($sql);
+            
 
+            $filesToKeep = [];
+
+            foreach ($results as $row) {
+                $filesToKeep[] = $row["image"];
+                
+            }
+            
+            return $filesToKeep;
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any valid image file names: ' . $e->getMessage());
+            return false;
+        }
+    }
+    public function deleteOldAndOrphanTicketFiles($validFileNames) {
+        $allFilePaths = glob(__DIR__ . '/../../../uploads/tickets/*');
+        try {
+            foreach ($allFilePaths as $filePath) {
+                $filename = basename($filePath);
+                
+                // if this file is NOT in the list, delete it
+                if (!in_array($filename, $validFileNames, true)) {
+                    
+                    unlink($filePath);
+                }
+            }
+           
+            return true;
+        } catch (\Exception $e) {
+            
+            $this->logger->error('Failed to remove files: ' . $e->getMessage());
+            return false;
+        }
+    }
+    public function deleteOldTickets() {
+        try {
+            $sql = '
+                DELETE FROM labs_tickets
+                WHERE resolved < DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+            ';
+            $results = $this->conn->query($sql);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove old tickets: ' . $e->getMessage());
+            return false;
+        }
+    }
+    public function purgeOldTicketsAndFiles() {
+        $validFiles = $this->getTicketFilesToKeep();
+        return ($this->deleteOldAndOrphanTicketFiles($validFiles) === true 
+            &&  $this->deleteOldTickets() === true);
+    }
     /**
      * Escalates ticket sends email to Don to inform of escalation
      * 

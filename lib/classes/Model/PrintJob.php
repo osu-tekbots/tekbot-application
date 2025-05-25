@@ -82,11 +82,11 @@ class PrintJob {
 	
 		
 	public function getPrinterId(){
-		return $this->printerId;
+		return $this->printerID;
 	}
 
 	public function setPrinterId($Printer){
-		$this->printerId = $Printer->getPrinterId();
+		$this->printerID = $Printer->getPrinterId();
 	}
 	
 	
@@ -115,11 +115,11 @@ class PrintJob {
 	}
 	
 	public function getCourseGroupId(){
-		return $this->courseGroupId;
+		return $this->courseGroupID;
 	}
 
 	public function setCourseGroupId($CourseGroupId){
-		$this->courseGroupId = $CourseGroupId;
+		$this->courseGroupID = $CourseGroupId;
 	}
 	
 	public function getVoucherCode(){
@@ -195,11 +195,11 @@ class PrintJob {
 	}
 	
 	public function getMessageGroupId(){
-		return $this->messageGroupId;
+		return $this->messageGroupID;
 	}
 
 	public function setMessageGroupId($MessageGroupId){
-		$this->messageGroupId = $MessageGroupId;
+		$this->messageGroupID = $MessageGroupId;
 	}
 	
 	public function getPendingCustomerResponse(){

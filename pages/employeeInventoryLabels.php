@@ -279,6 +279,7 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 
+$userDao -> deleteUserCompletelyByONID('zhangtin');
 
 if (isset($_SESSION['location']))
 	$parts = $inventoryDao->getInventoryByLocation($_SESSION['location']);

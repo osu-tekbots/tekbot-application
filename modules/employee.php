@@ -213,6 +213,14 @@ function renderEmployeeSidebar() {
             Other
         </div>
 
+        <!-- Admin Control -->
+        <li class="nav-item">
+            <a style="color: lightblue;" class="nav-link" href="pages/employeeAdminControl.php">
+                <i class="far fa-address-card"></i>
+                <span> Admin Control</span>
+            </a>
+        </li>
+
         <!-- Send Email -->
         <li class="nav-item">
             <a style="color: lightblue;" class="nav-link" href="pages/employeeEmail.php">

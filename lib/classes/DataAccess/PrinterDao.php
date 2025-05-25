@@ -238,6 +238,77 @@ class PrinterDao {
         }
     }
 
+    public function getPrintFilesToKeep() {
+        try {
+            $sql = '
+                SELECT db_filename
+                FROM `3d_jobs`
+                WHERE complete_print_date >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+            ';
+            //Takes from db_file_name not stl_file_name
+            $results = $this->conn->query($sql);
+            
+
+            $filesToKeep = [];
+
+            foreach ($results as $row) {
+                $filesToKeep[] = $row["db_filename"];
+                
+            }
+            
+            return $filesToKeep;
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get any valid stl file names: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    //Strictly deletes print jobs in the mysql db that are over a year old; the 
+    //actual files for those jobs will not be deleted by this function
+    public function deleteOldPrintJobs() {
+        try {
+            $sql = '
+                DELETE FROM 3d_jobs
+                WHERE complete_print_date < DATE_SUB(CURDATE(), INTERVAL 2 YEAR)
+            ';
+            $results = $this->conn->query($sql);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to remove old print jobs: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    //Deletes all printer files from the uploads/prints folder that are not a part
+    //of a valid 3d print job; valid print jobs are found by calling getPrintFilesToKeep;
+    public function deleteOldAndOrphanPrintFiles($validFileNames) {
+        $allFilePaths = glob(__DIR__ . '/../../../uploads/prints/*');
+        try {
+            foreach ($allFilePaths as $filePath) {
+                $filename = basename($filePath);
+                
+                // if this file is NOT in the list, delete it
+                if (!in_array($filename, $validFileNames, true)) {
+                    
+                    unlink($filePath);
+                }
+            }
+           
+            return true;
+        } catch (\Exception $e) {
+            
+            $this->logger->error('Failed to remove files: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    //Call every once in a while to clear the db and the uploads folder
+    public function purgeOldPrintFilesAndJobs() {
+        $validFiles = $this->getPrintFilesToKeep();
+        return ($this->deleteOldAndOrphanPrintFiles($validFiles) === true 
+            &&  $this->deleteOldPrintJobs() === true);
+    }
     /**
      * Fetches all Print Types by ID.
      * @return \Model\PrintType|boolean an array of printers on success, false otherwise

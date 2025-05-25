@@ -187,7 +187,7 @@ $printJobs = $printerDao->getPrintJobs();
                 }
 
                 echo"
-						
+
                 <h3>3D Print Jobs</h3>
                 <p><strong>IMPORTANT:</strong> You must process the order in TouchNet before approving fees!</p>
 
@@ -246,6 +246,7 @@ $printJobs = $printerDao->getPrintJobs();
 
         </div>
         <script>
+
             function processAllFees() {
                 let data = {
                     action: 'processAllFees',
@@ -341,6 +342,8 @@ $printJobs = $printerDao->getPrintJobs();
                 });
             }
 
+            
+            
             function updateEmployeeNotes(printJobID) {
                 let inputVal = $('#employeeNotes'+printJobID).val();
                 let data = {

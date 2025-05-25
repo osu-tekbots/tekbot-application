@@ -94,6 +94,16 @@ class TicketsActionHandler extends ActionHandler {
 
     }
 
+    public function handlePurgingOldTickets() {
+        $ok = $this->ticketDao->purgeOldTicketsAndFiles();
+        
+        if ($ok) {
+            $this->respond(new Response(Response::OK, 'Old Tickets purged successfully'));
+        } else {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to purge Tickets'));
+        }
+    }
+
     public function handleUpdateResponse() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
@@ -221,10 +231,14 @@ class TicketsActionHandler extends ActionHandler {
                 $this->handleEscalateTicket();
 				break;
             
+            case 'purgeOldTickets':
+                $this->handlePurgingOldTickets();
+                break;
+
             case 'createTicket':
                 $this->handleCreateTicket();
                 break;
-            
+
             case 'updateResponse':
                 $this->handleUpdateResponse();
                 break;
