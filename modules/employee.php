@@ -55,6 +55,8 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeInventory.php">Inventory List</a>
                 <a class="dropdown-item" href="pages/employeeInventoryKits.php">Configure Kits</a>
                 <a class="dropdown-item" href="pages/employeeInventoryOrderParts.php">Order Parts</a>
+                <a class="dropdown-item" href="pages/employeeInventoryCarts.php">Access Carts</a>
+
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Options:</h6>
                 <a class="dropdown-item" href="pages/employeeInventoryMessages.php">Edit Messages</a>

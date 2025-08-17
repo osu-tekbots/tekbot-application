@@ -5,12 +5,34 @@ use DataAccess\InventoryDao;
 use DataAccess\UsersDao;
 use Util\Security;
 
-if (PHP_SESSION_ACTIVE != session_status())
+
+if (PHP_SESSION_ACTIVE != session_status()) {
     session_start();
+}
 
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
+$inventoryDao = new InventoryDao($dbConn, $logger);
+$parts = $inventoryDao->getInventory();
+
+//Cart feature cookie and id storage:
+
+if (!isset($_SESSION['cart']) || ($_SESSION['cart'] === false)) {
+	if (isset($_COOKIE['cartId'])) {
+		$_SESSION['cart'] = $inventoryDao -> getCartByID($_COOKIE['cartId']); // Sync cookie to session
+		$inventoryDao -> refreshCartInDatabase($_SESSION['cart']); 
+		// Refresh the cart's date last accessed in the database
+	} else {
+		//create a new cart obj and get it     
+		$_SESSION['cart'] = $inventoryDao -> createCartInDatabase();
+		//Store in cookie (30 days)
+		setcookie('cartId', $_SESSION['cart'] -> getIdKey(), time() + (86400 * 30), "/");
+	}
+}
+$cart = $_SESSION['cart'];
+
+/*
 function studentPrice($price){
 	$markup = .15;
 	if ($price == 0)
@@ -33,23 +55,22 @@ function studentPrice($price){
 
 return $price;
 }
-
-
+*/
 
 $title = 'Public Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
-	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
-);
+	'assets/css/jquery.dataTables.min.css');
 $js = array(
-    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
-);
+    'assets/js/jquery.dataTables.min.js'
 
+);
 
 include_once PUBLIC_FILES . '/modules/header.php';
-$inventoryDao = new InventoryDao($dbConn, $logger);
-$parts = $inventoryDao->getInventory();
+include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
+include_once PUBLIC_FILES . '/modules/renderBrowse.php';
+
 ?>
 
 
@@ -61,14 +82,23 @@ $parts = $inventoryDao->getInventory();
 	<div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<div class='admin-paper'>
-			<div class='row'><div class='col-9'>
-			<h3>TekBots Inventory</h3>
-			<p>Welcome to our inventory. You can find all parts available form the TekBots store from the list below. These parts can be purchased via the TekBots Marketplace. Some parts are inexpensive enough that you only need to stop into the store to pick one up for free.</p>
-			</div><div class='col-3'></div>
+			<div class='row'>
+
+				<div class="d-flex justify-content-between align-items-center mb-2 col-12">
+					<h3 class="mb-0">TekBots Inventory</h3>
+					<a href="../pages/publicCart.php" class="btn btn-outline-secondary">
+						<i class="fas fa-shopping-cart"></i> Visit Cart
+					</a>
+				</div>
+				<div class='col-9'>
+					<p>Welcome to our inventory. You can find all parts available form the TekBots store from the list below. These parts can be purchased via the TekBots Marketplace. Some parts are inexpensive enough that you only need to stop into the store to pick one up for free.</p>
+				</div>
+				
 			</div>
             <?php 
 				$inventoryHTML = '';
                 foreach ($parts as $p) {
+
 					if ($p->getArchive() == 0){
 					$stocknumber = $p->getStocknumber();
 					$type = $p->getType();
@@ -81,12 +111,13 @@ $parts = $inventoryDao->getInventory();
 					$datasheet = $p->getDatasheet();
 					# add get touchnet page link
 					$touchnetId = $p->getTouchnetId();
-					
+					//$marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2)
 					$inventoryHTML .= "<tr><td>$type</td>
 						<td>$description<BR>Stock: $stocknumber</td>
+						<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>
 						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
 						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".($marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2))."</td>
+						<td>".(getStudentPrice($lastPrice))."</td>
 						<td>$quantity</td>
 						<td>".($touchnetId != '' ?"<a target ='_blank' href='https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=$touchnetId'>Purchase Item</a>":'')."</td>
 						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td></tr>";
@@ -94,30 +125,62 @@ $parts = $inventoryDao->getInventory();
 				}
             ?>
 			
-			<table class='table' id='InventoryTable' style='width: 100%; max-width: 100%; margin: 0 auto !important;'>
-                <caption>Current Inventory</caption>
-                <thead>
-                    <tr>
-						<th>Type</th>
-                        <th>Description</th>
-						<td></td>
-						<td></td>
-						<th>Student<BR>Price</th>
-                        <th>Current<BR>Stock</th>
-						<th>Purchase<BR>Link <!-- Added touchnet links by Travis Hudson 10/5/2022-->
-						<th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php echo $inventoryHTML;?>
-                </tbody>
-            </table>
+			<div class='row'>
+				<div class='col-12 col-md-12 table-responsive'>
+					<table class='table' id='InventoryTable' style='width: 100%; max-width: 100%;'>
+						<caption>Current Inventory</caption>
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Description</th>
+								<th>Add To Cart</th>
+								<td></td>
+								<td></td>
+								<th>Student<BR>Price</th>
+								<th>Current<BR>Stock</th>
+								<th>Purchase<BR>Link </th><!-- Added touchnet links by Travis Hudson 10/5/2022-->
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php echo $inventoryHTML;?>
+						</tbody>
+					</table>
+				</div>
+			</div>
 			</div>
         </div>
     </div>
 
 
 <script type='text/javascript'>
+
+// Listen for storage events to handle cart updates across tabs
+window.addEventListener('storage', (e) => {
+    if (e.key === 'refreshCart') {
+        console.log('Cart updated in another tab — reloading.');
+        location.reload(); // Reload page to get latest session/cart data
+    }
+});
+
+function addToCart(cartID, partID, quantity = 1) {
+	
+
+	let data = {
+		cartID: cartID,
+		partID: partID,
+		qty: quantity, // Default quantity to 1
+		action: 'addToCart'
+	};
+
+	api.post('/inventory.php', data).then(res => {
+		//console.log(res.message);
+		snackbar(res.message, 'Added to Cart');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
 function addpart(){
 	
 	let type = $('#addtype').val().trim();
@@ -167,6 +230,7 @@ function updateQuantity(id){
 		amount: amount
 	}
 	
+
 	api.post('/inventory.php', content).then(res => {
 		snackbar(res.message, 'Updated');
 		$('#row'+id).html('');
@@ -209,8 +273,27 @@ function toggleStocked(){
 		
 }
 
+var printButtonExtension = {
+    exportOptions: {
+        format: {
+            body: function ( data, row, column, node ) {
+                //check if type is input using jquery
+                return node.firstChild.tagName === "INPUT" ?
+                        node.firstElementChild.value :
+                        data;
+
+            }
+        }
+    }
+};
 
 $('#InventoryTable').DataTable({
+		'dom': 'Bft',
+		'buttons': [
+			$.extend( true, {}, printButtonExtension, {
+				extend: 'print'
+			} )
+		], 
 		"autoWidth": true,
 		'scrollX':false, 
 		'paging':false, 
@@ -220,7 +303,8 @@ $('#InventoryTable').DataTable({
 			null,
 			{ "orderable": false },
 			{ "orderable": false },
-			null,
+			{ "orderable": false },
+			{ "orderable": false },
 			{ "orderable": false },
 			{ "orderable": false }, //added row for puchase link
 			{ "orderable": false }

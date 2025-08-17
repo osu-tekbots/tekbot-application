@@ -82,9 +82,9 @@ $js = array(
 
 
 if (isset($_REQUEST['stocknumber']))
-	if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
+	if ($_REQUEST['stocknumber'] != '')
 		$stocknumber = $_REQUEST['stocknumber'];
-	}
+	
 
 $types = $inventoryDao->getTypes();
 $typeSelect = "<select id='typeselect' onchange='updateAddContents();'><option value=''>---</option>";
@@ -321,6 +321,7 @@ function updateKitQuantity(id,childid){
 }
 
 function addKitContents(id){
+	console.log('Adding kit contents for stock number:', id);
 	var childid = $('#newdescription').val();
 	var quantity = $('#newquantity').val();
 	

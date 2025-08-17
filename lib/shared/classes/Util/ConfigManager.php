@@ -231,6 +231,15 @@ class ConfigManager {
     }
 
     /**
+     * Fetches the markup for student prices for parts
+     *
+     * @return string
+     */
+    public function getMarkup() {
+        return $this->get('inventory.markup');
+    }
+
+    /**
      * Fetches the configuration associated with the provided key.
      * 
      * This function allows for nested keys. The keys must be separated by a period (.). If there is not value for
@@ -240,6 +249,8 @@ class ConfigManager {
      * @return mixed[]|null the value if it exists, null otherwise
      */
     public function get($key) {
+        
+
         $parts = explode('.', $key);
 
         $result = null;

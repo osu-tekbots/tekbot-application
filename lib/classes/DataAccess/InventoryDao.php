@@ -3,8 +3,12 @@
 namespace DataAccess;
 
 use Model\Part;
+use Model\Cart;
 use Model\Kit;
 use Model\InventoryType;
+
+include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
+
 
 /**
  * Handles all of the logic related to queries on loading/editing messages in the database.
@@ -675,6 +679,222 @@ class InventoryDao {
             return false;
         }
     }
+
+
+    //Creates a new cart in the database
+    //Returns the cartID on success, false on failure
+    public function createCartInDatabase() {
+        try {
+            $cart = new Cart();
+            $cartID = $cart->getIdKey();
+            $sql = '
+            INSERT INTO carts (cartID, editable)
+            VALUES (:cartID, :editableStatus)
+            ';
+            $params = array(
+                ':cartID' => $cartID,
+                ':editableStatus' => 1 // 1 for editable, 0 for not editable
+            );
+            $this->conn->execute($sql, $params);
+
+            return $cart;
+        } catch (\Exception $e) {
+            if ($e->errorInfo[1] === 1062) {
+                //rare duplicate entry error
+                return $this->createCartInDatabase(); // Try again
+            } 
+            $this->logger->error('Failed to create a cart: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function refreshCartInDatabase($cart) {
+        $this->logger->info('Called refresh cart');
+        try {
+            $sql = '
+            UPDATE carts
+            SET last_accessed = NOW()
+            WHERE cartID = :cartID
+            ';
+            $params = array(
+                ':cartID' => $cart ->getIdKey()
+            );
+            $this->conn->execute($sql, $params);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to refresh cart in database: ' . $e->getMessage());
+        }
+    }
+
+    public function setPartQuantityInCart($cart, $part, $quantity) {
+        try {
+            $this->logger->info('In dao: ' . $part->getStocknumber() . ' to ' . $quantity);
+
+            $sql = '
+            INSERT INTO cart_items (cart_id, part_id, quantity)
+            VALUES (
+                (SELECT ID FROM carts WHERE cartID = :cartID),
+                (SELECT ID FROM tekbots_parts WHERE stockNumber = :stockNumber),
+                :quantity
+            )
+            ON DUPLICATE KEY UPDATE quantity = :quantity';
+
+            $params = [
+                ':cartID' => $cart -> getIdKey(),
+                ':stockNumber' => $part -> getStocknumber(),
+                ':quantity' => $quantity
+            ];
+            $this->conn->execute($sql, $params);
+            return true;
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to change item quantity in cart: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function addToCart($cart, $part, $quantity) {
+        try {
+            $sql = '
+            INSERT INTO cart_items (cart_id, part_id, quantity)
+            SELECT carts.ID, parts.ID, :quantity
+            FROM carts
+            JOIN tekbots_parts AS parts ON parts.stockNumber = :stockNumber
+            WHERE carts.cartID = :cartID
+            ON DUPLICATE KEY UPDATE quantity = quantity + :quantity
+            ';
+            $params = [
+                ':cartID' => $cart -> getIdKey(),
+                ':stockNumber' => $part -> getStocknumber(),
+                ':quantity' => $quantity
+            ];
+            $this->conn->execute($sql, $params);
+            return true;
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add item to cart: ' . $e->getMessage());
+            return false;
+        }
+    }
+   
+    public function getCartByID($cartID) {
+        try {
+            $sql = '
+            SELECT * FROM carts
+            WHERE cartID = :cartID
+            ';
+            $params = array(':cartID' => $cartID);
+            $result = $this->conn->query($sql, $params);
+            $this -> logger->info('result in getCartByID: ' . var_export($result, true));
+
+            if (count($result) > 0) {
+                $cart = self::extractCartFromRow($result[0]);
+                self::addCartItemsToCart($cart);
+                return $cart;
+            }
+            return false;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get cart from ID: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    
+    public function addCartItemsToCart($cart) {
+        try {
+            $sql = '
+                SELECT 
+                cart_items.quantity AS cartQuantity,
+                tekbots_parts.*,
+                tekbots_types.Description AS type,
+                tekbots_inventory.Quantity AS Quantity,
+                tekbots_inventory.Location AS Location,
+                tekbots_inventory.lastupdated AS lastcounted
+                FROM carts
+                JOIN cart_items ON carts.ID = cart_items.cart_ID
+                JOIN tekbots_parts ON cart_items.part_ID = tekbots_parts.ID
+                JOIN tekbots_types ON tekbots_types.ID = tekbots_parts.TypeID
+                JOIN tekbots_inventory ON tekbots_inventory.StockNumber = tekbots_parts.StockNumber
+                WHERE carts.cartID = :cartID
+                ORDER BY tekbots_types.Description ASC, tekbots_parts.Name ASC
+            ';
+
+            $params = array(':cartID' => $cart->getIdKey());
+            $results = $this->conn->query($sql, $params);
+
+            foreach ($results as $row) {
+                $part = self::ExtractPartFromRow($row);
+                $cart->addContents($part, $row['cartQuantity']);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get cart items: ' . $e->getMessage());
+        }
+    }
+
+    public function changeCartEditableStatus($cart, $editableStatus) {
+        try {
+            $sql = '
+            UPDATE carts
+            SET editable = :editableStatus
+            WHERE cartID = :cartID
+            ';
+            $params = array(
+                ':cartID' => $cart->getIdKey(),
+                ':editableStatus' => $editableStatus
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to change cart editable status: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function changeCartPermanence($cart, $isPermanent) {
+        try {
+            $sql = '
+            UPDATE carts
+            SET is_permanent = :isPermanent
+            WHERE cartID = :cartID
+            ';
+            $params = array(
+                ':cartID' => $cart->getIdKey(),
+                ':isPermanent' => $isPermanent
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to change cart permanence: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getCartTotals($cart) {
+        $cartContents = $cart->getContents();
+        $totals = array(
+            'totalPrice' => 0,
+            'totalQuantity' => 0
+        );
+        foreach ($cartContents as $item) {
+            $part = $item['part'];
+            $quantity = $item['quantity'];
+
+            $totals['totalPrice'] += getStudentPriceAsNumber($part->getLastPrice()) * $quantity;
+            $totals['totalQuantity'] += $quantity;
+        }
+        return $totals;
+    }
+
+    public function extractCartFromRow($row) {
+        $this -> logger->info('Cart row: ' . var_export($row, true));
+
+        $cart = new Cart($row['cartID'], $row['editable'], $row['is_permanent']);
+        
+        if(isset($row['date_created'])) {
+            $cart->setDateCreated(($row['date_created']));
+        }
+        return $cart;
+    }
+
 
     //public function sendRecountEmail($id) {}
 

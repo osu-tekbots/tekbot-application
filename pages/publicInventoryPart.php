@@ -113,9 +113,16 @@ if (count($contents) > 0){
 }
 
 $partHTML = "<div class='admin-paper' " . ($archive == 1 ? "style='background-color: PaleGoldenRod;'" : "") .">
-			<a href='./pages/publicInventory.php'>Back to Inventory List</a>";
+			<a href='./pages/publicInventory.php'>Back to Inventory List</a>
+			<div class = 'row'>
+			<div class='d-flex justify-content-between align-items-center col-12'>";
 
 $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description) . ($archive == 1 ? " (Archived)" : "") . "</h3>
+				<a href='../pages/publicCart.php' class='btn btn-outline-secondary'>
+					<i class='fas fa-shopping-cart'></i> Visit Cart
+				</a>
+			</div>
+			</div>
 			<form>
 			<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
 				<div class='form-row'>
