@@ -107,11 +107,12 @@ if ($cart) {
 					<thead>
 						<tr>
 							<th style = 'width:35%'>Item</th>
-							<th style = 'width:10%'>Loc</th>
-							<th style = 'width:10%'class='d-none d-md-table-cell'>Price</th>
+							<th style = 'width:15%'>Loc</th>
+							<th style = 'width:15%'class='d-none d-md-table-cell'>Price</th>
 							<th style = 'width:15%'>QTY</th>
-							<th style = 'width:10%'>Stock</th>
-							<th style = 'width:20%'class='d-none d-md-table-cell'>Item<BR>Link</th>
+							<th style = 'width:15%'>Stock</th>
+							<th class = 'd-none'>Item</th>
+							<th class='d-none'>Item Info</th>
 						</tr>
 					</thead>
 					<tbody>";
@@ -140,7 +141,10 @@ if ($cart) {
 
 				
 			$tableHTML .= "<tr>
-				<td>$type: <BR> $description</td>
+			
+				<td>
+					<a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber' style='text-decoration:none;'>$type: <BR>$description</a>
+				</td>
 				<td>$location</td>
 				<td class='d-none d-md-table-cell'>$lastPrice</td>
                 <td>
@@ -159,10 +163,9 @@ if ($cart) {
       				/>
 				</td>
                 <td>$quantity</td>
-				<td class='d-none d-md-table-cell'>
-					<a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a>
-				</td>
-                </tr>";
+				<td class='d-none'>$type: <BR>$description</td>
+				<td class='d-none'><div>Cart Quantity: $cartQuantity<br>Location: $location<br>In-Stock: $quantity</div></td>
+            </tr>";
 		}
 	}
         
@@ -198,7 +201,7 @@ if($cart) {
 			<td id='nameSelect'></td>
 			<td><input type='text' id='addQuantity' placeholder='Add Quantity'></td>
 			<td>
-				<button class='btn btn-success' onclick='addToCart(\"{$cart->getIdKey()}\", document.getElementById(\"newDescription\").value, document.getElementById(\"addQuantity\").value);'>
+				<button type = 'button' class='btn btn-success' onclick='addToCart(\"{$cart->getIdKey()}\", document.getElementById(\"newDescription\").value, document.getElementById(\"addQuantity\").value);'>
 					Add
 				</button>
 			</td>
@@ -394,8 +397,8 @@ function addToCart(cartID, partID, quantity = 1) {
 
 var printButtonExtension = {
 	text: 'Print Cart',
-    exportOptions: {
-		columns: [0, 1, 3, 4],
+	exportOptions: {
+		columns: [5, 6],
 		modifier: {
             search: 'applied', // only export filtered rows
             order: 'applied'   // respect current sort order
@@ -420,15 +423,24 @@ $('#InventoryTable').DataTable({
 				
 				customize: function (win) {
 					// Remove the automatically added <h1> title
-        			$(win.document.body).find('h1').remove();
+					$(win.document.body).find('h1').remove();
 					// Set body font size
 					$(win.document.body).css('font-size', '10pt');
+
+					// Add heading with cart code and date, aligned with table
+					var urlParams = new URLSearchParams(window.location.search);
+					var cartCode = urlParams.get('cartID') || '';
+					var today = new Date();
+					var dateString = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+					var timeString = String(today.getHours()).padStart(2, '0') + ':' + String(today.getMinutes()).padStart(2, '0');
+					var headingHtml = '<div style="font-size:12pt; font-weight:bold; margin-top:0.25in; width:4in; margin-left:0.25in; margin-right:0.25in; text-align:center;">Cart Code: ' + cartCode + ' &nbsp; | &nbsp; ' + dateString + ' ' + timeString + '</div>';
+					$(win.document.body).prepend(headingHtml);
 
 					// Force table to 4in wide, centered
 					$(win.document.body).find('table')
 						.css('table-layout', 'fixed')
 						.css('width', '4in')
-						.css('margin', '0.25in 0.25in');
+						.css('margin', '0 0.25in 0.25in 0.25in');
 
 					// Optional: shrink text to fit
 					$(win.document.body).find('table td, table th')
@@ -445,7 +457,7 @@ $('#InventoryTable').DataTable({
 
 						}
 						table {
-							
+                            
 						}
 						</style>
 					`;
@@ -464,7 +476,8 @@ $('#InventoryTable').DataTable({
 			null,
 			{ "orderable": false },
 			null,
-			{ "orderable": false }
+			null,
+			null
 		  ]
 		});
 

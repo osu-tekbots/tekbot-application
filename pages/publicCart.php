@@ -60,7 +60,7 @@ $contents = $_SESSION['cart']->getContents();
 					</button>
 				</div>
 				<div class="col-8">
-					<p class = "mb-1">Provide your cart code to a TekBots employee for easy checkout</p>
+					<p class = "mb-1">Provide your cart code (<?php echo $cart -> getIdKey()?>) to a TekBots employee for easy checkout</p>
 					<p class = "mb-2">Below is a list of items currently in your cart. You can add more items to your cart from the <a href="./pages/publicInventory.php">inventory page</a>.</p>
 				</div>
 			</div>
@@ -96,8 +96,8 @@ $contents = $_SESSION['cart']->getContents();
 
 				
 					$inventoryHTML .= "<tr>
-						<td>$type: <BR>
-						$description 
+						<td>
+						<a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber' style='text-decoration:none;'>$type: <BR>$description</a>
 						<BR> <span id = 'StockCountWarning:$stocknumber' class= 'text-warning fw-bold'> ".
 						(($quantity < $cartQuantity)? 
 							("WARNING we ".(($quantity == 0) ? ("dont have any"):("only have ".$quantity)).
@@ -125,9 +125,6 @@ $contents = $_SESSION['cart']->getContents();
 
       						/>").
 						"</td>
-
-
-						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td>
                         <td>
 							<i class='fas fa-trash fa-lg' 
 								onClick='deletePartInCart(\"{$cart -> getIdKey() }\",\"$stocknumber\")'>
@@ -147,7 +144,6 @@ $contents = $_SESSION['cart']->getContents();
 								<th>Price</th>
 								<th>Cart<BR>Quantity</th>
 								<!--<th>Current<BR>Stock</th> -->
-								<th>Item<BR>Link <!-- Added touchnet links by Travis Hudson 10/5/2022-->
 								<th></th>
 							</tr>
 						</thead>
@@ -165,7 +161,7 @@ $contents = $_SESSION['cart']->getContents();
 					<p>Cart Code: <span style="color: red;"><?php echo $cart->getIdKey(); ?></span></p>
 					<p>Total Items: <span id="cart-total-items"><?= $totalCount?></span></p>
 					<p>Total Price: $<span id="cart-total-price"><?= number_format($totalPrice, 2) ?></span></p>
-					<div><h7 style="font-weight: bold;">To Order: </h7><p>Provide your cart code to a TekBots employee in-person at KEC 1110 during store hours, posted <a href = '../pages/index.php'>here</a></p></div>
+					<div><h7 style="font-weight: bold;">To Order: </h7><p>Provide your cart code (<?php echo $cart -> getIdKey()?>) to a TekBots employee in-person at KEC 1110 during store hours, posted <a href = '../pages/index.php'>here</a></p></div>
 					</div>
 				</div>
 			</div>
