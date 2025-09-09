@@ -67,35 +67,62 @@ if (isset($_GET['cartID'])) {
 			$logger->error('Invald cart ID provided');
 			$tableHTML.= "<p class='error'>Invalid Cart ID provided.</p>";
 		}
+		//Should session variable be set to cart here? Employees carts may be accessibe on public page
+		//$_SESSION['cart'] = $cart;
 	}
-} 
+} else if(isset($_SESSION['cart'])) {
+	$cart = $_SESSION['cart'];
+
+	echo "<script>
+        window.location.href = '/pages/employeeInventoryCarts.php?cartID=" . urlencode($cart -> getIdKey()) . "';
+    </script>";
+}
 //Cart status HTML, part of the cart input
+$cartControlHTML .= "
+        <div class='col-md-4 ms-auto mb-3'>
+            <div class='row justify-content-end align-items-center'>";
 if ($cart) {
-	$cartControlHTML .= "
-		<div class='form-check form-switch col-md-3 col-5 ps-5'>
-			<input class='form-check-input' type='checkbox' id='cartEditableSwitch'
-				onchange='setCartEditableStatus(\"{$cart->getIdKey()}\", this.checked)'
-				" . ($cart->getEditableStatus() == 1 ? "checked" : "") . "
-			>
-			<label class='form-check-label' for='cartEditableSwitch'>Cart Editable</label>
-			<BR>
-			<input class='form-check-input' type='checkbox' id='cartPermanenceSwitch'
-				onchange='setCartPermanence(\"{$cart->getIdKey()}\", this.checked)'
-				" . ($cart->getPermanence() == 1 ? "checked" : "") . "
-			>
-			<label class='form-check-label' for='cartPermanenceSwitch'>Cart Permanence</label>
-		</div>
-	";
-} 
+    $cartControlHTML .= "
+        <div class='col-auto'>
+            <div class='d-flex flex-column gap-1'>
+        		<div class='form-check form-switch'>
+                	<input class='form-check-input' type='checkbox' id='cartEditableSwitch'
+                        onchange='setCartEditableStatus(\"{$cart->getIdKey()}\", this.checked)'
+                    	    " . ($cart->getEditableStatus() == 1 ? "checked" : "") . "
+                    >
+                    <label class='form-check-label' for='cartEditableSwitch'>Cart Editable</label>
+                </div>
+                <div class='form-check form-switch'>
+                    <input class='form-check-input' type='checkbox' id='cartPermanenceSwitch'
+                    	onchange='setCartPermanence(\"{$cart->getIdKey()}\", this.checked)'
+                    	    " . ($cart->getPermanence() == 1 ? "checked" : "") . "
+                    >
+                    <label class='form-check-label' for='cartPermanenceSwitch'>Cart Permanence</label>
+                </div>
+            </div>
+        </div>
+    ";
+}
+$cartControlHTML .= "
+			<div class='col-auto'>
+				<a href='/pages/publicInventory.php' target='_blank' class='btn btn-info ms-3'>Go to Inventory</a>
+            </div>
+        </div>
+    </div>
+";
 
 //Cart input html, always displayed
+$cartId = '';
+if($cart) {
+	$cartId = $cart->getIdKey();
+}
 $cartInput = '
-<div class="table-responsive col-md-9 col-7">
+<div class="table-responsive col-md-8 col-7">
     <form method="GET" action="/pages/employeeInventoryCarts.php" >
-        <div class="d-flex mb-3 justify-content-end" style="gap: 15px;">
+        <div class="d-flex mb-3 justify-content-end" style="gap: 20px;">
             <label for="cartID">Enter Cart ID:</label>
-            <input type="text" id="cartID" name="cartID" required>
-            <button type="submit">Search</button>
+            <input type="text" id="cartID" name="cartID" value = "'.$cartId.'" required>
+            <button type="submit" class = "btn btn-primary">Search</button>
         </div>
     </form>
 </div>';
@@ -222,6 +249,8 @@ if($cart) {
 	</div>';
 }
 
+
+
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
@@ -246,7 +275,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 					Cart Menu
 					</button>
 				</div>
-				<div class='row collapse d-md-flex' id='cartMenuRow'>
+				<div class='row collapse d-md-flex align-items-center mb-2' id='cartMenuRow'>
 					<?php 
 						echo $cartInput;
 						echo $cartControlHTML;
