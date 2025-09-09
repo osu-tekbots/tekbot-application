@@ -7,6 +7,7 @@ use Model\Task;
 use Model\InventoryType;
 use DataAccess\UserDao;
 
+
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
  */
@@ -63,11 +64,8 @@ class InventoryActionHandler extends ActionHandler {
         if(!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
         }
-		$this->logger->info($body['stockNumber'] . ' Location Updated: '.$body['location']);
         $this->respond(new Response(Response::OK, 'Inventory Location Updated: '.$body['location']));
 		
-           
-
     }
 
 
@@ -627,7 +625,164 @@ class InventoryActionHandler extends ActionHandler {
                 $this->respond(new Response(Response::OK, 'Type Unarchived'));
     
     }
-   
+
+    public function handleAddToCart() {
+        /*Gets cartid and part id from body, creates a new cart object and passes 
+         in the part and quantity to add to the cart object as well as the db
+        */
+
+        // Ensure the required parameters exist
+        $this->requireParam('cartID');
+        /*
+        Problem?
+        Old way of adding to cart object, doesnt update quantities/values in real time 
+        as this new cart isnt asigned to the session
+
+        $cart = $this -> inventoryDao -> getCartByID($this->requestBody['cartID']);
+        */ 
+        $this -> logger->info('Session var ' . isset($_SESSION['cart']));
+
+        if(isset($_SESSION['cart'])) {
+            if($_SESSION['cart'] != ''  && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
+                $cart = $_SESSION['cart'];
+            } else {
+                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+            }
+        } else {
+            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+        }
+
+        $this->requireParam('partID');
+        $part = $this->inventoryDao->getPartByStocknumber($this->requestBody['partID']);
+
+        $this->requireParam('qty');
+
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->addToCart($cart, $part, $body['qty']);
+
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to add to cart'));
+        else
+            $cart -> addContents($part, $body['qty']);
+            $this->respond(new Response(Response::OK, 'Part added to cart'));
+    }
+
+    public function handleSetPartQuantityInCart() {
+
+        // Ensure the required parameters exist
+        $this->requireParam('cartID');
+        $this->requireParam('partID');
+        $this->requireParam('qty');
+        
+        if(isset($_SESSION['cart'])) {
+            if($_SESSION['cart'] != ''  && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
+                $cart = $_SESSION['cart'];
+                
+            } else {
+                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+            }
+        } else {
+            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+        }
+
+        $part = $this->inventoryDao->getPartByStocknumber($this->requestBody['partID']);
+        
+        $ok = $this->inventoryDao->setPartQuantityInCart($cart, $part, $this->requestBody['qty']);
+
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to remove from cart'));
+        else
+            $cart -> setPartQuantity($part, $this->requestBody['qty']);
+            if($this->requestBody['qty'] == 0) {
+                $this->respond(new Response(Response::OK, 'Item Removed'));
+            } else {
+                $this->respond(new Response(Response::OK));
+            }
+    }
+
+    public function handleSetCartEditable() {
+
+        // Ensure the required parameters exist
+        $this->requireParam('cartID');
+        $this ->requireParam('cartEditableStatus');
+        
+        if(isset($_SESSION['cart'])) {
+            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
+                $cart = $_SESSION['cart'];
+            } else {
+                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+            }
+        } else {
+            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+        }
+
+        $ok = $this->inventoryDao->changeCartEditableStatus($cart, $this->requestBody['cartEditableStatus']);
+
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to change cart editable status'));
+        else
+            $cart -> setEditableStatus($this->requestBody['cartEditableStatus']);
+            $this->respond(new Response(Response::OK, 'Cart editable status updated'));
+    }
+
+    public function handleSetCartPermanence() {
+
+        // Ensure the required parameters exist
+        $this->requireParam('cartID');
+        $this ->requireParam('cartPermanenceStatus');
+        
+        if(isset($_SESSION['cart'])) {
+            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
+                $cart = $_SESSION['cart'];
+            } else {
+                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+            }
+        } else {
+            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+        }
+
+        $ok = $this->inventoryDao->changeCartPermanence($cart, $this->requestBody['cartPermanenceStatus']);
+
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to change cart permanence'));
+        else
+            $cart -> setPermanence($this->requestBody['cartPermanenceStatus']);
+            $this->respond(new Response(Response::OK, 'Cart permanence status updated'));
+    }
+
+    public function handleCreateNewCart() {
+        unset($_SESSION['cart']);
+        unset($_COOKIE['cartId']);
+        setcookie('cartId', '', time() - 3600, '/');
+
+        $this->respond(new Response(Response::OK, 'New Cart Created'));
+    }
+
+    public function handleGetCartTotals() {
+        // Ensure the required parameters exist
+        $this->requireParam('cartID');
+        
+        if(isset($_SESSION['cart'])) {
+            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
+                $cart = $_SESSION['cart'];
+            } else {
+                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+            }
+        } else {
+            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+        }
+
+        $totals = $this->inventoryDao->getCartTotals($cart);
+
+        if(!$totals)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get cart totals'));
+        else
+            $this->respond(new Response(Response::OK, 'Cart Totals Retrieved', $totals));
+    }
+    
+
+    
     /**
      * Handles the HTTP request on the API resource. 
      * 
@@ -758,6 +913,39 @@ class InventoryActionHandler extends ActionHandler {
 			
 			case 'deletePart':
                 $this->handleDeletePart();
+                break;
+            
+            case 'addToCart':
+                //Params: cartID, partID, qty = 1
+                $this->handleAddToCart();
+                break;
+
+            case 'removeFromCart':
+                $this->handleRemoveFromCart();
+                break;
+            
+            case 'clearCart':
+                $this->handleClearCart();
+                break;
+
+            case 'setPartQuantityInCart':
+                $this->handleSetPartQuantityInCart();
+                break;
+
+            case 'setCartEditable':
+                $this->handleSetCartEditable();
+                break;
+            
+            case 'setCartPermanence':
+                $this->handleSetCartPermanence();
+                break;
+            
+            case 'createNewCart':
+                $this->handleCreateNewCart();
+                break;
+
+            case 'getCartTotals':
+                $this->handleGetCartTotals();
                 break;
 
             default:

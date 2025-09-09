@@ -131,6 +131,7 @@ class Part {
 		return $this->lastPrice;
 	}
 	
+	
 	public function setLastPrice($data){
 		$this->lastPrice = $data;
 	}
