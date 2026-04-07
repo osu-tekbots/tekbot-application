@@ -81,6 +81,7 @@ class EquipmentDao {
             FROM equipment, equipment_health
             WHERE equipment.is_archived = 0
             AND equipment.health_id = equipment_health.health_id
+            ORDER BY equipment_name ASC
             ';
         
             $results = $this->conn->query($sql);

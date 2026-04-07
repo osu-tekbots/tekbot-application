@@ -507,7 +507,7 @@ class VoucherDao {
         try {
             $sql = 'DELETE FROM voucher_code 
             WHERE (date_expired < :date
-                OR date_used IS NOT NULL)
+                AND date_used IS NULL)
             AND voucher_code.service_id=2
             AND account_code IS NULL
             ';
@@ -527,7 +527,7 @@ class VoucherDao {
         try {
             $sql = 'DELETE FROM voucher_code 
             WHERE (date_expired < :date
-                OR date_used IS NOT NULL)
+                AND date_used IS NULL)
             AND service_id=5
             AND account_code IS NULL
             ';

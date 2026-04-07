@@ -58,6 +58,10 @@ if(isset($_REQUEST['action'])){
 		echo "../../inventory_images/" . ($image != '' ? $image : 'noimage.jpg');
 		exit();
 	}
+	if ($_REQUEST['action'] == 'print'){
+	
+		exit();
+	}
 }
 
 if (isset($_GET['cartID'])) {
@@ -74,7 +78,7 @@ if (isset($_GET['cartID'])) {
 	$cart = $_SESSION['cart'];
 
 	echo "<script>
-        window.location.href = '/pages/employeeInventoryCarts.php?cartID=" . urlencode($cart -> getIdKey()) . "';
+        window.location.href = './employeeInventoryCarts.php?cartID=" . urlencode($cart -> getIdKey()) . "';
     </script>";
 }
 //Cart status HTML, part of the cart input
@@ -105,7 +109,7 @@ if ($cart) {
 }
 $cartControlHTML .= "
 			<div class='col-auto'>
-				<a href='/pages/publicInventory.php' target='_blank' class='btn btn-info ms-3'>Go to Inventory</a>
+				<a href='./publicInventory.php' target='_blank' class='btn btn-primary ms-3'>Go to Inventory</a>
             </div>
         </div>
     </div>
@@ -118,7 +122,7 @@ if($cart) {
 }
 $cartInput = '
 <div class="table-responsive col-md-8 col-7">
-    <form method="GET" action="/pages/employeeInventoryCarts.php" >
+    <form method="GET" action="./employeeInventoryCarts.php" >
         <div class="d-flex mb-3 justify-content-end" style="gap: 20px;">
             <label for="cartID">Enter Cart ID:</label>
             <input type="text" id="cartID" name="cartID" value = "'.$cartId.'" required>
@@ -133,13 +137,14 @@ if ($cart) {
 			<table class='table ' id='InventoryTable' style='width: 100%; max-width: 100%; table-layout:fixed;'>
 					<thead>
 						<tr>
-							<th style = 'width:35%'>Item</th>
+							<th style = 'width:30%'>Item</th>
 							<th style = 'width:15%'>Loc</th>
 							<th style = 'width:15%'class='d-none d-md-table-cell'>Price</th>
 							<th style = 'width:15%'>QTY</th>
 							<th style = 'width:15%'>Stock</th>
+							<th style = 'width:10%' class='d-none d-md-table-cell'>Reduce Stock</th>
 							<th class = 'd-none'>Item</th>
-							<th class='d-none'>Item Info</th>
+							<th class ='d-none'>Item Info</th>
 						</tr>
 					</thead>
 					<tbody>";
@@ -179,19 +184,29 @@ if ($cart) {
 						type= number
 						min= 0
 						value=$cartQuantity
-						class='form-control'
+						class='form-control cart-quantity-input'
 						style='width: 80px;'
-						onchange=\"setPartQuantityInCart(
-								'{$cart->getIdKey()}',
-								'{$stocknumber}',
-								this.value,
-								(Number('{$quantity}') < Number(this.value) ? Number('{$quantity}') : false)
-						)\"
+						onchange=\"(function() {
+								setPartQuantityInCart(
+									'{$cart->getIdKey()}',
+									'{$stocknumber}',
+									this.value,
+									(Number('{$quantity}') < Number(this.value) ? Number('{$quantity}') : false)
+								);
+								
+								const row = this.closest('tr');
+								const hiddenQty = row.querySelector('.hiddenCartQty'); 
+								hiddenQty.innerText = this.value;
+							}
+						).call(this)\"
       				/>
 				</td>
-                <td>$quantity</td>
-				<td class='d-none'>$type: <BR>$description</td>
-				<td class='d-none'><div>Cart Quantity: $cartQuantity<br>Location: $location<br>In-Stock: $quantity</div></td>
+                <td class = 'inventory-stock'>$quantity</td>
+				<td class='d-none d-md-table-cell'>
+					<button type = 'button' class='btn btn-primary' onclick=\"removeInventoryStock(this, '{$stocknumber}', '{$quantity}')\"> Remove Stock </button>
+				</td>
+				<td class='d-none'><div style = 'font-size: 18px;'>$type: <BR><span style = 'font-weight: bold;'>$description</span></div></td>
+				<td class='d-none'><div style = 'font-size: 18px;'>Cart Quantity: <span style = 'font-weight: bold;' class = 'hiddenCartQty'>$cartQuantity</span><br>Location: <span style = 'font-weight: bold;'>$location</span><br>In-Stock: <span class = 'hidden-inventory-stock'>$quantity</span></div></td>
             </tr>";
 		}
 	}
@@ -296,6 +311,51 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 </div>
 
 <script type='text/javascript'>
+
+function removeInventoryStock(button, stocknumber){
+	
+	const row = button.closest("tr");
+	const stockData = row.querySelector(".inventory-stock"); 
+	const quantity = Number(stockData.innerText);
+	
+	const cartQtyInput = row.querySelector(".cart-quantity-input"); 
+	let removeQty = Number(cartQtyInput.value);
+
+	if(removeQty > quantity){
+		removeQty = quantity
+	}
+
+	updateInventoryQuantityByAmount(stocknumber, -removeQty);
+
+	const newInventoryQty = Number(quantity) - Number(removeQty);	
+	//Redundant if window reloads, but  one in 5 refreshes dont actually
+	//refresh the page (chrome caching issue)
+	stockData.innerText = newInventoryQty;
+						
+	const hiddenStockData = row.querySelector(".hidden-inventory-stock");
+	hiddenStockData.innerText = newInventoryQty;
+	
+	
+
+}
+
+//updateInventoryQuantityByAmount()
+function updateInventoryQuantityByAmount(id, amount){
+	
+	
+	let content = {
+		action: 'updateInventoryQuantityByAmount',
+		stockNumber: id,
+		amount: amount
+	}
+	
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'info');
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
 function setTotals(cartID){
 	let data = {
 		cartID: cartID,
@@ -427,7 +487,7 @@ function addToCart(cartID, partID, quantity = 1) {
 var printButtonExtension = {
 	text: 'Print Cart',
 	exportOptions: {
-		columns: [5, 6],
+		columns: [6, 7],
 		modifier: {
             search: 'applied', // only export filtered rows
             order: 'applied'   // respect current sort order
@@ -443,18 +503,27 @@ var printButtonExtension = {
         }
     }
 };
-
+const printThickness = 4; // Thickness in in
+const margin = 0.25; // Margin in in
 $('#InventoryTable').DataTable({
 		'dom': ((window.innerWidth < 768) ? 't' : 'Bft'),
 		buttons: [
 			$.extend(true, {}, printButtonExtension, {
 				extend: 'print',
-				
+				action: function (e, dt, button, config) {
+					
+					// Custom logic before the print action
+					dt.rows().invalidate('dom').draw(); 
+					// Ensure data is up to date the hidden qty row was updated so this needs to be refreshed)
+
+					
+					// Call the default print action
+					$.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+					
+				},
 				customize: function (win) {
 					// Remove the automatically added <h1> title
 					$(win.document.body).find('h1').remove();
-					// Set body font size
-					$(win.document.body).css('font-size', '10pt');
 
 					// Add heading with cart code and date, aligned with table
 					var urlParams = new URLSearchParams(window.location.search);
@@ -462,26 +531,32 @@ $('#InventoryTable').DataTable({
 					var today = new Date();
 					var dateString = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 					var timeString = String(today.getHours()).padStart(2, '0') + ':' + String(today.getMinutes()).padStart(2, '0');
-					var headingHtml = '<div style="font-size:12pt; font-weight:bold; margin-top:0.25in; width:4in; margin-left:0.25in; margin-right:0.25in; text-align:center;">Cart Code: ' + cartCode + ' &nbsp; | &nbsp; ' + dateString + ' ' + timeString + '</div>';
+					var headingHtml = '<div style="font-size:16pt; font-weight:bold; margin-top:'+margin+'in; width:'+printThickness+'in; margin-left:'+margin+'in; margin-right:'+margin+'in; text-align:center;">Cart Code: ' + cartCode + ' &nbsp; | &nbsp; ' + dateString + ' ' + timeString + '</div>';
 					$(win.document.body).prepend(headingHtml);
+
+					// Set column widths
+					$(win.document.body).find('table tr td.item-print-col, table tr th.item-print-col')
+						.css('width', printThickness*0.6+'in');
+					$(win.document.body).find('table tr td.info-print-col, table tr th.info-print-col')
+						.css('width', printThickness*0.4+'in');
 
 					// Force table to 4in wide, centered
 					$(win.document.body).find('table')
-						.css('table-layout', 'fixed')
-						.css('width', '4in')
-						.css('margin', '0 0.25in 0.25in 0.25in');
+						.css('table-layout', 'fixed !important')
+						.css('width', printThickness+'in')
+						.css('margin', '0 '+margin+'in '+margin+'in '+margin+'in');
 
-					// Optional: shrink text to fit
+					//shrink text to fit
 					$(win.document.body).find('table td, table th')
 						.css('white-space', 'pre-wrap')
 						.css('word-wrap', 'break-word');
+					
+					
 
-					// Inject @page CSS for print width
+					// Inject CSS for print width (unused)
 					var style = `
 						<style>
-						@page {
-							size: 4.5in auto !important;   /* 4.5in wide, unlimited height */
-						}
+						
 						body {
 
 						}
@@ -505,8 +580,9 @@ $('#InventoryTable').DataTable({
 			null,
 			{ "orderable": false },
 			null,
-			null,
-			null
+			{ "orderable": false },
+			{ className: 'item-print-col' },
+			{ className: 'info-print-col' }
 		  ]
 		});
 

@@ -48,4 +48,7 @@ function getStudentPriceAsNumber($price) {
         return 0.10;
 }
 
+function numberToDollarString($number) {
+    return '$' . number_format($number, 2);
+}
 ?>

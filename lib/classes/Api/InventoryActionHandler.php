@@ -6,6 +6,8 @@ use Model\Part;
 use Model\Task;
 use Model\InventoryType;
 use DataAccess\UserDao;
+use Util\IdGenerator;
+
 
 
 /**
@@ -289,6 +291,7 @@ class InventoryActionHandler extends ActionHandler {
 		// Ensure the required parameters exist
         $this->requireParam('stockNumber');
 		$this->requireParam('lastPrice');
+        
         $body = $this->requestBody;
 		$part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
         $part->setMarketPrice((1+$markup)*$body['lastPrice']);
@@ -311,16 +314,18 @@ class InventoryActionHandler extends ActionHandler {
 		// Assuming this is only called on a kit
         $this->requireParam('stockNumber');
 		$this->requireParam('lastPrice');
+
         $body = $this->requestBody;
         $part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
-        
+
 		$contents = $this->inventoryDao->getKitContentsByStocknumber($body['stockNumber']);
 		$cost = $kitfee;
+
 		foreach ($contents AS $key => $value){
 			$p = $this->inventoryDao->getPartByStocknumber($key);
 			$cost += ($p->getLastPrice() * $value);
 		}
-		
+
 		$part->setLastPrice($cost);
         $ok = $this->inventoryDao->updatePart($part);
         if(!$ok)
@@ -366,6 +371,52 @@ class InventoryActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to be added'));
 		else
 			$this->respond(new Response(Response::OK, 'Part Added'));
+    }
+
+    public function handleCopyKit() {
+        // Ensure the user has permission to make the change
+
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+		$this->requireParam('id');
+        $this->requireParam('name');
+
+        
+        $body = $this->requestBody;
+        $kit = $this -> inventoryDao -> getPartByStocknumber($body['id']);
+
+        //Check to see if part is of type kit?
+        if(isset($kit)) {
+            if($kit->getType() != "Kit") {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part is not a kit'));
+            }
+        } else {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part does not exist'));
+        }
+
+        $kitContents = $this -> inventoryDao -> getKitContentsByStocknumber($body['id']);
+
+        //Create new kit object
+        $newStockNumber = IdGenerator::generateSecureUniqueId(6);
+        $kit -> setStocknumber($newStockNumber);
+        $kit -> setName($body['name']);
+        
+        //Set new kit in db
+        $ok = $this->inventoryDao->addPart($kit);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'New Kit Failed to be added'));
+        }
+
+        //set new kit contents in db
+        $ok = $this->inventoryDao->addKitContentsFromArray($kit -> getStockNumber(), $kitContents);
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'New Kit contents failed to be added'));
+        }
+        
+        //return new stocknumber
+        $this->respond(new Response(Response::OK, 'Kit Copied', $newStockNumber));
+
     }
 	public function handleUpdateArchived() {
         // Ensure the user has permission to make the change
@@ -447,6 +498,30 @@ class InventoryActionHandler extends ActionHandler {
 		else
 			$this->respond(new Response(Response::OK, 'Quantity Updated'));
     }
+
+    public function handleUpdateInventoryQuantityByAmount() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+        $this->requireParam('amount');//positive or negative
+
+        $body = $this->requestBody;
+        $part = $this->inventoryDao->getPartByStocknumber($body['stockNumber']);
+
+        $newQuantity = $part->getQuantity() + $body['amount'];
+
+        $part->setQuantity($newQuantity);
+        $ok = $this->inventoryDao->updatePart($part);
+
+        if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Part Failed to Update'));
+        } else {
+            $this->respond(new Response(Response::OK, 'On Hand Quantity Updated: '. $newQuantity));
+        }
+    }   
+    
 	public function handleAddKitContents() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
@@ -685,7 +760,14 @@ class InventoryActionHandler extends ActionHandler {
         } else {
             $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
         }
-
+        /* This is a backend check to prevent locked carts from being edited
+        Everythings done in the front end, but this is just a backup
+        might want to change later
+        if($cart -> getEditableStatus() == 0) {
+            $this->respond(new Response(Response::FORBIDDEN, 'Cart is not editable'));
+            return false;
+        }
+        */
         $part = $this->inventoryDao->getPartByStocknumber($this->requestBody['partID']);
         
         $ok = $this->inventoryDao->setPartQuantityInCart($cart, $part, $this->requestBody['qty']);
@@ -867,6 +949,10 @@ class InventoryActionHandler extends ActionHandler {
                 $this->handleUpdateKitQuantity();
 				break;
 
+            case 'updateInventoryQuantityByAmount':
+                $this->handleUpdateInventoryQuantityByAmount();
+                break;
+
 			case 'updateStocked':
                 $this->handleUpdateStocked();
 				break;
@@ -878,6 +964,10 @@ class InventoryActionHandler extends ActionHandler {
 			case 'addPart':
                 $this->handleAddPart();
 				break;
+
+            case 'copyKit':
+                $this->handleCopyKit();
+                break;
             
             case 'updateLocationState':
                 $this ->updateLocationState();
@@ -947,6 +1037,7 @@ class InventoryActionHandler extends ActionHandler {
             case 'getCartTotals':
                 $this->handleGetCartTotals();
                 break;
+                
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Part resource'));

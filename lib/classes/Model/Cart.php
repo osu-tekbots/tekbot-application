@@ -96,12 +96,14 @@ class Cart {
 
 	
 	public function addContents($part, $quantity){
+		$quantity = intval($quantity);
 		if ($this->contents == null) {
             $this->contents = array();
 		}
 		if(isset($this->contents[$part -> getStocknumber()])) {
 			//If the part already exists, just update the quantity
-			$this->contents[$part -> getStocknumber()]['quantity'] += $quantity;
+			$this->contents[$part -> getStocknumber()]['quantity'] = 
+				intval($this->contents[$part -> getStocknumber()]['quantity']) + $quantity;
 		} else {
 			$this->contents[$part -> getStocknumber()]["part"] = $part;
 			$this->contents[$part -> getStocknumber()]["quantity"] = $quantity;

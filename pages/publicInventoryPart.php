@@ -68,6 +68,22 @@ if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
 allowIf($stocknumber, $configManager->getBaseUrl() . 'pages/index.php');
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
+//Cart feature cookie and id storage:
+if (!isset($_SESSION['cart']) || ($_SESSION['cart'] === false)) {
+	if (isset($_COOKIE['cartId'])) {
+		$_SESSION['cart'] = $inventoryDao -> getCartByID($_COOKIE['cartId']); // Sync cookie to session
+		$inventoryDao -> refreshCartInDatabase($_SESSION['cart']); 
+		// Refresh the cart's date last accessed in the database
+	} else {
+		//create a new cart obj and get it     
+		$_SESSION['cart'] = $inventoryDao -> createCartInDatabase();
+		//Store in cookie (30 days)
+		setcookie('cartId', $_SESSION['cart'] -> getIdKey(), time() + (86400 * 30), "/");
+	}
+}
+$cart = $_SESSION['cart'];
+
+
 $part = $inventoryDao->getPartByStocknumber($stocknumber);
 
 $stocknumber = $part->getStocknumber();//
@@ -99,7 +115,7 @@ if (count($contents) > 0) {
     $contentsHTML.= 
 		"<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;'>
     		<h4>Contents as of " . date("m-d-y", time()) . "</h4>
-   			<button id='downloadCsvBtn' class='btn btn-primary'>Download CSV</button>
+   			<button type = 'button' id='downloadCsvBtn' class='btn btn-primary'>Download CSV</button>
     	</div>";
 
     $contentsHTML .= "<table id='contentsTable' class='display table table-striped table-bordered'>
@@ -131,7 +147,7 @@ $partHTML = "<div class='admin-paper' " . ($archive == 1 ? "style='background-co
 			<div class='d-flex justify-content-between align-items-center col-12'>";
 
 $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description) . ($archive == 1 ? " (Archived)" : "") . "</h3>
-				<a href='../pages/publicCart.php' class='btn btn-outline-secondary'>
+				<a href='./pages/publicCart.php' class='btn btn-outline-secondary'>
 					<i class='fas fa-shopping-cart'></i> Visit Cart
 				</a>
 			</div>
@@ -154,15 +170,19 @@ $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description) . ($archive == 1 
 
 				<div class='form-row'>
 					<div class='col-sm-6'>
-						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".(getStudentPrice($lastPrice))."</div>
+						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".($marketPrice != 0 ? numberToDollarString($marketPrice): getStudentPrice($lastPrice))."</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>In Stock Quantity</label>$quantity</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Datasheet</label>".($datasheet != '' ? "<a href='../../inventory_datasheets/$datasheet' target='_blank'>$datasheet</a>" : '<i>Not Present</i>' )."</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Public Description</label>".nl2br($publicdesc ?? '')."</div>
+						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Add to Cart: </label>".
+							(($cart -> getEditableStatus() == 0)? "":"<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>").
+							"</div>
 					</div>		
 					<div class='col-sm-6'>
-						<div class='form-group'><label style='font-weight:bold;'>Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>
+						<div class='form-group'><label style='font-weight:bold;'>Image* : <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>
+						* Images are representative only.
 					</div>
-				</div>
+				</div> 
 				$contentsHTML
 			</div>
 			</form>";
@@ -172,27 +192,50 @@ $partHTML .= "</div>";
 
 <script type='text/javascript'>
 
+	function addToCart(cartID, partID, quantity = 1) {
+
+		let data = {
+			cartID: cartID,
+			partID: partID,
+			qty: quantity, // Default quantity to 1
+			action: 'addToCart'
+		};
+
+		api.post('/inventory.php', data).then(res => {
+			//console.log(res.message);
+			snackbar(res.message, 'Added to Cart');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
 	$(document).ready(function() {
 		// Initialize DataTable with CSV export enabled
 		var table = $('#contentsTable').DataTable({
-			dom: 'Bfrti',
+			dom: 'frti',
 			buttons: [
 				{
 					extend: 'csvHtml5',
 					text: 'Download CSV',
-					className: 'btn btn-primary'
+					className: 'btn btn-primary',
+					filename: function() {
+						// generate a safe filename on the fly: replace spaces with underscores and unsafe characters with hyphens
+						<?php
+                        $inlineSafe = str_replace(' ', '_', $description); // Replace spaces with underscores
+                        $inlineSafe = preg_replace('/[\\/:*?"<>|]/', '-', $inlineSafe); // Replace unsafe characters with hyphens
+                        ?>
+						return "<?php echo $inlineSafe; ?>";
+					}
 				}
 			],
 			paging: false
 		});
 
 		// Move the CSV button into your custom header container
-		table.buttons().container().appendTo('#downloadCsvBtn').hide();
+		$('#downloadCsvBtn').on('click', function(e) {
+			e.preventDefault();
+			table.button('.buttons-csv').trigger();  
+    	});
 
-		// Hook your custom button to trigger DataTables CSV export
-		$('#downloadCsvBtn').on('click', function () {
-			table.button('.buttons-csv').trigger();
-		});
 	});
 </script>
 

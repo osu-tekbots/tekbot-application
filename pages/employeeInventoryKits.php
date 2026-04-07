@@ -142,9 +142,21 @@ if (isset($stocknumber)){ // Display single kit information
 	//added current kit stock 07/26/2023 by Travis
 	$quantity = $kit->getQuantity();
 	$contentsHTML = " <h4>Stock: ".$quantity." Location: " . $kit->getLocation() . 
-				" Date: ". date("m-d-y",time()) . "</h4>Student Price: ".studentPrice($lastPrice) ."
-				<button type='button' onclick='calculateLastPrice(\"$stocknumber\")'>Update</button><table id='ContentsTable'>
-                <thead>
+				" Date: ". date("m-d-y",time()) . "</h4>".
+				"<div class='d-flex mb-3 align-items-center'>
+					<div class = 'justify-content-start mr-auto'>
+						<span>Student Price: ".studentPrice($lastPrice)."</span>
+						<button type='button' class = 'btn btn-primary' onclick='calculateLastPrice(\"$stocknumber\")'>Update</button>
+					</div>".
+					'<div class = "d-flex justify-content-end">
+						<form method="GET" action="./employeeInventoryKits.php">
+							<input type="text" class = "" id="copyKitInput" name="stocknumber" placeholder= "Copied Kit Name" required>
+							<button type="button" style = "" class = "btn btn-primary" onclick = '."copyKit(\"$stocknumber\")".'>Copy</button>
+						</form>
+					</div>'
+				."</div>
+				<table id='ContentsTable'>
+				<thead>
                     <tr>
 						<th>Type</th>
                         <th>Description</th>
@@ -336,6 +348,28 @@ function addKitContents(id){
 		snackbar(res.message, 'Added');
 		window.location.reload(true);
 	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
+function copyKit(id){
+	console.log('Copying kit with stock number:', id);
+	var name = $('#copyKitInput').val();
+	console.log('New kit name:', name);
+	let content = {
+		action: 'copyKit',
+		name: name,
+		id: id
+	}
+
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'Added');
+		const url = new URL(window.location.href);
+		url.searchParams.set('stocknumber', res.content);
+		window.location.href = url.toString();
+	}).catch(err => {
+		console.log('In api post fails');
+
 		snackbar(err.message, 'error');
 	});
 }

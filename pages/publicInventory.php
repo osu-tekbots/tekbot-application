@@ -86,7 +86,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 				<div class="d-flex justify-content-between align-items-center mb-2 col-12">
 					<h3 class="mb-0">TekBots Inventory</h3>
-					<a href="../pages/publicCart.php" class="btn btn-outline-secondary">
+					<a href="./pages/publicCart.php" class="btn btn-outline-secondary">
 						<i class="fas fa-shopping-cart"></i> Visit Cart
 					</a>
 				</div>
@@ -113,33 +113,34 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 					$touchnetId = $p->getTouchnetId();
 					//$marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2)
 					$inventoryHTML .= "<tr><td>$type</td>
-						<td>$description<BR>Stock: $stocknumber</td>
-						<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>
-						<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
+						<td><a href='./publicInventoryPart.php?stocknumber=$stocknumber' >$description<BR>Stock: $stocknumber </a></td> 
+						<td>".($marketPrice != 0 ? numberToDollarString($marketPrice):getStudentPrice($lastPrice))."</td>
+						<td>$quantity</td>".
+						(($cart -> getEditableStatus() == 0)? "":"<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>")
+						."<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
 						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
-						<td>".(getStudentPrice($lastPrice))."</td>
-						<td>$quantity</td>
 						<td>".($touchnetId != '' ?"<a target ='_blank' href='https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=$touchnetId'>Purchase Item</a>":'')."</td>
-						<td><a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber'>More Info</a></td></tr>";
+						";
 					}
 				}
             ?>
 			
 			<div class='row'>
 				<div class='col-12 col-md-12 table-responsive'>
+					<?php echo ($cart -> getEditableStatus() == 1)?(""):
+						"<h4 style = 'caption-side: top;' class = 'text-warning fw-bold'>Your Cart is Locked</h4>"
+					?>
 					<table class='table' id='InventoryTable' style='width: 100%; max-width: 100%;'>
-						<caption>Current Inventory</caption>
 						<thead>
 							<tr>
 								<th>Type</th>
 								<th>Description</th>
-								<th>Add To Cart</th>
-								<td></td>
-								<td></td>
 								<th>Student<BR>Price</th>
 								<th>Current<BR>Stock</th>
+								<?php echo (($cart -> getEditableStatus() == 0)?(""):"<th>Add To Cart</th>")?>
+								<td></td><!--Image-->
+								<td></td><!-- datasheet-->
 								<th>Purchase<BR>Link </th><!-- Added touchnet links by Travis Hudson 10/5/2022-->
-								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -306,8 +307,7 @@ $('#InventoryTable').DataTable({
 			{ "orderable": false },
 			{ "orderable": false },
 			{ "orderable": false },
-			{ "orderable": false }, //added row for puchase link
-			{ "orderable": false }
+			{ "orderable": false } //added row for puchase link
 		  ]
 		});
 </script>

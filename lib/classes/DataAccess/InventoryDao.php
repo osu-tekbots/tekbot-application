@@ -234,6 +234,21 @@ class InventoryDao {
             return false;
         }
     }
+
+    public function addKitContentsFromArray($kitId, $contents) {
+        try {
+            foreach ($contents as $childId => $quantity) {
+               // $this -> logger->info('child object ' . $childId);
+
+                $this->addKitContents($kitId, $childId, $quantity);
+            }
+            return true;
+
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add kit contents from array: ' . $e->getMessage());
+            return false;
+        } 
+    }
 	
 	public function addKitContents($parentid, $childid, $quantity) {
         try {
@@ -868,6 +883,7 @@ class InventoryDao {
         }
     }
 
+    
     public function getCartTotals($cart) {
         $cartContents = $cart->getContents();
         $totals = array(

@@ -149,7 +149,7 @@ foreach ($vouchers as $voucher){
 						$laserCodesHTML
 					</tbody>
 					</table>
-					<button id='deleteAll' class='btn btn-danger'>Delete All Expired/Used Vouchers</button>
+					<button id='deleteAll' class='btn btn-danger'>Delete All Expired and Unused Vouchers</button>
 
 					<script>
 						$('#laserVoucherTable').DataTable(
@@ -174,7 +174,7 @@ foreach ($vouchers as $voucher){
 // Hiding and showing functionality for prompting to generate new codes
 
 $("#deleteAll").click(function() {
-	if(confirm("Clicking OK will delete all exisiting Vouchers that have expired and/or have been used"))
+	if(confirm("Clicking OK will delete all existing Vouchers that have expired and have not been used"))
 	{
 		let body = {
 			action: 'clearCutVouchers'
