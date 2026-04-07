@@ -478,7 +478,7 @@ class InventoryDao {
             foreach ($results as $row) {
                 $part = self::ExtractPartFromRow($row);
             }
-            return $part;
+            return $part? $part: false;
         } catch (\Exception $e) {
             $this->logger->error('Failed to get part with StockNumber '.$stockNumber.': ' . $e->getMessage());
             return false;
@@ -702,6 +702,7 @@ class InventoryDao {
         try {
             $cart = new Cart();
             $cartID = $cart->getIdKey();
+           
             $sql = '
             INSERT INTO carts (cartID, editable)
             VALUES (:cartID, :editableStatus)
@@ -714,8 +715,11 @@ class InventoryDao {
 
             return $cart;
         } catch (\Exception $e) {
-            if ($e->errorInfo[1] === 1062) {
-                //rare duplicate entry error
+            // DatabaseConnection wraps the PDOException in a generic Exception,
+            // so we check the message string for the 1062 Duplicate entry code.
+            if (strpos($e->getMessage(), '1062 Duplicate entry') !== false) {
+                // rare duplicate entry error
+                $this->logger->info('Duplicate cart error hit, attempting to generate a new key.');
                 return $this->createCartInDatabase(); // Try again
             } 
             $this->logger->error('Failed to create a cart: ' . $e->getMessage());
