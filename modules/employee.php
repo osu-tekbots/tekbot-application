@@ -72,8 +72,8 @@ function renderEmployeeSidebar() {
                 <span>Touchnet</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="https://secure.touchnet.net/central">Touchnet Admin</a>
-                <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8">Store Front</a>
+                <a class="dropdown-item" href="https://secure.touchnet.net/central" target="_blank" rel="noopener noreferrer">Touchnet Admin</a>
+                <a class="dropdown-item" href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank" rel="noopener noreferrer">Store Front</a>
             </div>
         </li>
 

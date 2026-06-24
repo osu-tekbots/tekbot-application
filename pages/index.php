@@ -38,8 +38,12 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <a href="./pages/info.php">Technical Help</a>
                     </strong></h2> 
                     <h3>KEC 1110 Hours: </h3>
-					<h2><strong>Spring Term (3/30 - 6/5):<br> 
-					3/30 - 6/5: M-F 10am-12:50pm<br>
+					<h2><strong>Summer Term (6/22 - 9/18):<br> 
+					6/22-6/26: M-Th 9am-11:50pm<br>
+					6/29-7/3: CLOSED<br>
+					7/6- 8/21: M-Th 9am-11:50pm <br>
+					8/24-9/11: CLOSED<br>
+					9/14-9/18: M-Th 9am-11:50pm <br>
 				</strong></h2><BR>Other Times by Appointment<BR>
                     <td><a href='mailto:<?= $configManager->getWorkerMaillist() ?>'> Email Us Here</a></td><BR></h2>
                    

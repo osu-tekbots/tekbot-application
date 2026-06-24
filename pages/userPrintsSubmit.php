@@ -125,7 +125,7 @@ $printTypeIdGetter = function ($printType) {
 			<br /><br />
 			<div class="collapse" id="collapseExample">
 				<div class="card card-body">
-					<i>Q: How big can your printer print?</i> <br /> A: Within 280 mm x 280 mm x 250mm <br /><br />
+					<i>Q: How big can your printer print?</i> <br /> A: Within 280 mm x 280 mm x 250mm. However, we have found that prints over 500g tend to have a high failure rate. If you are using a voucher code for payment, we may not print your design if it is over 500g. If you are paying for the item via Touchnet, we can print it for you, but we are not responsible for warping or other small errors.<br /><br />
 					<i>Q: How thick should my part's walls be?</i><br /> A: This is not a simple answer, as it depends on the size of the wall and the strength needed. We recommend at least .1" thick walls when feasible.<br /><br />
 					<i>Q: How can I keep my printing costs down?</i><br /> A: One hidden cost often overlooked is the support material. To print an object with an 'overhang' the printer will insert a softer support material as it builds. This support will be from the bottom up until the overhang is reached often increasing the amount of material used by 10x. The best design methodology is to try to think of everything as a bowl where it be be built of the open side up.<br />
 				</div>
