@@ -17,30 +17,6 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 allowIf(verifyPermissions('employee', $logger), 'index.php');
 
-
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else 
-		return ('Free for one / 10 for $1');
-return $price;
-}
-
-
 $title = 'Employee Inventory Part Update';
 $css = array(
 	'assets/css/sb-admin.css',
@@ -72,7 +48,6 @@ if ($part == false){
 }
 $stocknumber = $part->getStocknumber();//
 $description = $part->getName();//
-$lastPrice = $part->getLastPrice();//
 $location = $part->getLocation();//
 $quantity = $part->getQuantity();//
 $image = $part->getImage();
@@ -86,7 +61,10 @@ $manufacturerNumber = $part->getManufacturerNumber();//
 $partMargin = $part->getPartMargin();//
 $stocked = $part->getStocked();//
 $archive = $part->getArchive();//
+$lastPrice = $part->getLastPrice();//
 $marketPrice = $part->getMarketPrice();//
+$studentPrice = empty($marketPrice) ? getStudentPrice($lastPrice): $marketPrice;
+$studentPriceStr = numberToDollarString($studentPrice);
 $comment = $part->getComment();
 $publicdesc = $part->getPublicDescription();
 $lastUpdated = $part->getLastUpdated();
@@ -158,7 +136,7 @@ $partHTML .= "<h3>Stock Number: $stocknumber</h3>
 				<div class='form-row'>
 					<div class='form-group col-sm-3'><label for='lastPrice'>Last Price ".($typeId == 1 ? "<span onclick='calculateLastPrice(\"$stocknumber\");' style='color:blue;'>(Calculate)</span>":"")."</label><input type='text' class='form-control' onchange='updateLastPrice(\"$stocknumber\");' id='lastprice$stocknumber' value='".number_format(floatval($lastPrice),2)."'></div>
 					<div class='form-group col-sm-3'><label for='touchnetid'>Touchnet ID</label><input type='text' class='form-control' onchange='updateTouchnetId(\"$stocknumber\");' id='touchnetid$stocknumber' value='".Security::HtmlEntitiesEncode($touchnetId)."'></div>
-					<div class='form-group col-sm-3'><label for='studentprice'>Student Price</label><input type='text' class='form-control' id='studentprice' value='".studentPrice($lastPrice)."' disabled></div>
+					<div class='form-group col-sm-3'><label for='studentprice'>Student Price</label><input type='text' class='form-control' id='studentprice' value='".$studentPriceStr."' disabled></div>
 					<div class='form-group col-sm-1'><label for='marketPrice'>Touchnet Price</label><input type='text' class='form-control' onchange='updateMarketPrice(\"$stocknumber\");' id='marketPrice$stocknumber' value='".number_format($marketPrice,2)."'></div>					
 				</div>
 				<div class='form-row'>

@@ -15,30 +15,6 @@ if (PHP_SESSION_ACTIVE != session_status())
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-/*
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else 
-		return ('Free for one / 10 for $1');
-return $price;
-}
-*/
-
 
 $title = 'Part Details';
 $css = array(
@@ -88,9 +64,13 @@ $part = $inventoryDao->getPartByStocknumber($stocknumber);
 
 $stocknumber = $part->getStocknumber();//
 $description = $part->getName();//
-$lastPrice = $part->getLastPrice();//
+
+$marketPrice = $part->getMarketPrice();
+$studentPrice = $marketPrice == 0 ? getStudentPrice($part->getLastPrice()) : $marketPrice;
+$studentPriceStr = numberToDollarString($studentPrice);
+
 $location = $part->getLocation();//
-$quantity = $part->getQuantity();//
+$quantity = $part->getQuantity();//qty in stock
 $image = $part->getImage();
 $datasheet = $part->getDatasheet();
 $touchnetId = $part->getTouchnetId();//
@@ -102,7 +82,6 @@ $manufacturerNumber = $part->getManufacturerNumber();//
 $partMargin = $part->getPartMargin();//
 $stocked = $part->getStocked();//
 $archive = $part->getArchive();//
-$marketPrice = $part->getMarketPrice();//
 $publicdesc = $part->getPublicDescription();
 $lastUpdated = $part->getLastUpdated();
 $lastCounted = $part->getLastCounted();
@@ -170,7 +149,7 @@ $partHTML .= "<h3>".Security::HtmlEntitiesEncode($description) . ($archive == 1 
 
 				<div class='form-row'>
 					<div class='col-sm-6'>
-						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".($marketPrice != 0 ? numberToDollarString($marketPrice): getStudentPrice($lastPrice))."</div>
+						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Student Price</label>".$studentPriceStr."</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>In Stock Quantity</label>$quantity</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Datasheet</label>".($datasheet != '' ? "<a href='../../inventory_datasheets/$datasheet' target='_blank'>$datasheet</a>" : '<i>Not Present</i>' )."</div>
 						<div class='form-group col-sm-12'><label style='font-weight:bold;'>Public Description</label>".nl2br($publicdesc ?? '')."</div>

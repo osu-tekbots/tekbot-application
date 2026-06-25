@@ -892,15 +892,20 @@ class InventoryDao {
         $cartContents = $cart->getContents();
         $totals = array(
             'totalPrice' => 0,
-            'totalQuantity' => 0
+            'totalQuantity' => 0,
+            'totalPriceString' => ""
         );
         foreach ($cartContents as $item) {
             $part = $item['part'];
             $quantity = $item['quantity'];
 
-            $totals['totalPrice'] += getStudentPriceAsNumber($part->getLastPrice()) * $quantity;
+            $marketPrice = $part -> getMarketPrice();
+            $studentPrice = $marketPrice == 0 ? getStudentPrice($part->getLastPrice()) : $marketPrice;
+
+            $totals['totalPrice'] += $studentPrice * $quantity;
             $totals['totalQuantity'] += $quantity;
         }
+        $totals['totalPriceString'] = numberToDollarString($totals['totalPrice']);
         return $totals;
     }
 

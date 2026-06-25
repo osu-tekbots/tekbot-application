@@ -162,12 +162,14 @@ if ($cart) {
 			$type = $p->getType();
 			$description = $p->getName();
 
-			$lastPrice = getStudentPrice($p->getLastPrice());
-			$totalPrice += getStudentPriceAsNumber($p->getLastPrice()) * $c['quantity'];
+			$marketPrice = $p->getMarketPrice();
+			$studentPrice = $marketPrice == 0 ? getStudentPrice($p->getLastPrice()) : $marketPrice;
+			$studentPriceStr = numberToDollarString($studentPrice);
+			$totalPrice += $studentPrice * $c['quantity'];
 
 			$location = $p->getLocation();
-			$quantity = $p->getQuantity();
-            $cartQuantity = $c['quantity'];
+			$quantity = $p->getQuantity(); //The instock qty
+            $cartQuantity = $c['quantity']; //The qty in the cart of a part
 			$totalCount += $cartQuantity;
 			$touchnetId = $p->getTouchnetId();
 
@@ -178,7 +180,7 @@ if ($cart) {
 					<a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber' style='text-decoration:none;'>$type: <BR>$description</a>
 				</td>
 				<td>$location</td>
-				<td class='d-none d-md-table-cell'>$lastPrice</td>
+				<td class='d-none d-md-table-cell'>$studentPriceStr</td>
                 <td>
 					<input 
 						type= number
@@ -259,7 +261,7 @@ if($cart) {
 			<h4 class="text-center mb-3">Cart Summary</h4>
 			<p class="fs-6">Cart Code: <span style="color: red;">' . $cart->getIdKey() . '</span></p>
 			<p class="fs-6">Total Items: <span id="cart-total-items">' . $totalCount . '</span></p>
-			<p class="fs-6">Total Price: $<span id="cart-total-price">' . number_format($totalPrice, 2) . '</span></p>
+			<p class="fs-6">Total Price: <span id="cart-total-price">' . numberToDollarString($totalPrice) . '</span></p>
 		</div>
 	</div>';
 }
@@ -335,8 +337,6 @@ function removeInventoryStock(button, stocknumber){
 	const hiddenStockData = row.querySelector(".hidden-inventory-stock");
 	hiddenStockData.innerText = newInventoryQty;
 	
-	
-
 }
 
 //updateInventoryQuantityByAmount()
@@ -366,7 +366,7 @@ function setTotals(cartID){
 		if(res.code === 200 && res.content) {
 			// Update the page
 			document.getElementById('cart-total-items').innerText = res.content.totalQuantity;
-			document.getElementById('cart-total-price').innerText = res.content.totalPrice.toFixed(2);
+			document.getElementById('cart-total-price').innerText = res.content.totalPriceString;
 		} else {
 			snackbar('Failed to update cart totals', 'error');
 		}

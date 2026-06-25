@@ -11,31 +11,6 @@ if (PHP_SESSION_ACTIVE != session_status())
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else if ((1 / $price ) < 5 )
-		return ('5 for $1');
-	else
-		return ('Free for one / ' . number_format($price,2) . ' ea.');
-return $price;
-}
-
 allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 

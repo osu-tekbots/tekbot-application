@@ -779,7 +779,7 @@ class InventoryActionHandler extends ActionHandler {
             if($this->requestBody['qty'] == 0) {
                 $this->respond(new Response(Response::OK, 'Item Removed'));
             } else {
-                $this->respond(new Response(Response::OK));
+                $this->respond(new Response(Response::OK, 'Quantity Updated To: ' . $this->requestBody['qty']));
             }
     }
 

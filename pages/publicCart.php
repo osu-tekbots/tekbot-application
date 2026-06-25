@@ -83,13 +83,18 @@ $contents = $_SESSION['cart']->getContents();
 					$stocknumber = $p->getStocknumber();
 					$type = $p->getType();
 					$description = $p->getName();
-					$lastPrice = getStudentPrice($p->getLastPrice());
-					$totalPrice += getStudentPriceAsNumber($p->getLastPrice()) * $c['quantity'];
+
 					$marketPrice = $p->getMarketPrice();
-					$location = $p->getLocation();
-					$quantity = $p->getQuantity();
-                    $cartQuantity = $c['quantity'];
+					$studentPrice = $marketPrice == 0 ? getStudentPrice($p->getLastPrice()) : $marketPrice;
+
+					$studentPriceStr = numberToDollarString($studentPrice);
+					$totalPrice += $studentPrice * $c['quantity'];
+
+					$stockQuantity = $p->getQuantity(); //Qty in stock
+                    $cartQuantity = $c['quantity']; //Qty in cart
 					$totalCount += $cartQuantity;
+
+					$location = $p->getLocation();
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
 					$touchnetId = $p->getTouchnetId();
@@ -99,14 +104,14 @@ $contents = $_SESSION['cart']->getContents();
 						<td>
 						<a href='./publicInventoryPart.php?stocknumber=$stocknumber' >$type: <BR>$description</a>
 						<BR> <span id = 'StockCountWarning:$stocknumber' class= 'text-warning fw-bold'> ".
-						(($quantity < $cartQuantity)? 
-							("WARNING we ".(($quantity == 0) ? ("dont have any"):("only have ".$quantity)).
+						(($stockQuantity < $cartQuantity)? 
+							("WARNING we ".(($stockQuantity == 0) ? ("dont have any"):("only have ".$stockQuantity)).
 							" of this item in stock, check our exact inventory with a TekBots employee.")
 							:("")
 						)."
 						</span></td>
 						
-						<td>$lastPrice</td>
+						<td>$studentPriceStr</td>
 
                         <td>".(
 							($cart -> getEditableStatus() == 0) ? $cartQuantity :
@@ -120,7 +125,7 @@ $contents = $_SESSION['cart']->getContents();
 								'{$cart->getIdKey()}',
 								'{$stocknumber}',
 								this.value,
-								(Number('{$quantity}') < Number(this.value) ? Number('{$quantity}') : false)
+								(Number('{$stockQuantity}') < Number(this.value) ? Number('{$stockQuantity}') : false)
         					)\"
 
       						/>").
@@ -161,7 +166,7 @@ $contents = $_SESSION['cart']->getContents();
 					<h5>Cart Summary</h5>
 					<p>Cart Code: <span style="color: red;"><?php echo $cart->getIdKey(); ?></span></p>
 					<p>Total Items: <span id="cart-total-items"><?= $totalCount?></span></p>
-					<p>Total Price: $<span id="cart-total-price"><?= number_format($totalPrice, 2) ?></span></p>
+					<p>Total Price: <span id="cart-total-price"><?= numberToDollarString($totalPrice) ?></span></p>
 					<div><h7 style="font-weight: bold;">To Order: </h7><p>Provide your cart code (<?php echo $cart -> getIdKey()?>) to a TekBots employee in-person at KEC 1110 during store hours, posted <a href = './pages/index.php'>here</a></p></div>
 					</div>
 				</div>
@@ -177,20 +182,23 @@ Expects a cart object to be in session, doesnt pass in cart id to rebuild cart
 Passes in the part that needs to be built and its quantity
 */
 function generateStockCountWarningForPart(partID, quantity, stockQuantity) {
+	//StockQuantity is false when theres no need to generate a warning
+	//Expects stockQuantity to be a number or false
+	//Gets called on every javascript change so thee inner text will
+	//	need to be set to nothing to ensure it resets.
+	
 	let val = "";
-	if(stockQuantity !== false ) {
-		console.log('Generating stock count warning for quantity:', quantity, 'and stockQuantity:', stockQuantity, 
-		'with partID:', partID);
+	//console.log('Generating stock count warning for quantity:', quantity, 'and stockQuantity:', stockQuantity, 
+	//'with partID:', partID);
+	if(stockQuantity !== false) {
 		val = (quantity > stockQuantity)
 			? `WARNING we ${stockQuantity === 0 
 				? "dont have any" 
 				: `only have ${stockQuantity}`
 			} of this item in stock, check our exact inventory with a TekBots employee.`
-		: "";
-	} else {
-		console.log('No stock quantity provided, skipping warning generation for partID:', partID);
+			: "";
 	}
-	console.log('Stock Count Warning:', val);
+	//console.log('Stock Count Warning:', val);
 	document.getElementById('StockCountWarning:'+partID).innerText = val;
 }
 function setTotals(cartID){
@@ -203,7 +211,7 @@ function setTotals(cartID){
 		if(res.code === 200 && res.content) {
 			// Update the page
 			document.getElementById('cart-total-items').innerText = res.content.totalQuantity;
-			document.getElementById('cart-total-price').innerText = res.content.totalPrice.toFixed(2);
+			document.getElementById('cart-total-price').innerText = res.content.totalPriceString;
 		} else {
 			snackbar('Failed to update cart totals', 'error');
 		}
@@ -223,7 +231,10 @@ function setPartQuantityInCart(cartID,partID, quantity, stockCount) {
 	api.post('/inventory.php', data).then(res => {
 		//reset totals after updating in backend to ensure it happens in order (no async await)
 		setTotals(cartID);
-		generateStockCountWarningForPart(partID, quantity, stockCount)
+		generateStockCountWarningForPart(partID, quantity, stockCount);
+		//stockCount is false if theres no stock quantity issue
+		//Remove this snackbar if it gets annoying
+		snackbar(res.message, 'success');
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});

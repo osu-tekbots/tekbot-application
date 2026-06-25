@@ -3,32 +3,8 @@
 //Config Manager is a session variable defined in header
 
 //putting markup here and making it glocal doesnt work, must call the session function in every function
+
 function getStudentPrice($price) {
-    $markup = $_SESSION['configManager']->getMarkup();
-
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 3 )
-		return ('$0.50');
-	else if ((1 / $price ) < 4 )
-		return ('$0.25');
-	else 
-		return ('$0.10');
-
-    /*Alternative:    
-    $price = $price * (1 + $markup)
-    return '$'.(($price < 1)?($price + 0.1):('$'.number_format(ceil(), 2)));
-    */
-}
-
-function getStudentPriceAsNumber($price) {
     $markup = $_SESSION['configManager']->getMarkup();
 
     if ($price == 0)

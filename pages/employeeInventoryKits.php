@@ -10,29 +10,6 @@ use Util\Security;
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL); 
 
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else 
-		return ('Free for one / 10 for $1');
-return $price;
-}
-
-
 if (PHP_SESSION_ACTIVE != session_status())
     session_start();
 
@@ -135,6 +112,8 @@ if (isset($stocknumber)){ // Display single kit information
 	$title = $kit->getName() . " Parts List";
 	$description = $kit->getName();//
 	$lastPrice = $kit->getLastPrice();//
+	$studentPrice = getStudentPrice($lastPrice);
+	$studentPriceStr = numberToDollarString($studentPrice);
 	$image = $kit->getImage();//
 		
 	$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
@@ -145,7 +124,7 @@ if (isset($stocknumber)){ // Display single kit information
 				" Date: ". date("m-d-y",time()) . "</h4>".
 				"<div class='d-flex mb-3 align-items-center'>
 					<div class = 'justify-content-start mr-auto'>
-						<span>Student Price: ".studentPrice($lastPrice)."</span>
+						<span>Student Price: ".$studentPriceStr."</span>
 						<button type='button' class = 'btn btn-primary' onclick='calculateLastPrice(\"$stocknumber\")'>Update</button>
 					</div>".
 					'<div class = "d-flex justify-content-end">
@@ -178,7 +157,7 @@ if (isset($stocknumber)){ // Display single kit information
 		else
 			$contentsHTML .= "<a href='./pages/employeeInventoryPart.php?stocknumber=$key'>".$p->getName()."</a>";
 		$contentsHTML .= "</td>
-		<td>".$p->getLocation()."</td><td>$".number_format(floatval($p->getLastPrice()),2)."</td>
+		<td>".$p->getLocation()."</td><td>".numberToDollarString($p -> getLastPrice())."</td>
 		<td><input type='number' value='$value' id='quantity$key' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td>
 		<td><input class='form-control' type='number' id='stock$key' value='".$p->getQuantity()."' onchange='updateStock(\"$key\")'></td>
 		<td><button type='button' class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	

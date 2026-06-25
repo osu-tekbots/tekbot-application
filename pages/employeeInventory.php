@@ -25,29 +25,6 @@ function time_point(){
 	return $exec_time;
 }
 
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else 
-		return ('Free for one / 10 for $1');
-	
-}
-
-
 $title = 'Employee Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
@@ -170,9 +147,10 @@ function printKitsUsedInt($kits) {
 					$quantity = $p->getQuantity();
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
-					$finalPrice = studentPrice($lastPrice,2);
-					if ($p->getMarketPrice() != 0)
-							$finalPrice = '$' . number_format(floatval($p->getMarketPrice()),2);
+
+					$marketPrice = $p->getMarketPrice();
+					$studentPrice = empty($marketPrice) ? getStudentPrice($lastPrice) : $marketPrice;
+					$studentPriceStr = numberToDollarString($studentPrice);
 					$kitsUsedInStr = '';
 					$kitsUsedIn = $inventoryDao->getKitsUsedInByStocknumber($stocknumber);
 					foreach($kitsUsedIn as $k){
@@ -189,7 +167,7 @@ function printKitsUsedInt($kits) {
 						<td>".($p->getArchive() == 1 ?'Archived':'')."</td>
 						<td>"."-".$kitsUsedInStr."</td>" . 
 						//<td>\$".number_format(floatval($lastPrice),2)."</td>
-						//<td>$finalPrice</td>
+						//<td>$studentPriceStr</td>
 						"<td><input class='form-control' type='text' id='loc$stocknumber' value='$location' onchange='updateLocation(\"$stocknumber\")'></td>
 						<td><input class='form-control' type='number' id='quantity$stocknumber' value='$quantity' onchange='updateQuantity(\"$stocknumber\")'></td>
 						<td>".$dateUpdated."</td>

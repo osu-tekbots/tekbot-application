@@ -32,31 +32,6 @@ if (!isset($_SESSION['cart']) || ($_SESSION['cart'] === false)) {
 }
 $cart = $_SESSION['cart'];
 
-/*
-function studentPrice($price){
-	$markup = .15;
-	if ($price == 0)
-		return ('$0.00');
-		
-	$price = (($price * $markup) > .1 ? (1+$markup) * $price : $price + .1) ;
-	
-	if ( (1 / $price ) < 1 )
-		return ('$' . ceil($price) . '.00');
-	else if (intval((1 / $price )) == 1 )
-		return ('$1.00');
-	else if ((1 / $price ) < 2 )
-		return ('2 for $1');
-	else if ((1 / $price ) < 3 )
-		return ('3 for $1');
-	else if ((1 / $price ) < 4 )
-		return ('4 for $1');
-	else 
-		return ('Free for one / 10 for $1');
-
-return $price;
-}
-*/
-
 $title = 'Public Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
@@ -103,18 +78,20 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 					$stocknumber = $p->getStocknumber();
 					$type = $p->getType();
 					$description = $p->getName();
-					$lastPrice = $p->getLastPrice();
+
 					$marketPrice = $p->getMarketPrice();
+					$studentPrice = $marketPrice == 0 ? getStudentPrice($p->getLastPrice()) : $marketPrice;
+					$studentPriceStr = numberToDollarString($studentPrice);
+
 					$location = $p->getLocation();
-					$quantity = $p->getQuantity();
+					$quantity = $p->getQuantity(); //Qty in stock
 					$image = $p->getImage();
 					$datasheet = $p->getDatasheet();
 					# add get touchnet page link
 					$touchnetId = $p->getTouchnetId();
-					//$marketPrice == 0 ? studentPrice($lastPrice) : "$".number_format($marketPrice,2)
 					$inventoryHTML .= "<tr><td>$type</td>
 						<td><a href='./publicInventoryPart.php?stocknumber=$stocknumber' >$description<BR>Stock: $stocknumber </a></td> 
-						<td>".($marketPrice != 0 ? numberToDollarString($marketPrice):getStudentPrice($lastPrice))."</td>
+						<td>".($studentPriceStr)."</td>
 						<td>$quantity</td>".
 						(($cart -> getEditableStatus() == 0)? "":"<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>")
 						."<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
