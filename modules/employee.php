@@ -247,11 +247,11 @@ function renderEmployeeSidebar() {
             </a>
         </li>
 
-        <!-- Slack -->
+        <!-- Teams -->
         <li class="nav-item">
-            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://app.slack.com/client/T06L04JH5C7/C06M3ESL1FA">
-                <i class="fab fa-slack"></i>
-                <span>Slack</span>
+            <a style="color: lightblue;" target= "_blank" class="nav-link" href="https://teams.microsoft.com/l/team/19%3AALCvuZCBAm9ngX8gyW5BLAK_XkC51sgHbQQ67gaZKwI1%40thread.tacv2/conversations">
+                <i class="fas fa-comments"></i>
+                <span>MS Teams</span>
             </a>
         </li>
 
