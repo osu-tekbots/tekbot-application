@@ -191,7 +191,7 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 			<div class="container-fluid">
 			<div class="row">
 				<div class="col">
-					<a class="btn btn-danger" href="https://wd501.myworkday.com/oregonstate/d/task/2998$36922.htmld" target="_blank">Go To My Timeclock</a>
+					<a class="btn btn-danger" href="https://wd501.myworkday.com/oregonstate" target="_blank">Go To My Timeclock</a>
 				</div>
 			</div>
 
