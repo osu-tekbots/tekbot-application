@@ -35,7 +35,7 @@ class EquipmentFeeDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_fee
+            FROM equipment_fee_pre_2026
             WHERE user_id = :uid
             ';
             $params = array(':uid' => $userID);
@@ -64,7 +64,7 @@ class EquipmentFeeDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_fee
+            FROM equipment_fee_pre_2026
             WHERE checkout_id = :cid
             ';
             $params = array(':cid' => $checkoutID);
@@ -92,7 +92,7 @@ class EquipmentFeeDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_fee
+            FROM equipment_fee_pre_2026
             WHERE id = :id
             ';
             $params = array(':id' => $id);
@@ -119,7 +119,7 @@ class EquipmentFeeDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_fee
+            FROM equipment_fee_pre_2026
             ';
             $results = $this->conn->query($sql);
 
@@ -146,7 +146,7 @@ class EquipmentFeeDao {
         try {
             $sql = '
             SELECT COUNT(*) 
-            FROM equipment_fee 
+            FROM equipment_fee_pre_2026
             WHERE is_pending = 1
             ';
             $results = $this->conn->query($sql);
@@ -170,7 +170,7 @@ class EquipmentFeeDao {
     public function addNewFee($fee) {
         try {
             $sql = '
-            INSERT INTO equipment_fee VALUES (
+            INSERT INTO equipment_fee_pre_2026 VALUES (
                 :id,
                 :checkoutid,
                 :userid,
@@ -212,7 +212,7 @@ class EquipmentFeeDao {
     public function updateFee($fee) {
         try {
             $sql = '
-            UPDATE equipment_fee SET 
+            UPDATE equipment_fee_pre_2026 SET 
                 checkout_id = :checkoutid,
                 user_id = :userid,
                 notes = :notes,

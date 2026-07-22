@@ -40,13 +40,13 @@ class EquipmentCheckoutDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, equipment_reservation, contract, user_access_level  
-            WHERE checkout_status_id = equipment_checkout_status.id
-                AND equipment_checkout.user_id = user.user_id 
+            FROM equipment_checkout_pre_2026, equipment_checkout_status_pre_2026, user, equipment_reservation_pre_2026, contract, user_access_level  
+            WHERE checkout_status_id = equipment_checkout_status_pre_2026.id
+                AND equipment_checkout_pre_2026.user_id = user.user_id 
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.contract_id = contract.contract_id 
+                AND equipment_checkout_pre_2026.contract_id = contract.contract_id 
                 AND reservation_id = eqreservation_id
-                AND equipment_checkout.user_id = :uid
+                AND equipment_checkout_pre_2026.user_id = :uid
             ';
             $params = array(':uid' => $userID);
             $results = $this->conn->query($sql, $params);
@@ -74,13 +74,13 @@ class EquipmentCheckoutDao {
         try {
             $sql = '
             SELECT COUNT(*) 
-            FROM equipment_checkout, equipment_checkout_status, user, equipment_reservation, contract, user_access_level  
-            WHERE checkout_status_id = equipment_checkout_status.id
-                AND equipment_checkout.user_id = user.user_id 
+            FROM equipment_checkout_pre_2026, equipment_checkout_status_pre_2026, user, equipment_reservation_pre_2026, contract, user_access_level  
+            WHERE checkout_status_id = equipment_checkout_status_pre_2026.id
+                AND equipment_checkout_pre_2026.user_id = user.user_id 
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.contract_id = contract.contract_id 
+                AND equipment_checkout_pre_2026.contract_id = contract.contract_id 
                 AND reservation_id = eqreservation_id
-                AND equipment_checkout.user_id = :uid
+                AND equipment_checkout_pre_2026.user_id = :uid
             ';
             $params = array(':uid' => $userID);
             $results = $this->conn->query($sql, $params);
@@ -106,13 +106,13 @@ class EquipmentCheckoutDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_checkout, equipment_reservation, user, user_access_level, contract, equipment_checkout_status
-            WHERE equipment_checkout.eqcheckout_id = :id
-            AND equipment_checkout.reservation_id = equipment_reservation.eqreservation_id
-            AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
-            AND equipment_checkout.user_id = user.user_id
+            FROM equipment_checkout_pre_2026, equipment_reservation_pre_2026, user, user_access_level, contract, equipment_checkout_status_pre_2026
+            WHERE equipment_checkout_pre_2026.eqcheckout_id = :id
+            AND equipment_checkout_pre_2026.reservation_id = equipment_reservation_pre_2026.eqreservation_id
+            AND equipment_checkout_pre_2026.checkout_status_id = equipment_checkout_status_pre_2026.id
+            AND equipment_checkout_pre_2026.user_id = user.user_id
             AND user.access_level_id = user_access_level.user_access_level_id
-            AND equipment_checkout.contract_id = contract.contract_id
+            AND equipment_checkout_pre_2026.contract_id = contract.contract_id
             ';
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
@@ -138,11 +138,11 @@ class EquipmentCheckoutDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, user_access_level, equipment_reservation, contract 
-            WHERE equipment_checkout.user_id = user.user_id 
-                AND equipment_checkout.contract_id = contract.contract_id 
+            FROM equipment_checkout_pre_2026, equipment_checkout_status_pre_2026, user, user_access_level, equipment_reservation_pre_2026, contract 
+            WHERE equipment_checkout_pre_2026.user_id = user.user_id 
+                AND equipment_checkout_pre_2026.contract_id = contract.contract_id 
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
+                AND equipment_checkout_pre_2026.checkout_status_id = equipment_checkout_status_pre_2026.id
                 AND reservation_id = eqreservation_id
 
             ';
@@ -170,11 +170,11 @@ class EquipmentCheckoutDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, user_access_level, equipment_reservation, contract 
-            WHERE equipment_checkout.user_id = user.user_id 
-                AND equipment_checkout.contract_id = contract.contract_id 
+            FROM equipment_checkout_pre_2026, equipment_checkout_status_pre_2026, user, user_access_level, equipment_reservation_pre_2026, contract 
+            WHERE equipment_checkout_pre_2026.user_id = user.user_id 
+                AND equipment_checkout_pre_2026.contract_id = contract.contract_id 
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
+                AND equipment_checkout_pre_2026.checkout_status_id = equipment_checkout_status_pre_2026.id
                 AND reservation_id = eqreservation_id
 
             ';
@@ -204,7 +204,7 @@ class EquipmentCheckoutDao {
     public function addNewCheckout($checkout) {
         try {
             $sql = '
-            INSERT INTO equipment_checkout VALUES (
+            INSERT INTO equipment_checkout_pre_2026 VALUES (
                 :id,
                 :userid,
                 :reservationid,
@@ -250,7 +250,7 @@ class EquipmentCheckoutDao {
     public function updateCheckout($checkout) {
         try {
             $sql = '
-            UPDATE equipment_checkout SET
+            UPDATE equipment_checkout_pre_2026 SET
                 user_id = :userid,
                 reservation_id = :reservationid,
                 equipment_id = :equipmentid,
@@ -292,7 +292,7 @@ class EquipmentCheckoutDao {
      */
     public function getCheckoutStatusTypes() {
         try {
-            $sql = 'SELECT * FROM equipment_checkout_status';
+            $sql = 'SELECT * FROM equipment_checkout_status_pre_2026';
             $results = $this->conn->query($sql);
 
             $categories = array();

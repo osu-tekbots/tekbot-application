@@ -42,8 +42,8 @@ class EquipmentDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment, equipment_health
-            WHERE equipment.health_id = equipment_health.health_id 
+            FROM equipment_pre_2026, equipment_health_pre_2026
+            WHERE equipment_pre_2026.health_id = equipment_health_pre_2026.health_id 
             AND is_public = 1 AND is_archived = 0
             ';
 
@@ -78,9 +78,9 @@ class EquipmentDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment, equipment_health
-            WHERE equipment.is_archived = 0
-            AND equipment.health_id = equipment_health.health_id
+            FROM equipment_pre_2026, equipment_health_pre_2026
+            WHERE equipment_pre_2026.is_archived = 0
+            AND equipment_pre_2026.health_id = equipment_health_pre_2026.health_id
             ORDER BY equipment_name ASC
             ';
         
@@ -111,9 +111,9 @@ class EquipmentDao {
             // First fetch the equipment
             $sql = '
             SELECT * 
-            FROM equipment, equipment_health
-            WHERE equipment.health_id = equipment_health.health_id 
-            AND equipment.equipment_id = :id
+            FROM equipment_pre_2026, equipment_health_pre_2026
+            WHERE equipment_pre_2026.health_id = equipment_health_pre_2026.health_id 
+            AND equipment_pre_2026.equipment_id = :id
             ';
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
@@ -125,9 +125,9 @@ class EquipmentDao {
 
             $sql = '
             SELECT *
-            FROM equipment_image 
-            WHERE equipment_image.equipment_id = :id
-            ORDER BY equipment_image.is_default DESC
+            FROM equipment_image_pre_2026
+            WHERE equipment_image_pre_2026.equipment_id = :id
+            ORDER BY equipment_image_pre_2026.is_default DESC
             ';
             $results = $this->conn->query($sql, $params);
 
@@ -155,7 +155,7 @@ class EquipmentDao {
     public function addNewEquipment($equipment) {
         try {
             $sql = '
-            INSERT INTO equipment VALUES (
+            INSERT INTO equipment_pre_2026 VALUES (
                 :id,
                 :name,
                 :description,
@@ -212,7 +212,7 @@ class EquipmentDao {
     public function updateEquipment($equipment) {
         try {
             $sql = '
-            UPDATE equipment SET
+            UPDATE equipment_pre_2026 SET
                 equipment_name = :name,
                 description = :description,
                 health_id = :health,
@@ -258,7 +258,7 @@ class EquipmentDao {
     public function updateEquipmentVisiblity($equipment){
         try {
             $sql = '
-            UPDATE equipment SET
+            UPDATE equipment_pre_2026 SET
                 is_public = :public,
                 is_archived = :archived,
                 date_updated = :dupdated
@@ -290,7 +290,7 @@ class EquipmentDao {
     public function addNewEquipmentImage($image) {
         try {
             $sql = '
-            INSERT INTO equipment_image 
+            INSERT INTO equipment_image_pre_2026
             (
                 equipment_image_id, equipment_id, image_name, is_default
             ) VALUES (
@@ -323,7 +323,7 @@ class EquipmentDao {
     public function updateDefaultEquipmentImage($image) {
         try {
             $sql = '
-            UPDATE equipment_image SET is_default = :default WHERE equipment_image_id = :id
+            UPDATE equipment_image_pre_2026 SET is_default = :default WHERE equipment_image_id = :id
            ';
             $params = array(
                 ':id' => $image->getImageID(),
@@ -334,7 +334,7 @@ class EquipmentDao {
             // Set isdefault to 0 for rest of images
             $equipmentID = $image->getEquipmentID();
             $sql = '
-            UPDATE equipment_image SET is_default = 0 WHERE equipment_image.equipment_id = :eid AND equipment_image_id != :id
+            UPDATE equipment_image_pre_2026 SET is_default = 0 WHERE equipment_image_pre_2026.equipment_id = :eid AND equipment_image_id != :id
             ';
             $params = array(
                 ':id' => $image->getImageID(),
@@ -358,7 +358,7 @@ class EquipmentDao {
     public function removeEquipmentImage($imageID) {
         try {
             $sql = '
-            DELETE FROM equipment_image WHERE equipment_image_id = :id
+            DELETE FROM equipment_image_pre_2026 WHERE equipment_image_id = :id
             ';
             $params = array(
                 ':id' => $imageID,
@@ -383,7 +383,7 @@ class EquipmentDao {
      */
     public function getEquipmentImage($id) {
         try {
-            $sql = 'SELECT * FROM equipment_image WHERE equipment_image_id = :id';
+            $sql = 'SELECT * FROM equipment_image_pre_2026 WHERE equipment_image_id = :id';
             $params = array(':id' => $id);
             $results = $this->conn->query($sql, $params);
             if (\count($results) == 0) {
@@ -408,7 +408,7 @@ class EquipmentDao {
      */
     public function getEquipmentImages($equipment, $setImages = false) {
         try {
-            $sql = 'SELECT * FROM equipment_image WHERE equipment_id = :id';
+            $sql = 'SELECT * FROM equipment_image_pre_2026 WHERE equipment_id = :id';
             $params = array(':id' => $equipment->getEquipmentID());
             $results = $this->conn->query($sql, $params);
             $images = array();
@@ -441,7 +441,7 @@ class EquipmentDao {
      */
     public function getDefaultEquipmentImage($id) {
         try {
-            $sql = 'SELECT * FROM equipment_image WHERE equipment_id = :id AND is_default = :default';
+            $sql = 'SELECT * FROM equipment_image_pre_2026 WHERE equipment_id = :id AND is_default = :default';
             $params = array(
                 ':id' => $id,
                 ':default' => true
@@ -465,7 +465,7 @@ class EquipmentDao {
      */
     public function getEquipmentCategory() {
         try {
-            $sql = 'SELECT * FROM equipment_category';
+            $sql = 'SELECT * FROM equipment_category_pre_2026';
             $results = $this->conn->query($sql);
 
             $categories = array();
@@ -487,7 +487,7 @@ class EquipmentDao {
      */
     public function getEquipmentHealth() {
         try {
-            $sql = 'SELECT * FROM equipment_health';
+            $sql = 'SELECT * FROM equipment_health_pre_2026';
             $results = $this->conn->query($sql);
 
             $categories = array();

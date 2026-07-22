@@ -40,11 +40,11 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_reservation, user, equipment, user_access_level
-            WHERE equipment_reservation.equipment_id = equipment.equipment_id
-                AND equipment_reservation.user_id = user.user_id
+            FROM _pre_2026, user, equipment_pre_2026, user_access_level
+            WHERE equipment_reservation_pre_2026.equipment_id = equipment_pre_2026.equipment_id
+                AND equipment_reservation_pre_2026.user_id = user.user_id
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_reservation.user_id = :uid
+                AND equipment_reservation_pre_2026.user_id = :uid
                 
             ';
             $params = array(':uid' => $userID);
@@ -72,11 +72,11 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_reservation, user, equipment, user_access_level
-            WHERE equipment_reservation.equipment_id = equipment.equipment_id
-                AND equipment_reservation.user_id = user.user_id
+            FROM equipment_reservation_pre_2026, user, equipment_pre_2026, user_access_level
+            WHERE equipment_reservation_pre_2026.equipment_id = equipment_pre_2026.equipment_id
+                AND equipment_reservation_pre_2026.user_id = user.user_id
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_reservation.is_active = 1
+                AND equipment_reservation_pre_2026.is_active = 1
                 
             ';
             $results = $this->conn->query($sql);
@@ -104,11 +104,11 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_reservation, user, equipment, user_access_level
-            WHERE equipment_reservation.equipment_id = equipment.equipment_id
-                AND equipment_reservation.user_id = user.user_id
+            FROM equipment_reservation_pre_2026, user, equipment_pre_2026, user_access_level
+            WHERE equipment_reservation_pre_2026.equipment_id = equipment_pre_2026.equipment_id
+                AND equipment_reservation_pre_2026.user_id = user.user_id
                 AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_reservation.eqreservation_id = :id
+                AND equipment_reservation_pre_2026.eqreservation_id = :id
                 
             ';
             $params = array(':id' => $id);
@@ -135,9 +135,9 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT * 
-            FROM equipment_reservation, user, equipment, user_access_level
-            WHERE equipment_reservation.equipment_id = equipment.equipment_id
-                AND equipment_reservation.user_id = user.user_id
+            FROM equipment_reservation_pre_2026, user, equipment_pre_2026, user_access_level
+            WHERE equipment_reservation_pre_2026.equipment_id = equipment_pre_2026.equipment_id
+                AND equipment_reservation_pre_2026.user_id = user.user_id
                 AND user.access_level_id = user_access_level.user_access_level_id
                 
             ';
@@ -165,9 +165,9 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT COUNT(*) 
-            FROM equipment_reservation, user, equipment, user_access_level
-            WHERE equipment_reservation.equipment_id = equipment.equipment_id
-                AND equipment_reservation.user_id = user.user_id
+            FROM equipment_reservation_pre_2026, user, equipment_pre_2026, user_access_level
+            WHERE equipment_reservation_pre_2026.equipment_id = equipment_pre_2026.equipment_id
+                AND equipment_reservation_pre_2026.user_id = user.user_id
                 AND user.access_level_id = user_access_level.user_access_level_id
                 AND is_active = 1
                 
@@ -189,17 +189,17 @@ class EquipmentReservationDao {
         try {
             $sql = '
             SELECT equipment_id, equipment_name, instances
-            FROM equipment
+            FROM equipment_pre_2026
             WHERE equipment_id = :eid
                 AND instances > (
                     SELECT (
                         SELECT COUNT(*) 
-                        FROM equipment_reservation
+                        FROM equipment_reservation_pre_2026
                         WHERE equipment_id = :eid
                         AND is_active = 1
                     ) + ( 
                         SELECT COUNT(*)
-                        FROM equipment_checkout
+                        FROM equipment_checkout_pre_2026
                         WHERE equipment_id = :eid
                         AND (checkout_status_id = 1 OR checkout_status_id = 2)
                     )
@@ -234,7 +234,7 @@ class EquipmentReservationDao {
     public function addNewReservation($reservation) {
         try {
             $sql = '
-            INSERT INTO equipment_reservation VALUES (
+            INSERT INTO equipment_reservation_pre_2026 VALUES (
                 :id,
                 :equipmentid,
                 :userid,
@@ -268,7 +268,7 @@ class EquipmentReservationDao {
     public function updateReservation($reservation) {
         try {
             $sql = '
-            UPDATE equipment_reservation SET
+            UPDATE equipment_reservation_pre_2026 SET
                 equipment_id = :equipmentid,
                 user_id = :userid,
                 datetime_reserved = :reserved,
