@@ -25,26 +25,18 @@ $js = array(
 );
 
 
-if (isset($_REQUEST['location'])|| $_SESSION["location"] == 'all'){
+if (isset($_REQUEST['location'])|| $_SESSION["location"] == 'all') {
 	if ($_REQUEST['location'] == 'all')
 		unset($_SESSION['location']);
 	else
 		$_SESSION['location'] = $_REQUEST['location'];
-	}
-
-//TODO: We need to add a selector to this page to set the location. This should be handled similar to how we handle
-// the type selection on the main inventory page.
-//$_SESSION['location'] = 'A1';
+}
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-//Removed 12-13-2021 by Don
-//include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-
-$userDao -> deleteUserCompletelyByONID('zhangtin');
 
 if (isset($_SESSION['location']))
 	$parts = $inventoryDao->getInventoryByLocation($_SESSION['location']);
@@ -83,8 +75,7 @@ $locationsHTML .= "</select>
 			</div>";
 			
 
-$options = "";
-$options .= "<div class='form-row'>
+$options = "<div class='form-row'>
 				<div class='form-group col-sm-3'>
 					<select name='labeltype' id='labeltype' class='form-control'>
 						<option value='1'>Large Inventory Label</option>
@@ -102,7 +93,7 @@ $selectAllHTML = "<label for='selectAll'>
                        type='checkbox' 
                        id='selectAll' 
                        onclick='handleSelectAllClick(this)'
-                     > Select All
+                     > Select&nbsp;All
                    </label>";
 
 $formHTML = "<form action='employeeInventoryLabelsPrint.php' method='get' target='_blank' id='mainform'>
@@ -146,7 +137,6 @@ $formHTML .= "</tbody>
 
 ?>
 <script type='text/javascript'>
-//We need to add a select all function to this page to check all displayed boxes.
 	function handleSelectAllClick(selectAll) {
 		console.log("IN HANDLE SELECT ALL");
 		const elements = document.getElementsByClassName('selectButtons');
