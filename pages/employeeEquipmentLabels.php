@@ -1,9 +1,9 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
@@ -81,7 +81,7 @@ if (count($items) > 0) { //Need to render labels
 	</style>";
 	
 	
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 	
 /* 
@@ -145,7 +145,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $equipment = $equipmentDao->getAdminEquipment();
 
 $options = "";

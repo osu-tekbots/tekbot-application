@@ -6,7 +6,7 @@ use DataAccess\LaserDao;
 
 
 //Add the Daos and Models you need here
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 
 
 if (PHP_SESSION_ACTIVE != session_status())

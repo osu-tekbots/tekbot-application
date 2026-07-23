@@ -1,6 +1,6 @@
 <?php
 
-use DataAccess\EquipmentFeeDao;
+use DataAccess\EquipmentFeeDaoOld;
 
 // Checks if the entry for student ID is valid
 function isValidStudentID($sid){
@@ -195,6 +195,22 @@ function renderEmployeeSidebar() {
             </div>
         </li>
 
+        <!-- New Equipment -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-tools"></i>
+            <span>Equipment (New!)</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeEquipmentCheckoutNew.php">Checkout</a>
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Adjust Content:</h6>
+                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
+            </div>
+        </li>
+
         <!-- Lockers -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -303,7 +319,7 @@ HTML;
 				action: 'makeEquipmentHidden',
                 equipmentID: equipmentID,
 			};
-			api.post('/equipments.php', data).then(res => {
+			api.post('/equipments-old.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);
@@ -332,7 +348,7 @@ function createShowEquipmentButton($equipmentID) {
 				action: 'makeEquipmentShown',
                 equipmentID: equipmentID,
 			};
-			api.post('/equipments.php', data).then(res => {
+			api.post('/equipments-old.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);
@@ -361,7 +377,7 @@ function createArchiveEquipmentButton($equipmentID){
 				action: 'makeEquipmentArchive',
                 equipmentID: equipmentID,
 			};
-			api.post('/equipments.php', data).then(res => {
+			api.post('/equipments-old.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     history.go(-1);
@@ -376,7 +392,7 @@ function createArchiveEquipmentButton($equipmentID){
 
 function createAssignEquipmentFeesButton($checkoutID, $userID, $reservationID){
     global $dbConn, $logger;
-    $feeDao = new EquipmentFeeDao($dbConn, $logger);
+    $feeDao = new EquipmentFeeDaoOld($dbConn, $logger);
     $fee = $feeDao->getEquipmentFeeWithCheckoutID($checkoutID);
     if (empty($fee)){
         $buttonText = "Assign Fee";
@@ -405,7 +421,7 @@ function createAssignEquipmentFeesButton($checkoutID, $userID, $reservationID){
             userID: userID,
             feeNotes: feeNotes
          };
-         api.post('/equipmentrental.php', data).then(res => {
+         api.post('/equipmentrentalold.php', data).then(res => {
              snackbar(res.message, 'success');
              setTimeout(function(){
                 window.location.reload(1);
@@ -442,7 +458,7 @@ function createReservationHandoutButton($reservationID, $listNumber, $userID, $e
                 equipmentID: equipmentID,
 				messageID: 'wersspdohssfuj'
  			};
- 			api.post('/equipmentrental.php', data).then(res => {
+ 			api.post('/equipmentrentalold.php', data).then(res => {
  				$('#activeReservation$listNumber').remove();
                  snackbar(res.message, 'success');
                  setTimeout(function(){
@@ -484,7 +500,7 @@ function createReserveAsEmployeeBtn($reservationID, $listNumber, $userID, $equip
                equipmentID: equipmentID,
 			   messageID: 'wersspdohssfuj'
             };
-            api.post('/equipmentrental.php', data).then(res => {
+            api.post('/equipmentrentalold.php', data).then(res => {
                 $('#expiredReservation$listNumber').remove();
                 snackbar(res.message, 'success');
                 setTimeout(function(){
@@ -519,7 +535,7 @@ function renderEquipmentReturnButton($checkout){
                checkoutNotes: checkoutNotes,
 			   messageID: 'fsrt56pdohssfuj'
             };
-            api.post('/equipmentrental.php', data).then(res => {
+            api.post('/equipmentrentalold.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);
@@ -547,7 +563,7 @@ function renderEquipmentFeeApproveButton($feeID){
             action: 'approveEquipmentFees',
             feeID: feeID
          };
-         api.post('/equipmentrental.php', data).then(res => {
+         api.post('/equipmentrentalold.php', data).then(res => {
              snackbar(res.message, 'success');
              setTimeout(function(){
                  window.location.reload(1);
@@ -563,7 +579,7 @@ function renderEquipmentFeeApproveButton($feeID){
             action: 'rejectEquipmentFees',
             feeID: feeID
          };
-         api.post('/equipmentrental.php', data).then(res => {
+         api.post('/equipmentrentalold.php', data).then(res => {
              snackbar(res.message, 'success');
              setTimeout(function(){
                  window.location.reload(1);

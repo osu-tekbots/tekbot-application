@@ -4,13 +4,13 @@ namespace DataAccess;
 
 use Model\EquipmentReservation;
 use Model\Contract;
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 
 
 /**
  * Handles all of the logic related to queries on capstone project resources in the database.
  */
-class EquipmentReservationDao {
+class EquipmentReservationDaoOld {
 
     /** @var DatabaseConnection */
     private $conn;

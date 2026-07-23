@@ -1,7 +1,7 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 use Model\EquipmentStatus;
 use Util\Security;
 
@@ -33,7 +33,7 @@ $isEmployee = verifyPermissions('employee', $logger);
 
 $isLoggedIn = verifyPermissions(['user', 'employee'], $logger);
 
-$dao = new EquipmentDao($dbConn, $logger);
+$dao = new EquipmentDaoOld($dbConn, $logger);
 $equipment = $dao->getEquipment($eID);
 
 if ($equipment) {
@@ -226,7 +226,7 @@ function onCreateReservationClick() {
     };
 
 
-    api.post('/./equipmentrental.php', body).then(res => {
+    api.post('/./equipmentrentalold.php', body).then(res => {
         snackbar('Successfully Reserved!', 'success');
     }).catch( err=> {
         snackbar(err.message, 'error');

@@ -23,17 +23,17 @@ use Email\TekBotsMailer;
 class EquipmentRentalActionHandler extends ActionHandler {
 
     /** @var \DataAccess\EquipmentCheckout */
-    private $EquipmentCheckoutDao;
+    private $EquipmentCheckoutDaoOld;
     /** @var \DataAccess\EquipmentReservation */
-    private $EquipmentReservationDao;
+    private $EquipmentReservationDaoOld;
     /** @var \DataAccess\ContractDao */
     private $ContractDao;
     /** @var \DataAccess\UsersDao */
     private $userDao;
-    /** @var \DataAccess\EquipmentFeeDao */
-    private $EquipmentFeeDao;
-    /** @var \DataAccess\EquipmentDao */
-    private $EquipmentDao;
+    /** @var \DataAccess\EquipmentFeeDaoOld */
+    private $EquipmentFeeDaoOld;
+    /** @var \DataAccess\EquipmentDaoOld */
+    private $EquipmentDaoOld;
     /** @var \Email\EquipmentRentalMailer */
     private $mailer;
     /** @var \Util\ConfigManager */
@@ -44,20 +44,20 @@ class EquipmentRentalActionHandler extends ActionHandler {
     /**
      * Constructs a new instance of the action handler for requests on project resources.
      *
-     * @param \DataAccess\EquipmentCheckoutDao $EquipmentCheckoutDao the data access object for checkouts
-     * @param \DataAccess\EquipmentReservationDao $EquipmentReservationDao the data access object for reservations
+     * @param \DataAccess\EquipmentCheckoutDaoOld $EquipmentCheckoutDaoOld the data access object for checkouts
+     * @param \DataAccess\EquipmentReservationDaoOld $EquipmentReservationDaoOld the data access object for reservations
      * @param \Email\EquipmentRentalMailer $mailer the mailer used to send project related emails
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($EquipmentCheckoutDao, $EquipmentReservationDao, $ContractDao, $userDao, $EquipmentFeeDao, $EquipmentDao ,$mailer, $config, $logger, $messageDao) {
+    public function __construct($EquipmentCheckoutDaoOld, $EquipmentReservationDaoOld, $ContractDao, $userDao, $EquipmentFeeDaoOld, $EquipmentDaoOld ,$mailer, $config, $logger, $messageDao) {
         parent::__construct($logger);
-        $this->EquipmentCheckoutDao = $EquipmentCheckoutDao;
-        $this->EquipmentReservationDao = $EquipmentReservationDao;
+        $this->EquipmentCheckoutDaoOld = $EquipmentCheckoutDaoOld;
+        $this->EquipmentReservationDaoOld = $EquipmentReservationDaoOld;
         $this->ContractDao = $ContractDao;
         $this->userDao = $userDao;
-        $this->EquipmentFeeDao = $EquipmentFeeDao;
-        $this->EquipmentDao = $EquipmentDao;
+        $this->EquipmentFeeDaoOld = $EquipmentFeeDaoOld;
+        $this->EquipmentDaoOld = $EquipmentDaoOld;
         $this->mailer = $mailer;
         $this->config = $config;
 		$this->messageDao = $messageDao;
@@ -99,26 +99,26 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $checkout->setDateUpdated(new \DateTime());
 
 		
-        $ok = $this->EquipmentCheckoutDao->addNewCheckout($checkout);
+        $ok = $this->EquipmentCheckoutDaoOld->addNewCheckout($checkout);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new equipment checkout'));
         }
 
-        $reservation = $this->EquipmentReservationDao->getReservation($body['reservationID']);
+        $reservation = $this->EquipmentReservationDaoOld->getReservation($body['reservationID']);
         if (empty($reservation)){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain reservation from ID'));
         }
 
         $reservation->setIsActive(FALSE);
 
-        $ok = $this->EquipmentReservationDao->updateReservation($reservation);
+        $ok = $this->EquipmentReservationDaoOld->updateReservation($reservation);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to close reservation'));
         }
 
         // Create email
         $user = $this->userDao->getUserByID($body['userID']);
-        $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
+        $equipment = $this->EquipmentDaoOld->getEquipment($body['equipmentID']);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 		
@@ -148,7 +148,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $checkoutID = $body['checkoutID'];
         $checkoutNotes = $body['checkoutNotes'];
 
-        $checkout = $this->EquipmentCheckoutDao->getCheckout($checkoutID);
+        $checkout = $this->EquipmentCheckoutDaoOld->getCheckout($checkoutID);
         if (empty($checkout)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain checkout from ID'));
         }
@@ -163,7 +163,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $checkout->setReturnTime(new \DateTime());
         $checkout->setDateUpdated(new \DateTime());
     
-        $ok = $this->EquipmentCheckoutDao->updateCheckout($checkout);
+        $ok = $this->EquipmentCheckoutDaoOld->updateCheckout($checkout);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create return equipment'));
         }
@@ -172,7 +172,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
 		$userID = $checkout->getUserID();
         $user = $this->userDao->getUserByID($userID);
         $equipmentID = $checkout->getEquipmentID();
-		$equipment = $this->EquipmentDao->getEquipment($equipmentID);
+		$equipment = $this->EquipmentDaoOld->getEquipment($equipmentID);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 		
@@ -191,7 +191,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $this->requireParam('reservationID');
         $body = $this->requestBody;
 
-        $reservation = $this->EquipmentReservationDao->getReservation($body['reservationID']);
+        $reservation = $this->EquipmentReservationDaoOld->getReservation($body['reservationID']);
         if (empty($reservation)) {
             $this->respond(new Response(Response::BAD_REQUEST, 'Unable to obtain reservation from ID'));
         }
@@ -203,7 +203,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $contracts = $this->ContractDao->getEquipmentCheckoutContracts();
         
         $user = $this->userDao->getUserByID($userID);
-        $equipment = $this->EquipmentDao->getEquipment($equipmentID);
+        $equipment = $this->EquipmentDaoOld->getEquipment($equipmentID);
     
         $equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
         $equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
@@ -365,7 +365,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
 		$this->requireParam('messageID');   
         $body = $this->requestBody;
 
-        $isEquipmentAvailable = $this->EquipmentReservationDao->getEquipmentAvailableStatus($body['equipmentID']);
+        $isEquipmentAvailable = $this->EquipmentReservationDaoOld->getEquipmentAvailableStatus($body['equipmentID']);
         if (!$isEquipmentAvailable) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Equipment already reserved or checked out'));
         }
@@ -377,14 +377,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $reservation->setDatetimeExpired(QueryUtils::HoursFromCurrentDate($reserveDuration));
         $reservation->setIsActive(true);
 
-        $ok = $this->EquipmentReservationDao->addNewReservation($reservation);
+        $ok = $this->EquipmentReservationDaoOld->addNewReservation($reservation);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create equipment reservation'));
         }
 
         // Create email
         $user = $this->userDao->getUserByID($body['userID']);
-        $equipment = $this->EquipmentDao->getEquipment($body['equipmentID']);
+        $equipment = $this->EquipmentDaoOld->getEquipment($body['equipmentID']);
 		$message = $this->messageDao->getMessageByID($body['messageID']);
         $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
 
@@ -410,14 +410,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $body = $this->requestBody;
         $reservationID = $body['reservationID'];
 
-        $reservation = $this->EquipmentReservationDao->getReservation($reservationID);
+        $reservation = $this->EquipmentReservationDaoOld->getReservation($reservationID);
         if (empty($reservation)){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain reservation from ID'));
         }
 
         $reservation->setIsActive(FALSE);
 
-        $ok = $this->EquipmentReservationDao->updateReservation($reservation);
+        $ok = $this->EquipmentReservationDaoOld->updateReservation($reservation);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to cancel reservation'));
         }
@@ -461,7 +461,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $equipmentFee->setIsPending(false);
         $equipmentFee->setDateUpdated(new \Datetime());
 
-        $ok = $this->EquipmentFeeDao->addNewFee($equipmentFee);
+        $ok = $this->EquipmentFeeDaoOld->addNewFee($equipmentFee);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to assign fee'));
         }
@@ -490,14 +490,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $feeID = $body['feeID'];
         $touchnetID = $body['touchnetID'];
 
-        $equipmentFee = $this->EquipmentFeeDao->getEquipmentFee($feeID);
+        $equipmentFee = $this->EquipmentFeeDaoOld->getEquipmentFee($feeID);
         if (empty($equipmentFee)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain checkout from ID'));
         }
         $equipmentFee->setPaymentInfo($touchnetID);
         $equipmentFee->setIsPending(1);
 
-        $ok = $this->EquipmentFeeDao->updateFee($equipmentFee);
+        $ok = $this->EquipmentFeeDaoOld->updateFee($equipmentFee);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update fee'));
         }
@@ -525,14 +525,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $body = $this->requestBody;
         $feeID = $body['feeID'];
 
-        $equipmentFee = $this->EquipmentFeeDao->getEquipmentFee($feeID);
+        $equipmentFee = $this->EquipmentFeeDaoOld->getEquipmentFee($feeID);
         if (empty($equipmentFee)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain checkout from ID'));
         }
         $equipmentFee->setIsPending(0);
         $equipmentFee->setIsPaid(1);
 
-        $ok = $this->EquipmentFeeDao->updateFee($equipmentFee);
+        $ok = $this->EquipmentFeeDaoOld->updateFee($equipmentFee);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update fee'));
         }
@@ -556,14 +556,14 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $body = $this->requestBody;
         $feeID = $body['feeID'];
 
-        $equipmentFee = $this->EquipmentFeeDao->getEquipmentFee($feeID);
+        $equipmentFee = $this->EquipmentFeeDaoOld->getEquipmentFee($feeID);
         if (empty($equipmentFee)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain checkout from ID'));
         }
         $equipmentFee->setIsPending(0);
         $equipmentFee->setIsPaid(0);
 
-        $ok = $this->EquipmentFeeDao->updateFee($equipmentFee);
+        $ok = $this->EquipmentFeeDaoOld->updateFee($equipmentFee);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update fee'));
         }

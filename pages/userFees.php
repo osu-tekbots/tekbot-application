@@ -9,8 +9,8 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentFeeDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
 
 if (PHP_SESSION_ACTIVE != session_status())
 	session_start();
@@ -33,8 +33,8 @@ include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 
-$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
+$checkoutFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
+$equipmentCheckoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
 
 $uID = $_SESSION['userID'];
 $checkoutFees = $checkoutFeeDao->getFeesForUser($uID);

@@ -6,7 +6,7 @@ use Model\EquipmentFee;
 /**
  * Handles all of the logic related to queries on capstone project resources in the database.
  */
-class EquipmentFeeDao {
+class EquipmentFeeDaoOld {
 
     /** @var DatabaseConnection */
     private $conn;

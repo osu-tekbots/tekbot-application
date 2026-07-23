@@ -5,9 +5,9 @@
 */
 use Util\Security;
 use DataAccess\UsersDao;
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 use DataAccess\EquipmentReservation;
-use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentCheckoutDaoOld;
 
 include_once PUBLIC_FILES . "/modules/button.php";
 
@@ -43,7 +43,7 @@ function renderEmployeeEquipmentList($equipments) {
 
 function renderUserCheckoutFeesOwedTable($fees){
     global $dbConn, $logger;
-    $equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
+    $equipmentCheckoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
     
     echo"
     <table>
@@ -112,7 +112,7 @@ function renderEquipmentList($equipments, $isLoggedIn){
 		return;
     }
     $count = count($equipments);
-    $equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
+    $equipmentReservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 
     foreach ($equipments as $e){
         $equipmentID = $e->getEquipmentID();
@@ -192,7 +192,7 @@ function createReservationCancelButton($reservationID, $listNumber){
 				action: 'cancelReservation',
                 reservationID: reservationID
 			};
-			api.post('/equipmentrental.php', data).then(res => {
+			api.post('/equipmentrentalold.php', data).then(res => {
                 $('#activeReservation$listNumber').remove();
                 snackbar(res.message, 'success');
 			}).catch(err => {
@@ -227,7 +227,7 @@ function createPayButton($feeID){
                 feeID: feeID,
                 touchnetID: touchnetID
 			};
-			api.post('/equipmentrental.php', data).then(res => {
+			api.post('/equipmentrentalold.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);

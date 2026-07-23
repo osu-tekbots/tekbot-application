@@ -5,7 +5,7 @@
  * may not include a file upload.
  */
 include_once '../bootstrap.php';
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 use Model\EquipmentImage;
 use Api\Response;
 
@@ -32,7 +32,7 @@ if (is_null($equipmentID) || empty($equipmentID)) {
     respond(400, 'Must include ID of Equipment in request');
 }
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 //
 // The client making the request has passed all access checks. We can now handle the request based on the action.
 //

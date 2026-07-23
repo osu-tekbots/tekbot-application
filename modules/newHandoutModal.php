@@ -2,10 +2,10 @@
 use Util\Security;
 use DataAccess\QueryUtils;
 use DataAccess\UsersDao;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
-use DataAccess\EquipmentFeeDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
+use DataAccess\EquipmentFeeDaoOld;
 use DataAccess\ContractDao;
 use Model\EquipmentReservation;
 use Model\EquipmentFee;
@@ -20,7 +20,7 @@ use Model\EquipmentFee;
 function renderNewHandoutModal($reservation) {
 	global $dbConn, $logger;
 	$userDao = new UsersDao($dbConn, $logger);
-	$equipmentDao = new EquipmentDao($dbConn, $logger);
+	$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 	$contractDao = new ContractDao($dbConn, $logger);
 	
 	$hours = QueryUtils::timeAddToCurrent("24:00:00");
@@ -106,8 +106,8 @@ function renderNewHandoutModal($reservation) {
 function renderEquipmentReturnModal($checkout) {
 	global $dbConn, $logger;
 	$userDao = new UsersDao($dbConn, $logger);
-	$equipmentDao = new EquipmentDao($dbConn, $logger);
-	$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+	$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
+	$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 	
 	$checkoutID = $checkout->getCheckoutID();
 	$reservationID = $checkout->getReservationID();
@@ -188,9 +188,9 @@ function renderEquipmentReturnModal($checkout) {
 
 function renderEquipmentFeesModal($checkout) {
 	global $dbConn, $logger;
-	$equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
-	$equipmentDao = new EquipmentDao($dbConn, $logger);
-	$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+	$equipmentFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
+	$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
+	$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 	$checkoutID = $checkout->getCheckoutID();
 
 	$fee = $equipmentFeeDao->getEquipmentFeeWithCheckoutID($checkoutID);
@@ -266,8 +266,8 @@ function renderEquipmentFeesModal($checkout) {
 function renderViewCheckoutModal($checkout){
 	global $dbConn, $logger;
 	$userDao = new UsersDao($dbConn, $logger);
-	$equipmentDao = new EquipmentDao($dbConn, $logger);
-	$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+	$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
+	$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 
 	// Update for view
 	$checkoutID = $checkout->getCheckoutID();
@@ -350,7 +350,7 @@ function renderViewCheckoutModal($checkout){
 
 function renderApproveEquipmentFeeModal($fee){
 	global $dbConn, $logger;
-	$equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
+	$equipmentFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
 	$userDao = new UsersDao($dbConn,$logger);
 	
 	$feeID = $fee->getFeeID();

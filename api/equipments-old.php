@@ -6,8 +6,8 @@
 include_once '../bootstrap.php';
 
 use Api\Response;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
 use Api\EquipmentActionHandler;
 use Email\ProjectMailer;
 
@@ -15,7 +15,7 @@ if (PHP_SESSION_ACTIVE != session_status())
     session_start();
 
 // Setup our data access and handler classes
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $handler = new EquipmentActionHandler($equipmentDao, $configManager, $logger);
 
 // Handle the request

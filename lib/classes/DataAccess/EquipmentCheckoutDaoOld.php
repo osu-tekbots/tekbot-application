@@ -3,14 +3,14 @@
 namespace DataAccess;
 
 use Model\EquipmentCheckout;
-use Model\EquipmentDao;
+use Model\EquipmentDaoOld;
 use Model\EquipmentCheckoutStatus;
 
 
 /**
  * Handles all of the logic related to queries on capstone project resources in the database.
  */
-class EquipmentCheckoutDao {
+class EquipmentCheckoutDaoOld {
 
     /** @var DatabaseConnection */
     private $conn;

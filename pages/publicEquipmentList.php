@@ -2,8 +2,8 @@
 include_once '../bootstrap.php';
 
 use Util\Security;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 
 $title = 'Browse Equipment';
 $css = array(
@@ -17,8 +17,8 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 
 
-$dao = new EquipmentDao($dbConn, $logger);
-$equipmentReservationDao = new EquipmentReservationDao($dbConn, $logger);
+$dao = new EquipmentDaoOld($dbConn, $logger);
+$equipmentReservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 
 $isEmployee = verifyPermissions('employee', $logger);
 

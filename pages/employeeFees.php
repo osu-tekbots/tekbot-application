@@ -5,11 +5,11 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
+use DataAccess\EquipmentFeeDaoOld;
 use DataAccess\PrinterFeeDao;
 use Model\UserAccessLevel;
 use Model\EquipmentFee;
@@ -41,9 +41,9 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 // Handout Modal Functionality
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
-$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
+$equipmentCheckoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$equipmentFeeDao = new EquipmentFeeDao($dbConn, $logger);
+$equipmentFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
 $printFeeDao = new PrinterFeeDao($dbConn, $logger);
 
 $equipmentFees = $equipmentFeeDao->getAdminFees();

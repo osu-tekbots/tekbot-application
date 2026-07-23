@@ -6,8 +6,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use DataAccess\TaskDao; //Added 2/21/2024
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentFeeDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\KitEnrollmentDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
@@ -21,8 +21,8 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 allowIf(verifyPermissions('employee', $logger));
 
-$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$checkoutFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
+$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 $kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
 $printerJobsDao = new PrinterDao($dbConn, $logger);
 $laserJobsDao = new LaserDao($dbConn, $logger);

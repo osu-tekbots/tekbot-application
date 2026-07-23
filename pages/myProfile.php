@@ -2,10 +2,10 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentFeeDaoOld;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
 use DataAccess\BoxDao;

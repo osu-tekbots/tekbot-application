@@ -1,9 +1,9 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
@@ -34,10 +34,10 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 // Handout Modal Functionality
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$checkoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
+$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 
@@ -373,7 +373,7 @@ function reserveEquipment(){
 		messageID: 'wersdhwrujhssfuj'
 	}
 	
-	api.post('/equipmentrental.php', content).then(res => {
+	api.post('/equipmentrentalold.php', content).then(res => {
 		snackbar(res.message, 'info');
 	}).catch(err => {
 		snackbar(err.message, 'error');

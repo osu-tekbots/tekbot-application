@@ -1,7 +1,7 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 use Model\EquipmentStatus;
 use Util\Security;
 
@@ -52,7 +52,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
 
-$dao = new EquipmentDao($dbConn, $logger);
+$dao = new EquipmentDaoOld($dbConn, $logger);
 
 $healths = $dao->getEquipmentHealth();
 $categories = $dao->getEquipmentCategory();

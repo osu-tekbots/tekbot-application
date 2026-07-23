@@ -1,19 +1,19 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use DataAccess\QueryUtils;
 use Model\EquipmentCheckoutStatus;
 use Util\Security;
 use Email\EquipmentRentalMailer;
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$checkoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
+$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 $reservedEquipment = $reservationDao->getReservationsForAdmin();
 $checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
 // $messageDao = new MessageDao($dbConn, $logger);

@@ -1,9 +1,9 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use Model\UserAccessLevel;
 use Util\Security;
@@ -34,7 +34,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 // Handout Modal Functionality
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 
 $users = $userDao->getAllUsers();

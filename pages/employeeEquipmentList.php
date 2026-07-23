@@ -1,7 +1,7 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 
 if (PHP_SESSION_ACTIVE != session_status())
     session_start();
@@ -43,7 +43,7 @@ include_once PUBLIC_FILES . '/modules/newEquipmentModal.php';
 * Gets the various pieces of information for each item from the Equipment DAO,
 * hides content if it is not public. 
 */
-$dao = new EquipmentDao($dbConn, $logger);
+$dao = new EquipmentDaoOld($dbConn, $logger);
 $equipments = $dao->getAdminEquipment();
 $equipmentItemHTML = "";
 foreach ($equipments as $e){
@@ -163,7 +163,7 @@ foreach ($equipments as $e){
 				};
 
 				// Send our request to the API endpoint
-				api.post('/equipments.php', data).then(res => {
+				api.post('/equipments-old.php', data).then(res => {
 					window.location.replace('pages/employeeEquipmentDetail.php?id=' + res.content.id);
 				}).catch(err => {
 					snackbar(err.message, 'error');

@@ -2,10 +2,10 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentFeeDaoOld;
+use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentCheckoutDaoOld;
+use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
@@ -57,11 +57,11 @@ if ($user){
 	exit();
 }
 
-$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$checkoutFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
+$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$checkoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
+$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
 $laserDao = new LaserDao($dbConn, $logger);

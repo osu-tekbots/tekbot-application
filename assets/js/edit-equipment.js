@@ -74,7 +74,7 @@ function onProjectImageSelected(imageId) {
         imageID: imageId
     };
 
-    api.post('/equipments.php', body)
+    api.post('/equipments-old.php', body)
         .then(res => {
             $('#nameOfImageInput').val(res.content.name);
             $('#img-upload').attr('src', 'images/' + imageId);
@@ -126,7 +126,7 @@ function onSaveEquipmentClick() {
         action: 'saveEquipment'
     };
 
-    api.post('/equipments.php', body)
+    api.post('/equipments-old.php', body)
         .then(res => {
             snackbar(res.message, 'success');
         })
@@ -161,7 +161,7 @@ function onMakePublicClick() {
         ...equipment,
         action: 'saveEquipment'
     };
-    api.post('/equipments.php', body)
+    api.post('/equipments-old.php', body)
         .then(res => {
             snackbar(res.message, 'success');
             setTimeout(function(){
@@ -239,7 +239,7 @@ function onAddNewImageFormSubmit() {
     let form = new FormData(this);
     form.append('action', 'addEquipmentImage');
 
-    api.post('/equipment-images.php', form, true)
+    api.post('/equipment-images-old.php', form, true)
         .then(res => {
             snackbar(res.message, 'success');
             onUploadImageSuccess(res.content.id);
@@ -296,7 +296,7 @@ function onDeleteSelectedImageButtonClick() {
     form.append('equipmentID', $('#equipmentID').val());
     form.append('equipmentImageID', id);
 
-    api.post('/equipment-images.php', form, true)
+    api.post('/equipment-images-old.php', form, true)
         .then(res => {
             $(`option[id=${id}]`).remove();
             initializeImagePicker();

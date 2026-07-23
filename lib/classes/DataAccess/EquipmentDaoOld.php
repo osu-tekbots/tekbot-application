@@ -11,7 +11,7 @@ use Model\EquipmentImage;
 /**
  * Handles all of the logic related to queries on capstone equipment resources in the database.
  */
-class EquipmentDao {
+class EquipmentDaoOld {
 
     /** @var DatabaseConnection */
     private $conn;

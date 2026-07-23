@@ -4,7 +4,7 @@
  */
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentDaoOld;
 use Model\EquipmentImage;
 use Util\Security;
 
@@ -25,7 +25,7 @@ function respond($code, $message) {
 if ($_POST['action'] == 'uploadImage') {
     header('Content-Type: application/json');
 
-    $dao = new EquipmentDao($dbConn, $logger);
+    $dao = new EquipmentDaoOld($dbConn, $logger);
 
     $id = $_POST['id'];
     if (empty($id)) {
