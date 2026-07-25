@@ -150,7 +150,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
                 <img class='kit-label-logo' src='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/assets/img/resize_tekbots.png'>
                 <div style='display:flex;'>
                     <ul class='kit-label-list'>";
-            $k = 0;
+            $k = 1;
 
             // List all contents of the kit, except the kit label itself and the bag it's
             // on (or anything else in the "no-print" category). If this would overflow
@@ -159,7 +159,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
             foreach ($contents as $kit_part) {
                 if (! $kit_part['ShowOnLabel']) continue;
                 
-                if ($k > 18 && count($contents) > 19) { // NOTE: hardcoded to vertical limit
+                if ($k > 19 && count($contents) > 20) { // NOTE: hardcoded to vertical limit
                     $labelsHTML .= "<li>(and more; see all contents with QR)</li>";
                     break;
                 }
@@ -189,6 +189,6 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     <?php echo $labelsHTML ?>
 
     <script>
-        // alert('When printing, you must select \'No Margin\' for correct scaling.');
+        alert('When printing, you must select \'No Margin\' for correct scaling.');
     </script>
 </html>
