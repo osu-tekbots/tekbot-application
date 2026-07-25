@@ -134,53 +134,53 @@ if (count($item) > 0){ // Order to generate
 			
 			if ($order[$key] > 0) { // We need to make some of these kits
 				$contents1 = $inventoryDao->getKitContentsByStocknumber($key);
-				foreach ($contents1 AS $key1 => $need1){
-					$part1 = $inventoryDao->getPartByStocknumber($key1);
+				foreach ($contents1 AS $kit_part1){
+					$part1 = $inventoryDao->getPartByStocknumber($kit_part1['StockNumber']);
 					if ($part1->getTypeId() == 1){ //Is a Kit
-						if (array_key_exists($key1, $order))
-							$order[$key1] += $need1*$value1;
+						if (array_key_exists($kit_part1['StockNumber'], $order))
+							$order[$kit_part1['StockNumber']] += $kit_part1['Quantity']*$value1;
 						else
-							$order[$key1] = $need1*$value1 - $part1->getQuantity();	
-						$log .= "$key1 is a KIT. We have ".$part1->getQuantity()." and need $need1 * $value1 = ".($need1*$value1)."<BR>";
+							$order[$kit_part1['StockNumber']] = $kit_part1['Quantity']*$value1 - $part1->getQuantity();	
+						$log .= "{$kit_part1['StockNumber']} is a KIT. We have ".$part1->getQuantity()." and need {$kit_part1['Quantity']} * $value1 = ".($kit_part1['Quantity']*$value1)."<BR>";
 						
-						$value2 = ($need1*$value1) - $part1->getQuantity();
-						if ($order[$key1] > 0) { // We need to make some of these kits
-							$contents2 = $inventoryDao->getKitContentsByStocknumber($key1);
-							foreach ($contents2 AS $key2 => $need2){
-								$part2 = $inventoryDao->getPartByStocknumber($key2);
+						$value2 = ($kit_part1['Quantity']*$value1) - $part1->getQuantity();
+						if ($order[$kit_part1['StockNumber']] > 0) { // We need to make some of these kits
+							$contents2 = $inventoryDao->getKitContentsByStocknumber($kit_part1['StockNumber']);
+							foreach ($contents2 AS $kit_part2){
+								$part2 = $inventoryDao->getPartByStocknumber($kit_part2['StockNumber']);
 								if ($part2->getTypeId() == 1){ //Is a Kit
-									if (array_key_exists($key2, $order))
-										$order[$key2] += $need2*$value2;
+									if (array_key_exists($kit_part2['StockNumber'], $order))
+										$order[$kit_part2['StockNumber']] += $kit_part2['Quantity']*$value2;
 									else
-										$order[$key2] = $need2*$value2 - $part2->getQuantity();
-									$log .= "$key2 is a kit. We have ".$part2->getQuantity()." and need ".($need2*$value2)."<BR>";
-									$value3 = ($need2*$value2) - $part2->getQuantity();
+										$order[$kit_part2['StockNumber']] = $kit_part2['Quantity']*$value2 - $part2->getQuantity();
+									$log .= "{$kit_part2['StockNumber']} is a kit. We have ".$part2->getQuantity()." and need ".($kit_part2['Quantity']*$value2)."<BR>";
+									$value3 = ($kit_part2['Quantity']*$value2) - $part2->getQuantity();
 									
-									if ($order[$key2] > 0) { // We need to make some of these kits
-										$contents3 = $inventoryDao->getKitContentsByStocknumber($key2);
-										foreach ($contents3 AS $key3 => $need3){			
-												$log .= "3: $key3 is a part. We have ".$part2->getQuantity()." and need $need3 * $value3 = ".($need3*$value3)."<BR>";
-												if (array_key_exists($key3, $order))
-													$order[$key3] += $need3*$value3;
+									if ($order[$kit_part2['StockNumber']] > 0) { // We need to make some of these kits
+										$contents3 = $inventoryDao->getKitContentsByStocknumber($kit_part2['StockNumber']);
+										foreach ($contents3 AS $kit_part3['StockNumber'] => $kit_part3['Quantity']){			
+												$log .= "3: {$kit_part3['StockNumber']} is a part. We have ".$part2->getQuantity()." and need {$kit_part3['Quantity']} * $value3 = ".($kit_part3['Quantity']*$value3)."<BR>";
+												if (array_key_exists($kit_part3['StockNumber'], $order))
+													$order[$kit_part3['StockNumber']] += $kit_part3['Quantity']*$value3;
 												else
-													$order[$key3] = $need3*$value3 - $part2->getQuantity();							
+													$order[$kit_part3['StockNumber']] = $kit_part3['Quantity']*$value3 - $part2->getQuantity();							
 										}
 									}
 								} else {
-									$log .= "2: ".$part2->getName()." is a part. We have ".$part2->getQuantity()." and need $need2 * $value2 = ".($need2*$value2)."<BR>";
-									if (array_key_exists($key2, $order))
-										$order[$key2] += $need2*$value2;
+									$log .= "2: ".$part2->getName()." is a part. We have ".$part2->getQuantity()." and need {$kit_part2['Quantity']} * $value2 = ".($kit_part2['Quantity']*$value2)."<BR>";
+									if (array_key_exists($kit_part2['StockNumber'], $order))
+										$order[$kit_part2['StockNumber']] += $kit_part2['Quantity']*$value2;
 									else
-										$order[$key2] = $need2*$value2- $part2->getQuantity();	
+										$order[$kit_part2['StockNumber']] = $kit_part2['Quantity']*$value2- $part2->getQuantity();	
 								}				
 							}
 						}
 					} else {
-						$log .= "1: ".$part1->getName()." is a part. We have ".$part1->getQuantity()." and need ".($need1*$value1)."<BR>";
-						if (array_key_exists($key1, $order))
-							$order[$key1] += $need1*$value1;
+						$log .= "1: ".$part1->getName()." is a part. We have ".$part1->getQuantity()." and need ".($kit_part1['Quantity']*$value1)."<BR>";
+						if (array_key_exists($kit_part1['StockNumber'], $order))
+							$order[$kit_part1['StockNumber']] += $kit_part1['Quantity']*$value1;
 						else
-							$order[$key1] = $need1*$value1 - $part1->getQuantity();	
+							$order[$kit_part1['StockNumber']] = $kit_part1['Quantity']*$value1 - $part1->getQuantity();	
 					}				
 				}
 			}

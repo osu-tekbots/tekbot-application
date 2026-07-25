@@ -156,14 +156,16 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
             // on (or anything else in the "no-print" category). If this would overflow
             // the label, adds a note referring the user to the TekBots website for the
             // full contents list.
-            foreach ($contents as $key => $value) {
+            foreach ($contents as $kit_part) {
+                if (! $kit_part['ShowOnLabel']) continue;
+                
                 if ($k > 18 && count($contents) > 19) { // NOTE: hardcoded to vertical limit
                     $labelsHTML .= "<li>(and more; see all contents with QR)</li>";
                     break;
                 }
             
-                $p = $inventoryDao->getPartByStocknumber($key);
-                $labelsHTML .= "<li><b>$value &ndash;</b> {$p->getName()}</li>";
+                $p = $inventoryDao->getPartByStocknumber($kit_part['StockNumber']);
+                $labelsHTML .= "<li><b>{$kit_part['Quantity']} &ndash;</b> {$p->getName()}</li>";
                 $k++;
             }
             $labelsHTML .= "</ul>

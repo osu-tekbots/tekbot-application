@@ -321,9 +321,9 @@ class InventoryActionHandler extends ActionHandler {
 		$contents = $this->inventoryDao->getKitContentsByStocknumber($body['stockNumber']);
 		$cost = $kitfee;
 
-		foreach ($contents AS $key => $value){
-			$p = $this->inventoryDao->getPartByStocknumber($key);
-			$cost += ($p->getLastPrice() * $value);
+		foreach ($contents AS $kit_part){
+			$p = $this->inventoryDao->getPartByStocknumber($kit_part['StockNumber']);
+			$cost += ($p->getLastPrice() * $kit_part['Quantity']);
 		}
 
 		$part->setLastPrice($cost);
@@ -497,6 +497,22 @@ class InventoryActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
 		else
 			$this->respond(new Response(Response::OK, 'Quantity Updated'));
+    }
+    public function handleUpdateKitPartLabelVisibility() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+        
+        // Ensure the required parameters exist
+        $this->requireParam('stockNumber');
+		$this->requireParam('childid');
+        $this->requireParam('showOnLabel');
+        $body = $this->requestBody;
+
+        $ok = $this->inventoryDao->updateKitPartLabelVisibility($body['stockNumber'],$body['childid'],$body['showOnLabel']);
+        if(!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Update'));
+		else
+			$this->respond(new Response(Response::OK, 'Visibility Updated'));
     }
 
     public function handleUpdateInventoryQuantityByAmount() {
@@ -948,6 +964,10 @@ class InventoryActionHandler extends ActionHandler {
 			case 'updateKitQuantity':
                 $this->handleUpdateKitQuantity();
 				break;
+            
+            case 'updateKitPartLabelVisibility':
+                $this->handleUpdateKitPartLabelVisibility();
+                break;
 
             case 'updateInventoryQuantityByAmount':
                 $this->handleUpdateInventoryQuantityByAmount();

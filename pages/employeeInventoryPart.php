@@ -109,11 +109,11 @@ if (count($contents) > 0){
                     </tr>
                 </thead>
                 <tbody>";
-	foreach ($contents AS $key => $value){
-		$p = $inventoryDao->getPartByStocknumber($key);
+	foreach ($contents AS $kit_part){
+		$p = $inventoryDao->getPartByStocknumber($kit_part['StockNumber']);
 		
-		$contentsHTML .= "<tr><td>$value</td><td>".$p->getType()."</td>
-		<td><a href='./pages/employeeInventoryPart.php?stocknumber=$key'>".$p->getName()."</a></td><td>$".$p->getLastPrice()."</td></tr>";	
+		$contentsHTML .= "<tr><td>{$kit_part['Quantity']}</td><td>".$p->getType()."</td>
+		<td><a href='./pages/employeeInventoryPart.php?stocknumber={$kit_part['StockNumber']}'>".$p->getName()."</a></td><td>$".$p->getLastPrice()."</td></tr>";	
 	}
 	$contentsHTML .= "</tbody></table>";
 }

@@ -166,7 +166,7 @@ class InventoryDao {
     public function getKitContentsByStocknumber($stockNumber) {
         try {
 			$sql = '
-			SELECT tekbots_kitcontents.* 
+			SELECT tekbots_kitcontents.ChildID as StockNumber, tekbots_kitcontents.Quantity, tekbots_kitcontents.ShowOnLabel
 			FROM `tekbots_kitcontents` 
 			INNER JOIN tekbots_parts ON tekbots_parts.StockNumber = tekbots_kitcontents.ChildID 
 			INNER JOIN tekbots_types ON tekbots_types.ID = tekbots_parts.TypeID 
@@ -175,14 +175,8 @@ class InventoryDao {
 			';
             $params = array(':stocknumber' => $stockNumber);
             $results = $this->conn->query($sql, $params);
-          
-            $contents = Array();
-			foreach ($results as $row) {
-				$contents[$row['ChildID']] = $row['Quantity'];
-				// $contents[] = $row;
-            }
 			
-            return $contents;
+            return $results;
         } catch (\Exception $e) {
             $this->logger->error('Failed to get part with StockNumber '.$stockNumber.': ' . $e->getMessage());
             return false;
@@ -235,12 +229,35 @@ class InventoryDao {
         }
     }
 
+    public function updateKitPartLabelVisibility($parentid, $childid, $showOnLabel) {
+        try {
+            $sql = '
+            UPDATE tekbots_kitcontents
+            SET `ShowOnLabel` = :showOnLabel
+			WHERE `ParentID` = :parentid 
+			AND `ChildID` = :childid
+            ';
+            $params = array(
+                ':parentid' => $parentid,
+				':childid' => $childid,
+				':showOnLabel' => $showOnLabel
+				
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update kit part label visibility: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function addKitContentsFromArray($kitId, $contents) {
         try {
-            foreach ($contents as $childId => $quantity) {
+            foreach ($contents as $kit_part) {
                // $this -> logger->info('child object ' . $childId);
 
-                $this->addKitContents($kitId, $childId, $quantity);
+                $this->addKitContents($kitId, $kit_part['StockNumber'], $kit_part['Quantity']);
             }
             return true;
 

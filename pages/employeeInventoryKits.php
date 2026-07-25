@@ -143,24 +143,26 @@ if (isset($stocknumber)){ // Display single kit information
 						<th>Cost (each)</th>
 						<th>Quantity per Kit</th>
 						<th>Stock</th>
+						<th>Show on Label</th>
 						<th></th>
                     </tr>
                 </thead>
                 <tbody>";
-	foreach ($contents AS $key => $value){
-		$p = $inventoryDao->getPartByStocknumber($key);
+	foreach ($contents AS $kit_part){
+		$p = $inventoryDao->getPartByStocknumber($kit_part['StockNumber']);
 		
 		$contentsHTML .= "<tr><td>".$p->getType()."</td>
 		<td>";
 		if($p->getType() == "Kit")
-			$contentsHTML .= "<a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a>";
+			$contentsHTML .= "<a href='./pages/employeeInventoryKits.php?stocknumber={$kit_part['StockNumber']}'>".$p->getName()."</a>";
 		else
-			$contentsHTML .= "<a href='./pages/employeeInventoryPart.php?stocknumber=$key'>".$p->getName()."</a>";
+			$contentsHTML .= "<a href='./pages/employeeInventoryPart.php?stocknumber={$kit_part['StockNumber']}'>".$p->getName()."</a>";
 		$contentsHTML .= "</td>
 		<td>".$p->getLocation()."</td><td>".numberToDollarString($p -> getLastPrice())."</td>
-		<td><input type='number' value='$value' id='quantity$key' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td>
-		<td><input class='form-control' type='number' id='stock$key' value='".$p->getQuantity()."' onchange='updateStock(\"$key\")'></td>
-		<td><button type='button' class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	
+		<td><input type='number' value='{$kit_part['Quantity']}' id='quantity{$kit_part['StockNumber']}' onchange='updateKitQuantity(\"$stocknumber\",\"{$kit_part['StockNumber']}\");'></td>
+		<td><input class='form-control' type='number' id='stock{$kit_part['StockNumber']}' value='".$p->getQuantity()."' onchange='updateStock(\"{$kit_part['StockNumber']}\")'></td>
+		<td class='text-center'><input class='form-control' id='visibility{$kit_part['StockNumber']}' onchange='updateKitPartLabelVisiblity(\"$stocknumber\",\"{$kit_part['StockNumber']}\");' type='checkbox'" . ($kit_part['ShowOnLabel'] ? " checked" : "") . "></td>
+		<td><button type='button' class='btn btn-warning print-hide' onclick='removeKitContents(\"$stocknumber\",\"{$kit_part['StockNumber']}\");'>Remove</button></td></tr>";	
 	}
 	$contentsHTML .= "</tbody></table>";
 	
@@ -304,7 +306,25 @@ function updateKitQuantity(id,childid){
 	}
 
 	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'Updated');
+		snackbar(res.message, 'success');
+		window.location.reload();
+	}).catch(err => {
+		snackbar(err.message, 'error');
+	});
+}
+
+function updateKitPartLabelVisiblity(id, childid) {
+	let showOnLabel = $('#visibility'+childid).is(':checked');
+
+	let content = {
+		action: 'updateKitPartLabelVisibility',
+		stockNumber: id,
+		childid,
+		showOnLabel
+	}
+
+	api.post('/inventory.php', content).then(res => {
+		snackbar(res.message, 'success');
 		window.location.reload();
 	}).catch(err => {
 		snackbar(err.message, 'error');
