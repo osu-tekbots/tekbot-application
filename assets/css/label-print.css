@@ -1,0 +1,134 @@
+body {
+    font-family: 'Arial' , monospace;
+    font-size: 6pt;
+}
+
+@page {
+    size: letter landscape;
+    margin: 0in;
+}
+
+div.printpagexl {
+    page-break-inside: avoid;
+    float: none;
+    box-sizing: border-box;
+    
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: .25in;
+
+    width: 11in;
+    height: 8.48in; /* Maximum height that keeps Chrome from adding a second page */
+
+    padding-left: .5in;
+    padding-right: .5in;
+    padding-top: .0in;
+    padding-bottom: .25in;
+}
+
+div.printpagelarge {
+    page-break-inside: avoid;
+    float: none;
+    box-sizing: border-box;
+
+    width:8.35in; 
+    height:10.04in; 
+
+    padding-left: .15in;
+    padding-right: 0in;
+    padding-top: .35in;
+    padding-bottom: .48in;
+}
+
+div.printpagesmall {
+    page-break-inside: avoid;
+    float: none;
+    box-sizing: border-box;
+    
+    width: 8.35in;
+    height: 10.04in;
+
+    padding-left: .3in;
+    padding-right: 0in;
+    padding-top: .45in;
+    padding-bottom: .48in;
+}
+
+div.printlabelxl {
+    position: relative;
+    float: left;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: white;
+    background-color: #ffffff;
+
+    width: 3.33in;
+    height: 4in; /* Maximum height that keeps Chrome from adding a second page */
+
+    padding: 2em;
+}
+
+div.printlabellarge {
+    float: left;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: black;
+    background-color: #ffffff;
+
+    width: 4in;
+    min-width: 4in;
+    height: 2in;
+    min-height: 2in;
+}
+
+div.printlabelsmall {
+    float:left;
+    box-sizing: border-box;
+    background-color: #ffffff;
+
+    width: 1.95in;
+    min-width: 1.95in;
+    height: 1.25in;
+    min-height: 1.25in;
+}
+
+div.kit-label {
+    text-align: center;
+}
+
+.kit-label-list {
+    font-size:1.5em;
+    text-align: left;
+    
+    padding-left: 0;
+    overflow: hidden;
+}
+
+.kit-label-list li {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+
+.kit-label-qr {
+    display: block;
+    height: .8in;
+    margin: 0;
+}
+
+.kit-label-logo {
+    position:absolute;
+    right:2.5em;
+    bottom:1em;
+    transform-origin:bottom right;
+    transform: rotate(-90deg) translateX(100%);
+
+    height:.7in;
+
+    /* Filters identified from https://angel-rs.github.io/css-color-filter-generator/ */
+    filter: brightness(0) saturate(100%) invert(45%) sepia(83%) saturate(7023%) hue-rotate(11deg) brightness(94%) contrast(93%);
+}
+
+div.kit-label * {
+    margin: 0;
+}
