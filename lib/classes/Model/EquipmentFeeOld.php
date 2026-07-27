@@ -6,7 +6,7 @@ use Util\IdGenerator;
 /**
  * Data structure representing equipment fees
  */
-class EquipmentFee {
+class EquipmentFeeOld {
 
     /** @var int */
     private $feeID;
@@ -14,7 +14,7 @@ class EquipmentFee {
     /** @var int */
 	private $checkoutID;
 	
-	/** @var EquipmentCheckout */
+	/** @var EquipmentCheckoutOld */
 	private $checkout;
 
 	/** @var int */

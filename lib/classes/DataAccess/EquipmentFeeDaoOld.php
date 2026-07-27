@@ -1,7 +1,7 @@
 <?php
 namespace DataAccess;
 
-use Model\EquipmentFee;
+use Model\EquipmentFeeOld;
 
 /**
  * Handles all of the logic related to queries on capstone project resources in the database.
@@ -86,7 +86,7 @@ class EquipmentFeeDaoOld {
      * Fetches the equipment fee with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentFee|boolean the equipment on success, false otherwise
+     * @return \Model\EquipmentFeeOld|boolean the equipment on success, false otherwise
      */
     public function getEquipmentFee($id) {
         try {
@@ -252,7 +252,7 @@ class EquipmentFeeDaoOld {
      * @return \Model\CapstoneProject
      */
     public static function ExtractEquipmentFeeFromRow($row, $userInRow = false) {
-        $fee = new EquipmentFee($row['id']);
+        $fee = new EquipmentFeeOld($row['id']);
         $fee->setCheckoutID($row['checkout_id']);
         $fee->setUserID($row['user_id']);
         $fee->setNotes($row['notes']);

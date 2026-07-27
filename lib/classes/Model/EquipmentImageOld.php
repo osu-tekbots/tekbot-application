@@ -8,13 +8,13 @@ use Util\IdGenerator;
  * Represents an image (JPEG, PNG, etc.) associated with a equipment. Equipments can have multiple
  * images.
  */
-class EquipmentImage {
+class EquipmentImageOld {
 
     /** @var string */
     private $imageID;
     /** @var string */
 	private $equipmentID;
-    /** @var Equipment */
+    /** @var EquipmentOld */
     private $equipment;
     /** @var string */
     private $imageName;

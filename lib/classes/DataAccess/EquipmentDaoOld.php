@@ -2,10 +2,10 @@
 // Updated 11/5/2019
 namespace DataAccess;
 
-use Model\Equipment;
-use Model\EquipmentHealth;
-use Model\EquipmentCategory;
-use Model\EquipmentImage;
+use Model\EquipmentOld;
+use Model\EquipmentHealthOld;
+use Model\EquipmentCategoryOld;
+use Model\EquipmentImageOld;
 
 
 /**
@@ -35,7 +35,7 @@ class EquipmentDaoOld {
      *
      * @param integer $offset the offset into the results to fetch
      * @param integer $limit the max number of results to fetch in this batch
-     * @return \Model\Equipment[]|boolean an array of equipments on success, false otherwise
+     * @return \Model\EquipmentOld[]|boolean an array of equipments on success, false otherwise
      */
     public function getBrowsableEquipment() {
         // $offset = 0, $limit = -1
@@ -72,7 +72,7 @@ class EquipmentDaoOld {
      *
      * @param integer $offset the offset into the results to fetch
      * @param integer $limit the max number of results to fetch in this batch
-     * @return \Model\Equipment[]|boolean an array of equipments on success, false otherwise
+     * @return \Model\EquipmentOld[]|boolean an array of equipments on success, false otherwise
      */
     public function getAdminEquipment($offset = 0, $limit = -1) {
         try {
@@ -104,7 +104,7 @@ class EquipmentDaoOld {
      * Fetches the equipment with the provided ID
      *
      * @param string $id
-     * @return \Model\Equipment|boolean the equipment on success, false otherwise
+     * @return \Model\EquipmentOld|boolean the equipment on success, false otherwise
      */
     public function getEquipment($id) {
         try {
@@ -149,7 +149,7 @@ class EquipmentDaoOld {
     /**
      * Adds a new capstone equipment entry into the database.
      *
-     * @param \Model\Equipment $equipment the equipment to add
+     * @param \Model\EquipmentOld $equipment the equipment to add
      * @return boolean true if successful, false otherwise
      */
     public function addNewEquipment($equipment) {
@@ -206,7 +206,7 @@ class EquipmentDaoOld {
     /**
      * Updates an existing capstone equipment entry into the database.
      *
-     * @param \Model\Equipment $equipment the equipment to update
+     * @param \Model\EquipmentOld $equipment the equipment to update
      * @return boolean true if successful, false otherwise
      */
     public function updateEquipment($equipment) {
@@ -284,7 +284,7 @@ class EquipmentDaoOld {
     /**
      * Inserts metadata for a new image for a equipment in the databsae.
      *
-     * @param \Model\EquipmentImage $image the image metadata to insert into the database
+     * @param \Model\EquipmentImageOld $image the image metadata to insert into the database
      * @return boolean true on success, false otherwise
      */
     public function addNewEquipmentImage($image) {
@@ -317,7 +317,7 @@ class EquipmentDaoOld {
     /**
      * Updates metadata for an image for a equipment in the databsae.
      *
-     * @param \Model\EquipmentImage $image the image metadata to update into the database
+     * @param \Model\EquipmentImageOld $image the image metadata to update into the database
      * @return boolean true on success, false otherwise
      */
     public function updateDefaultEquipmentImage($image) {
@@ -352,7 +352,7 @@ class EquipmentDaoOld {
     /**
      * Removes metadata for a new image for a equipment in the databsae.
      *
-     * @param \Model\EquipmentImage $image the image metadata to insert into the database
+     * @param \Model\EquipmentImageOld $image the image metadata to insert into the database
      * @return boolean true on success, false otherwise
      */
     public function removeEquipmentImage($imageID) {
@@ -379,7 +379,7 @@ class EquipmentDaoOld {
      * The image metadata will NOT include a reference to the equipment with which it is associated.
      *
      * @param string $id the ID of the image to fetch
-     * @return \Model\EquipmentImage the image on success, false otherwise
+     * @return \Model\EquipmentImageOld the image on success, false otherwise
      */
     public function getEquipmentImage($id) {
         try {
@@ -401,10 +401,10 @@ class EquipmentDaoOld {
     /**
      * Fetches the images related to an equipment item
      *
-     * @param \Model\Equipment $equipment the project whose images to fetch
+     * @param \Model\EquipmentOld $equipment the project whose images to fetch
      * @param boolean $setImages determines whether the function will implicity set equipment images to the result of
      * the query.
-     * @return \Model\Equipment[]|boolean an array if image metadata objects on success, false otherwise
+     * @return \Model\EquipmentOld[]|boolean an array if image metadata objects on success, false otherwise
      */
     public function getEquipmentImages($equipment, $setImages = false) {
         try {
@@ -437,7 +437,7 @@ class EquipmentDaoOld {
      * The image metadata will NOT include a reference to the project with which it is associated.
      *
      * @param string $id the ID of the image to fetch
-     * @return \Model\EquipmentImage the image on success, false otherwise
+     * @return \Model\EquipmentImageOld the image on success, false otherwise
      */
     public function getDefaultEquipmentImage($id) {
         try {
@@ -461,7 +461,7 @@ class EquipmentDaoOld {
     /**
      * Fetches a list of categories for equipment categories
      *
-     * @return \Model\EquipmentCategory[]|boolean an array of categories on success, false otherwise
+     * @return \Model\EquipmentCategoryOld[]|boolean an array of categories on success, false otherwise
      */
     public function getEquipmentCategory() {
         try {
@@ -483,7 +483,7 @@ class EquipmentDaoOld {
     /**
      * Fetches a list of categories for equipment health
      *
-     * @return \Model\EquipmentHealth[]|boolean an array of categories on success, false otherwise
+     * @return \Model\EquipmentHealthOld[]|boolean an array of categories on success, false otherwise
      */
     public function getEquipmentHealth() {
         try {
@@ -503,13 +503,13 @@ class EquipmentDaoOld {
     }
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new EquipmentOld object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\EquipmentOld
      */
     public static function ExtractEquipmentFromRow($row) {
-        $equipment = new Equipment($row['equipment_id']);
+        $equipment = new EquipmentOld($row['equipment_id']);
         $equipment->setEquipmentName($row['equipment_name']);
         $equipment->setDescription($row['description']);
         $equipment->setHealthID(self::ExtractEquipmentHealthFromRow($row, true));
@@ -532,13 +532,13 @@ class EquipmentDaoOld {
     /**
      * Extracts information about an image for a equipment from a row in a database result set.
      * 
-     * The resulting EquipmentImage does NOT have its reference to the equipment it belongs to set.
+     * The resulting EquipmentImageOld does NOT have its reference to the equipment it belongs to set.
      *
      * @param mixed[] $row the row in the database result
-     * @return \Model\EquipmentImage the image extracted from the information
+     * @return \Model\EquipmentImageOld the image extracted from the information
      */
     public static function ExtractEquipmentImageFromRow($row) {
-        $image = new EquipmentImage($row['equipment_image_id']);
+        $image = new EquipmentImageOld($row['equipment_image_id']);
         $image->setEquipmentID($row['equipment_id']);
         $image->setImageName($row['image_name']);
         $image->setIsDefault($row['is_default'] ? true : false);
@@ -546,29 +546,29 @@ class EquipmentDaoOld {
     }
  
     /**
-     * Extract Equipment Category using information from the database row
+     * Extract EquipmentOld Category using information from the database row
      *
      * @param mixed[] $row the database row to extract information from
      * @param boolean $equipmentInRow indicates whether the project is also included in the row
-     * @return \Model\EquipmentCategory
+     * @return \Model\EquipmentCategoryOld
      */
     public static function ExtractEquipmentCategoryFromRow($row, $equipmentInRow = false) {
         $id = $equipmentInRow ? 'category_name' : 'category_id';
         $name = isset($row['category_name']) ? $row['category_name'] : null;
-        return new EquipmentCategory($row[$id], $name);
+        return new EquipmentCategoryOld($row[$id], $name);
     }
 
     /**
-     * Extract Equipment Health using information from the database row
+     * Extract EquipmentOld Health using information from the database row
      *
      * @param mixed[] $row the database row to extract information from
      * @param boolean $equipmentInRow indicates whether the project is also included in the row
-     * @return \Model\EquipmentHealth
+     * @return \Model\EquipmentHealthOld
      */
     public static function ExtractEquipmentHealthFromRow($row, $equipmentInRow = false) {
         $id = $equipmentInRow ? 'health_name' : 'health_id';
         $name = isset($row['health_name']) ? $row['health_name'] : null;
-        return new EquipmentHealth($row[$id], $name);
+        return new EquipmentHealthOld($row[$id], $name);
     }
 
 

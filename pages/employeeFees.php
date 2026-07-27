@@ -11,8 +11,6 @@ use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use DataAccess\EquipmentFeeDaoOld;
 use DataAccess\PrinterFeeDao;
-use Model\UserAccessLevel;
-use Model\EquipmentFee;
 use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())

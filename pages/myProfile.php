@@ -2,17 +2,6 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDaoOld;
-use DataAccess\EquipmentDaoOld;
-use DataAccess\EquipmentCheckoutDaoOld;
-use DataAccess\EquipmentReservationDaoOld;
-use DataAccess\PrinterFeeDao;
-use DataAccess\PrinterDao;
-use DataAccess\BoxDao;
-use DataAccess\KitEnrollmentDao;
-use Model\KitEnrollmentStatus;
-use Model\EquipmentCheckoutStatus;
-use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
 	session_start();

@@ -2,9 +2,9 @@
 // Updated 11/5/2019
 namespace DataAccess;
 
-use Model\EquipmentCheckout;
+use Model\EquipmentCheckoutOld;
 use Model\EquipmentDaoOld;
-use Model\EquipmentCheckoutStatus;
+use Model\EquipmentCheckoutStatusOld;
 
 
 /**
@@ -34,7 +34,7 @@ class EquipmentCheckoutDaoOld {
      * Fetches checkouts associated with a user.
      *
      * @param string $userID the ID of the user whose projects to fetch
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentCheckoutOld[]|boolean an array of projects on success, false otherwise
      */
     public function getCheckoutsForUser($userID) {
         try {
@@ -100,7 +100,7 @@ class EquipmentCheckoutDaoOld {
      * Fetches the equipment checkout with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentCheckout|boolean the equipment on success, false otherwise
+     * @return \Model\EquipmentCheckoutOld|boolean the equipment on success, false otherwise
      */
     public function getCheckout($id) {
         try {
@@ -132,7 +132,7 @@ class EquipmentCheckoutDaoOld {
     /**
      * Fetches checked out equipment for admin.
      *
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentCheckoutOld[]|boolean an array of projects on success, false otherwise
      */
     public function getCheckoutsForAdmin() {
         try {
@@ -164,7 +164,7 @@ class EquipmentCheckoutDaoOld {
     /**
      * Fetches checked out equipment count for admin.
      *
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentCheckoutOld[]|boolean an array of projects on success, false otherwise
      */
     public function getCheckoutCountForAdmin() {
         try {
@@ -198,7 +198,7 @@ class EquipmentCheckoutDaoOld {
     /**
      * Adds a new equipment checkout entry into the database.
      *
-     * @param \Model\EquipmentCheckout $checkout the equipment to add
+     * @param \Model\EquipmentCheckoutOld $checkout the equipment to add
      * @return boolean true if successful, false otherwise
      */
     public function addNewCheckout($checkout) {
@@ -244,7 +244,7 @@ class EquipmentCheckoutDaoOld {
     /**
      * Updates an equipment entry into the database.
      *
-     * @param \Model\EquipmentCheckout $checkout the equipment to add
+     * @param \Model\EquipmentCheckoutOld $checkout the equipment to add
      * @return boolean true if successful, false otherwise
      */
     public function updateCheckout($checkout) {
@@ -288,7 +288,7 @@ class EquipmentCheckoutDaoOld {
     /**
      * Fetches a list of categories for checkout status
      *
-     * @return \Model\EquipmentCheckoutStatus[]|boolean an array of categories on success, false otherwise
+     * @return \Model\EquipmentCheckoutStatusOld[]|boolean an array of categories on success, false otherwise
      */
     public function getCheckoutStatusTypes() {
         try {
@@ -311,10 +311,10 @@ class EquipmentCheckoutDaoOld {
      * Extracts Checkout object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\EquipmentCheckout
+     * @return \Model\EquipmentCheckoutOld
      */
     public static function ExtractCheckoutFromRow($row, $userInRow = false) {
-        $checkout = new EquipmentCheckout($row['eqcheckout_id']);
+        $checkout = new EquipmentCheckoutOld($row['eqcheckout_id']);
         $checkout->setUserID($row['user_id']);
         $checkout->setReservationID($row['reservation_id']);
         $checkout->setEquipmentID($row['equipment_id']);
@@ -344,7 +344,7 @@ class EquipmentCheckoutDaoOld {
     public static function ExtractCheckoutStatusFromRow($row, $userInRow = false) {
         $id = $userInRow ? 'status_name' : 'id';
         $name = isset($row['status_name']) ? $row['status_name'] : null;
-        return new EquipmentCheckoutStatus($row[$id], $name);
+        return new EquipmentCheckoutStatusOld($row[$id], $name);
     }
 }
 

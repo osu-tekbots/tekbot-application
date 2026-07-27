@@ -111,16 +111,7 @@ class KitEnrollmentActionHandler extends ActionHandler {
         } else {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, $errors));
         }
-        /*
-        $equipment = new Equipment();
-        $equipment->setEquipmentName($body['title']);
-        $equipment->setDateCreated(new \DateTime());
 
-        $ok = $this->equipmentDao->addNewEquipment($equipment);
-        if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new equipment'));
-        }
-        */
         $this->respond(new Response(
             Response::CREATED, 
             $kitArray

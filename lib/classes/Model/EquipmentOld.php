@@ -5,9 +5,9 @@ namespace Model;
 use Util\IdGenerator;
 
 /**
- * Data structure representing an Equipment
+ * Data structure representing an EquipmentOld
  */
-class Equipment {
+class EquipmentOld {
     
     /** @var int */
     private $equipmentID;
@@ -18,7 +18,7 @@ class Equipment {
     /** @var string */
     private $description;
 
-    /** @var EquipmentHealth */
+    /** @var EquipmentHealthOld */
     private $healthID;
 
     /** @var string */
@@ -45,10 +45,10 @@ class Equipment {
 	/** @var int */
 	private $instances;
 
-    /** @var EquipmentCategory */
+    /** @var EquipmentCategoryOld */
 	private $categoryID;
 	
-	/** @var EquipmentImage[] */
+	/** @var EquipmentImageOld[] */
 	private $equipmentImages;
 
 	/** @var boolean */
@@ -64,7 +64,7 @@ class Equipment {
     private $dateUpdated;
 
     /**
-     * Creates a new instance of a Tekbot Equipment.
+     * Creates a new instance of a Tekbot EquipmentOld.
      * 
      * If an ID is provided, defaults will not be set. If an ID is not provided, a new ID will be generated and
      * defaults will be set.
@@ -75,8 +75,8 @@ class Equipment {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setEquipmentID($id);
-            $this->setHealthID(new EquipmentHealth());
-			$this->setCategoryID(new EquipmentCategory());
+            $this->setHealthID(new EquipmentHealthOld());
+			$this->setCategoryID(new EquipmentCategoryOld());
 			$this->setIsArchived(FALSE);
 			$this->setIsPublic(FALSE);
 			$this->setInstances(1);

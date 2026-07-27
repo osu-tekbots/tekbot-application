@@ -13,7 +13,7 @@ use Model\PrintType;
 use Model\Box;
 use Model\LaserJob;
 use Model\LaserMaterial;
-use Model\Equipment;
+use Model\EquipmentOld;
 use Model\Ticket;
 use Model\Part;
 use Model\InternalSale;
@@ -138,8 +138,8 @@ class MessageActionHandler extends ActionHandler {
                 $this->fillObject($laserMaterial);
                 $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
                 break;
-            case 6: // Equipment
-                $equipment = new Equipment();
+            case 6: // EquipmentOld
+                $equipment = new EquipmentOld();
                 $this->fillObject($equipment);
                 $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
                 break;

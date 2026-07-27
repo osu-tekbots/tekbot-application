@@ -83,10 +83,10 @@ class PrinterFeeDao {
     }
     
     /**
-     * Fetches the equipment fee with the provided ID
+     * Fetches the print fee with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentFee|boolean the equipment on success, false otherwise
+     * @return \Model\PrintFee|boolean the fee on success, false otherwise
      */
     public function getPrintFee($id) {
         try {

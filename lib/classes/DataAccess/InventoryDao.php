@@ -941,10 +941,10 @@ class InventoryDao {
     //public function sendRecountEmail($id) {}
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Part object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\Part
      */
     public static function ExtractPartFromRow($row) {
         $part = new Part($row['StockNumber']);
@@ -1017,10 +1017,10 @@ class InventoryDao {
     }
 	
 	/**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Kit object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\Kit
      */
     public static function ExtractKitFromRow($row) {
         $kit = new Kit($row['StockNumber']);

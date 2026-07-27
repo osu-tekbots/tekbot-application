@@ -149,10 +149,10 @@ class MessageDao {
     }
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Message object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\Message
      */
     public static function ExtractMessageFromRow($row) {
         $message = new Message($row['message_id']);

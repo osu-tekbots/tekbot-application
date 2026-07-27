@@ -685,10 +685,10 @@ class PrinterDao {
 
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Printer object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\Printer
      */
     public static function ExtractPrinterFromRow($row, $printerInRow = false) {
         $printer = new Printer($row['3dprinter_id']);
@@ -711,12 +711,10 @@ class PrinterDao {
     }
 
     /**
-     * Extracts information about an image for a equipment from a row in a database result set.
-     * 
-     * The resulting EquipmentImage does NOT have its reference to the equipment it belongs to set.
+     * Extracts information about a print type from a row in a database result set.
      *
      * @param mixed[] $row the row in the database result
-     * @return \Model\EquipmentImage the image extracted from the information
+     * @return \Model\PrintType the print type extracted from the information
      */
     public static function ExtractPrintTypeFromRow($row, $printTypeInRow = false) {
         $printType = new PrintType($row['3dprinter_type_id']);
@@ -737,11 +735,10 @@ class PrinterDao {
     }
  
     /**
-     * Extract Equipment Category using information from the database row
+     * Extract PrintJob Category using information from the database row
      *
      * @param mixed[] $row the database row to extract information from
-     * @param boolean $equipmentInRow indicates whether the project is also included in the row
-     * @return \Model\EquipmentCategory
+     * @return \Model\PrintJob
      */
     public static function ExtractPrintJobFromRow($row) {
         $printJob = new PrintJob($row['3d_job_id']);

@@ -26,10 +26,10 @@ class FaqDao {
     }
     
     /**
-     * Fetches the equipment FAQ with the provided ID
+     * Fetches the FAQ with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentFee|boolean the equipment on success, false otherwise
+     * @return \Model\FAQ|boolean the equipment on success, false otherwise
      */
     public function getFaq($id) {
         try {

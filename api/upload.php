@@ -5,7 +5,7 @@
 include_once '../bootstrap.php';
 
 use DataAccess\EquipmentDaoOld;
-use Model\EquipmentImage;
+use Model\EquipmentImageOld;
 use Util\Security;
 
 /**
@@ -60,7 +60,7 @@ if ($_POST['action'] == 'uploadImage') {
         $equipment = $dao->getEquipment($id);
         // TODO: handle case when no project is found
 
-		$image = new EquipmentImage();
+		$image = new EquipmentImageOld();
 		$imageId = $image->getEquipmentImageID();
 
         if (count($equipment->getEquipmentImages()) == 0) {

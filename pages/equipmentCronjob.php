@@ -6,7 +6,7 @@ use DataAccess\EquipmentCheckoutDaoOld;
 use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\UsersDao;
 use DataAccess\QueryUtils;
-use Model\EquipmentCheckoutStatus;
+use Model\EquipmentCheckoutStatusOld;
 use Util\Security;
 use Email\EquipmentRentalMailer;
 
@@ -80,7 +80,7 @@ foreach ($checkedoutEquipment as $c){
 	// If checked out
 	if ($statusID == "Checked Out"){
 		if (QueryUtils::isLate($latestPickupTime)){
-			$c->setStatusID(EquipmentCheckoutStatus::LATE);
+			$c->setStatusID(EquipmentCheckoutStatusOld::LATE);
 			$ok = $checkoutDao->updateCheckout($c);
 			if ($ok){
 				$ok = $mailer->sendEquipmentLateEmail($c, $user, $equipmentName);

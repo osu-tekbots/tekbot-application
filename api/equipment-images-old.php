@@ -6,7 +6,7 @@
  */
 include_once '../bootstrap.php';
 use DataAccess\EquipmentDaoOld;
-use Model\EquipmentImage;
+use Model\EquipmentImageOld;
 use Api\Response;
 
 if (PHP_SESSION_ACTIVE != session_status())
@@ -101,7 +101,7 @@ function handleAddNewEquipmentImage($equipmentID, $equipmentDao, $configManager,
     if($mimeParts[0] != 'image') {
         respond(400, 'Uploaded file must be an image');
     }
-    $image = new EquipmentImage();
+    $image = new EquipmentImageOld();
     $image->setImageName($fileName);
     $image->setEquipmentID($equipmentID);
     $imageId = $image->getImageID();

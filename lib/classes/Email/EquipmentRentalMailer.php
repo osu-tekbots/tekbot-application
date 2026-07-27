@@ -144,8 +144,8 @@ class EquipmentRentalMailer extends Mailer {
     /**
      * Sends a confirmation email to the user after reserving their equipment
      *
-     * @param \Model\EquipmentReservation $project 
-     * @param string $link the URL allowing the user to view the project
+     * @param \Model\User $user the user who reserved the equipment
+     * @param string $link the URL allowing the user to view their reservation
      * @return boolean true on success, false otherwise
      */
     public function sendReservationAgreementEmail($user, $link) {

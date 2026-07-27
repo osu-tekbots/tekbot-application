@@ -1,9 +1,7 @@
 <?php
 namespace Api;
 
-use Model\Equipment;
-use Model\EquipmentCategory;
-use Model\EquipmentHealth;
+use Model\EquipmentOld;
 use DataAccess\QueryUtils;
 
 
@@ -12,7 +10,7 @@ use DataAccess\QueryUtils;
 /**
  * Defines the logic for how to handle AJAX requests made to modify equipment information.
  */
-class EquipmentActionHandler extends ActionHandler {
+class EquipmentActionHandlerOld extends ActionHandler {
 
     /** @var \DataAccess\equipmentDao */
     private $equipmentDao;
@@ -50,7 +48,7 @@ class EquipmentActionHandler extends ActionHandler {
 
         $body = $this->requestBody;
 
-        $equipment = new Equipment();
+        $equipment = new EquipmentOld();
         $equipment->setEquipmentName($body['title']);
         $equipment->setDateCreated(new \DateTime());
 

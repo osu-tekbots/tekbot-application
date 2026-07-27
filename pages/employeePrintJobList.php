@@ -7,7 +7,6 @@ include_once '../bootstrap.php';
 
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())

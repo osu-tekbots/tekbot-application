@@ -5,9 +5,9 @@ use Util\IdGenerator;
 // Updated 11/5/2019
 
 /**
- * Data structure representing an Equipment Checkout
+ * Data structure representing an EquipmentOld Checkout
  */
-class EquipmentCheckout {
+class EquipmentCheckoutOld {
     
     /** @var int */
     private $checkoutID;
@@ -21,13 +21,13 @@ class EquipmentCheckout {
     /** @var int */
 	private $reservationID;
 	
-	/** @var EquipmentReservation */
+	/** @var EquipmentReservationOld */
 	private $reservation;
 
 	/** @var int */
 	private $equipmentID;
 
-	/** @var Equipment */
+	/** @var EquipmentOld */
 	private $equipment;
 
 	/** @var CheckoutStatus */
@@ -69,7 +69,7 @@ class EquipmentCheckout {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setCheckoutID($id);
-            $this->setStatusID(new EquipmentCheckoutStatus());
+            $this->setStatusID(new EquipmentCheckoutStatusOld());
             $this->setDateCreated(new \DateTime());
         } else {
             $this->setCheckoutID($id);

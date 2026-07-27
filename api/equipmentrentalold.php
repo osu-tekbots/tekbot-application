@@ -13,7 +13,7 @@ use DataAccess\UsersDao;
 use DataAccess\ContractDao;
 use DataAccess\EquipmentFeeDaoOld;
 use DataAccess\EquipmentDaoOld;
-use Api\EquipmentRentalActionHandler;
+use Api\EquipmentRentalActionHandlerOld;
 use Email\TekBotsMailer;
 use DataAccess\MessageDao;
 
@@ -30,7 +30,7 @@ $equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail());
 $messageDao = new MessageDao($dbConn, $logger);
 
-$handler = new EquipmentRentalActionHandler($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $equipmentDao , $mailer, $configManager, $logger, $messageDao);
+$handler = new EquipmentRentalActionHandlerOld($equipmentCheckoutDao, $equipmentReservationDao, $contractDao, $usersDao, $equipmentFeeDao, $equipmentDao , $mailer, $configManager, $logger, $messageDao);
 
 // Handle the request
 $handler->handleRequest();

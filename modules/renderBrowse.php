@@ -6,7 +6,6 @@
 use Util\Security;
 use DataAccess\UsersDao;
 use DataAccess\EquipmentDaoOld;
-use DataAccess\EquipmentReservation;
 use DataAccess\EquipmentCheckoutDaoOld;
 
 include_once PUBLIC_FILES . "/modules/button.php";

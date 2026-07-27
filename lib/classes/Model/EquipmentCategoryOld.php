@@ -2,12 +2,12 @@
 namespace Model;
 
 /**
- * Data class representing an TekbotEquipmentHealth enumeration
+ * Data class representing an TekbotEquipmentCategory enumeration
  */
-class EquipmentHealth {
-    const FULLY_FUNCTIONAL = 1;
-    const PARTIAL_FUNCTIONALITY = 2;
-    const BROKEN = 3;
+class EquipmentCategoryOld {
+    const HARDWARE = 1;
+    const ELECTRICAL = 2;
+    const CHEMICAL = 3;
 
     /** @var integer */
     private $id;
@@ -16,20 +16,21 @@ class EquipmentHealth {
     private $name;
 
     /**
-     * Constructs a new instance of a TekbotEquipmentHealth.
+     * Constructs a new instance of a TekbotEquipmentCategory.
      *
-     * @param integer $id the ID of the TekbotEquipmentHealth. This should come directly from the database.
-     * @param string $name the name associated with the TekbotEquipmentHealth
+     * @param integer $id the ID of the TekbotEquipmentCategory. This should come directly from the database.
+     * @param string $name the name associated with the TekbotEquipmentCategory
      */
     public function __construct($id = null, $name = null) {
         if ($id == null && $name == null) {
-            $this->setId(self::FULLY_FUNCTIONAL);
-            $this->setName('FULLY_FUNCTIONAL');
+            $this->setId(self::HARDWARE);
+            $this->setName('HARDWARE');
         } else {
             $this->setId($id);
             $this->setName($name);
         }
     }
+    
 
     /**
      * Get the value of id
@@ -67,5 +68,4 @@ class EquipmentHealth {
         return $this;
     }
 }
-
 ?>

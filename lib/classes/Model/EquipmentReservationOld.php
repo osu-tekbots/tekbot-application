@@ -7,7 +7,7 @@ use Util\IdGenerator;
 /**
  * Data structure representing an equipment Reservation
  */
-class EquipmentReservation {
+class EquipmentReservationOld {
     
     /** @var int */
     private $reservationID;
@@ -15,7 +15,7 @@ class EquipmentReservation {
     /** @var string */
     private $equipmentID;
 
-    /** @var Equipment */
+    /** @var EquipmentOld */
     private $equipment;
 
     /** @var string */

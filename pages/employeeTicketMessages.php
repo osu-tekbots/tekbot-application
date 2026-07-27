@@ -3,7 +3,6 @@ include_once '../bootstrap.php';
 
 use DataAccess\MessageDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 $tool_id = 7; //7 will be tickets id in messages db

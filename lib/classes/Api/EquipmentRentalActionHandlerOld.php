@@ -5,11 +5,10 @@ namespace Api;
 NOTE: Verifying payments requires a call to an uncreated mailing function */
 
 // This action handler will contain handlers for equipment checkout and equipment reservation
-use Model\EquipmentCheckout;
-use Model\EquipmentCheckoutStatus;
-use Model\EquipmentReservation;
-use Model\Equipment;
-use Model\EquipmentFee;
+use Model\EquipmentCheckoutOld;
+use Model\EquipmentCheckoutStatusOld;
+use Model\EquipmentReservationOld;
+use Model\EquipmentFeeOld;
 use Model\User;
 use Model\UserAccessLevel;
 use DataAccess\QueryUtils;
@@ -20,11 +19,11 @@ use Email\TekBotsMailer;
 /**
  * Defines the logic for how to handle AJAX requests made to modify project information.
  */
-class EquipmentRentalActionHandler extends ActionHandler {
+class EquipmentRentalActionHandlerOld extends ActionHandler {
 
-    /** @var \DataAccess\EquipmentCheckout */
+    /** @var \DataAccess\EquipmentCheckoutOld */
     private $EquipmentCheckoutDaoOld;
-    /** @var \DataAccess\EquipmentReservation */
+    /** @var \DataAccess\EquipmentReservationOld */
     private $EquipmentReservationDaoOld;
     /** @var \DataAccess\ContractDao */
     private $ContractDao;
@@ -88,11 +87,11 @@ class EquipmentRentalActionHandler extends ActionHandler {
         $duration = $contract->getDuration();
         
 
-        $checkout = new EquipmentCheckout();
+        $checkout = new EquipmentCheckoutOld();
         $checkout->setReservationID($body['reservationID']);
         $checkout->setUserID($body['userID']);
         $checkout->setEquipmentID($body['equipmentID']);
-        $checkout->setStatusID(EquipmentCheckoutStatus::CHECKED_OUT);
+        $checkout->setStatusID(EquipmentCheckoutStatusOld::CHECKED_OUT);
         $checkout->setContractID($body['contractID']);
         $checkout->setPickupTime(new \DateTime());
         $checkout->setDeadlineTime(QueryUtils::timeAddToCurrent($duration));
@@ -154,9 +153,9 @@ class EquipmentRentalActionHandler extends ActionHandler {
         }
         $deadlineTime = $checkout->getDeadlineTime();
         if (QueryUtils::isLate($deadlineTime)){
-            $checkout->setStatusID(EquipmentCheckoutStatus::RETURNED_LATE);
+            $checkout->setStatusID(EquipmentCheckoutStatusOld::RETURNED_LATE);
         } else {
-            $checkout->setStatusID(EquipmentCheckoutStatus::RETURNED);
+            $checkout->setStatusID(EquipmentCheckoutStatusOld::RETURNED);
         }
 
         $checkout->setNotes($checkoutNotes);
@@ -370,7 +369,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Equipment already reserved or checked out'));
         }
 
-        $reservation = new EquipmentReservation();
+        $reservation = new EquipmentReservationOld();
         $reservation->setEquipmentID($body['equipmentID']);
         $reservation->setUserID($body['userID']);
         $reservation->setDatetimeReserved(new \DateTime());
@@ -452,7 +451,7 @@ class EquipmentRentalActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Both the amount and notes need to have input!'));
         }
 
-        $equipmentFee = new EquipmentFee();
+        $equipmentFee = new EquipmentFeeOld();
         $equipmentFee->setCheckoutID($body['checkoutID']);
         $equipmentFee->setUserID($body['userID']);
         $equipmentFee->setNotes($body['feeNotes']);

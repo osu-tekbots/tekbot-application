@@ -7,8 +7,6 @@ use DataAccess\EquipmentCheckoutDaoOld;
 use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\EquipmentFeeDaoOld;
 use DataAccess\ContractDao;
-use Model\EquipmentReservation;
-use Model\EquipmentFee;
 
 /**
  * Renders the HTML for the modal that will start the handout process for handing out an equipment to a student

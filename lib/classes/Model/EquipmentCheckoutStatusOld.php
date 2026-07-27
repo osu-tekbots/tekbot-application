@@ -4,7 +4,7 @@ namespace Model;
 /**
  * Data class representing a checkoutStatus enumeration.
  */
-class EquipmentCheckoutStatus {
+class EquipmentCheckoutStatusOld {
     const CHECKED_OUT = 1;
     const LATE = 2;
     const RETURNED = 3;

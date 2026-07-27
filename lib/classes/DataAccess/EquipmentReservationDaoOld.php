@@ -2,7 +2,7 @@
 // Updated 11/5/2019
 namespace DataAccess;
 
-use Model\EquipmentReservation;
+use Model\EquipmentReservationOld;
 use Model\Contract;
 use DataAccess\EquipmentDaoOld;
 
@@ -34,7 +34,7 @@ class EquipmentReservationDaoOld {
      * Fetches reservations associated with a user.
      *
      * @param string $userID the ID of the user whose reservations to fetch
-     * @return \Model\EquipmentReservation[]|boolean an array of reservations on success, false otherwise
+     * @return \Model\EquipmentReservationOld[]|boolean an array of reservations on success, false otherwise
      */
     public function getReservationsForUser($userID) {
         try {
@@ -66,7 +66,7 @@ class EquipmentReservationDaoOld {
     /**
      * Fetches active equipment for admin.
      *
-     * @return \Model\EquipmentReservation[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentReservationOld[]|boolean an array of projects on success, false otherwise
      */
     public function getActiveReservations() {
         try {
@@ -98,7 +98,7 @@ class EquipmentReservationDaoOld {
      * Fetches the equipment reservation with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentReservation|boolean the equipment on success, false otherwise
+     * @return \Model\EquipmentReservationOld|boolean the equipment on success, false otherwise
      */
     public function getReservation($id) {
         try {
@@ -129,7 +129,7 @@ class EquipmentReservationDaoOld {
     /**
      * Fetches reserved equipment for admin.
      *
-     * @return \Model\EquipmentReservation[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentReservationOld[]|boolean an array of projects on success, false otherwise
      */
     public function getReservationsForAdmin() {
         try {
@@ -159,7 +159,7 @@ class EquipmentReservationDaoOld {
         /**
      * Fetches reserved equipment count for admin.
      *
-     * @return \Model\EquipmentReservation[]|boolean an array of projects on success, false otherwise
+     * @return \Model\EquipmentReservationOld[]|boolean an array of projects on success, false otherwise
      */
     public function getReservationCountForAdmin() {
         try {
@@ -228,7 +228,7 @@ class EquipmentReservationDaoOld {
     /**
      * Adds a new equipment reservation entry into the database.
      *
-     * @param \Model\EquipmentReservation $reservation the equipment to add
+     * @param \Model\EquipmentReservationOld $reservation the equipment to add
      * @return boolean true if successful, false otherwise
      */
     public function addNewReservation($reservation) {
@@ -262,7 +262,7 @@ class EquipmentReservationDaoOld {
     /**
      * Updates an equipment reservation in the database.
      *
-     * @param \Model\EquipmentReservation $reservation the reservation to add
+     * @param \Model\EquipmentReservationOld $reservation the reservation to add
      * @return boolean true if successful, false otherwise
      */
     public function updateReservation($reservation) {
@@ -298,10 +298,10 @@ class EquipmentReservationDaoOld {
      * Extracts equipment reservation object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\EquipmentReservation
+     * @return \Model\EquipmentReservationOld
      */
     public static function ExtractReservationFromRow($row, $userInRow = false) {
-        $reservation = new EquipmentReservation($row['eqreservation_id']);
+        $reservation = new EquipmentReservationOld($row['eqreservation_id']);
         $reservation->setEquipmentID($row['equipment_id']);
         $reservation->setUserID($row['user_id']);
         $reservation->setDatetimeReserved($row['datetime_reserved']);
