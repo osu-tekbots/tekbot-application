@@ -20,7 +20,7 @@ function getEquipmentFormDataAsJson() {
     let data = new FormData(form);
 
     let json = {
-        equipmentName: $('#equipmentNameText').val()
+        name: $('#equipmentNameText').val()
     };
     for (const [key, value] of data.entries()) {
         json[key] = value;
@@ -29,39 +29,8 @@ function getEquipmentFormDataAsJson() {
     return json;
 }
 
-//
-// Special element format initialization
-//
-// datetimepicker is a function from the TempusDominus library and is the GUI
-// that allows users to select the date time of the StartBy/EndBy inputs.
-// Link to documentation: https://tempusdominus.github.io/bootstrap-4/
-$('#startbydate').datetimepicker({
-    format: 'L'
-});
-$('#endbydate').datetimepicker({
-    format: 'L'
-});
 // Instantiates all tool tips.
 $('[data-toggle="tooltip"]').tooltip();
-
-
-/**
- * Uploads a newly selected image to the server. This function will be invoked when a change is detected in the
- * 'Upload Image' file input on the edit equipment page.
- */
-function uploadEquipmentImage() {
-    let data = new FormData();
-    data.append('action', 'uploadImage');
-    data.append('id', getEquipmentID());
-    data.append('image', $('#imgInp').prop('files')[0]);
-
-    api.post('/upload.php', data, true).then(res => {
-        // TODO: display newly uploaded image in image picker
-    }).catch(err => {
-        snackbar(err.message, 'error');
-    });
-}
-$('#imgInp').on('change', uploadEquipmentImage);
 
 /**
  * Sets the selected image as the default image for the equipment. On ever select, the default value will be
@@ -70,11 +39,11 @@ $('#imgInp').on('change', uploadEquipmentImage);
  */
 function onProjectImageSelected(imageId) {
     let body = {
-        action: 'defaultImageSelected',
+        action: 'setDefaultImage',
         imageID: imageId
     };
 
-    api.post('/equipments-old.php', body)
+    api.post('/equipment.php', body)
         .then(res => {
             $('#nameOfImageInput').val(res.content.name);
             $('#img-upload').attr('src', 'images/' + imageId);
@@ -101,21 +70,21 @@ function createSaveIcon() {
 }
 
 /**
- * Handler for a user click on the 'Save Project Draft' button. It will use AJAX to save the equipment in the
+ * Handler for a user click on the 'Update Information' button. It will use AJAX to save the equipment in the
  * database. The equipment title must not be empty.
  */
 function onSaveEquipmentClick() {
     let equipment = getEquipmentFormDataAsJson();
 
     // Validate the form
-    if (equipment.equipmentName == '') {
+    if (equipment.name == '') {
         return snackbar('Please provide an equipment name', 'error');
-    } else if (equipment.equipmentDescription == '') {
+    } else if (equipment.replacementCost == 0) {
+        return snackbar('Please provide input for the equipment\'s replacement cost', 'error');
+    } else if (equipment.description == '') {
         return snackbar('Please provide input for a equipment description', 'error');
-    } else if (equipment.equipmentLocation == '') {
-        return snackbar('Please provide input for a equipment location', 'error');
-    } else if (equipment.equipmentPartlist == '') {
-        return snackbar('Please provide input for the equipment partlist', 'error');
+    } else if (equipment.parts == '') {
+        return snackbar('Please provide input for the equipment parts list', 'error');
     } else if (equipment.equipmentCheck == '') {
         return snackbar('Please provide input for the equipment return check', 'error');
     }
@@ -126,7 +95,7 @@ function onSaveEquipmentClick() {
         action: 'saveEquipment'
     };
 
-    api.post('/equipments-old.php', body)
+    api.post('/equipment.php', body)
         .then(res => {
             snackbar(res.message, 'success');
         })
@@ -136,55 +105,71 @@ function onSaveEquipmentClick() {
 }
 $('#saveEquipmentBtn').on('click', onSaveEquipmentClick);
 
-/**
- * Handler for a user click on the 'Submit for Approval' button. This will verify all required input fields of
- * the form are filled out and then send a request to the server via AJAX to update the status of the application.
- */
-function onMakePublicClick() {
-    let equipment = getEquipmentFormDataAsJson();
-
-    // Validate the form
-    if (equipment.equipmentName == '') {
-        return snackbar('Please provide an equipment name', 'error');
-    } else if (equipment.equipmentDescription == '') {
-        return snackbar('Please provide input for a equipment description', 'error');
-    } else if (equipment.equipmentLocation == '') {
-        return snackbar('Please provide input for a equipment location', 'error');
-    } else if (equipment.equipmentPartlist == '') {
-        return snackbar('Please provide input for the equipment partlist', 'error');
-    } else if (equipment.equipmentCheck == '') {
-        return snackbar('Please provide input for the equipment return check', 'error');
-    }
-
-    // Validation completed. Make the request.
+function onCreateItem(typeId) {
     let body = {
-        ...equipment,
-        action: 'saveEquipment'
+        action: 'createEquipmentItem',
+        equipmentID: typeId
     };
-    api.post('/equipments-old.php', body)
+
+    api.post('/equipment.php', body)
         .then(res => {
             snackbar(res.message, 'success');
-            setTimeout(function(){
-                window.location.reload(1);
-             }, 3000);
+            setTimeout(() => window.location.reload(), 1000);
         })
         .catch(err => {
             snackbar(err.message, 'error');
         });
 }
-$('#uploadToPublicBtn').on('click', onMakePublicClick);
 
+function onUpdateItemHealth(id) {
+    let body = {
+        action: 'setEquipmentItemHealth',
+        healthStatus: $(`#unitHealth${id}`).val(),
+        notes: '', //$(`#unitNotes${id}`).val(),
+        itemID: id
+    };
 
-/**
- * Handles changing the DOM when the AJAX request to submit the equipment is successful.
- */
-function onProjectSubmissionSuccess() {
-    $('#formProject .input').attr('readonly', true);
-    $('#formActions').html(`
-        <div class='alert alert-success'>
-            Submitted. Your equipment is pending approval.
-        </div>
-    `);
+    api.post('/equipment.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+
+/** Handler for user updating an equipment item's notes */
+function onUpdateItemNotes(id) {
+    let body = {
+        action: 'saveEquipmentItem',
+        notes: $(`#unitNotes${id}`).val(),
+        itemID: id
+    };
+
+    api.post('/equipment.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+
+/** Handler for user updating an equipment item's location */
+function onUpdateItemLocation(id) {
+    let body = {
+        action: 'saveEquipmentItem',
+        location: $(`#unitLocation${id}`).val(),
+        itemID: id
+    };
+
+    api.post('/equipment.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
 }
 
 
@@ -239,11 +224,10 @@ function onAddNewImageFormSubmit() {
     let form = new FormData(this);
     form.append('action', 'addEquipmentImage');
 
-    api.post('/equipment-images-old.php', form, true)
+    api.post('/equipment-images.php', form, true)
         .then(res => {
             snackbar(res.message, 'success');
             onUploadImageSuccess(res.content.id);
-            onProjectImageSelected(res.content.id);
         })
         .catch(err => {
             snackbar(err.message, 'error');
@@ -296,7 +280,7 @@ function onDeleteSelectedImageButtonClick() {
     form.append('equipmentID', $('#equipmentID').val());
     form.append('equipmentImageID', id);
 
-    api.post('/equipment-images-old.php', form, true)
+    api.post('/equipment-images.php', form, true)
         .then(res => {
             $(`option[id=${id}]`).remove();
             initializeImagePicker();

@@ -1,9 +1,6 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDaoOld;
-use DataAccess\EquipmentCheckoutDaoOld;
-use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
 use Util\Security;
@@ -34,14 +31,7 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 // Handout Modal Functionality
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
-$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
-$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
-$reservedEquipment = $reservationDao->getReservationsForAdmin();
-$checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
-
-
 $printerDao = new PrinterDao($dbConn, $logger);
 $printers = $printerDao->getPrinters();
 $printTypes = $printerDao->getPrintTypes();

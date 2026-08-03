@@ -59,15 +59,3 @@
 		</div>
 	</div>
 </div>
-
-
-<script type="text/javascript">
-	$(document).ready(function() {
-	  $('#newReservationModal').on('shown.bs.modal', function() {
-		$('#equipmentNameInput').trigger('focus');
-	  });
-	  $('#newReservationModal').on('hide.bs.modal', function() {
-		$('#equipmentNameInput').val('');
-	  });
-	});
-</script>

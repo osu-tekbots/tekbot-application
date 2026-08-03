@@ -21,7 +21,6 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 allowIf(verifyPermissions('employee', $logger));
 
-$checkoutFeeDao = new EquipmentFeeDaoOld($dbConn, $logger);
 $reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
 $kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
 $printerJobsDao = new PrinterDao($dbConn, $logger);
@@ -73,7 +72,6 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 $remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
 $tasks = $taskDao->getAllIncompleteTasks();
 $equipmentReservationCount = $reservationDao->getReservationCountForAdmin();
-$equipmentFeeCount =  $checkoutFeeDao->getPendingAdminFeesCount();
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
 $laserJobs = $laserJobsDao->getLaserJobsRequiringAction();
 $tickets = $ticketDao->getTicketsByStatus(0);
@@ -84,9 +82,6 @@ $dashboardText = "";
 
 if ($equipmentReservationCount != 0)
 	$dashboardText .= "<li>There are $equipmentReservationCount <a href='./pages/employeeEquipment.php'>active equipment reservations</a>.  Students will be coming in soon to pick up the item.</li>";
-
-if ($equipmentFeeCount != 0)
-	$dashboardText .= "<li>There are $equipmentFeeCount <a href='./pages/employeeFees.php'>pending fees</a>!</li>";
 
 if (count($printerJobs) > 1)
 	$dashboardText .= "<li>There are ".count($printerJobs)." <a href='./pages/employeePrintJobList.php'>3D printing jobs</a> that require employee actions.</li>";

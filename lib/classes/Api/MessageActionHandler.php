@@ -138,8 +138,8 @@ class MessageActionHandler extends ActionHandler {
                 $this->fillObject($laserMaterial);
                 $ok = $this->mailer->sendLaserEmail($user, $laserJob, $laserMaterial, $message);
                 break;
-            case 6: // EquipmentOld
-                $equipment = new EquipmentOld();
+            case 6: // Equipment
+                $equipment = new EquipmentType();
                 $this->fillObject($equipment);
                 $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
                 break;

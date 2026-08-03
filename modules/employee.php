@@ -202,10 +202,10 @@ function renderEmployeeSidebar() {
             <span>Equipment (New!)</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeEquipmentListNew.php">Overview</a>
                 <a class="dropdown-item" href="pages/employeeEquipmentCheckoutNew.php">Checkout</a>
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Adjust Content:</h6>
-                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
                 <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
                 <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
             </div>

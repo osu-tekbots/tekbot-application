@@ -1,9 +1,6 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDaoOld;
-use DataAccess\EquipmentCheckoutDaoOld;
-use DataAccess\EquipmentReservationDaoOld;
 use DataAccess\LaserDao;
 use DataAccess\UsersDao;
 
@@ -33,17 +30,10 @@ include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 // Handout Modal Functionality
 include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
-$equipmentDao = new EquipmentDaoOld($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDaoOld($dbConn, $logger);
-$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
-$reservedEquipment = $reservationDao->getReservationsForAdmin();
-$checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
-
-
-$printerDao = new LaserDao($dbConn, $logger);
-$printers = $printerDao->getLaserCutters();
-$printTypes = $printerDao->getLaserCutMaterials();
+$laserDao = new LaserDao($dbConn, $logger);
+$laserCutters = $laserDao->getLaserCutters();
+$cutMaterials = $laserDao->getLaserCutMaterials();
 
 
 
@@ -74,7 +64,7 @@ $printTypes = $printerDao->getLaserCutMaterials();
 
 				$printerHTML = "";
 
-				foreach ($printers as $p) {
+				foreach ($laserCutters as $p) {
 					$printerID = $p->getLaserId();
 					$printerName = $p->getLaserName();
 					$printerDesc = $p->getDescription();
@@ -213,7 +203,7 @@ $("#addPrinterButt").click(function(){
 	</tr>
 	";
 
-	foreach ($printTypes as $p) {
+	foreach ($cutMaterials as $p) {
 		$printTypeID = $p->getLaserMaterialId();
 		$printTypeName = $p->getLaserMaterialName();
 		$description = $p->getDescription();
