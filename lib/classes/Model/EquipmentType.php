@@ -32,8 +32,8 @@ class EquipmentType {
 	/** @var float */
 	private $replacementCost;
 
-	/** @var EquipmentItem[] */
-	private $instances;
+	/** @var EquipmentUnit[] */
+	private $units;
 
     /** @var EquipmentTypeCategory */
 	private $category;
@@ -141,12 +141,12 @@ class EquipmentType {
 		$this->replacementCost = $replacementCost;
 	}
 
-	public function getInstances(){
-		return $this->instances;
+	public function getUnits(){
+		return $this->units;
 	}
 
-	public function setInstances($instances){
-		$this->instances = $instances;
+	public function setUnits($units){
+		$this->units = $units;
 	}
 
 	public function getCategory(){

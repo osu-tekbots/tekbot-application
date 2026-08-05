@@ -1,7 +1,7 @@
 <?php
 namespace DataAccess;
 
-use DataAccess\EquipmentItemDao;
+use DataAccess\EquipmentUnitDao;
 use Model\EquipmentType;
 use Model\EquipmentTypeCategory;
 use Model\EquipmentTypeImage;
@@ -17,8 +17,8 @@ class EquipmentTypeDao {
     /** @var \Util\Logger */
     private $logger;
 
-    /** @var \DataAccess\EquipmentItemDao */
-    private $item_dao;
+    /** @var \DataAccess\EquipmentUnitDao */
+    private $unit_dao;
 
     /**
      * Creates a new instance of the data access object for equipment data.
@@ -30,7 +30,7 @@ class EquipmentTypeDao {
         $this->conn = $connection;
         $this->logger = $logger;
 
-        $this->item_dao = new EquipmentItemDao($connection, $logger);
+        $this->unit_dao = new EquipmentUnitDao($connection, $logger);
     }
 
 
@@ -42,12 +42,12 @@ class EquipmentTypeDao {
      */
     public function getBrowsableEquipment() {
         try {
-            $sql = 'SELECT eti.*, et.*, etc.name as category_name FROM equipment_type et
-                    INNER JOIN equipment_type_category etc ON et.etc_id = etc.etc_id
-                    LEFT JOIN equipment_type_image eti ON et.et_id = eti.et_id AND eti.is_default
-                    INNER JOIN equipment_item ei ON ei.et_id = et.et_id
-                WHERE ei.is_public AND NOT et.is_deleted AND NOT ei.is_deleted
-                GROUP BY et.et_id;
+            $sql = 'SELECT * FROM equipment_type
+                    INNER JOIN equipment_type_category ON etc_id = et_etc_id
+                    LEFT JOIN equipment_type_image ON eti_et_id = et_id AND eti_is_default
+                    INNER JOIN equipment_unit ON eu_et_id = et_id
+                WHERE eu_is_public AND NOT et_is_deleted AND NOT eu_is_deleted
+                GROUP BY et_id;
             ';
 
             $results = $this->conn->query($sql);
@@ -55,9 +55,9 @@ class EquipmentTypeDao {
             $equipment = array();
             foreach ($results as $row) {
                 $e = self::ExtractEquipmentTypeFromRow($row);
-                $e->setCategory(self::ExtractEquipmentTypeCategoryFromRow($row, 'category_name'));
+                $e->setCategory(self::ExtractEquipmentTypeCategoryFromRow($row));
                 $e->setImages([self::ExtractEquipmentTypeImageFromRow($row)]);
-                $e->setInstances($this->item_dao->getAllItemsByEquipmentID($e->getEquipmentID()));
+                $e->setUnits($this->unit_dao->getAllUnitsByEquipmentID($e->getEquipmentID()));
 
                 $equipment[] = $e;
             }
@@ -79,11 +79,11 @@ class EquipmentTypeDao {
      */
     public function getEmployeeEquipment($includeDeleted = false) {
         try {
-            $sql = 'SELECT eti.*, et.*, etc.name as category_name FROM equipment_type et
-                    INNER JOIN equipment_type_category etc ON et.etc_id = etc.etc_id
-                    LEFT JOIN equipment_type_image eti ON et.et_id = eti.et_id AND eti.is_default
-                WHERE (NOT is_deleted OR :include_deleted)
-                ORDER BY name ASC
+            $sql = 'SELECT * FROM equipment_type
+                    INNER JOIN equipment_type_category ON et_etc_id = etc_id
+                    LEFT JOIN equipment_type_image ON eti_et_id = et_id AND eti_is_default
+                WHERE (NOT et_is_deleted OR :include_deleted)
+                ORDER BY et_name ASC
             ';
             $params = ['include_deleted' => $includeDeleted];
         
@@ -92,11 +92,11 @@ class EquipmentTypeDao {
             $equipment = array();
             foreach ($results as $row) {
                 $e = self::ExtractEquipmentTypeFromRow($row);
-                $e->setCategory(self::ExtractEquipmentTypeCategoryFromRow($row, 'category_name'));
+                $e->setCategory(self::ExtractEquipmentTypeCategoryFromRow($row));
                 if (isset($row['eti_id'])) {
                     $e->setImages([self::ExtractEquipmentTypeImageFromRow($row)]);
                 }
-                $e->setInstances($this->item_dao->getAllItemsByEquipmentID($e->getEquipmentID()));
+                $e->setUnits($this->unit_dao->getAllUnitsByEquipmentID($e->getEquipmentID()));
 
                 $equipment[] = $e;
             }
@@ -128,7 +128,7 @@ class EquipmentTypeDao {
 
             $equipment = self::ExtractEquipmentTypeFromRow($results[0]);
             $equipment->setImages($this->getEquipmentImages($id));
-            $equipment->setInstances($this->item_dao->getAllItemsByEquipmentID($id, $includeDeletedInstances));
+            $equipment->setUnits($this->unit_dao->getAllUnitsByEquipmentID($id, $includeDeletedInstances));
 
             return $equipment;
         } catch (\Exception $e) {
@@ -139,14 +139,14 @@ class EquipmentTypeDao {
 
 
     /**
-     * Fetches the equipment type with the item with the provided ID
+     * Fetches the equipment type with the unit with the provided ID
      *
      * @param string $id
      * @return \Model\EquipmentType|boolean the equipment on success, false otherwise
      */
-    public function getEquipmentByItemID($id) {
+    public function getEquipmentByUnitID($id) {
         try {
-            $sql = 'SELECT et.* FROM equipment_type et JOIN equipment_item ei ON et.et_id = ei.et_id WHERE ei_id = :id;';
+            $sql = 'SELECT * FROM equipment_type JOIN equipment_unit ON eu_et_id = et_id WHERE eu_id = :id;';
             $params = array(':id' => $id);
 
             $results = $this->conn->query($sql, $params);
@@ -156,7 +156,7 @@ class EquipmentTypeDao {
 
             $equipment = self::ExtractEquipmentTypeFromRow($results[0]);
             $equipment->setImages($this->getEquipmentImages($equipment->getEquipmentID()));
-            $equipment->setInstances([$this->item_dao->getItem($id)]);
+            $equipment->setUnits([$this->unit_dao->getUnit($id)]);
 
             return $equipment;
         } catch (\Exception $e) {
@@ -174,7 +174,7 @@ class EquipmentTypeDao {
      */
     public function getEquipmentImages($id) {
         try {
-            $sql = 'SELECT * FROM equipment_type_image WHERE et_id = :id ORDER BY is_default DESC';
+            $sql = 'SELECT * FROM equipment_type_image WHERE eti_et_id = :id ORDER BY eti_is_default DESC';
             $params = array(':id' => $id);
             
             $results = $this->conn->query($sql, $params);
@@ -225,8 +225,9 @@ class EquipmentTypeDao {
         try {
             // NOTE: if implementing categories, don't hardcode `etc_id` to `1`
             $sql = 'INSERT INTO equipment_type(
-                et_id, `name`, `description`, parts, replacement_cost, usage_instructions,
-                notes, return_check, etc_id, date_created, date_updated
+                et_id, et_name, et_description, et_parts, et_replacement_cost,
+                et_usage_instructions, et_notes, et_return_check, et_etc_id,
+                et_date_created, et_date_updated
             ) VALUES (
                 :id, :name, :description, :parts, :replacement_cost, :usage_instructions,
                 :notes, :return_check, 1, :date_created, :date_updated
@@ -259,7 +260,7 @@ class EquipmentTypeDao {
      */
     public function addEquipmentImage($equipmentImage) {
         try {
-            $sql = 'INSERT INTO equipment_type_image (eti_id, et_id, `filename`, is_default)
+            $sql = 'INSERT INTO equipment_type_image (eti_id, eti_et_id, eti_filename, eti_is_default)
                 VALUES (:eti_id, :et_id, :filename, :is_default);';
             $params = [
                 'eti_id' => $equipmentImage->getImageID(),
@@ -289,14 +290,14 @@ class EquipmentTypeDao {
         try {
             $sql = 'UPDATE equipment_type
                 SET
-                    `name` = :name,
-                    `description` = :description,
-                    usage_instructions = :usageInstructions,
-                    notes = :notes,
-                    return_check = :returnCheck,
-                    parts = :parts,
-                    replacement_cost = :replacementCost,
-                    date_updated = :dateUpdated
+                    et_name = :name,
+                    et_description = :description,
+                    et_usage_instructions = :usageInstructions,
+                    et_notes = :notes,
+                    et_return_check = :returnCheck,
+                    et_parts = :parts,
+                    et_replacement_cost = :replacementCost,
+                    et_date_updated = :dateUpdated
                 WHERE `et_id` = :id;
             ';
             $params = [
@@ -331,9 +332,9 @@ class EquipmentTypeDao {
     public function updateDefaultEquipmentImage($id) {
         try {
             $sql = 'UPDATE equipment_type_image
-                SET is_default = (eti_id = :id)
-                WHERE et_id = (
-                    SELECT et_id FROM equipment_type_image WHERE eti_id = :id
+                SET eti_is_default = (eti_id = :id)
+                WHERE eti_et_id = (
+                    SELECT eti_et_id FROM equipment_type_image WHERE eti_id = :id
                 );
             ';
             $params = [ 'id' => $id ];
@@ -359,7 +360,7 @@ class EquipmentTypeDao {
      */
     public function deleteEquipment($id) {
         try {
-            $sql = 'UPDATE equipment_type SET is_deleted = TRUE WHERE et_id = :id;';
+            $sql = 'UPDATE equipment_type SET et_is_deleted = TRUE WHERE et_id = :id;';
             $params = ['id' => $id];
     
             $this->conn->execute($sql, $params);
@@ -382,7 +383,7 @@ class EquipmentTypeDao {
      */
     public function restoreEquipment($id) {
         try {
-            $sql = 'UPDATE equipment_type SET is_deleted = FALSE WHERE et_id = :id;';
+            $sql = 'UPDATE equipment_type SET et_is_deleted = FALSE WHERE et_id = :id;';
             $params = ['id' => $id];
     
             $this->conn->execute($sql, $params);
@@ -411,7 +412,7 @@ class EquipmentTypeDao {
     
             return true;
         } catch (\Exception $e) {
-            $this->logger->error("Failed to delete equipment item '$id': " . $e->getMessage());
+            $this->logger->error("Failed to delete equipment unit '$id': " . $e->getMessage());
             return false;
         }
     }
@@ -425,16 +426,16 @@ class EquipmentTypeDao {
      */
     public static function ExtractEquipmentTypeFromRow($row) {
         $equipment = new EquipmentType($row['et_id']);
-        $equipment->setName($row['name']);
-        $equipment->setDescription($row['description']);
-        $equipment->setUsageInstructions($row['usage_instructions']);
-        $equipment->setNotes($row['notes']);
-        $equipment->setReturnCheck($row['return_check']);
-        $equipment->setParts($row['parts']);
-        $equipment->setReplacementCost($row['replacement_cost']);
-        $equipment->setIsDeleted($row['is_deleted']);
-        $equipment->setDateCreated(new \DateTime(($row['date_created'] == '' ? 'now' : $row['date_created'])));
-        $equipment->setDateUpdated(new \DateTime(($row['date_updated'] == '' ? 'now' : $row['date_updated'])));
+        $equipment->setName($row['et_name']);
+        $equipment->setDescription($row['et_description']);
+        $equipment->setUsageInstructions($row['et_usage_instructions']);
+        $equipment->setNotes($row['et_notes']);
+        $equipment->setReturnCheck($row['et_return_check']);
+        $equipment->setParts($row['et_parts']);
+        $equipment->setReplacementCost($row['et_replacement_cost']);
+        $equipment->setIsDeleted($row['et_is_deleted']);
+        $equipment->setDateCreated(new \DateTime(($row['et_date_created'] == '' ? 'now' : $row['et_date_created'])));
+        $equipment->setDateUpdated(new \DateTime(($row['et_date_updated'] == '' ? 'now' : $row['et_date_updated'])));
         return $equipment;
     }
 
@@ -449,9 +450,9 @@ class EquipmentTypeDao {
      */
     public static function ExtractEquipmentTypeImageFromRow($row) {
         $image = new EquipmentTypeImage($row['eti_id']);
-        $image->setEquipmentID($row['et_id']);
-        $image->setFilename($row['filename']);
-        $image->setIsDefault($row['is_default'] ? true : false);
+        $image->setEquipmentID($row['eti_et_id']);
+        $image->setFilename($row['eti_filename']);
+        $image->setIsDefault($row['eti_is_default'] ? true : false);
         return $image;
     }
 
@@ -464,9 +465,9 @@ class EquipmentTypeDao {
      *                     also in row; `name` field overlaps)
      * @return \Model\EquipmentCategoryOld
      */
-    public static function ExtractEquipmentTypeCategoryFromRow($row, $name = 'name') {
+    public static function ExtractEquipmentTypeCategoryFromRow($row) {
         $equipmentTypeCategory = new EquipmentTypeCategory($row['etc_id']);
-        $equipmentTypeCategory->setName($row['name']);
+        $equipmentTypeCategory->setName($row['etc_name']);
         return $equipmentTypeCategory;
     }
 

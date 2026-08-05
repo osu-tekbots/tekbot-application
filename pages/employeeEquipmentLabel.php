@@ -92,7 +92,7 @@ if (count($items) > 0) { //Need to render labels
 				$j = 0;
 			}
 
-			$e = $equipmentDao->getEquipmentByItemID($i);
+			$e = $equipmentDao->getEquipmentByUnitID($i);
 			
 			if (!empty($e->getImages())){
 				$imageName = $e->getImages()[0]->getImageID();
@@ -103,14 +103,14 @@ if (count($items) > 0) { //Need to render labels
 			}
 			$equipmentName = $e->getName();
 			$parts = nl2br($e->getParts());
-			$itemID = $e->getInstances()[0]->getItemID();
+			$unitID = $e->getUnits()[0]->getUnitID();
 
 			$labelsHTML .= "
 				<div class='printlabellarge'>
 					<div style='width:1.6in;height:1.8in;float:left;' ><img style='width:100%;height:100%;object-fit:contain;' src='../$imagePath'></div>
 					<div style='float:left;width:2.1in;height:1.8in;padding-left:.05in;padding-top:.1in;'>
 						<div style='height:1.5in;'><span style='font-size:2em;'>$equipmentName<BR></span>Contents:<BR>$parts</div>
-						<span style='height:.2in; font-size: 2em;'>Unit $itemID</span>
+						<span style='height:.2in; font-size: 2em;'>Unit $unitID</span>
 					</div>
 				</div>
 			";
@@ -140,8 +140,8 @@ foreach ($equipment as $e) {
 	$name = Security::HtmlEntitiesEncode($e->getName());
 	$description = Security::HtmlEntitiesEncode($e->getDescription());
 	
-	foreach ($e->getInstances() as $i) {
-		$id = $i->getItemID();
+	foreach ($e->getUnits() as $i) {
+		$id = $i->getUnitID();
 		$location = $i->getLocation();
 
 		$tableBodyHTML .= "<tr>

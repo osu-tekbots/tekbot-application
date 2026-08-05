@@ -35,9 +35,9 @@ class EquipmentCheckoutDao {
      */
     public function getReservationCountForEmployee() {
         try {
-            $sql = 'SELECT COUNT(er.er_id) AS count FROM equipment_reservation er
-                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
-                WHERE NOT is_employee_dismissed AND ec.ec_id IS NULL AND date_reserved >= NOW() - INTERVAL 1 HOUR;
+            $sql = 'SELECT COUNT(er_id) AS count FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
             ';
     
             $result = $this->conn->query($sql);
@@ -57,10 +57,10 @@ class EquipmentCheckoutDao {
      */
     public function getReservationCountForUser($userID) {
         try {
-            $sql = 'SELECT COUNT(er.er_id) AS count FROM equipment_reservation er
-                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
-                WHERE NOT is_employee_dismissed AND ec.ec_id IS NULL AND date_reserved >= NOW() - INTERVAL 1 HOUR
-                    AND er.u_id = :user_id;
+            $sql = 'SELECT COUNT(er_id) AS count FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR
+                    AND er_u_id = :user_id;
             ';
             $params = ['user_id' => $userID];
     
@@ -82,7 +82,7 @@ class EquipmentCheckoutDao {
     public function getCheckoutCountForUser($userID) {
         try {
             $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
-                WHERE date_returned IS NULL AND u_id = :user_id;
+                WHERE ec_date_returned IS NULL AND ec_u_id = :user_id;
             ';
             $params = ['user_id' => $userID];
     
@@ -104,7 +104,7 @@ class EquipmentCheckoutDao {
     public function getLateCheckoutCountForUser($userID) {
         try {
             $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
-                WHERE date_returned IS NULL AND date_due < NOW() AND u_id = :user_id;
+                WHERE ec_date_returned IS NULL AND ec_date_due < NOW() AND ec_u_id = :user_id;
             ';
             $params = ['user_id' => $userID];
     
@@ -125,9 +125,9 @@ class EquipmentCheckoutDao {
      */
     public function getEmployeeReservations() {
         try {
-            $sql = 'SELECT er.* FROM equipment_reservation er
-                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
-                WHERE NOT is_employee_dismissed AND ec.ec_id IS NULL AND date_reserved >= NOW() - INTERVAL 1 HOUR;
+            $sql = 'SELECT equipment_reservation.* FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
             ';
     
             $result = $this->conn->query($sql);
@@ -177,7 +177,7 @@ class EquipmentCheckoutDao {
     public function getLateCheckoutsForEmployee() {
         try {
             $sql = 'SELECT * FROM equipment_checkout
-                WHERE date_returned IS NULL AND date_due < NOW();
+                WHERE ec_date_returned IS NULL AND ec_date_due < NOW();
             ';
 
             $results = $this->conn->query($sql);
@@ -239,24 +239,24 @@ class EquipmentCheckoutDao {
 
 
     /**
-     * Fetches the active reservation for the given equipment item
+     * Fetches the active reservation for the given equipment unit
      * 
-     * @param int $id The item to fetch the active reservation for
+     * @param int $id The unit to fetch the active reservation for
      * 
      * @return \Model\EquipmentReservation|false The active reservation, or false if
      * there's no active reservation or an error occured
      */
     public function getActiveReservation($id) {
         try {
-            $sql = 'SELECT er.* FROM equipment_reservation er
-                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
+            $sql = 'SELECT equipment_reservation.* FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
                 WHERE 
-                    er.ei_id = :ei_id
-                    AND NOT is_employee_dismissed
-                    AND ec.ec_id IS NULL
-                    AND date_reserved >= NOW() - INTERVAL 1 HOUR;
+                    er_eu_id = :eu_id
+                    AND NOT er_is_employee_dismissed
+                    AND ec_id IS NULL
+                    AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
             ';
-            $params = ['ei_id' => $id];
+            $params = ['eu_id' => $id];
 
             $results = $this->conn->query($sql, $params);
             if (\count($results) == 0) {
@@ -272,17 +272,17 @@ class EquipmentCheckoutDao {
 
 
     /**
-     * Fetches the active checkout for the given equipment item
+     * Fetches the active checkout for the given equipment unit
      * 
-     * @param int $id The item to fetch the active checkout for
+     * @param int $id The unit to fetch the active checkout for
      * 
      * @return \Model\EquipmentCheckout|false The active checkout, or false if there's no
      * active checkout or an error occured
      */
     public function getActiveCheckout($id) {
         try {
-            $sql = 'SELECT * FROM equipment_checkout WHERE ei_id = :ei_id AND date_returned IS NULL;';
-            $params = ['ei_id' => $id];
+            $sql = 'SELECT * FROM equipment_checkout WHERE ec_eu_id = :eu_id AND ec_date_returned IS NULL;';
+            $params = ['eu_id' => $id];
 
             $results = $this->conn->query($sql, $params);
             if (\count($results) == 0) {
@@ -298,16 +298,16 @@ class EquipmentCheckoutDao {
 
 
     /**
-     * Finds an available (not reserved/checked out) equipment item of the given type, if
-     * any are available. Only considers public, non-deleted items, making it suitable for
+     * Finds an available (not reserved/checked out) equipment unit of the given type, if
+     * any are available. Only considers public, non-deleted units, making it suitable for
      * unprivileged use.
      * 
-     * @return int|boolean The item ID if one found, false otherwise
+     * @return int|boolean The unit ID if one found, false otherwise
      */
-    public function getAvailableItem($typeID) {
+    public function getAvailableUnit($typeID) {
         try {
-            $sql = 'SELECT ei_id FROM EquipmentItemStatusView
-                WHERE et_id = :et_id AND is_public AND NOT is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci
+            $sql = 'SELECT eu_id FROM EquipmentUnitStatusView
+                WHERE et_id = :et_id AND eu_is_public AND NOT eu_is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci
                 LIMIT 1
             ;';
             $params = [ 'et_id' => $typeID ];
@@ -318,31 +318,31 @@ class EquipmentCheckoutDao {
                 return false;
             }
 
-            return $result[0]['ei_id'];
+            return $result[0]['eu_id'];
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get available item for '$typeID': " . $e->getMessage());
+            $this->logger->error("Failed to get available unit for '$typeID': " . $e->getMessage());
             return false;
         }
     }
 
 
     /**
-     * Counts available (not reserved/checked out) equipment item of the given type. Only
-     * considers public, non-deleted items, making it suitable for unprivileged use.
+     * Counts available (not reserved/checked out) equipment unit of the given type. Only
+     * considers public, non-deleted units, making it suitable for unprivileged use.
      * 
      * @return int|boolean The number of available units; false if an error occurs
      */
-    public function countAvailableItems($typeID) {
+    public function countAvailableUnits($typeID) {
         try {
-            $sql = 'SELECT COUNT(ei_id) AS count FROM EquipmentItemStatusView
-                WHERE et_id = :et_id AND is_public AND NOT is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci;';
+            $sql = 'SELECT COUNT(eu_id) AS count FROM EquipmentUnitStatusView
+                WHERE et_id = :et_id AND eu_is_public AND NOT eu_is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci;';
             $params = [ 'et_id' => $typeID ];
     
             $result = $this->conn->query($sql, $params);
 
             return $result[0]['count'];
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get available item for '$typeID': " . $e->getMessage());
+            $this->logger->error("Failed to count available units for '$typeID': " . $e->getMessage());
             return false;
         }
     }
@@ -351,16 +351,16 @@ class EquipmentCheckoutDao {
     /**
      * Saves the given reservation request.
      * 
-     * TODO: doesn't validate that ei_id is actually available
+     * TODO: doesn't validate that eu_id is actually available
      * 
      * @return boolean Whether the reservation was successfully saved
      */
     public function addReservation($reservation) {
         try {
-            $sql = 'INSERT INTO equipment_reservation(ei_id, u_id, date_reserved, is_employee_dismissed)
-                VALUES (:ei_id, :u_id, :date_reserved, :is_employee_dismissed)';
+            $sql = 'INSERT INTO equipment_reservation(er_eu_id, er_u_id, er_date_reserved, er_is_employee_dismissed)
+                VALUES (:eu_id, :u_id, :date_reserved, :is_employee_dismissed)';
             $params = [
-                'ei_id' => $reservation->getItemID(),
+                'eu_id' => $reservation->getUnitID(),
                 'u_id' => $reservation->getUserID(),
                 'date_reserved' => QueryUtils::formatDate($reservation->getDateReserved()),
                 'is_employee_dismissed' => $reservation->getIsEmployeeDismissed(),
@@ -370,7 +370,7 @@ class EquipmentCheckoutDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to reserve item: ' . $e->getMessage());
+            $this->logger->error('Failed to reserve unit: ' . $e->getMessage());
             return false;
         }
     }
@@ -379,20 +379,20 @@ class EquipmentCheckoutDao {
     /**
      * Creates a new checkout record.
      * 
-     * TODO: doesn't validate that ei_id is actually available
+     * TODO: doesn't validate that eu_id is actually available
      * 
      * @return boolean Whether the checkout was successfully created
      */
     public function addCheckout($checkout) {
         try {
             $sql = 'INSERT INTO equipment_checkout(
-                er_id, ei_id, u_id, date_checked_out, date_due, date_returned, date_updated
+                ec_er_id, ec_eu_id, ec_u_id, ec_date_checked_out, ec_date_due, ec_date_returned, ec_date_updated
             ) VALUES (
-                :er_id, :ei_id, :u_id, :date_checked_out, :date_due, :date_returned, :date_updated
+                :er_id, :eu_id, :u_id, :date_checked_out, :date_due, :date_returned, :date_updated
             );';
             $params = [
                 'er_id' => $checkout->getReservationID(),
-                'ei_id' => $checkout->getItemID(),
+                'eu_id' => $checkout->getUnitID(),
                 'u_id' => $checkout->getUserID(),
                 'date_checked_out' => QueryUtils::formatDate($checkout->getDateCheckedOut()),
                 'date_due' => QueryUtils::formatDate($checkout->getDateDue()),
@@ -404,7 +404,7 @@ class EquipmentCheckoutDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to check out item: ' . $e->getMessage());
+            $this->logger->error('Failed to check out unit: ' . $e->getMessage());
             return false;
         }
     }
@@ -422,7 +422,7 @@ class EquipmentCheckoutDao {
     public function dismissReservation($reservationID) {
         try {
             $sql = 'UPDATE equipment_reservation
-                SET is_employee_dismissed = TRUE
+                SET er_is_employee_dismissed = TRUE
                 WHERE er_id = :er_id;
             ';
             $params = ['er_id' => $reservationID];
@@ -447,17 +447,17 @@ class EquipmentCheckoutDao {
     public function updateCheckout($checkout) {
         try {
             $sql = 'UPDATE equipment_checkout
-                SET er_id = :er_id,
-                    ei_id = :ei_id,
-                    u_id = :u_id,
-                    date_due = :date_due,
-                    date_returned = :date_returned,
-                    date_updated = :date_updated
+                SET ec_er_id = :er_id,
+                    ec_eu_id = :eu_id,
+                    ec_u_id = :u_id,
+                    ec_date_due = :date_due,
+                    ec_date_returned = :date_returned,
+                    ec_date_updated = :date_updated
                 WHERE ec_id = :ec_id;
             ';
             $params = [
                 'er_id' => $checkout->getReservationID(),
-                'ei_id' => $checkout->getItemID(),
+                'eu_id' => $checkout->getUnitID(),
                 'u_id' => $checkout->getUserID(),
                 'date_due' => QueryUtils::formatDate($checkout->getDateDue()),
                 'date_returned' => QueryUtils::formatDate($checkout->getDateReturned()),
@@ -483,10 +483,10 @@ class EquipmentCheckoutDao {
      */
     public static function ExtractReservationFromRow($row, $userInRow = false) {
         $reservation = new EquipmentReservation($row['er_id']);
-        $reservation->setItemID($row['ei_id']);
-        $reservation->setUserID($row['u_id']);
-        $reservation->setDateReserved(new \DateTime($row['date_reserved'] ?? 'now'));
-        $reservation->setIsEmployeeDismissed($row['is_employee_dismissed']);
+        $reservation->setUnitID($row['er_eu_id']);
+        $reservation->setUserID($row['er_u_id']);
+        $reservation->setDateReserved(new \DateTime($row['er_date_reserved'] ?? 'now'));
+        $reservation->setIsEmployeeDismissed($row['er_is_employee_dismissed']);
 
         return $reservation;
     }
@@ -500,13 +500,13 @@ class EquipmentCheckoutDao {
      */
     public static function ExtractCheckoutFromRow($row, $userInRow = false) {
         $checkout = new EquipmentCheckout($row['ec_id']);
-        $checkout->setReservationID($row['er_id']);
-        $checkout->setItemID($row['ei_id']);
-        $checkout->setUserID($row['u_id']);
-        $checkout->setDateCheckedOut(new \DateTime($row['date_checked_out'] ?? 'now'));
-        $checkout->setDateDue(new \DateTime($row['date_due'] ?? 'now'));
-        $checkout->setDateReturned($row['date_returned'] ? new \DateTime($row['date_returned']) : null);
-        $checkout->setDateUpdated(new \DateTime($row['date_updated'] ?? 'now'));
+        $checkout->setReservationID($row['ec_er_id']);
+        $checkout->setUnitID($row['ec_eu_id']);
+        $checkout->setUserID($row['ec_u_id']);
+        $checkout->setDateCheckedOut(new \DateTime($row['ec_date_checked_out'] ?? 'now'));
+        $checkout->setDateDue(new \DateTime($row['ec_date_due'] ?? 'now'));
+        $checkout->setDateReturned($row['ec_date_returned'] ? new \DateTime($row['ec_date_returned']) : null);
+        $checkout->setDateUpdated(new \DateTime($row['ec_date_updated'] ?? 'now'));
 
         return $checkout;
     }

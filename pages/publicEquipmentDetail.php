@@ -38,7 +38,7 @@ $equipment = $equipmentDao->getEquipment($eID);
 allowIf(!empty($equipment) && !$equipment->getIsDeleted(), $configManager->getBaseUrl() . 'pages/index.php');
 
 // If item isn't public, only allow if user is employee status or higher.  Else, redirect to home page
-if (! array_filter($equipment->getInstances(), fn($unit) => $unit->getIsPublic())) {
+if (! array_filter($equipment->getUnits(), fn($unit) => $unit->getIsPublic())) {
 	allowIf($isEmployee, $configManager->getBaseUrl() . 'pages/index.php');
 }
 
@@ -49,7 +49,7 @@ $parts = $equipment->getParts();
 $instructions = $equipment->getUsageInstructions();
 $replacementCost = $equipment->getReplacementCost();
 
-$unitAvailable = !!array_filter($equipment->getInstances(), fn($unit) => (
+$unitAvailable = !!array_filter($equipment->getUnits(), fn($unit) => (
     $unit->getIsPublic() && $unit->getCheckoutStatus() == 'Available'
 ));
 
@@ -92,7 +92,7 @@ if ($numImages > 1) {
 }
 
 $unitsHtml = '';
-foreach ($equipment->getInstances() as $unit) {
+foreach ($equipment->getUnits() as $unit) {
     if (! $unit->getIsPublic() && ! $isEmployee)
         continue;
 
@@ -101,12 +101,12 @@ foreach ($equipment->getInstances() as $unit) {
 
     // Show the expected return date
     if ($status == 'Checked out') {
-        $checkout = $checkoutDao->getActiveCheckout($unit->getItemID());
+        $checkout = $checkoutDao->getActiveCheckout($unit->getUnitID());
         $status .= ' (expected return ' . $checkout->getDateDue()->format('m/d/Y') . ')';
     }
     // Show the user if they reserved the unit
     else if ($status == 'Reserved') {
-        $reservation = $checkoutDao->getActiveReservation($unit->getItemID());
+        $reservation = $checkoutDao->getActiveReservation($unit->getUnitID());
         if ($reservation->getUserID() == $_SESSION['userID']) {
             $status .= ' by you';
         }

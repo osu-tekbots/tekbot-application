@@ -13,7 +13,7 @@ class EquipmentHealthLog {
     private $checkoutID;
 
 	/** @var int */
-	private $itemID;
+	private $unitID;
 	
 	/** @var EquipmentHealthOption */
 	private $healthOption;
@@ -66,12 +66,12 @@ class EquipmentHealthLog {
 		$this->checkoutID = $checkoutID;
 	}
 
-	public function getItemID(){
-		return $this->itemID;
+	public function getUnitID(){
+		return $this->unitID;
 	}
 
-	public function setItemID($itemID){
-		$this->itemID = $itemID;
+	public function setUnitID($unitID){
+		$this->unitID = $unitID;
 	}
 
 	public function getHealthOption(){

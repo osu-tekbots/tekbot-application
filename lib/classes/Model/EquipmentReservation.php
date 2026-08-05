@@ -10,7 +10,7 @@ class EquipmentReservation {
     private $reservationID;
 	
 	/** @var int */
-	private $itemID;
+	private $unitID;
 	
 	/** @var string */
 	private $userID;
@@ -50,12 +50,12 @@ class EquipmentReservation {
 		$this->reservationID = $reservationID;
 	}
 
-	public function getItemID(){
-		return $this->itemID;
+	public function getUnitID(){
+		return $this->unitID;
 	}
 
-	public function setItemID($itemID){
-		$this->itemID = $itemID;
+	public function setUnitID($unitID){
+		$this->unitID = $unitID;
 	}
 
 	public function getUserID(){

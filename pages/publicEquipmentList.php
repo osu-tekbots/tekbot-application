@@ -23,7 +23,7 @@ $isEmployee = verifyPermissions('employee', $logger);
 
 /* Populates page with information from the Equipment DAO */
 $equipments = $dao->getBrowsableEquipment();
-$equipmentItemHTML = "";
+$equipmentUnitHTML = "";
 foreach ($equipments as $e){
     $equipmentID = $e->getEquipmentID();
     if (!empty($e->getImages())){
@@ -43,7 +43,7 @@ foreach ($equipments as $e){
         $actions = "$viewButton";
     }
 	
-    $availableUnits = $equipmentCheckoutDao->countAvailableItems($equipmentID);
+    $availableUnits = $equipmentCheckoutDao->countAvailableUnits($equipmentID);
     if ($availableUnits) $status = "$availableUnits Available";
     else                 $status = "Not Available";
 	
@@ -60,7 +60,7 @@ foreach ($equipments as $e){
     
 
     /** Creates a data table containing each piece of equipment that is available for rental */
-    $equipmentItemHTML .= "
+    $equipmentUnitHTML .= "
     <tr>
         <td><a href='pages/publicEquipmentDetail.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
         <td>$name</td>
@@ -100,7 +100,7 @@ foreach ($equipments as $e){
 				</tr>
 			</thead>
 			<tbody>
-				<?php echo $equipmentItemHTML; ?>
+				<?php echo $equipmentUnitHTML; ?>
 			</tbody>
 		</table>
 	</div>

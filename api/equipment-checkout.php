@@ -10,7 +10,7 @@ use Api\EquipmentCheckoutActionHandler;
 use Api\Response;
 use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentHealthDao;
-use DataAccess\EquipmentItemDao;
+use DataAccess\EquipmentUnitDao;
 use DataAccess\EquipmentTypeDao;
 use DataAccess\MessageDao;
 use DataAccess\UsersDao;
@@ -22,13 +22,13 @@ if (PHP_SESSION_ACTIVE != session_status())
 // Setup our data access and handler classes
 $equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $equipmentHealthDao = new EquipmentHealthDao($dbConn, $logger);
-$equipmentItemDao = new EquipmentItemDao($dbConn, $logger);
+$equipmentUnitDao = new EquipmentUnitDao($dbConn, $logger);
 $equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
 $messageDao = new MessageDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
 $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager->getBounceEmail());
 
-$handler = new EquipmentCheckoutActionHandler($equipmentCheckoutDao, $equipmentHealthDao, $equipmentItemDao, $equipmentTypeDao, $messageDao, $usersDao, $mailer, $configManager, $logger);
+$handler = new EquipmentCheckoutActionHandler($equipmentCheckoutDao, $equipmentHealthDao, $equipmentUnitDao, $equipmentTypeDao, $messageDao, $usersDao, $mailer, $configManager, $logger);
 
 // Handle the request
 $handler->handleRequest();

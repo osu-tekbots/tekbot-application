@@ -3,7 +3,7 @@ namespace Api;
 
 use Model\EquipmentHealthLog;
 use Model\EquipmentHealthOption;
-use Model\EquipmentItem;
+use Model\EquipmentUnit;
 use Model\EquipmentType;
 
 
@@ -14,8 +14,8 @@ class EquipmentActionHandler extends ActionHandler {
 
     /** @var \DataAccess\EquipmentTypeDao */
     private $equipmentTypeDao;
-    /** @var \DataAccess\EquipmentItemDao */
-    private $equipmentItemDao;
+    /** @var \DataAccess\EquipmentUnitDao */
+    private $equipmentUnitDao;
     /** @var \DataAccess\EquipmentHealthDao */
     private $equipmentHealthDao;
     /** @var \Util\ConfigManager */
@@ -25,14 +25,14 @@ class EquipmentActionHandler extends ActionHandler {
      * Constructs a new instance of the action handler for requests on equipment resources.
      *
      * @param \DataAccess\EquipmentTypeDao $equipmentTypeDao the data access object for equipment types
-     * @param \DataAccess\EquipmentItemDao $equipmentItemDao the data access object for equipment items
+     * @param \DataAccess\EquipmentUnitDao $equipmentUnitDao the data access object for equipment units
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($equipmentTypeDao, $equipmentItemDao, $equipmentHealthDao, $config, $logger) {
+    public function __construct($equipmentTypeDao, $equipmentUnitDao, $equipmentHealthDao, $config, $logger) {
         parent::__construct($logger);
         $this->equipmentTypeDao = $equipmentTypeDao;
-        $this->equipmentItemDao = $equipmentItemDao;
+        $this->equipmentUnitDao = $equipmentUnitDao;
         $this->equipmentHealthDao = $equipmentHealthDao;
         $this->config = $config;
     }
@@ -67,28 +67,28 @@ class EquipmentActionHandler extends ActionHandler {
 
 
     /**
-     * Creates a new equipment item entry in the database.
+     * Creates a new equipment unit entry in the database.
      * 
      * @return void
      */
-    public function handleCreateEquipmentItem() {
+    public function handleCreateEquipmentUnit() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
         $equipmentID = $this->getFromBody('equipmentID');
 
-        $item = new EquipmentItem();
-        $item->setEquipmentID($equipmentID);
-        $item->setDateCreated(new \DateTime());
+        $unit = new EquipmentUnit();
+        $unit->setEquipmentID($equipmentID);
+        $unit->setDateCreated(new \DateTime());
 
-        $id = $this->equipmentItemDao->addItem($item);
+        $id = $this->equipmentUnitDao->addUnit($unit);
         if (!$id) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create equipment item'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create equipment unit'));
         }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully created equipment item',
+            'Successfully created equipment unit',
             array('id' => $id)
         ));
     }
@@ -139,66 +139,66 @@ class EquipmentActionHandler extends ActionHandler {
 
 
     /**
-     * Updates the provided equipment item records
+     * Updates the provided equipment unit records
      *
      * @return void
      */
-    public function handleSaveEquipmentItem() {
+    public function handleSaveEquipmentUnit() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $itemId = $this->getFromBody('itemID');
+        $unitId = $this->getFromBody('unitID');
         $isPublic = $this->getFromBody('isPublic', false);
         $location = $this->getFromBody('location', false);
         $notes = $this->getFromBody('notes', false);
 
-        $item = $this->equipmentItemDao->getItem($itemId);
-        if (!$item){
+        $unit = $this->equipmentUnitDao->getUnit($unitId);
+        if (!$unit){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain unit from ID'));
         }
 
-        if (isset($isPublic)) $item->setIsPublic($isPublic);
-        if (isset($location)) $item->setLocation($location);
-        if (isset($notes)) $item->setNotes($notes);
-        $item->setDateUpdated(new \Datetime);
+        if (isset($isPublic)) $unit->setIsPublic($isPublic);
+        if (isset($location)) $unit->setLocation($location);
+        if (isset($notes)) $unit->setNotes($notes);
+        $unit->setDateUpdated(new \Datetime);
 
-        $ok = $this->equipmentItemDao->updateItem($item);
+        $ok = $this->equipmentUnitDao->updateUnit($unit);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update item'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update unit'));
         }
 
         $this->respond(new Response(
             Response::OK,
-            'Successfully updated item'
+            'Successfully updated unit'
         ));
     }
 
 
     /**
-     * Creates a new health log entry for the given equipment item
+     * Creates a new health log entry for the given equipment unit
      * 
      * @return void
      */
-    public function handleSetEquipmentItemHealth() {
+    public function handleSetEquipmentUnitHealth() {
         
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $itemID = $this->getFromBody('itemID');
+        $unitID = $this->getFromBody('unitID');
         $healthOption = $this->getFromBody('healthStatus');
         $notes = $this->getFromBody('notes');
 
         $healthLog = new EquipmentHealthLog();
-        $healthLog->setItemID($itemID);
+        $healthLog->setUnitID($unitID);
         $healthLog->setHealthOption(new EquipmentHealthOption($healthOption));
         $healthLog->setNotes($notes);
 
         $ok = $this->equipmentHealthDao->addHealthLog($healthLog);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update item health'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update unit health'));
         }
 
-        $this->respond(new Response(Response::OK, 'Successfully updated item health'));
+        $this->respond(new Response(Response::OK, 'Successfully updated unit health'));
     }
 
 
@@ -255,24 +255,24 @@ class EquipmentActionHandler extends ActionHandler {
 
 
     /**
-     * Handles archiving an equipment item in the database.
+     * Handles archiving an equipment unit in the database.
      * 
      * @return void
      */
-    public function handleDeleteEquipmentItem() {
+    public function handleDeleteEquipmentUnit() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $itemID = $this->getFromBody('itemID');
+        $unitID = $this->getFromBody('unitID');
 
-        $ok = $this->equipmentItemDao->deleteItem($itemID);
+        $ok = $this->equipmentUnitDao->deleteUnit($unitID);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete equipment item'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete equipment unit'));
         }
 
         $this->respond(new Response(
             Response::OK, 
-            'Successfully deleted equipment item'
+            'Successfully deleted equipment unit'
         ));
     }
 
@@ -301,24 +301,24 @@ class EquipmentActionHandler extends ActionHandler {
 
 
     /**
-     * Handles unarchiving an equipment item in the database.
+     * Handles unarchiving an equipment unit in the database.
      * 
      * @return void
      */
-    public function handleRestoreEquipmentItem() {
+    public function handleRestoreEquipmentUnit() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $itemID = $this->getFromBody('itemID');
+        $unitID = $this->getFromBody('unitID');
 
-        $ok = $this->equipmentItemDao->restoreItem($itemID);
+        $ok = $this->equipmentUnitDao->restoreUnit($unitID);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to restore equipment item'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to restore equipment unit'));
         }
 
         $this->respond(new Response(
             Response::OK, 
-            'Successfully restored equipment item'
+            'Successfully restored equipment unit'
         ));
     }
 
@@ -342,17 +342,17 @@ class EquipmentActionHandler extends ActionHandler {
             case 'createEquipment':
                 $this->handleCreateEquipment();
 
-            case 'createEquipmentItem':
-                $this->handleCreateEquipmentItem();
+            case 'createEquipmentUnit':
+                $this->handleCreateEquipmentUnit();
 
             case 'saveEquipment':
                 $this->handleSaveEquipment();
 
-            case 'saveEquipmentItem':
-                $this->handleSaveEquipmentItem();
+            case 'saveEquipmentUnit':
+                $this->handleSaveEquipmentUnit();
 
-            case 'setEquipmentItemHealth':
-                $this->handleSetEquipmentItemHealth();
+            case 'setEquipmentUnitHealth':
+                $this->handleSetEquipmentUnitHealth();
 
             case 'setDefaultImage':
                 $this->handleSetDefaultImage();
@@ -360,14 +360,14 @@ class EquipmentActionHandler extends ActionHandler {
             case 'deleteEquipment':
                 $this->handleDeleteEquipment();
 
-            case 'deleteEquipmentItem':
-                $this->handleDeleteEquipmentItem();
+            case 'deleteEquipmentUnit':
+                $this->handleDeleteEquipmentUnit();
 
             case 'restoreEquipment':
                 $this->handleRestoreEquipment();
 
-            case 'restoreEquipmentItem':
-                $this->handleRestoreEquipmentItem();
+            case 'restoreEquipmentUnit':
+                $this->handleRestoreEquipmentUnit();
 
 
             default:

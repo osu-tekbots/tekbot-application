@@ -53,8 +53,8 @@ $healthOptions = $equipmentHealthDao->getAllHealthOptions();
 
 allowIf($equipment, 'employeeEquipmentList.php');
 
-$isPublic = array_filter($equipment->getInstances(), fn($unit) => $unit->getIsPublic() && !$unit->getIsDeleted());
-$instances = $equipment->getInstances();
+$isPublic = array_filter($equipment->getUnits(), fn($unit) => $unit->getIsPublic() && !$unit->getIsDeleted());
+$instances = $equipment->getUnits();
 
 /* Image variables */
 $pImagePreviewSrc = '';
@@ -282,8 +282,8 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 
 			<?php
 				foreach ($instances as $unit) {
-					$unitID = $unit->getItemID();
-					$healthLogs = $equipmentHealthDao->getHealthLogsForItem($unitID);
+					$unitID = $unit->getUnitID();
+					$healthLogs = $equipmentHealthDao->getHealthLogsForUnit($unitID);
 
 					// Sort with most recent first for easy reading
 					usort(
@@ -328,7 +328,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 											<label for='unitHealth$unitID'>Health</label>
 											<div class='input-group'>
 												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-heartbeat'></i></div></div>
-												<select id='unitHealth$unitID' onchange='onUpdateItemHealth($unitID)' class='custom-select'>";
+												<select id='unitHealth$unitID' onchange='onUpdateUnitHealth($unitID)' class='custom-select'>";
 					foreach ($healthOptions as $option) {
 						echo "<option value='{$option->getOptionID()}'" . ($option->getName() == $unit->getHealthStatus() ? ' selected' : '') . ">
 							{$option->getName()}
@@ -345,17 +345,17 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 											<label for='unitLocation$unitID'>Location</label>
 											<div class='input-group'>
 												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-map-marker-alt'></i></div></div>
-												<input id='unitLocation$unitID' onchange='onUpdateItemLocation($unitID);' class='form-control input' value='{$unit->getLocation()}'>
+												<input id='unitLocation$unitID' onchange='onUpdateUnitLocation($unitID);' class='form-control input' value='{$unit->getLocation()}'>
 											</div>
 										</div>
 									</div>
 									<div class='col-sm pt-4'>";
 					
-					if ($unit->getIsPublic()) { createEquipmentHideButton($unit->getItemID()); }
-					else 					  { createShowEquipmentButton($unit->getItemID()); }
+					if ($unit->getIsPublic()) { createEquipmentHideButton($unit->getUnitID()); }
+					else 					  { createShowEquipmentButton($unit->getUnitID()); }
 
-					if ($unit->getIsDeleted()) { createUnarchiveUnitButton($unit->getItemID()); }
-					else                       { createArchiveUnitButton($unit->getItemID()); }
+					if ($unit->getIsDeleted()) { createUnarchiveUnitButton($unit->getUnitID()); }
+					else                       { createArchiveUnitButton($unit->getUnitID()); }
 					
 					echo "			</div>
 								</div>
@@ -363,7 +363,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<div class='col-xl-5'>
 								<div class='form-group'>
 									<label for='unitNotes$unitID'>Notes</label>
-									<textarea id='unitNotes$unitID' onchange='onUpdateItemNotes($unitID);' class='form-control input' rows='4' >{$unit->getNotes()}</textarea>
+									<textarea id='unitNotes$unitID' onchange='onUpdateUnitNotes($unitID);' class='form-control input' rows='4' >{$unit->getNotes()}</textarea>
 								</div>
 							</div>
 						</div>
@@ -411,7 +411,7 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 				}
 			?>
 
-			<button class="btn btn-outline-primary capstone-nav-btn" type="button" onclick="onCreateItem('<?= $equipment->getEquipmentID() ?>')">
+			<button class="btn btn-outline-primary capstone-nav-btn" type="button" onclick="onCreateUnit('<?= $equipment->getEquipmentID() ?>')">
 				Create New Unit
 			</button>
 

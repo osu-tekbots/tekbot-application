@@ -29,9 +29,9 @@ class EquipmentHealthDao {
     }
 
     /**
-     * Fetches all possible health statuses an equipment item could have.
+     * Fetches all possible health statuses an equipment unit could have.
      *
-     * @return \Model\EquipmentHealthOption[]|boolean an array of items on success, false otherwise
+     * @return \Model\EquipmentHealthOption[]|boolean an array of units on success, false otherwise
      */
     public function getAllHealthOptions() {
         try {
@@ -39,12 +39,12 @@ class EquipmentHealthDao {
 
             $results = $this->conn->query($sql);
 
-            $items = array();
+            $units = array();
             foreach ($results as $row) {
-                $items[] = self::ExtractEquipmentHealthOptionFromRow($row);
+                $units[] = self::ExtractEquipmentHealthOptionFromRow($row);
             }
 
-            return $items;
+            return $units;
         } catch (\Exception $e) {
             $this->logger->error("Failed to get equipment health options: " . $e->getMessage());
             return false;
@@ -53,37 +53,37 @@ class EquipmentHealthDao {
 
 
     /**
-     * Fetches all health log entries for an equipment item.
+     * Fetches all health log entries for an equipment unit.
      * 
-     * @param int $id The item to fetch health log entries for
+     * @param int $id The unit to fetch health log entries for
      * 
      * @return \Model\EquipmentHealthLog[]|false The health log entries, or false if an error occured
      */
-    public function getHealthLogsForItem($id) {
+    public function getHealthLogsForUnit($id) {
         try {
-            $sql = 'SELECT * FROM equipment_health_log ehl
-                    JOIN equipment_health_option eho ON eho.eho_id = ehl.eho_id
-                WHERE ei_id = :ei_id;
+            $sql = 'SELECT * FROM equipment_health_log
+                    JOIN equipment_health_option ON eho_id = ehl_eho_id
+                WHERE ehl_eu_id = :eu_id;
             ';
-            $params = ['ei_id' => $id];
+            $params = ['eu_id' => $id];
 
             $results = $this->conn->query($sql, $params);
 
-            $items = array();
+            $units = array();
             foreach ($results as $row) {
-                $items[] = self::ExtractEquipmentHealthLogFromRow($row);
+                $units[] = self::ExtractEquipmentHealthLogFromRow($row);
             }
 
-            return $items;
+            return $units;
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get equipment health logs for item $id: " . $e->getMessage());
+            $this->logger->error("Failed to get equipment health logs for unit $id: " . $e->getMessage());
             return false;
         }
     }
 
 
     /**
-     * Adds a new health log entry for an equipment item.
+     * Adds a new health log entry for an equipment unit.
      * 
      * @param \Model\EquipmentHealthLog $healthLog The health log to add
      * 
@@ -91,11 +91,14 @@ class EquipmentHealthDao {
      */
     public function addHealthLog($healthLog) {
         try {
-            $sql = 'INSERT INTO equipment_health_log (`ec_id`, `ei_id`, `eho_id`, `notes`, `date_created`, `date_updated`)
-                VALUES (:checkout_id, :item_id, :option_id, :notes, :date_created, :date_updated);';
+            $sql = 'INSERT INTO equipment_health_log (
+                `ehl_ec_id`, `ehl_eu_id`, `ehl_eho_id`, `ehl_notes`, `ehl_date_created`, `ehl_date_updated`
+            ) VALUES (
+                :checkout_id, :unit_id, :option_id, :notes, :date_created, :date_updated
+            );';
             $params = [
                 'checkout_id' => $healthLog->getCheckoutID(),
-                'item_id' => $healthLog->getItemID(),
+                'unit_id' => $healthLog->getUnitID(),
                 'option_id' => $healthLog->getHealthOption()->getOptionID(),
                 'notes' => $healthLog->getNotes(),
                 'date_created' => QueryUtils::formatDate($healthLog->getDateCreated()),
@@ -120,7 +123,7 @@ class EquipmentHealthDao {
      */
     public static function ExtractEquipmentHealthOptionFromRow($row) {
         $healthOption = new EquipmentHealthOption($row['eho_id']);
-        $healthOption->setName($row['name']);
+        $healthOption->setName($row['eho_name']);
         return $healthOption;
     }
 
@@ -133,12 +136,12 @@ class EquipmentHealthDao {
      */
     public static function ExtractEquipmentHealthLogFromRow($row) {
         $healthLog = new EquipmentHealthLog($row['ehl_id']);
-        $healthLog->setCheckoutID($row['ec_id']);
-        $healthLog->setItemID($row['ei_id']);
+        $healthLog->setCheckoutID($row['ehl_ec_id']);
+        $healthLog->setUnitID($row['ehl_eu_id']);
         $healthLog->setHealthOption(self::ExtractEquipmentHealthOptionFromRow($row));
-        $healthLog->setNotes($row['notes']);
-        $healthLog->setDateCreated(new \DateTime(($row['date_created'] == '' ? 'now' : $row['date_created'])));
-        $healthLog->setDateUpdated(new \DateTime(($row['date_updated'] == '' ? 'now' : $row['date_updated'])));
+        $healthLog->setNotes($row['ehl_notes']);
+        $healthLog->setDateCreated(new \DateTime(($row['ehl_date_created'] == '' ? 'now' : $row['ehl_date_created'])));
+        $healthLog->setDateUpdated(new \DateTime(($row['ehl_date_updated'] == '' ? 'now' : $row['ehl_date_updated'])));
         return $healthLog;
     }
 

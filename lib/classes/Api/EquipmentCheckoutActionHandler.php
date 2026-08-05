@@ -18,8 +18,8 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
     private $equipmentCheckoutDao;
     /** @var \DataAccess\EquipmentHealthDao */
     private $equipmentHealthDao;
-    /** @var \DataAccess\EquipmentItemDao */
-    private $equipmentItemDao;
+    /** @var \DataAccess\EquipmentUnitDao */
+    private $equipmentUnitDao;
     /** @var \DataAccess\EquipmentTypeDao */
     private $equipmentTypeDao;
 	/** @var \DataAccess\MessageDao */
@@ -35,7 +35,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
      * Constructs a new instance of the action handler for requests on project resources.
      *
      * @param \DataAccess\EquipmentCheckoutDao $equipmentCheckoutDao the data access object for checkouts
-     * @param \DataAccess\EquipmentItemDao $equipmentItemDao the data access object for equipment items
+     * @param \DataAccess\EquipmentUnitDao $equipmentUnitDao the data access object for equipment units
      * @param \DataAccess\EquipmentTypeDao $equipmentTypeDao the data access object for equipment types
      * @param \DataAccess\MessageDao $messageDao the data access object for email messages
      * @param \DataAccess\UserDao $userDao the data access object for users
@@ -43,11 +43,11 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($equipmentCheckoutDao, $equipmentHealthDao, $equipmentItemDao, $equipmentTypeDao, $messageDao, $userDao, $mailer, $config, $logger) {
+    public function __construct($equipmentCheckoutDao, $equipmentHealthDao, $equipmentUnitDao, $equipmentTypeDao, $messageDao, $userDao, $mailer, $config, $logger) {
         parent::__construct($logger);
         $this->equipmentHealthDao = $equipmentHealthDao;
         $this->equipmentCheckoutDao = $equipmentCheckoutDao;
-        $this->equipmentItemDao = $equipmentItemDao;
+        $this->equipmentUnitDao = $equipmentUnitDao;
         $this->equipmentTypeDao = $equipmentTypeDao;
 		$this->messageDao = $messageDao;
         $this->userDao = $userDao;
@@ -68,13 +68,13 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
         $equipmentID = $this->getFromBody('equipmentID');
         $userID = $this->getFromBody('userID');
 
-        $itemID = $this->equipmentCheckoutDao->getAvailableItem($equipmentID);
-        if (!$itemID) {
+        $unitID = $this->equipmentCheckoutDao->getAvailableUnit($equipmentID);
+        if (!$unitID) {
             $this->respond(new Response(Response::BAD_REQUEST, 'No available units for this equipment'));
         }
 
         $reservation = new EquipmentReservation();
-        $reservation->setItemID($itemID);
+        $reservation->setUnitID($unitID);
         $reservation->setUserID($userID);
 
         $ok = $this->equipmentCheckoutDao->addReservation($reservation);
@@ -86,7 +86,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
         $messageID = 'wersdhwrujhssfuj';
 
         $user = $this->userDao->getUserByID($userID);
-        $equipment = $this->equipmentTypeDao->getEquipmentByItemID($itemID);
+        $equipment = $this->equipmentTypeDao->getEquipmentByUnitID($unitID);
 		$message = $this->messageDao->getMessageByID($messageID);
         $ok = $this->mailer->sendEquipmentEmail($user, null, $equipment, $message);
 
@@ -119,7 +119,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
 
     /**
      * Returns details to populate the equipment checkout modal. Necessary for dynamic
-     * population of available equipment items.
+     * population of available equipment units.
      * 
      * @return void
      */
@@ -129,7 +129,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
 
         $equipmentID = $this->getFromBody('equipmentID');
         $userID = $this->getFromBody('userID');
-        $reservedItemID = $this->getFromBody('reservedItemID', false);
+        $reservedUnitID = $this->getFromBody('reservedUnitID', false);
 
         $equipment = $this->equipmentTypeDao->getEquipment($equipmentID);
         if (!$equipment) {
@@ -161,18 +161,18 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
                     ],
                     $equipment->getImages()
                 ),
-                'items' => array_map(
-                    fn($item) => [
-                        'id' => $item->getItemID(),
-                        'location' => $item->getLocation(),
-                        'healthStatus' => $item->getHealthStatus(),
-                        'notes' => $item->getNotes(),
-                        'isPublic' => $item->getIsPublic()
+                'units' => array_map(
+                    fn($unit) => [
+                        'id' => $unit->getUnitID(),
+                        'location' => $unit->getLocation(),
+                        'healthStatus' => $unit->getHealthStatus(),
+                        'notes' => $unit->getNotes(),
+                        'isPublic' => $unit->getIsPublic()
                     ],
                     array_values( // Needed to avoid `array_filter` turning this into an associative array
                         array_filter(
-                            $equipment->getInstances(), 
-                            fn($item) => $item->getCheckoutStatus() == 'Available' || $item->getItemID() == $reservedItemID
+                            $equipment->getUnits(), 
+                            fn($unit) => $unit->getCheckoutStatus() == 'Available' || $unit->getUnitID() == $reservedUnitID
                         )
                     )
                 ),
@@ -190,24 +190,24 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $itemID = $this->getFromBody('itemID');
+        $unitID = $this->getFromBody('unitID');
         $userID = $this->getFromBody('userID');
         $reservationID = $this->getFromBody('reservationID', false);
         $dateDue = $this->getFromBody('dateDue');
 
-        if (!$itemID) $this->respond(new Response(Response::BAD_REQUEST, 'Unit must be specified'));
+        if (!$unitID) $this->respond(new Response(Response::BAD_REQUEST, 'Unit must be specified'));
         if (!$dateDue) $this->respond(new Response(Response::BAD_REQUEST, 'Return deadline must be specified'));
         if (!$reservationID) $reservationID = null;
         
-        $activeReservation = $this->equipmentCheckoutDao->getActiveReservation($itemID);
+        $activeReservation = $this->equipmentCheckoutDao->getActiveReservation($unitID);
         if ($activeReservation && $activeReservation->getReservationID() != $reservationID) {
-            // Employee checkout page is outdated; trying to hand out item that's since been reserved elsewhere
+            // Employee checkout page is outdated; trying to hand out unit that's since been reserved elsewhere
             $this->respond(new Response(Response::BAD_REQUEST, 'This unit is actively reserved by someone else'));
         }
 
         $checkout = new EquipmentCheckout();
         $checkout->setReservationID($reservationID);
-        $checkout->setItemID($itemID);
+        $checkout->setUnitID($unitID);
         $checkout->setUserID($userID);
         $checkout->setDateDue(new \DateTime($dateDue));
 
@@ -220,7 +220,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
         $messageID = 'wersspdohssfuj';
 
         $user = $this->userDao->getUserByID($userID);
-        $equipment = $this->equipmentTypeDao->getEquipmentByItemID($itemID);
+        $equipment = $this->equipmentTypeDao->getEquipmentByUnitID($unitID);
 		$message = $this->messageDao->getMessageByID($messageID);
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
 
@@ -255,16 +255,16 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update checkout'));
         }
 
-        $item = $this->equipmentItemDao->getItem($checkout->getItemID());
-        if (!$item) {
+        $unit = $this->equipmentUnitDao->getUnit($checkout->getUnitID());
+        if (!$unit) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to find checked out unit'));
         }
 
-        if ($location != $item->getLocation()) {
-            $item->setLocation($location);
-            $item->setDateUpdated(new \DateTime);
+        if ($location != $unit->getLocation()) {
+            $unit->setLocation($location);
+            $unit->setDateUpdated(new \DateTime);
 
-            $ok = $this->equipmentItemDao->updateItem($item);
+            $ok = $this->equipmentUnitDao->updateUnit($unit);
             if (!$ok) {
                 $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update unit location'));
             }
@@ -272,7 +272,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
 
         $healthLog = new EquipmentHealthLog();
         $healthLog->setCheckoutID($checkoutID);
-        $healthLog->setItemID($checkout->getItemID());
+        $healthLog->setUnitID($checkout->getUnitID());
         $healthLog->setHealthOption(new EquipmentHealthOption($healthStatus));
         $healthLog->setNotes($notes);
 
@@ -284,7 +284,7 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
         $messageID = 'fsrt56pdohssfuj';
 
         $user = $this->userDao->getUserByID($checkout->getUserID());
-        $equipment = $this->equipmentTypeDao->getEquipmentByItemID($checkout->getItemID());
+        $equipment = $this->equipmentTypeDao->getEquipmentByUnitID($checkout->getUnitID());
         $message = $this->messageDao->getMessageByID($messageID);
         $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
         if (!$ok) {

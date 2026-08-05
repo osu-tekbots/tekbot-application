@@ -3,7 +3,7 @@ include_once '../bootstrap.php';
 
 use DataAccess\EquipmentCheckoutDao;
 use DataAccess\EquipmentHealthDao;
-use DataAccess\EquipmentItemDao;
+use DataAccess\EquipmentUnitDao;
 use DataAccess\EquipmentTypeDao;
 use DataAccess\UsersDao;
 use Util\Security;
@@ -32,7 +32,7 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $equipmentHealthDao = new EquipmentHealthDao($dbConn, $logger);
-$equipmentItemDao = new EquipmentItemDao($dbConn, $logger);
+$equipmentUnitDao = new EquipmentUnitDao($dbConn, $logger);
 $equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 
@@ -62,7 +62,7 @@ foreach ($reservedEquipment as $r){
 
 	$dateReserved = $r->getDateReserved();
 
-	$equipment = $equipmentTypeDao->getEquipmentByItemID($r->getItemID());
+	$equipment = $equipmentTypeDao->getEquipmentByUnitID($r->getUnitID());
 	$user = $userDao->getUserByID($r->getUserID());
 	
 	$reservedHTML .= "
@@ -71,11 +71,11 @@ foreach ($reservedEquipment as $r){
 		<td>" . Security::HtmlEntitiesEncode($user->getFirstName())." ".Security::HtmlEntitiesEncode($user->getLastName()) . "</td>
 		<td>{$dateReserved->format('Y-m-d H:i:s')}</td>
 		<td>" . Security::HtmlEntitiesEncode($equipment->getName()) . "</td>
-		<td>{$r->getItemID()}</td>
+		<td>{$r->getUnitID()}</td>
 		<td>
 			<button
 				data-toggle='modal' data-target='#handoutModal'
-				data-equipment-id='{$equipment->getEquipmentID()}' data-user-id='{$user->getUserID()}' data-reservation-id='$reservationID' data-reserved-item-id='{$r->getItemID()}'
+				data-equipment-id='{$equipment->getEquipmentID()}' data-user-id='{$user->getUserID()}' data-reservation-id='$reservationID' data-reserved-unit-id='{$r->getUnitID()}'
 				class='btn btn-outline-primary capstone-nav-btn' type='button'
 			>
 				Handout
@@ -90,15 +90,15 @@ foreach ($reservedEquipment as $r){
 
 /* 
  * This section of code displays the "Checked Out Equipment" section.
- * Gets the details of each checked out item, then populates a data table with this
+ * Gets the details of each checked out unit, then populates a data table with this
  * information.
  */
 $checkoutHTML = '';
 foreach ($checkedOutEquipment as $c){
 	$checkoutID = $c->getCheckoutID();
 
-	$equipment = $equipmentTypeDao->getEquipmentByItemID($c->getItemID());
-	$item = $equipmentItemDao->getItem($c->getItemID());
+	$equipment = $equipmentTypeDao->getEquipmentByUnitID($c->getUnitID());
+	$unit = $equipmentUnitDao->getUnit($c->getUnitID());
 	$user = $userDao->getUserByID($c->getUserID());
 
 	if ($c->getDateReturned()) {
@@ -126,9 +126,9 @@ foreach ($checkedOutEquipment as $c){
 			data-user-name='{$user->getFirstName()} {$user->getLastName()}'
 			data-user-onid='{$user->getOnid()}'
 			data-user-email='{$user->getEmail()}'
-			data-item-id='{$c->getItemID()}'
-			data-item-location='{$item->getLocation()}'
-			data-item-health='{$item->getHealthStatus()}'
+			data-unit-id='{$c->getUnitID()}'
+			data-unit-location='{$unit->getLocation()}'
+			data-unit-health='{$unit->getHealthStatus()}'
 		>
 			Return
 		</button>";
@@ -142,7 +142,7 @@ foreach ($checkedOutEquipment as $c){
 		<td>{$c->getDateDue()->format('Y-m-d H:i:s')}</td>
 		<td>{$c->getDateReturned()?->format('Y-m-d H:i:s')}</td>
 		<td>" . Security::HtmlEntitiesEncode($equipment->getName()) . "</td>
-		<td>{$c->getItemID()}</td>
+		<td>{$c->getUnitID()}</td>
 		<td>$status</td>
 		<td>$button</td>
 	</tr>
@@ -210,7 +210,7 @@ foreach ($checkedOutEquipment as $c){
 				</div>
 				<div class='admin-paper'>
 					<h3>Checked Out Equipment</h3>
-					<p>When a student brings back the rented equipment, hit the 'Return' button next to their checkout. Write any necessary notes in the notes section (scratches, broken handle). The student can see the notes you put here. If there are any fees that need to be assigned (late fees, damaged item), you can assign them fees by pressing the 'Assign fee' button.</p>
+					<p>When a student brings back the rented equipment, hit the 'Return' button next to their checkout. Write any necessary notes in the notes section (scratches, broken handle). The student can see the notes you put here.</p>
 					<table class='table' id='equipmentCheckouts'>
 						<thead>
 							<tr>
@@ -247,7 +247,7 @@ foreach ($checkedOutEquipment as $c){
 			<div class="modal-body">
 				<h4 class="d-flex justify-content-between">
 					<span class="equipmentName2"></span>
-					<span class="itemID uninitialized"></span>
+					<span class="unitID uninitialized"></span>
 				</h4>
 				<div class="images d-flex gap-2 overflow-auto" style="height: 150px; gap: 8px;"></div>
 				<p class="equipmentNotes"></p>
@@ -256,17 +256,17 @@ foreach ($checkedOutEquipment as $c){
 				<input type="hidden" id="handoutUserId">
 
 				<div class='input-group mb-2'>
-					<div class='input-group-prepend'><label for="handoutItemSelect" class='input-group-text'>Unit</label></div>
-					<select id="handoutItemSelect" class="custom-select"></select>
+					<div class='input-group-prepend'><label for="handoutUnitSelect" class='input-group-text'>Unit</label></div>
+					<select id="handoutUnitSelect" class="custom-select"></select>
 				</div>
 				
 				<div class="row">
 					<div class="col">
-						<p><b>Location:</b> <span class="itemLocation uninitialized"></span></p>
-						<p><b>Employee Notes:</b> <span class="itemNotes uninitialized"></span></p>
+						<p><b>Location:</b> <span class="unitLocation uninitialized"></span></p>
+						<p><b>Employee Notes:</b> <span class="unitNotes uninitialized"></span></p>
 					</div>
 					<div class="col">
-						<p><b>Health:</b> <span class="itemHealthStatus uninitialized"></span></p>
+						<p><b>Health:</b> <span class="unitHealthStatus uninitialized"></span></p>
 						<p><b>Visibility:</b> <span class="publicStatus uninitialized"></span></p>
 					</div>
 				</div>
@@ -303,7 +303,7 @@ foreach ($checkedOutEquipment as $c){
 			<div class="modal-body">
 				<h4 class="d-flex justify-content-between">
 					<span class="equipmentName2"></span>
-					<span class="itemID"></span>
+					<span class="unitID"></span>
 				</h4>
 
 				<p><b>Equipment Notes:</b> <span class="equipmentNotes"></span></p>
@@ -367,18 +367,18 @@ foreach ($checkedOutEquipment as $c){
 	$('#createReservationBtn').attr('data-target', '#handoutModal');
 
 	// Populates the handout modal with equipment and user details, allowing easy
-	// verification that the correct item is handed out to the correct user
+	// verification that the correct unit is handed out to the correct user
 	$('#handoutModal').on('show.bs.modal', event => {
 		const modal = $('#handoutModal'), button = $(event.relatedTarget);
 		const equipmentId = button.data('equipment-id') ?? $('#equipment').val(),
 			userId = button.data('user-id') ?? $('#user').val(),
 			reservationId = button.data('reservation-id'),
-			reservedItemId = button.data('reserved-item-id');
+			reservedUnitId = button.data('reserved-unit-id');
 
 		const content = {
 			action: 'getCheckoutDetails',
 			equipmentID: equipmentId,
-			reservedItemID: reservedItemId,
+			reservedUnitID: reservedUnitId,
 			userID: userId
 		};
 
@@ -398,29 +398,29 @@ foreach ($checkedOutEquipment as $c){
 				}));
 			}
 
-			modal.find('.uninitialized').html('<i>Select an item</i>');
+			modal.find('.uninitialized').html('<i>Select a unit</i>');
 
 			modal.find('#handoutUserId').val(userId);
 			modal.find('#handoutReservationId').val(reservationId);
-			modal.find('#handoutItemSelect').empty();
-			modal.find('#handoutItemSelect').append($('<option>', {selected: Boolean(reservedItemId)}));
-			for (const item of res.content.items) {
-				modal.find('#handoutItemSelect').append($('<option>', {
-					value: item.id,
-					text: `${item.id} -${item.isPublic ? '' : ' HIDDEN -'} ${item.healthStatus} - Last seen in ${item.location}`,
-					selected: item.id == reservedItemId,
-					'data-location': item.location,
-					'data-health-status': item.healthStatus,
-					'data-notes': item.notes,
-					'data-is-public': item.isPublic,
+			modal.find('#handoutUnitSelect').empty();
+			modal.find('#handoutUnitSelect').append($('<option>', {selected: Boolean(reservedUnitId)}));
+			for (const unit of res.content.units) {
+				modal.find('#handoutUnitSelect').append($('<option>', {
+					value: unit.id,
+					text: `${unit.id} -${unit.isPublic ? '' : ' HIDDEN -'} ${unit.healthStatus} - Last seen in ${unit.location}`,
+					selected: unit.id == reservedUnitId,
+					'data-location': unit.location,
+					'data-health-status': unit.healthStatus,
+					'data-notes': unit.notes,
+					'data-is-public': unit.isPublic,
 				}));
 			}
 
-			if (reservedItemId) {
-				const item = res.content.items.find(i => i.id == reservedItemId)
-				populateCheckoutModalItemFields(item.id, item.location, item.notes, item.healthStatus, item.isPublic);
+			if (reservedUnitId) {
+				const unit = res.content.units.find(i => i.id == reservedUnitId)
+				populateCheckoutModalUnitFields(unit.id, unit.location, unit.notes, unit.healthStatus, unit.isPublic);
 			} else {
-				clearCheckoutModalItemFields();
+				clearCheckoutModalUnitFields();
 			}
 		}).catch(err => {
 			snackbar(err.message, 'error');
@@ -428,14 +428,14 @@ foreach ($checkedOutEquipment as $c){
 		});
 	});
 
-	// Populates modal fields with item details to easily verify the correct item was selected
-	$('#handoutItemSelect').on('change', () => {
-		const selected = $('#handoutItemSelect').find(':selected');
+	// Populates modal fields with unit details to easily verify the correct unit was selected
+	$('#handoutUnitSelect').on('change', () => {
+		const selected = $('#handoutUnitSelect').find(':selected');
 
 		if (selected.val() == '') 
-			clearCheckoutModalItemFields();
+			clearCheckoutModalUnitFields();
 		else
-			populateCheckoutModalItemFields(
+			populateCheckoutModalUnitFields(
 				selected.val(),
 				selected.data('location'),
 				selected.data('notes'),
@@ -444,12 +444,12 @@ foreach ($checkedOutEquipment as $c){
 			);
 	});
 
-	function clearCheckoutModalItemFields() {
+	function clearCheckoutModalUnitFields() {
 		const modal = $('#handoutModal');
 
 		modal.find('.uninitialized').html('<i>Select a unit</i>');
 		
-		modal.find('.itemHealthStatus')
+		modal.find('.unitHealthStatus')
 			.removeClass('text-success').removeClass('text-warning').removeClass('text-danger')
 			.removeClass('font-weight-bold');
 		modal.find('.publicStatus')
@@ -457,29 +457,29 @@ foreach ($checkedOutEquipment as $c){
 			.removeClass('font-weight-bold')
 	}
 
-	function populateCheckoutModalItemFields(id, location, notes, healthStatus, isPublic) {
+	function populateCheckoutModalUnitFields(id, location, notes, healthStatus, isPublic) {
 		const modal = $('#handoutModal');
 
-		modal.find('.itemID').text(`Unit ${id}`);
-		modal.find('.itemLocation').text(location);
-		modal.find('.itemNotes').html(notes);
+		modal.find('.unitID').text(`Unit ${id}`);
+		modal.find('.unitLocation').text(location);
+		modal.find('.unitNotes').html(notes);
 
-		modal.find('.itemHealthStatus').text(healthStatus);
+		modal.find('.unitHealthStatus').text(healthStatus);
 		switch (healthStatus) {
 			case 'Fully Functional':
-				modal.find('.itemHealthStatus')
+				modal.find('.unitHealthStatus')
 					.addClass('text-success').removeClass('text-warning').removeClass('text-danger')
 					.removeClass('font-weight-bold');
 				break;
 
 			case 'Partially Functional':
-				modal.find('.itemHealthStatus')
+				modal.find('.unitHealthStatus')
 					.addClass('text-warning').removeClass('text-success').removeClass('text-danger')
 					.addClass('font-weight-bold');
 				break;
 			
 			default:
-				modal.find('.itemHealthStatus')
+				modal.find('.unitHealthStatus')
 					.addClass('text-danger').removeClass('text-success').removeClass('text-warning')
 					.addClass('font-weight-bold');
 		}
@@ -505,9 +505,9 @@ foreach ($checkedOutEquipment as $c){
 			userName = button.data('user-name'),
 			userOnid = button.data('user-onid'),
 			userEmail = button.data('user-email'),
-			itemId = button.data('item-id'),
-			itemLocation = button.data('item-location'),
-			itemHealth = button.data('item-health');
+			unitId = button.data('unit-id'),
+			unitLocation = button.data('unit-location'),
+			unitHealth = button.data('unit-health');
 
 		modal.find('.equipmentName2').text(equipmentName);
 		modal.find('.equipmentNotes').text(equipmentNotes);
@@ -516,11 +516,11 @@ foreach ($checkedOutEquipment as $c){
 		modal.find('.userName').text(userName);
 		modal.find('.userOnid').text(userOnid);
 		modal.find('.userEmail').text(userEmail);
-		modal.find('.itemID').text(`Unit ${itemId}`);
+		modal.find('.unitID').text(`Unit ${unitId}`);
 		modal.find('#returnCheckoutID').val(checkoutId);
-		modal.find('#returnLocation').val(itemLocation);
+		modal.find('#returnLocation').val(unitLocation);
 		modal.find('#returnHealth option').prop('selected', false);
-		modal.find('#returnHealth option').filter(function() {console.log($(this).text()); return $(this).text() == itemHealth}).prop('selected', true);
+		modal.find('#returnHealth option').filter(function() {return $(this).text().trim() == unitHealth}).prop('selected', true);
 		modal.find('#returnNotes').val('');
 	});
 
@@ -547,14 +547,14 @@ foreach ($checkedOutEquipment as $c){
 
 	function handoutEquipment() {
 		const userId = $('#handoutUserId').val(),
-			itemId = $('#handoutItemSelect').val(),
+			unitId = $('#handoutUnitSelect').val(),
 		 	reservationId = $('#handoutReservationId').val()
 			dateDue = $('#handoutDueDate').val();
 
 		const content = {
 			action: 'checkoutEquipment',
 			userID: userId,
-			itemID: itemId,
+			unitID: unitId,
 			reservationID: reservationId,
 			dateDue
 		};

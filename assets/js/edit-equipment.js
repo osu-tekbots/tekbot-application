@@ -105,9 +105,9 @@ function onSaveEquipmentClick() {
 }
 $('#saveEquipmentBtn').on('click', onSaveEquipmentClick);
 
-function onCreateItem(typeId) {
+function onCreateUnit(typeId) {
     let body = {
-        action: 'createEquipmentItem',
+        action: 'createEquipmentUnit',
         equipmentID: typeId
     };
 
@@ -121,12 +121,11 @@ function onCreateItem(typeId) {
         });
 }
 
-function onUpdateItemHealth(id) {
+function onUpdateUnitHealth(id) {
     let body = {
-        action: 'setEquipmentItemHealth',
+        action: 'setEquipmentUnitHealth',
         healthStatus: $(`#unitHealth${id}`).val(),
-        notes: '', //$(`#unitNotes${id}`).val(),
-        itemID: id
+        unitID: id
     };
 
     api.post('/equipment.php', body)
@@ -138,12 +137,12 @@ function onUpdateItemHealth(id) {
         });
 }
 
-/** Handler for user updating an equipment item's notes */
-function onUpdateItemNotes(id) {
+/** Handler for user updating an equipment unit's notes */
+function onUpdateUnitNotes(id) {
     let body = {
-        action: 'saveEquipmentItem',
+        action: 'saveEquipmentUnit',
         notes: $(`#unitNotes${id}`).val(),
-        itemID: id
+        unitID: id
     };
 
     api.post('/equipment.php', body)
@@ -155,12 +154,12 @@ function onUpdateItemNotes(id) {
         });
 }
 
-/** Handler for user updating an equipment item's location */
-function onUpdateItemLocation(id) {
+/** Handler for user updating an equipment unit's location */
+function onUpdateUnitLocation(id) {
     let body = {
-        action: 'saveEquipmentItem',
+        action: 'saveEquipmentUnit',
         location: $(`#unitLocation${id}`).val(),
-        itemID: id
+        unitID: id
     };
 
     api.post('/equipment.php', body)

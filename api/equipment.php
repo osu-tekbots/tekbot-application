@@ -8,7 +8,7 @@ include_once '../bootstrap.php';
 use Api\EquipmentActionHandler;
 use Api\Response;
 use DataAccess\EquipmentTypeDao;
-use DataAccess\EquipmentItemDao;
+use DataAccess\EquipmentUnitDao;
 use DataAccess\EquipmentHealthDao;
 use Email\ProjectMailer;
 
@@ -17,9 +17,9 @@ if (PHP_SESSION_ACTIVE != session_status())
 
 // Setup our data access and handler classes
 $equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
-$equipmentItemDao = new EquipmentItemDao($dbConn, $logger);
+$equipmentUnitDao = new EquipmentUnitDao($dbConn, $logger);
 $equipmentHealthDao = new EquipmentHealthDao($dbConn, $logger);
-$handler = new EquipmentActionHandler($equipmentTypeDao, $equipmentItemDao, $equipmentHealthDao, $configManager, $logger);
+$handler = new EquipmentActionHandler($equipmentTypeDao, $equipmentUnitDao, $equipmentHealthDao, $configManager, $logger);
 
 // Handle the request
 $handler->handleRequest();

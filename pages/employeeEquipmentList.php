@@ -47,7 +47,7 @@ $equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
 
 $equipment = $equipmentTypeDao->getEmployeeEquipment($showDeleted);
 
-$equipmentItemHTML = "";
+$equipmentHTML = "";
 foreach ($equipment as $e){
 	$equipmentID = $e->getEquipmentID();
 
@@ -70,7 +70,7 @@ foreach ($equipment as $e){
 	$editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
 
 	$units = "<ul>";
-	foreach ($e->getInstances() as $unit) {
+	foreach ($e->getUnits() as $unit) {
 		$status = $unit->getCheckoutStatus();
 		if (! $unit->getIsPublic()) $status = "Hidden";
 
@@ -89,7 +89,7 @@ foreach ($equipment as $e){
 	/**
 	 * Creates a data table with the information populated from above. 
 	 */
-	$equipmentItemHTML .= "
+	$equipmentHTML .= "
 	<tr style='$background'>
 		<td>
 			$name
@@ -141,7 +141,7 @@ foreach ($equipment as $e){
 							</tr>
 						</thead>
 						<tbody>
-							<?= $equipmentItemHTML ?>
+							<?= $equipmentHTML ?>
 						</tbody>
 					</table>
 					<script>

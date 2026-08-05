@@ -279,22 +279,22 @@ HTML;
 
  }
 
- function createEquipmentHideButton($itemID) {
+ function createEquipmentHideButton($unitID) {
 	echo "
-	<button class='btn btn-outline-info hideEquipmentBtn' id='hideEquipmentBtn$itemID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='Hide the unit from public view, making it only visible to employees. This can be used for archived items or listings that you are still working on.'>
+	<button class='btn btn-outline-info hideEquipmentBtn' id='hideEquipmentBtn$unitID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='Hide the unit from public view, making it only visible to employees. This can be used for archived units or listings that you are still working on.'>
 		Make Hidden
 	</button>
 	
 	<script type='text/javascript'>
-		$('#hideEquipmentBtn$itemID').on('click', function() {
+		$('#hideEquipmentBtn$unitID').on('click', function() {
 			let res = confirm('You are hiding this equipment from public view. This can be changed later.');
 			if(!res) return false;
-			let itemID = '$itemID';
+			let unitID = '$unitID';
 			let data = {
-				action: 'saveEquipmentItem',
+				action: 'saveEquipmentUnit',
                 isPublic: false,
-                itemID,
+                unitID,
 			};
 			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
@@ -309,22 +309,22 @@ HTML;
 	";
 }
 
-function createShowEquipmentButton($itemID) {
+function createShowEquipmentButton($unitID) {
 	echo "
-	<button class='btn btn-outline-info capstone-nav-btn' id='showEquipmentBtn$itemID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='This will make the unit visible to everyone on the Browse Equipment page.  By default, items are created as private, so you will need to hit this button to make them visible.'>
+	<button class='btn btn-outline-info capstone-nav-btn' id='showEquipmentBtn$unitID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='This will make the unit visible to everyone on the Browse Equipment page.  By default, units are created as private, so you will need to hit this button to make them visible.'>
 		Make Public
 	</button>
 	
 	<script type='text/javascript'>
-		$('#showEquipmentBtn$itemID').on('click', function() {
+		$('#showEquipmentBtn$unitID').on('click', function() {
 			let res = confirm('You are making this equipment available for public viewing. This can be changed later.');
 			if(!res) return false;
-			let itemID = '$itemID';
+			let unitID = '$unitID';
 			let data = {
-				action: 'saveEquipmentItem',
+				action: 'saveEquipmentUnit',
                 isPublic: true,
-                itemID,
+                unitID,
 			};
 			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
@@ -404,10 +404,10 @@ function createArchiveUnitButton($unitID){
 		$('#deleteUnitBtn$unitID').on('click', function() {
 			let res = confirm('You are deleting an unit. Are you sure about this?.');
 			if(!res) return false;
-			let itemID = '$unitID';
+			let unitID = '$unitID';
 			let data = {
-				action: 'deleteEquipmentItem',
-                itemID
+				action: 'deleteEquipmentUnit',
+                unitID
 			};
 			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
@@ -429,10 +429,10 @@ function createUnarchiveUnitButton($unitID){
 	
 	<script type='text/javascript'>
 		$('#restoreUnitBtn$unitID').on('click', function() {
-			let itemID = '$unitID';
+			let unitID = '$unitID';
 			let data = {
-				action: 'restoreEquipmentItem',
-                itemID
+				action: 'restoreEquipmentUnit',
+                unitID
 			};
 			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');

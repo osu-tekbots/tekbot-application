@@ -2,12 +2,12 @@
 namespace Model;
 
 /**
- * Data structure representing an equipment item
+ * Data structure representing an equipment unit
  */
-class EquipmentItem {
+class EquipmentUnit {
     
     /** @var int */
-    private $itemID;
+    private $unitID;
 
     /** @var string */
     private $equipmentID;
@@ -37,15 +37,15 @@ class EquipmentItem {
 	private $dateUpdated;
 
     /**
-     * Creates a new instance of an equipment item.
+     * Creates a new instance of an equipment unit.
      * 
      * If an ID is provided, defaults will not be set. If an ID is not provided,
      * defaults will be set.
      *
-     * @param int|null $id the ID of the item.
+     * @param int|null $id the ID of the unit.
      */
     public function __construct($id = null) {
-        $this->setItemID($id);
+        $this->setUnitID($id);
         
         if ($id == null) {
             $this->setIsPublic(false);
@@ -62,12 +62,12 @@ class EquipmentItem {
      * Getters and Setters
      */
 
-	public function getItemID(){
-		return $this->itemID;
+	public function getUnitID(){
+		return $this->unitID;
 	}
 
-	public function setItemID($itemID){
-		$this->itemID = $itemID;
+	public function setUnitID($unitID){
+		$this->unitID = $unitID;
 	}
 
 	public function getEquipmentID(){

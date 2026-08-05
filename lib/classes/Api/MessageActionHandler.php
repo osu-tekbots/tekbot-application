@@ -13,7 +13,7 @@ use Model\PrintType;
 use Model\Box;
 use Model\LaserJob;
 use Model\LaserMaterial;
-use Model\EquipmentOld;
+use Model\EquipmentType;
 use Model\Ticket;
 use Model\Part;
 use Model\InternalSale;
