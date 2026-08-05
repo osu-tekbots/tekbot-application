@@ -198,7 +198,6 @@ if (isset($stocknumber)){ // Display single kit information
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 
 ?>
@@ -500,7 +499,8 @@ $(document).ready(function() {
 				{ "orderable": false },
 				{ "orderable": false },
 				{ "orderable": false },
-				{ "orderable": false }			
+				{ "orderable": false },
+				null
 			  ]
 			});
 });
