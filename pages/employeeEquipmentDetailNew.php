@@ -374,7 +374,18 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 						<div class='row'>
 							<div class='col'>
 								<ul>";
-					foreach ($healthLogs as $log) {
+					
+					for ($i = 0; $i < count($healthLogs); $i++) {
+						// Skip logs that don't have notes & don't update the health status
+						if (
+							$i < count($healthLogs) - 1
+							&& $healthLogs[$i]->getHealthOption()->getOptionID() == $healthLogs[$i + 1]->getHealthOption()->getOptionID()
+							&& empty($healthLogs[$i]->getNotes())
+						)
+							continue;
+						else
+							$log = $healthLogs[$i];
+
 						echo "<li><b>{$log->getDateCreated()->format('Y-m-d H:i:s')}</b> (";
 
 						if ($log->getCheckoutID()) {
@@ -414,8 +425,9 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 			<p style="white-space: normal">
 				<i class="fas fa-info-circle"></i>
 				<i style="white-space: normal">
-					&nbsp;&nbsp;You can upload images to help showcase the equipment. Images must be no larger than 5MB. The 
-					selected image will be the default image.</i>
+					&nbsp;&nbsp;You can upload images (&lt;5MB) to help showcase the equipment. The 
+					selected image will be the default image and should show the equipment's usage/contents.
+				</i>
 			</p>
 
 			<div class="edit-project-images-container mx-2">

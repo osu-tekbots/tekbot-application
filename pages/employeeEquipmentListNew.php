@@ -95,10 +95,12 @@ foreach ($equipment as $e){
 	 */
 	$equipmentItemHTML .= "
 	<tr style='$background'>
-		<td><img height='200px;' src='$imagePath'></td>
-		<td>$name</td>
+		<td>
+			$name
+			<br>
+			<img height='200px;' src='$imagePath'>
+		</td>
 		<td>$units</td>
-		<td>$replacementCost</td>
 		<td>$notes</td>
 		<td>$viewButton $editButton</td>
 	</tr>
@@ -136,10 +138,8 @@ foreach ($equipment as $e){
 						<caption>Employee Equipment List</caption>
 						<thead>
 							<tr>
-								<th>Image</th>
-								<th>Name</th>
+								<th>Equipment</th>
 								<th>Units</th>
-								<th>Cost</th>
 								<th>Notes</th>
 								<th></th>
 							</tr>

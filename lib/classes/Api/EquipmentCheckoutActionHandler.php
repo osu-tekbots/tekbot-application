@@ -154,6 +154,13 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
                     'onid' => $user->getOnid(),
                     'email' => $user->getEmail()
                 ],
+                'images' => array_map(
+                    fn($img) => [
+                        'url' => 'images/equipment/' . $img->getImageID(),//TODO
+                        'name' => $img->getFilename()
+                    ],
+                    $equipment->getImages()
+                ),
                 'items' => array_map(
                     fn($item) => [
                         'id' => $item->getItemID(),

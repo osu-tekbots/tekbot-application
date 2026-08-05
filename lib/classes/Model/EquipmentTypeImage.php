@@ -53,11 +53,11 @@ class EquipmentTypeImage {
 		return $this->equipmentId;
 	}
 
-	public function setequipmentId($equipmentId){
+	public function setEquipmentId($equipmentId){
 		$this->equipmentId = $equipmentId;
 	}
 
-	public function getFileName(){
+	public function getFilename(){
 		return $this->filename;
 	}
 

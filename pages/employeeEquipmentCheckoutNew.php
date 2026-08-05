@@ -253,6 +253,7 @@ foreach ($checkedOutEquipment as $c){
 					<span class="equipmentName2"></span>
 					<span class="itemID uninitialized"></span>
 				</h4>
+				<div class="images d-flex gap-2 overflow-auto" style="height: 150px; gap: 8px;"></div>
 				<p class="equipmentNotes"></p>
 
 				<input type="hidden" id="handoutReservationId">
@@ -310,7 +311,7 @@ foreach ($checkedOutEquipment as $c){
 				</h4>
 
 				<p><b>Equipment Notes:</b> <span class="equipmentNotes"></span></p>
-				<p><b>Equipment Parts:</b> <span class="equipmentParts"></span></p>
+				<p><b>Equipment Parts:</b><br> <span class="equipmentParts"></span></p>
 				<p><b>Return Steps:</b><br> <span class="equipmentReturnCheck"></span></p>
 
 				<h4 class="userName"></h4>
@@ -391,6 +392,15 @@ foreach ($checkedOutEquipment as $c){
 			modal.find('.userName').text(res.content.user.name);
 			modal.find('.userOnid').text(res.content.user.onid);
 			modal.find('.userEmail').text(res.content.user.email);
+			
+			modal.find('.images').html('');
+			for (const img of res.content.images) {
+				modal.find('.images').append($('<img>', {
+					src: img.url,
+					alt: img.name,
+					class: 'img-fluid rounded'
+				}));
+			}
 
 			modal.find('.uninitialized').html('<i>Select an item</i>');
 
@@ -401,7 +411,7 @@ foreach ($checkedOutEquipment as $c){
 			for (const item of res.content.items) {
 				modal.find('#handoutItemSelect').append($('<option>', {
 					value: item.id,
-					text: `${item.id} -${item.isPublic ? '' : ' HIDDEN -'} ${item.location} (${item.healthStatus})`,
+					text: `${item.id} -${item.isPublic ? '' : ' HIDDEN -'} ${item.healthStatus} - Last seen in ${item.location}`,
 					selected: item.id == reservedItemId,
 					'data-location': item.location,
 					'data-health-status': item.healthStatus,
@@ -456,7 +466,7 @@ foreach ($checkedOutEquipment as $c){
 
 		modal.find('.itemID').text(`Unit ${id}`);
 		modal.find('.itemLocation').text(location);
-		modal.find('.itemNotes').text(notes);
+		modal.find('.itemNotes').html(notes);
 
 		modal.find('.itemHealthStatus').text(healthStatus);
 		switch (healthStatus) {
@@ -522,23 +532,6 @@ foreach ($checkedOutEquipment as $c){
 	// 
 	// Action handlers
 	// 
-	
-	function reserveEquipment() {
-		const user = $('#user').val();
-		const equipment = $('#equipment').val();
-		
-		const content = {
-			action: 'createReservation',
-			userID: user,
-			equipmentID: equipment
-		}
-		
-		api.post('/equipment-checkout.php', content).then(res => {
-			snackbar(res.message, 'info');
-		}).catch(err => {
-			snackbar(err.message, 'error');
-		});
-	}
 
 	function cancelReservation(reservationId) {
 		let res = confirm('You are about to cancel a reservation. This action cannot be undone.');
@@ -571,6 +564,7 @@ foreach ($checkedOutEquipment as $c){
 		};
 
 		api.post('/equipment-checkout.php', content).then(res => {
+			setTimeout(() => window.location.reload(1), 1000);
 			snackbar(res.message, 'info');
 		}).catch(err => {
 			snackbar(err.message, 'error');
@@ -592,6 +586,7 @@ foreach ($checkedOutEquipment as $c){
 		};
 
 		api.post('/equipment-checkout.php', content).then(res => {
+			setTimeout(() => window.location.reload(1), 1000);
 			snackbar(res.message, 'info');
 		}).catch(err => {
 			snackbar(err.message, 'error');
