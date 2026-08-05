@@ -46,7 +46,6 @@ if (isset($_REQUEST['key'])){
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $boxDao = new BoxDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);

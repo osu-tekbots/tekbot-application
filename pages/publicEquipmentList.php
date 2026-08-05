@@ -2,8 +2,8 @@
 include_once '../bootstrap.php';
 
 use Util\Security;
-use DataAccess\EquipmentDaoOld;
-use DataAccess\EquipmentReservationDaoOld;
+use DataAccess\EquipmentTypeDao;
+use DataAccess\EquipmentCheckoutDao;
 
 $title = 'Browse Equipment';
 $css = array(
@@ -13,36 +13,28 @@ $js = array(
     'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/reserveEquipmentModal.php';
 
 
-$dao = new EquipmentDaoOld($dbConn, $logger);
-$equipmentReservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
+$dao = new EquipmentTypeDao($dbConn, $logger);
+$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 
 $isEmployee = verifyPermissions('employee', $logger);
 
-/* 
-* Populates page with information from the Equipment DAO
-*/
+/* Populates page with information from the Equipment DAO */
 $equipments = $dao->getBrowsableEquipment();
 $equipmentItemHTML = "";
 foreach ($equipments as $e){
     $equipmentID = $e->getEquipmentID();
-    $image = $dao->getDefaultEquipmentImage($equipmentID);
-    if (!empty($image)){
-        $imageName = $image->getImageID();
+    if (!empty($e->getImages())){
+        $imageName = $e->getImages()[0]->getImageID();
         $imagePath = "images/equipment/$imageName";
-        
     } else {
         $imageName = "no-image.png";
         $imagePath = "assets/img/$imageName";
     }
-
-/* 
-* Will only show edit button if the user logged in is an employee
-*/
-
+    
+    //  Will only show edit button if the user logged in is an employee
     $viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
     $editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
     if ($isEmployee){
@@ -51,22 +43,15 @@ foreach ($equipments as $e){
         $actions = "$viewButton";
     }
 	
-    $isAvailable = $equipmentReservationDao->getEquipmentAvailableStatus($equipmentID);
-    if ($isAvailable){
-        $status = "Available";
-    }
-    else {
-        $status = "Not Available";
-    }
+    $availableUnits = $equipmentCheckoutDao->countAvailableItems($equipmentID);
+    if ($availableUnits) $status = "$availableUnits Available";
+    else                 $status = "Not Available";
 	
-//	$status .= "<BR>" . $e->getInstances() . " Unit(s) Total";
-	
-    $name = Security::HtmlEntitiesEncode($e->getEquipmentName());
+    $name = Security::HtmlEntitiesEncode($e->getName());
     if (strlen($name) > 60) {
         // Restrict the name length
         $name = substr($name, 0, 60) . "..."; 
     }
-    $health = $e->getHealthID()->getName();
     $description = Security::HtmlEntitiesEncode($e->getDescription());
     if (strlen($description) > 318) {
         // Restrict the description length
@@ -74,10 +59,7 @@ foreach ($equipments as $e){
     }
     
 
-/* 
-* Creates a data table containing each piece of equipment that is available for rental
-*/
-
+    /** Creates a data table containing each piece of equipment that is available for rental */
     $equipmentItemHTML .= "
     <tr>
         <td><a href='pages/publicEquipmentDetail.php?id=$equipmentID'><img height='150px;' src='$imagePath'></a></td>
@@ -90,10 +72,7 @@ foreach ($equipments as $e){
     ";
 }
 
-/* 
-* Populates the top of the page, and sets the table headers for the data items
-*/
-
+/* Populates the top of the page and sets the table headers for the data items */
 ?> 
 <br><br>
 <div class="container-fluid">
@@ -102,7 +81,7 @@ foreach ($equipments as $e){
 		<h1>Equipment Available to Borrow</h1>
 		<div class="row">
 			<div class="col-7">
-                <p class="lead mb-0">OSU students, employees, and staff can borrow a variety of equipment from the TekBots store in KEC1110. Equipment is available on a varying number of day loans. To pick up equipment, browse the listing below and make a reservation for the equipment you want, A reservation is good for an hour so travel quickly to pickup your item from KEC1110. In the event that you can not make it to our hours, it maybe possible to leave the item for you in one of our TekBox lockers. Contact us for more details.</p>
+                <p class="lead mb-0">OSU students, employees, and staff can borrow a variety of equipment from the TekBots store in KEC1110. Equipment is available on a varying number of day loans. To pick up equipment, browse the listing below and make a reservation for the equipment you want. Reservations are good for an hour, so travel quickly to pickup your item from KEC1110. If you can not make it to our store hours, it may be possible to leave the item for you in one of our TekBox lockers. Contact us for more details.</p>
 			</div>
 			<div class="col-5">
                 <img class="img-fluid rounded" src="./assets/img/rect1.png">

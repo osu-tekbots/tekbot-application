@@ -38,7 +38,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $log .= "Time to Load Headers: " . time_point() . " mS<BR>";
 

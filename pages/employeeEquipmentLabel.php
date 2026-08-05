@@ -128,7 +128,6 @@ if (count($items) > 0) { //Need to render labels
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 
 $equipment = $equipmentDao->getEmployeeEquipment();

@@ -186,28 +186,12 @@ function renderEmployeeSidebar() {
             <span>Equipment</span>
             </a>
             <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeEquipment.php">Overview</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Adjust Content:</h6>
-                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Edit Equipment</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
-            </div>
-        </li>
-
-        <!-- New Equipment -->
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-tools"></i>
-            <span>Equipment (New!)</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeEquipmentListNew.php">Overview</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentCheckoutNew.php">Checkout</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentCheckout.php">Checkout</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentList.php">Equipment List</a>
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Adjust Content:</h6>
                 <a class="dropdown-item" href="pages/employeeEquipmentMessages.php">Edit Messages</a>
-                <a class="dropdown-item" href="pages/employeeEquipmentLabels.php">Print Labels</a>
+                <a class="dropdown-item" href="pages/employeeEquipmentLabel.php">Print Labels</a>
             </div>
         </li>
 
@@ -244,14 +228,6 @@ function renderEmployeeSidebar() {
             <a style="color: lightblue;" class="nav-link" href="pages/employeeEmail.php">
                 <i class="far fa-fw fa-paper-plane"></i>
                 <span>Send Email</span>
-            </a>
-        </li>
-
-        <!-- Fees -->
-        <li class="nav-item">
-            <a style="color: lightblue;" class="nav-link" href="pages/employeeFees.php">
-                <i class="fas fa-fw fa-dollar-sign"></i>
-                <span>Fees</span>
             </a>
         </li>
 
@@ -303,23 +279,24 @@ HTML;
 
  }
 
- function createEquipmentHideButton($equipmentID) {
+ function createEquipmentHideButton($itemID) {
 	echo "
-	<button class='btn btn-outline-info hideEquipmentBtn' id='hideEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='Hide the equipment from public view.  This equipment will only be visible on the employee equipment page.  This can be used for archived items, or listings that you are still working on.'>
+	<button class='btn btn-outline-info hideEquipmentBtn' id='hideEquipmentBtn$itemID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='Hide the unit from public view, making it only visible to employees. This can be used for archived items or listings that you are still working on.'>
 		Make Hidden
 	</button>
 	
 	<script type='text/javascript'>
-		$('#hideEquipmentBtn$equipmentID').on('click', function() {
+		$('#hideEquipmentBtn$itemID').on('click', function() {
 			let res = confirm('You are hiding this equipment from public view. This can be changed later.');
 			if(!res) return false;
-			let equipmentID = '$equipmentID';
+			let itemID = '$itemID';
 			let data = {
-				action: 'makeEquipmentHidden',
-                equipmentID: equipmentID,
+				action: 'saveEquipmentItem',
+                isPublic: false,
+                itemID,
 			};
-			api.post('/equipments-old.php', data).then(res => {
+			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);
@@ -332,23 +309,24 @@ HTML;
 	";
 }
 
-function createShowEquipmentButton($equipmentID) {
+function createShowEquipmentButton($itemID) {
 	echo "
-	<button class='btn btn-outline-info capstone-nav-btn' id='showEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='This will make the equipment visible to everyone on the browse equipment page.  By default, items are created as private so to make them visible you will need to hit this button.'>
+	<button class='btn btn-outline-info capstone-nav-btn' id='showEquipmentBtn$itemID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='This will make the unit visible to everyone on the Browse Equipment page.  By default, items are created as private, so you will need to hit this button to make them visible.'>
 		Make Public
 	</button>
 	
 	<script type='text/javascript'>
-		$('#showEquipmentBtn$equipmentID').on('click', function() {
+		$('#showEquipmentBtn$itemID').on('click', function() {
 			let res = confirm('You are making this equipment available for public viewing. This can be changed later.');
 			if(!res) return false;
-			let equipmentID = '$equipmentID';
+			let itemID = '$itemID';
 			let data = {
-				action: 'makeEquipmentShown',
-                equipmentID: equipmentID,
+				action: 'saveEquipmentItem',
+                isPublic: true,
+                itemID,
 			};
-			api.post('/equipments-old.php', data).then(res => {
+			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     window.location.reload(1);
@@ -364,7 +342,7 @@ function createShowEquipmentButton($equipmentID) {
 function createArchiveEquipmentButton($equipmentID){
 	echo "
 	<button class='btn btn-outline-danger capstone-nav-btn' id='archiveEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
-    title='Removes the equipment for both employees and students'>
+    title='Removes the equipment, though restoration by an employee is possible.'>
 		Delete Equipment
 	</button>
 	
@@ -374,10 +352,10 @@ function createArchiveEquipmentButton($equipmentID){
 			if(!res) return false;
 			let equipmentID = '$equipmentID';
 			let data = {
-				action: 'makeEquipmentArchive',
+				action: 'deleteEquipment',
                 equipmentID: equipmentID,
 			};
-			api.post('/equipments-old.php', data).then(res => {
+			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
                 setTimeout(function(){
                     history.go(-1);
@@ -390,208 +368,79 @@ function createArchiveEquipmentButton($equipmentID){
 	";
 }
 
-function createAssignEquipmentFeesButton($checkoutID, $userID, $reservationID){
-    global $dbConn, $logger;
-    $feeDao = new EquipmentFeeDaoOld($dbConn, $logger);
-    $fee = $feeDao->getEquipmentFeeWithCheckoutID($checkoutID);
-    if (empty($fee)){
-        $buttonText = "Assign Fee";
-    }
-    else {
-        // Checkout has been asssigned, change to view
-        $buttonText = "View Fee";
-    }
-    return "
-    <button class='btn btn-outline-danger capstone-nav-btn' type='button' data-toggle='modal' 
-    data-target='#newFeeModal$checkoutID' id='openNewEquipmentFeeModalBtn'>$buttonText</button>
-    
-    <script type='text/javascript'>
-
-     $('#assignEquipmentFees$checkoutID').on('click', function() {
-        let reservationID = '$reservationID';
-        let feeAmount = $('#feeAmount$checkoutID').val();
-        let feeNotes = $('#feeNotes$checkoutID').val();
-        let userID = '$userID';
-        let checkoutID = '$checkoutID';
-         let data = {
-            action: 'assignEquipmentFees',
-            checkoutID: checkoutID,
-            reservationID: reservationID,
-            feeAmount: feeAmount,
-            userID: userID,
-            feeNotes: feeNotes
-         };
-         api.post('/equipmentrentalold.php', data).then(res => {
-             snackbar(res.message, 'success');
-             setTimeout(function(){
-                window.location.reload(1);
-             }, 2000);
-         }).catch(err => {
-             snackbar(err.message, 'error');
-         });
-     });
-     
- </script>
-    
-    ";
-}
-
-function createReservationHandoutButton($reservationID, $listNumber, $userID, $equipmentID){
-     
-     return "
-     <button class='btn btn-outline-primary capstone-nav-btn' type='button' data-toggle='modal' 
-     data-target='#newHandoutModal$reservationID' id='openNewHandoutModalBtn'>Handout</button>
-    
-    
-     <script type='text/javascript'>
-
- 		$('#handoutEquipmentBtn$reservationID').on('click', function() {
-            let reservationID = '$reservationID';
-            let contractID = $('#$reservationID').val();
-            let userID = '$userID';
-            let equipmentID = '$equipmentID';
- 			let data = {
- 				action: 'checkoutEquipment',
-                reservationID: reservationID,
-                contractID: contractID,
-                userID: userID,
+function createUnarchiveEquipmentButton($equipmentID){
+	echo "
+	<button class='btn btn-outline-danger capstone-nav-btn' id='unarchiveEquipmentBtn$equipmentID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='Restores the equipment, making it show up again on equipment lists.'>
+		Restore Equipment
+	</button>
+	
+	<script type='text/javascript'>
+		$('#unarchiveEquipmentBtn$equipmentID').on('click', function() {
+			let equipmentID = '$equipmentID';
+			let data = {
+				action: 'restoreEquipment',
                 equipmentID: equipmentID,
-				messageID: 'wersspdohssfuj'
- 			};
- 			api.post('/equipmentrentalold.php', data).then(res => {
- 				$('#activeReservation$listNumber').remove();
-                 snackbar(res.message, 'success');
-                 setTimeout(function(){
-                    window.location.reload(1);
-                 }, 2000);
- 			}).catch(err => {
- 				snackbar(err.message, 'error');
- 			});
-         });
-         
- 	</script>
-
-     ";
-
-}
-
-function createViewCheckoutButton($checkoutID){
-     
-    return "
-    <button class='btn btn-outline-primary capstone-nav-btn' type='button' data-toggle='modal' 
-    data-target='#viewCheckoutModal$checkoutID' id='openNewViewModalBtn'>View</button>
-    ";
-
-}
-
-function createReserveAsEmployeeBtn($reservationID, $listNumber, $userID, $equipmentID){
-     
-    return "
-    <button class='btn btn-outline-primary capstone-nav-btn' type='button' id='reserveAsEmployeeBtn$reservationID'>Recreate Reservation</button>
-   
-   
-    <script type='text/javascript'>
-        $('#reserveAsEmployeeBtn$reservationID').on('click', function() {
-           let equipmentID = '$equipmentID';
-           let userID = '$userID';
-            let data = {
-                action: 'createReservation',
-               userID: userID,
-               equipmentID: equipmentID,
-			   messageID: 'wersspdohssfuj'
-            };
-            api.post('/equipmentrentalold.php', data).then(res => {
-                $('#expiredReservation$listNumber').remove();
+			};
+			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
-                setTimeout(function(){
-                   window.location.reload(1);
-                }, 2000);
-            }).catch(err => {
-                snackbar(err.message, 'error');
-            });
-        });
-        
-    </script>
-
-    ";
-
+                setTimeout(() => window.location.reload(), 1000);
+			}).catch(err => {
+				snackbar(err.message, 'error');
+			});
+		});
+	</script>
+	";
 }
 
-
-function renderEquipmentReturnButton($checkout){
-    $checkoutID = $checkout->getCheckoutID();
-    return "
-    <button class='btn btn-outline-primary capstone-nav-btn' type='button' data-toggle='modal' 
-    data-target='#newReturnModal$checkoutID' id='openNewReturnModalBtn'>Return</button>
-   
-   
-    <script type='text/javascript'>
-        $('#returnEquipmentBtn$checkoutID').on('click', function() {
-           let checkoutID = '$checkoutID';
-           let checkoutNotes = $('#checkoutNotes$checkoutID').val();
-            let data = {
-               action: 'returnEquipment',
-               checkoutID: checkoutID,
-               checkoutNotes: checkoutNotes,
-			   messageID: 'fsrt56pdohssfuj'
-            };
-            api.post('/equipmentrentalold.php', data).then(res => {
+function createArchiveUnitButton($unitID){
+	echo "
+	<button class='btn btn-outline-danger capstone-nav-btn' id='deleteUnitBtn$unitID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='Removes this unit of the equipment, though restoration by an employee is possible.'>
+		Delete Unit
+	</button>
+	
+	<script type='text/javascript'>
+		$('#deleteUnitBtn$unitID').on('click', function() {
+			let res = confirm('You are deleting an unit. Are you sure about this?.');
+			if(!res) return false;
+			let itemID = '$unitID';
+			let data = {
+				action: 'deleteEquipmentItem',
+                itemID
+			};
+			api.post('/equipment.php', data).then(res => {
                 snackbar(res.message, 'success');
-                setTimeout(function(){
-                    window.location.reload(1);
-                 }, 2000);
-            }).catch(err => {
-                snackbar(err.message, 'error');
-            });
-        });
-        
-    </script>
-
-    ";
+                setTimeout(() => window.location.reload(), 1000);
+			}).catch(err => {
+				snackbar(err.message, 'error');
+			});
+		});
+	</script>
+	";
 }
 
-function renderEquipmentFeeApproveButton($feeID){
-    return "
-    <button class='btn btn-outline-primary capstone-nav-btn' type='button' data-toggle='modal' 
-    data-target='#verifyFeeModal$feeID' id='verifyFeeModalBtn'>Verify</button>
-   
-   
-    <script type='text/javascript'>
-    $('#approveEquipmentFees$feeID').on('click', function() {
-        let feeID = '$feeID';
-         let data = {
-            action: 'approveEquipmentFees',
-            feeID: feeID
-         };
-         api.post('/equipmentrentalold.php', data).then(res => {
-             snackbar(res.message, 'success');
-             setTimeout(function(){
-                 window.location.reload(1);
-              }, 2000);
-         }).catch(err => {
-             snackbar(err.message, 'error');
-         });
-     });
-
-     $('#denyEquipmentFees$feeID').on('click', function() {
-        let feeID = '$feeID';
-         let data = {
-            action: 'rejectEquipmentFees',
-            feeID: feeID
-         };
-         api.post('/equipmentrentalold.php', data).then(res => {
-             snackbar(res.message, 'success');
-             setTimeout(function(){
-                 window.location.reload(1);
-              }, 2000);
-         }).catch(err => {
-             snackbar(err.message, 'error');
-         });
-     });
-     
-    </script>
-
-    ";
-
-
+function createUnarchiveUnitButton($unitID){
+	echo "
+	<button class='btn btn-outline-danger capstone-nav-btn' id='restoreUnitBtn$unitID' type='button' data-toggle='tooltip' data-placement='bottom' 
+    title='Restores this unit of the equipment, making it show up on unit lists and making it available for checkout again.'>
+		Restore Unit
+	</button>
+	
+	<script type='text/javascript'>
+		$('#restoreUnitBtn$unitID').on('click', function() {
+			let itemID = '$unitID';
+			let data = {
+				action: 'restoreEquipmentItem',
+                itemID
+			};
+			api.post('/equipment.php', data).then(res => {
+                snackbar(res.message, 'success');
+                setTimeout(() => window.location.reload(), 1000);
+			}).catch(err => {
+				snackbar(err.message, 'error');
+			});
+		});
+	</script>
+	";
 }

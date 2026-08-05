@@ -1,7 +1,7 @@
 <?php
 include_once '../bootstrap.php';
-
 use DataAccess\EquipmentDaoOld;
+use DataAccess\EquipmentTypeDao;
 
 if (PHP_SESSION_ACTIVE != session_status())
     session_start();
@@ -35,53 +35,68 @@ $js = array(
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/newEquipmentModal.php';
 
+$showDeleted = isset($_GET['show_deleted']) && strtolower($_GET['show_deleted']) != 'false';
+
 
 /* 
-* Gets the various pieces of information for each item from the Equipment DAO,
-* hides content if it is not public. 
+* Gets the various pieces of information for each item from the Equipment DAO
 */
-$dao = new EquipmentDaoOld($dbConn, $logger);
-$equipments = $dao->getAdminEquipment();
+$equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
+
+$equipment = $equipmentTypeDao->getEmployeeEquipment($showDeleted);
+
 $equipmentItemHTML = "";
-foreach ($equipments as $e){
+foreach ($equipment as $e){
 	$equipmentID = $e->getEquipmentID();
-	$defaultImage = $dao->getDefaultEquipmentImage($equipmentID);
-	if (!empty($defaultImage)){
-        $imageName = $defaultImage->getImageID();
-        $imagePath = "images/equipment/$imageName";
+
+	if (!empty($e->getImages())){
+        $imagePath = "images/equipment/{$e->getImages()[0]->getImageID()}";
     } else {
-        $imageName = "no-image.png";
-        $imagePath = "assets/img/$imageName";
+        $imagePath = "assets/img/no-image.png";
     }
-	$name = $e->getEquipmentName();
-	$location = $e->getLocation();
+	
+	$background = $e->getIsDeleted() ? 'background: rgb(255, 230, 230)' : '';
+
+	$name = $e->getName();
 	$replacementCost = $e->getReplacementCost();
 	$notes = $e->getNotes();
-	$parts = $e->getPartList();
-	$units = $e->getInstances();
-	$isPublic = $e->getIsPublic();
-	if ($isPublic){
-		$publicStatus = "Public";
-	} else {
-		$publicStatus = "Hidden";
-	}
-	$viewButton = createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
-	$editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
+	$parts = $e->getParts();
 	
-/* 
-* Creates a data table with the information populated from above. 
-*/
+
+	// Allow editing deleted equipment to hit "restore" button, but not viewing
+	$viewButton = $e->getIsDeleted() ? '' : createLinkButton("pages/publicEquipmentDetail.php?id=$equipmentID", 'View');
+	$editButton = createLinkButton("pages/employeeEquipmentDetail.php?id=$equipmentID", 'Edit');
+
+	$units = "<ul>";
+	foreach ($e->getInstances() as $unit) {
+		$status = $unit->getCheckoutStatus();
+		if (! $unit->getIsPublic()) $status = "Hidden";
+
+		if ($status == 'Available')        $statusColor = 'text-success';
+		else if ($status == 'Reserved')    $statusColor = 'text-warning';
+		else if ($status == 'Checked out') $statusColor = 'text-danger';
+		else if ($status == 'Hidden')     $statusColor = 'text-primary';
+
+		$location = $unit->getLocation();
+		$health = $unit->getHealthStatus();
+
+		$units .= "<li><b><span class='$statusColor'>$status</span> ($health):</b> $location</li>";
+	}
+	$units .= "</ul>";
+	
+	/**
+	 * Creates a data table with the information populated from above. 
+	 */
 	$equipmentItemHTML .= "
-	<tr>
-		<td><img height='200px;' src='$imagePath'></td>
-		<td>$name</td>
-		<td>$publicStatus</td>
-		<td>$location</td>
+	<tr style='$background'>
+		<td>
+			$name
+			<br>
+			<img height='200px;' src='$imagePath'>
+		</td>
 		<td>$units</td>
-		<td>$replacementCost</td>
 		<td>$notes</td>
 		<td>$viewButton $editButton</td>
 	</tr>
@@ -92,86 +107,71 @@ foreach ($equipments as $e){
 ?>
 <br/>
 <div id="page-top">
-
 	<div id="wrapper">
-
-	<?php 
-		renderEmployeeSidebar();
-	?>
+		<?php renderEmployeeSidebar(); ?>
 
 		<div id="content-wrapper">
-
 			<div class="container-fluid">
-
-					<button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button" data-toggle="modal"
-					data-target="#newEquipmentModal" id="openNewEquipmentModalBtn">Create New Equipment</button>
-				<?php
-				echo"
-					<div class='admin-paper'>
-					<h1>Equipment Rentals</h1>
-						<table class='table' id='equipmentList'>
-						<caption>Employee Equipment List</caption>
-							<thead>
-								<tr>
-									<th>Image</th>
-									<th>Name</th>
-									<th>Visibility</th>
-									<th>Location</th>
-									<th>Units</th>
-									<th>Cost</th>
-									<th>Notes</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								$equipmentItemHTML
-							</tbody>
-						</table>
-						<script>
-						$('#equipmentList').DataTable(
-							{
-								lengthMenu: [[-1, 25, 50], ['All', 25, 50]]
-							}
-						);
-			
-						</script>
-					</div>
-					";
-				?>
-
-
-
-          
-
-
-
+				<button
+					class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button"
+					data-toggle="modal" data-target="#newEquipmentModal" id="openNewEquipmentModalBtn"
+				>
+					Create New Equipment
+				</button>
 				
-
-
+				<div class="admin-paper">
+					<div class="d-flex justify-content-between align-items-end">
+						<h1>Equipment for Rent</h1>
+						<form class="form-group form-inline">
+							<input
+								name="show_deleted" id="deletedCheckbox" class='form-control mr-1' type="checkbox"
+								onchange='this.form.submit()' <?php echo $showDeleted ? 'checked' : '' ?>
+							>
+							<label for="deletedCheckbox">Show deleted equipment</label>
+						</form>
+					</div>
+					<table class="table" id="equipmentList">
+						<caption>Employee Equipment List</caption>
+						<thead>
+							<tr>
+								<th>Equipment</th>
+								<th>Units</th>
+								<th>Notes</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?= $equipmentItemHTML ?>
+						</tbody>
+					</table>
+					<script>
+					$('#equipmentList').DataTable(
+						{
+							lengthMenu: [[-1, 25, 50], ['All', 25, 50]]
+						}
+					);
+					</script>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
 
 <script>
+	$('#createEquipmentBtn').on('click', function () {
+		// Capture the data we need
+		let data = {
+			action: 'createEquipment',
+			title: $('#equipmentNameInput').val(),
+		};
 
-		$('#createEquipmentBtn').on('click', function () {
-				// Capture the data we need
-				let data = {
-					action: 'createEquipment',
-					title: $('#equipmentNameInput').val(),
-				};
-
-				// Send our request to the API endpoint
-				api.post('/equipments-old.php', data).then(res => {
-					window.location.replace('pages/employeeEquipmentDetail.php?id=' + res.content.id);
-				}).catch(err => {
-					snackbar(err.message, 'error');
-				});
+		// Send our request to the API endpoint
+		api.post('/equipment.php', data).then(res => {
+			window.location.replace('pages/employeeEquipmentDetail.php?id=' + res.content.id);
+		}).catch(err => {
+			snackbar(err.message, 'error');
 		});
-
-
-
+	});
 </script>
 
 <?php 

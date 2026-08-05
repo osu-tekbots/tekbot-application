@@ -28,12 +28,7 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/renderTermData.php';
-
-
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);
 $kits = $kitEnrollmentDao->getKitsForAdmin();

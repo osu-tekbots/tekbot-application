@@ -28,10 +28,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
-
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
 $messageDao = new MessageDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);

@@ -31,7 +31,6 @@ $js = array(
 include_once PUBLIC_FILES . '/modules/renderTermData.php';
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 

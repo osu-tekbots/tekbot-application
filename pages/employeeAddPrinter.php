@@ -26,10 +26,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
-
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
 $userDao = new UsersDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
