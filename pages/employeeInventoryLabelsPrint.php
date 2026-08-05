@@ -26,8 +26,10 @@ if (count($items) < 2) {
     die();
 }
 
+$labelsHTML = '';
 if ($_GET['labeltype'] == 1) { // Larger Labels
     $j = 0;
+    $pageCSS = 'size: letter;';
     $labelsHTML .= "<div class='printpagelarge'>";
     foreach ($items AS $i){
         if ($i != 'labeltype'){
@@ -69,6 +71,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     $labelsHTML .= "</div>";
 } else if ($_GET['labeltype'] == 2) { //Small Labels
     $j = 0;
+    $pageCSS = 'size: letter;';
     $labelsHTML .= '<div class="printpagesmall">';
     foreach ($items AS $i){
         if ($i != 'labeltype'){
@@ -97,6 +100,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     $labelsHTML .= "</div>";
 } else if ($_GET['labeltype'] == 3) { //Ordering Labels
     $j = 0;
+    $pageCSS = 'size: letter;';
     $labelsHTML .= "<div class='printpagelarge'>";
     foreach ($items AS $i){
         if ($i != 'labeltype'){
@@ -124,7 +128,25 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
         }
     }
     $labelsHTML .= "</div>";
-} else if ($_GET['labeltype'] == 4) { //Kit Labels
+} else if ($_GET['labeltype'] == 4) { //Simple Kit Labels
+    foreach ($items AS $i){
+        if ($i != 'labeltype'){
+            $pageCSS = 'size: letter;';
+            $labelsHTML .= '<div class="printpagesmall">';
+            $p = $inventoryDao->getPartByStocknumber($i);
+            for($j=0;$j<32;$j++){	
+                $labelsHTML .= "<div class='printlabelsmall'>
+                                    <div class='kit-label-sm'>
+                                        <b>" . $p->getName() . "</b>
+                                        <BR>" . date('m-d-Y',time()) . "
+                                    </div>
+                                </div>";
+            }
+            $labelsHTML .= "</div>";
+        }
+    }
+    
+} else if ($_GET['labeltype'] == 5) { //Detailed Kit Labels
     foreach ($items AS $i){
         if ($i == 'labeltype') continue;
 
@@ -136,11 +158,12 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
         // the kit name's color changed to Beaver Orange.
         $is_ecampus = preg_match('/\be-?campus\b/i', $kit->getName()) === 1;
 
+        $pageCSS = 'size: letter landscape;';
         $labelsHTML .= '<div class="printpagexl">';
         for($j = 0; $j < 6; $j++) {
             $labelsHTML .= "<div class='printlabelxl'>
                 <div style='display:flex;'>
-                    <div class='kit-label' style='flex-grow:1;'>
+                    <div class='kit-label-lg' style='flex-grow:1;'>
                         <h1" . ($is_ecampus ? " style='color:#d73f09'" : "") . ">{$kit->getName()}</h1>
                         <p style='font-size:2em;'>Kitted on $date</p>
                         <p style='font-size:1.5em;'>https://tekbots.com</p>
@@ -183,6 +206,11 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
 	<head>
 		<title>Inventory Labels</title>
 		<link href="assets/css/label-print.css" rel="stylesheet">
+        <style>
+            @page {
+                <?= $pageCSS ?>
+            }
+        </style>
 	</head>
 	<body>
 

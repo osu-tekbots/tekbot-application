@@ -81,7 +81,8 @@ $options = "<div class='form-row'>
 						<option value='1'>Large Inventory Label</option>
 						<option value='2'>Small Inventory Label</option>
 						<option value='3'>Touchnet Ordering Label</option>
-						<option value='4'>Kit Labels</option>
+						<option value='4'>Simple Kit Label</option>
+						<option value='5'>Detailed Kit Label</option>
 					</select>
 				</div>
 				<div class='form-group col-sm-1'>

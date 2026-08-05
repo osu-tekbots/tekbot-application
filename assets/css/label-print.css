@@ -4,7 +4,6 @@ body {
 }
 
 @page {
-    size: letter landscape;
     margin: 0in;
 }
 
@@ -92,7 +91,17 @@ div.printlabelsmall {
     min-height: 1.25in;
 }
 
-div.kit-label {
+div.kit-label-sm {
+    margin-top: .5em;
+    margin-right: auto;
+    margin-left: auto;
+    width: 70%;
+
+    text-align: center;
+    font-size: 2em;
+}
+
+div.kit-label-lg {
     text-align: center;
 }
 
@@ -129,6 +138,6 @@ div.kit-label {
     filter: brightness(0) saturate(100%) invert(45%) sepia(83%) saturate(7023%) hue-rotate(11deg) brightness(94%) contrast(93%);
 }
 
-div.kit-label * {
+div.kit-label-lg * {
     margin: 0;
 }
