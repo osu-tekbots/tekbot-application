@@ -33,7 +33,7 @@ class KitEnrollmentDao {
      * Fetches the equipment kit with the provided ID.
      *
      * @param string $id
-     * @return \Model\EquipmentCheckout|boolean the equipment on success, false otherwise
+     * @return \Model\KitEnrollment|boolean the equipment on success, false otherwise
      */
     public function getKitEnrollment($id) {
         try {

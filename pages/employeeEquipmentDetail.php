@@ -1,29 +1,16 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
+use DataAccess\EquipmentCheckoutDao;
+use DataAccess\EquipmentHealthDao;
+use DataAccess\EquipmentTypeDao;
+use DataAccess\UsersDao;
 use Model\EquipmentStatus;
 use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
     session_start();
 
-/*
-If we ever decide to implement the category for equipment
-<label for="equipmentCategorySelect">Equipment Category 
-	</label>
-	<select class="form-control input" id="equipmentCategorySelect" name="equipmentCategoryID" data-toggle="tooltip" 
-		data-placement="bottom" title="tooltiptext">
-		<?php
-		foreach ($categories as $c) {
-			$id = $c->getId();
-			$name = $c->getName();
-			$selected = $id == $category ? 'selected' : '';
-			echo "<option $selected value='$id'>$name</option>";
-		}
-		?>
-	</select>
-*/
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
@@ -51,43 +38,36 @@ $js = array(
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
+$showDeleted = isset($_GET['show_deleted']) && strtolower($_GET['show_deleted']) != 'false';
 
-$dao = new EquipmentDao($dbConn, $logger);
 
-$healths = $dao->getEquipmentHealth();
-$categories = $dao->getEquipmentCategory();
+$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
+$equipmentHealthDao = new EquipmentHealthDao($dbConn, $logger);
+$equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
+$userDao = new UsersDao($dbConn, $logger);
+
 
 $eID = $_GET['id'];
-$equipment = $dao->getEquipment($eID);
-if ($equipment) {
-    $equipmentname = $equipment->getEquipmentName();
-    //$category = $equipment->getCategoryID()->getId();
-    $health = $equipment->getHealthID()->getId();
-    $description = $equipment->getDescription();
-    $notes = $equipment->getNotes();
-    $numberparts = $equipment->getNumberParts();
-    $location = $equipment->getLocation();
-    $partslist = $equipment->getPartList();
-	$equipmentcheck = $equipment->getReturnCheck();
-	$eImages = $equipment->getEquipmentImages();
-	$isPublic = $equipment->getIsPublic();
-	$instructions = $equipment->getUsageInstructions();
-	$instances = $equipment->getInstances();
-	$replacementCost = $equipment->getReplacementCost();
-}
+$equipment = $equipmentTypeDao->getEquipment($eID, $showDeleted);
+$healthOptions = $equipmentHealthDao->getAllHealthOptions();
+
+allowIf($equipment, 'employeeEquipmentList.php');
+
+$isPublic = array_filter($equipment->getUnits(), fn($unit) => $unit->getIsPublic() && !$unit->getIsDeleted());
+$instances = $equipment->getUnits();
+
 /* Image variables */
-// Fetch any images for the project
 $pImagePreviewSrc = '';
 $pButtonImageDeleteStyle = 'style="display: none;"';
 $pButtonImagePreviewStyle = $pButtonImageDeleteStyle;
 $pProjectImagesSelectHtml = "
     <select class='image-picker' id='selectProjectImages'>
 ";
-$eImages = $equipment->getEquipmentImages();
 $first = true;
+$eImages = $equipment->getImages();
 foreach ($eImages as $i) {
     $id = $i->getImageID();
-    $name = $i->getImageName();
+    $name = $i->getFilename();
     $selected = $first ? 'selected' : '';
     $pProjectImagesSelectHtml .= "
         <option 
@@ -134,148 +114,92 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 ?>
 <br/>
 <div id="page-top">
-
 	<div id="wrapper">
-
-        <?php 
-		renderEmployeeSidebar();
-		?>
-
+        <?php renderEmployeeSidebar(); ?>
 
 		<div id="content-wrapper">
-
 			<div class="container-fluid">
-			<?php 
-				if ($isPublic)
+			<?php
+				if ($equipment->getIsDeleted()) {
+					echo "
+					<div class='alert alert-danger' role='alert'>
+						This equipment is currently DELETED! If you would like to restore it,
+						use the &quot;Restore Equipment&quot; button below.
+					</div>
+					";
+				} else if ($isPublic)
 				{
 					echo "
 					<div class='alert alert-warning' role='alert'>
-						This equipment is currently PUBLIC! Updates made here will reflect the live item on browse equipment.
+						This equipment is currently PUBLIC! Updates made here will be immediately shown on the public equipment listing.
+						If you would like to make it private (visible only to employees), make all units hidden.
 					</div>
 					";
-				}
-				else {
+				} else {
 					echo "
 					<div class='alert alert-info' role='alert'>
-						This equipment is currently HIDDEN! If you would like to make it public hit the 'make public' button.
+						This equipment is currently HIDDEN! If you would like to make it public, make at least one unit public.
 					</div>
 					";
 				}
-
 			?>
 
+			<h3>General Info</h3>
             <form id="formEquipment">
 				<input type="hidden" id="equipmentID" name="equipmentID" value="<?php echo $eID; ?>" />
 
                 <div class="row">
-                    <div class="col-sm-3">
+                    <div class="col-sm-4">
                         <div class="form-group">
 							<label for="equipmentNameText">
 								Equipment Name  <font size="2" style="color:red;">*</font>
 							</label>
-							<textarea class="form-control input" id="equipmentNameText" name="equipmentName"
-								rows="1" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Name of the equipment"><?php 
-									echo "$equipmentname";
-								?></textarea>
+							<input 
+								class="form-control input" id="equipmentNameText" name="name"
+								value="<?= $equipment->getName() ?>"
+							>
 						</div>
                     </div>
-                    <div class="col-sm-3">
-                        <div class="form-group">
-							<label for="equipmentLocationText">
-								Equipment Location <font size="2" style="color:red;">*</font>
-							</label>
-							<textarea class="form-control input" id="equipmentLocationText" name="equipmentLocation"
-								rows="1" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Where the employee can find this equipment"><?php 
-									echo "$location"; 
-								?></textarea>
-	
-						</div>
-                    </div>
-					<div class="col-sm">
-                        <div class="form-group">
-							<label for="equipmentUnitsText">
-								(#) Units <font size="2" style="color:red;">*</font>
-							</label>
-							<input class="form-control input" type="number" step="1" id="equipmentUnitsText" value="<?php echo $instances ?>" name="instances"
-							 data-toggle="tooltip" data-placement="top" title="The number of available units of that item we have">
-	
-						</div>
-                    </div>
-					<div class="col-sm">
+					<div class="col-sm-3">
                         <div class="form-group">
 							<label for="equipmentReplacementCost">
-								($) Replace <font size="2" style="color:red;">*</font>
+								Replacement Cost <font size="2" style="color:red;">*</font>
 							</label>
-							<input class="form-control input" type="number" step="0.10" id="equipmentReplacementCost" value="<?php echo $replacementCost ?>" name="replacementCost"
-							 data-toggle="tooltip" data-placement="top" title="Cost for replacement of item.  Make sure you put the original price of an item not a sale price.">
-						</div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="form-group">
-							<label for="equipmentHealthSelect"> Health <font size="2" style="color:red;">*</font>
-                            </label>
-							<select class="custom-select input" id="equipmentHealthSelect" name="equipmentHealthID" data-toggle="tooltip" 
-								data-placement="bottom" title="Health based on functionality of the equipment.  Fully functional has no issues, broken does not work, and partial functionality is functional but has some quirks">
-								<?php
-								foreach ($healths as $h) {
-								    $id = $h->getId();
-								    $name = $h->getName();
-									$selected = '';
-									if ($name == $health){
-										$selected = 'selected';
-									}
-								    echo "<option $selected value='$id'>$name</option>";
-								}
-								?>
-							</select>
-						</div>
-                    </div>
-					<div class="col-sm">
-                        <div class="form-group">
-							<label for="equipmentNumberpartsSelect">(#) Parts <font size="2" style="color:red;">*</font>
-                            </label>
-							<select class="custom-select input" id="equipmentNumberpartsSelect" name="equipmentNumberparts" data-toggle="tooltip" 
-								data-placement="bottom" title="Number of parts that come with the equipment.  Include manuals, cords, accesories in this count.">
-								<?php
-								for ($n = 1; $n <= 25; $n++) {
-								    $selected = $n == $numberparts ? 'selected' : '';
-								    echo "<option $selected value='$n'>$n</option>";
-								}
-								?>
-							</select>
+							<div class="input-group">
+								<div class="input-group-prepend"><div class="input-group-text">$</div></div>
+								<input
+									class="form-control input" type="number" step="0.10" id="equipmentReplacementCost" name="replacementCost" aria-describedby="cost-help"
+									value="<?= $equipment->getReplacementCost() ?>"
+								>
+							</div>
+							<small id="cost-help" class="form-text text-muted">Item's original price, not a sale price.</small>
 						</div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-8">
+                    <div class="col-sm-6">
                         <div class="form-group">
 							<label for="equipmentDescriptionText">
 								Equipment Description <font size="2" style="color:red;">*required</font>
 							</label>
-							<textarea class="form-control input" id="equipmentDescriptionText" name="equipmentDescription"
-								rows="4" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Give some description of the item.  A copy of the item description will work here"><?php 
-									echo "$description"; 
-								?></textarea>
+							<textarea class="form-control input" id="equipmentDescriptionText" name="description" rows="3" aria-describedby="description-help"><?=
+								$equipment->getDescription()
+							?></textarea>
+							<small id="description-help" class="form-text text-muted">
+								Give some description of the item. A copy of the item description will work here.
+							</small>
 						</div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-6">
 						<div class="form-group">
-							<label for="equipmentNotesText">
-								Equipment Notes
-							</label>
-							<textarea class="form-control input" id="equipmentNotesText" name="equipmentNotes"
-								rows="4" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Notes that are relevant towards the functionality or apperance of the item.  For example, item will only work when tilted upright or item has large scratch near the bottom of the pan."><?php 
-									echo "$notes"; 
-								?></textarea>
+							<label for="equipmentNotesText">Equipment Notes</label>
+							<textarea class="form-control input" id="equipmentNotesText" name="notes" rows="3" aria-describedby="notes-help"><?=
+								$equipment->getNotes()
+							?></textarea>
+							<small id="notes-help" class="form-text text-muted">
+								Notes that are relevant towards the functionality or apperance of the item.  For example, "item will only work when tilted upright" or "item has large scratch near the bottom of the pan".
+							</small>
 						</div>
                     </div>
                 </div>
@@ -286,12 +210,12 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<label for="equipmentPartlistText">
 								Parts List <font size="2" style="color:red;">*required</font>
 							</label>
-							<textarea class="form-control input" id="equipmentPartlistText" name="equipmentPartlist"
-								rows="6" data-toggle="tooltip" 
-								data-placement="top" 
-								title="List of parts that correlate to the number of parts above"><?php 
-									echo $partslist; 
-								?></textarea>
+							<textarea class="form-control input" id="equipmentPartlistText" name="parts" rows="4" aria-describedby="parts-help"><?=
+								$equipment->getParts()
+							?></textarea>
+							<small id="parts-help" class="form-text text-muted">
+								List of parts that come with the equipment. Include manuals, cord, and accessories.
+							</small>
 						</div>
                     </div>
 
@@ -300,115 +224,240 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 							<label for="equipmentCheckText">
 								Equipment Return Check <font size="2" style="color:red;">*required</font>
 							</label>
-							<textarea class="form-control input" id="equipmentCheckText" name="equipmentCheck"
-								rows="6" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Steps that the employee will need to take when taking back the item.  Things for them to check to make sure that the student handed it back in the same condition it was given."><?php 
-									echo $equipmentcheck; 
-								?></textarea>
+							<textarea
+								class="form-control input" id="equipmentCheckText" name="returnCheck" rows="4"
+							><?=
+								$equipment->getReturnCheck()
+							?></textarea>
+							<small id="return-help" class="form-text text-muted">
+								Steps for employees to follow when recieving the item to ensure that it was returned in the same condition as handout.
+							</small>
 						</div>
                     </div>
 					<div class="col-sm-4">
 						<div class="form-group">
-							<label for="equipmentUsageText">
-								Equipment Usage Instructions
-							</label>
-							<textarea class="form-control input" id="equipmentUsageText" name="equipmentUsage"
-								rows="6" data-toggle="tooltip" 
-								data-placement="top" 
-								title="Instructions for usage, this could be a link to a pdf"><?php 
-									echo $instructions; 
-								?></textarea>
+							<label for="equipmentUsageText">Equipment Usage Instructions</label>
+							<textarea class="form-control input" id="equipmentUsageText" name="usageInstructions" rows="4" aria-describedby="usage-help"><?=
+								$equipment->getUsageInstructions()
+							?></textarea>
+							<small id="usage-help" class="form-text text-muted">
+								Instructions for usage. This could be a link to a pdf.
+							</small>
 						</div>
                     </div>
                 </div>
 	
 				<div class="row">
 					<div class="col-sm">
+						<button
+							id='saveEquipmentBtn' class='btn btn-success capstone-nav-btn' type='button' 
+							data-toggle='tooltip' data-placement='bottom' title='Saves the currently-entered information above'
+						>
+							Update Information
+						</button>
 						<?php
-
-							echo("
-							<button id='saveEquipmentBtn' class='btn btn-success capstone-nav-btn' type='button' 
-							data-toggle='tooltip' data-placement='bottom' 
-							title='Updates the current information on the page'>
-							Update Information</button>
-							");
-							
-							if ($isPublic){
-								createEquipmentHideButton($eID);
+							if ($equipment->getIsDeleted()) {
+								createUnarchiveEquipmentButton($eID);
+							} else {
+								createArchiveEquipmentButton($eID);
 							}
-							else if (!$isPublic){
-								createShowEquipmentButton($eID);
-							}
-
-							createArchiveEquipmentButton($eID);
-
 						?>
 					</div>
 				</div>
-
             </form>
-	<br><br><br>
-	<h3 id="images">Images</h3>
-	<p style="white-space: normal">
-		<i class="fas fa-info-circle"></i>
-		<i style="white-space: normal">
-			&nbsp;&nbsp;You can upload images to help showcase the equipment. Images must be no larger than 5MB. The 
-			selected image will be the default image.</i>
-	</p>
 
-	<div class="edit-project-images-container mx-2">
-		<button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
-			<?php echo $pButtonImageDeleteStyle; ?>>
-			<i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
-		</button>
-		<div class="project-images-select-container">
-			<?php echo $pProjectImagesSelectHtml; ?>
-		</div>
-		<form id="formAddNewImage">
-			<input type="hidden" name="equipmentID" value="<?php echo $eID; ?>" />
-			<div class="form-group row custom-file-row" id="divNewArtifactFile">
-				<div class="custom-file col-md-4">
-					<input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
-					<label class="custom-file-label" for="imageFile" id="labelImageFile">
-						Choose a new image to upload
-					</label>
-				</div>
+			<br><br><br>
+
+			<div class='d-flex justify-content-between'>
+				<h3>Units</h3>
+				<form class="form-group form-inline">
+					<input type="hidden" name="id" value="<?php echo $eID ?>">
+					<input
+						name="show_deleted" id="deletedCheckbox" class='form-control mr-1' type="checkbox"
+						onchange='this.form.submit()' <?php echo $showDeleted ? 'checked' : '' ?>
+					>
+					<label for="deletedCheckbox">Show deleted units</label>
+				</form>
 			</div>
-			<div class="form-group row">
-				<div class="col-md-4 row-project-image-submit">
-					<button type="submit" id="btnUploadImage" class="btn btn-primary btn-sm">
-						<i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
-					</button>
-					<div class="loader" id="formAddNewImageLoader"></div>
+
+			<?php
+				foreach ($instances as $unit) {
+					$unitID = $unit->getUnitID();
+					$healthLogs = $equipmentHealthDao->getHealthLogsForUnit($unitID);
+
+					// Sort with most recent first for easy reading
+					usort(
+						$healthLogs,
+						fn($a, $b) => ($a->getDateCreated() > $b->getDateCreated() 
+							? -1
+							: ($a->getDateCreated() == $b->getDateCreated()
+								? 0
+								: 1
+							)
+						)
+					);
+					
+					$background = $unit->getIsDeleted() // Will only be included if specifically requested in DAO call
+									? 'background: rgb(255, 230, 230) !important;'
+									: '';
+
+					echo "<div class='bg-light rounded my-4 p-3' style='$background'>
+						<div class='row'>
+							<div class='col-xl-7'>
+								<div class='row'>
+									<div class='col-md-3'>
+										<div class='form-group'>
+											<label for='unitID$unitID'>Unit ID</label>
+											<div class='input-group'>
+												<div class='input-group-prepend'><div class='input-group-text'>#</div></div>
+												<input id='unitID$unitID' class='form-control input' disabled value='$unitID'>
+											</div>
+										</div>
+									</div>
+									<div class='col-md-4'>
+										<div class='form-group'>
+											<label for='unitCheckout$unitID'>Checkout Status</label>
+											<div class='input-group'>
+												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-shopping-basket'></i></div></div>
+												<input id='unitCheckout$unitID' class='form-control input' disabled value='{$unit->getCheckoutStatus()}'>
+											</div>
+										</div>
+									</div>
+									<div class='col-md-5'>
+										<div class='form-group'>
+											<label for='unitHealth$unitID'>Health</label>
+											<div class='input-group'>
+												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-heartbeat'></i></div></div>
+												<select id='unitHealth$unitID' onchange='onUpdateUnitHealth($unitID)' class='custom-select'>";
+					foreach ($healthOptions as $option) {
+						echo "<option value='{$option->getOptionID()}'" . ($option->getName() == $unit->getHealthStatus() ? ' selected' : '') . ">
+							{$option->getName()}
+						</option>";
+					}
+					echo "						</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class='row'>
+									<div class='col-sm'>
+										<div class='form-group'>
+											<label for='unitLocation$unitID'>Location</label>
+											<div class='input-group'>
+												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-map-marker-alt'></i></div></div>
+												<input id='unitLocation$unitID' onchange='onUpdateUnitLocation($unitID);' class='form-control input' value='{$unit->getLocation()}'>
+											</div>
+										</div>
+									</div>
+									<div class='col-sm pt-4'>";
+					
+					if ($unit->getIsPublic()) { createEquipmentHideButton($unit->getUnitID()); }
+					else 					  { createShowEquipmentButton($unit->getUnitID()); }
+
+					if ($unit->getIsDeleted()) { createUnarchiveUnitButton($unit->getUnitID()); }
+					else                       { createArchiveUnitButton($unit->getUnitID()); }
+					
+					echo "			</div>
+								</div>
+							</div>
+							<div class='col-xl-5'>
+								<div class='form-group'>
+									<label for='unitNotes$unitID'>Notes</label>
+									<textarea id='unitNotes$unitID' onchange='onUpdateUnitNotes($unitID);' class='form-control input' rows='4' >{$unit->getNotes()}</textarea>
+								</div>
+							</div>
+						</div>
+						<div class='row'>
+							<div class='col'>
+								<ul>";
+					
+					for ($i = 0; $i < count($healthLogs); $i++) {
+						// Skip logs that don't have notes & don't update the health status
+						if (
+							$i < count($healthLogs) - 1
+							&& $healthLogs[$i]->getHealthOption()->getOptionID() == $healthLogs[$i + 1]->getHealthOption()->getOptionID()
+							&& empty($healthLogs[$i]->getNotes())
+						)
+							continue;
+						else
+							$log = $healthLogs[$i];
+
+						echo "<li><b>{$log->getDateCreated()->format('Y-m-d H:i:s')}</b> (";
+
+						if ($log->getCheckoutID()) {
+							$checkout = $equipmentCheckoutDao->getCheckout($log->getCheckoutID());
+							$user = $userDao->getUserByID($checkout->getUserID());
+							
+							echo 'used by '
+								. Security::HtmlEntitiesEncode($user->getFirstName()) 
+								. ' ' 
+								. Security::HtmlEntitiesEncode($user->getLastName());
+						} else {
+							echo '<i>employee update</i>';
+						}
+
+						echo ") &ndash; <b>{$log->getHealthOption()->getName()}</b>";
+						
+						if ($log->getNotes()) {
+							echo " &ndash; {$log->getNotes()}";
+						}
+						
+						echo "</li>";
+					}
+					echo "		</ul>
+							</div>
+						</div>
+					</div>";
+				}
+			?>
+
+			<button class="btn btn-outline-primary capstone-nav-btn" type="button" onclick="onCreateUnit('<?= $equipment->getEquipmentID() ?>')">
+				Create New Unit
+			</button>
+
+			<br><br><br>
+
+			<h3 id="images">Images</h3>
+			<p style="white-space: normal">
+				<i class="fas fa-info-circle"></i>
+				<i style="white-space: normal">
+					&nbsp;&nbsp;You can upload images (&lt;5MB) to help showcase the equipment. The 
+					selected image will be the default image and should show the equipment's usage/contents.
+				</i>
+			</p>
+
+			<div class="edit-project-images-container mx-2">
+				<button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" <?= $pButtonImageDeleteStyle ?>>
+					<i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
+				</button>
+				<div class="project-images-select-container">
+					<?php echo $pProjectImagesSelectHtml; ?>
 				</div>
+				<form id="formAddNewImage">
+					<input type="hidden" name="equipmentID" value="<?php echo $eID; ?>" />
+					<div class="form-group row custom-file-row" id="divNewArtifactFile">
+						<div class="custom-file col-md-4">
+							<input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
+							<label class="custom-file-label" for="imageFile" id="labelImageFile">
+								Choose a new image to upload
+							</label>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-md-4 row-project-image-submit">
+							<button type="submit" id="btnUploadImage" class="btn btn-primary btn-sm">
+								<i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
+							</button>
+							<div class="loader" id="formAddNewImageLoader"></div>
+						</div>
+					</div>
+				</form>
+				<h6>Image Preview</h6>
+				<img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
 			</div>
-		</form>
-		<h6>Image Preview</h6>
-		<img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
-	</div>
-
-
-
-
-
-
-
-				
-
-
 			</div>
 		</div>
 	</div>
 </div>
 
-<script>
-
-
-
-</script>
-
-<?php 
-include_once PUBLIC_FILES . '/modules/footer.php' ; 
-?>
-
+<?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>

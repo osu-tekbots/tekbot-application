@@ -44,7 +44,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 ?>
 

@@ -31,7 +31,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $stationDao = new LabDao($dbConn, $logger);
 $users = new UsersDao($dbConn, $logger);

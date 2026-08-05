@@ -54,39 +54,40 @@ class PrinterFeeDao {
         }
     }
 
-        /**
+    /**
      * Fetches fees associated with an equipment checkout.
      *
      * @param string $checkoutID the ID of the checkout whose fee to fetch
      * @return \Model\FeesOwed[]|boolean an array of projects on success, false otherwise
      */
     public function getEquipmentFeeWithJobID($jobID) {
-        try {
-            $sql = '
-            SELECT * 
-            FROM 3d_job_fees
-            WHERE 3d_job_id = :jid
-            ';
-            $params = array(':jid' => $jobID);
-            $results = $this->conn->query($sql, $params);
-            if (\count($results) == 0) {
-                return false;
-            }
+        // Removed 07-29-2026; does not seem to be in use & DB table is empty
+        // try {
+        //     $sql = '
+        //     SELECT * 
+        //     FROM 3d_job_fees
+        //     WHERE 3d_job_id = :jid
+        //     ';
+        //     $params = array(':jid' => $jobID);
+        //     $results = $this->conn->query($sql, $params);
+        //     if (\count($results) == 0) {
+        //         return false;
+        //     }
 
-            $fee = self::ExtractPrintFeeFromRow($results[0]);
+        //     $fee = self::ExtractPrintFeeFromRow($results[0]);
            
-            return $fee;
-        } catch (\Exception $e) {
-            $this->logger->error("Failed to get fees for print '$jobID': " . $e->getMessage());
-            return false;
-        }
+        //     return $fee;
+        // } catch (\Exception $e) {
+        //     $this->logger->error("Failed to get fees for print '$jobID': " . $e->getMessage());
+        //     return false;
+        // }
     }
     
     /**
-     * Fetches the equipment fee with the provided ID
+     * Fetches the print fee with the provided ID
      *
      * @param string $id
-     * @return \Model\EquipmentFee|boolean the equipment on success, false otherwise
+     * @return \Model\PrintFee|boolean the fee on success, false otherwise
      */
     public function getPrintFee($id) {
         try {

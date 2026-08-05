@@ -51,10 +51,10 @@ class TekBotsMailer extends Mailer {
 		
 		$replacements['email'] = Security::HtmlEntitiesEncode($user->getEmail());
 		$replacements['name'] = Security::HtmlEntitiesEncode($user->getFirstName() . " " . $user->getLastName());
-		$replacements['equipname'] = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
+		$replacements['equipname'] = Security::HtmlEntitiesEncode($equipment->getName());
 		$replacements['equipid'] = Security::HtmlEntitiesEncode($equipment->getEquipmentID());
 		if ($checkout != null){
-			$temp = $checkout->getPickupTime();
+			$temp = $checkout->getDateCheckedOut();
 			if (is_string($temp))
 				$replacements['pickupDate'] = date('D, m/d/y', strtotime($temp));
 			else
@@ -62,7 +62,7 @@ class TekBotsMailer extends Mailer {
 
 			//I have no idea why this comes back as a string. Everything points to this being a DateTime but it errors if I treat the return value that way.
 			// Patch to use strtotime instead.
-			$temp = $checkout->getDeadlineTime();
+			$temp = $checkout->getDateDue();
 			if (is_string($temp))
 				$replacements['deadlineDate'] = date('D, m/d/y', strtotime($temp));
 			else

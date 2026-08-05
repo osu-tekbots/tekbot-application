@@ -30,7 +30,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $ticketDao = new TicketDao($dbConn, $logger);
 $stationDao = new LabDao($dbConn, $logger);

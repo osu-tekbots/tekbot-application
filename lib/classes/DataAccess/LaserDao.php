@@ -299,10 +299,10 @@ class LaserDao
 
     
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new EquipmentOld object using information from the database row
      *
-     * @param \Model\Equipment $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @param \Model\LaserJob $printJob The laser cut job to update
+     * @return boolean
     */
 	public function updateCutJob(LaserJob $printJob) {
         try {

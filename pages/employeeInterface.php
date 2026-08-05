@@ -6,8 +6,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use DataAccess\TaskDao; //Added 2/21/2024
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentReservationDao;
+use DataAccess\EquipmentCheckoutDao;
 use DataAccess\KitEnrollmentDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
@@ -21,8 +20,7 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 allowIf(verifyPermissions('employee', $logger));
 
-$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
+$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
 $printerJobsDao = new PrinterDao($dbConn, $logger);
 $laserJobsDao = new LaserDao($dbConn, $logger);
@@ -60,7 +58,7 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 		return false;
 	}
 
-	// Can I just include equipmentCronjob here?
+	// Including the cronjob script will make it execute, sending the needed emails
 	include 'equipmentCronjob.php';
 
 	// Update last email sent time
@@ -72,8 +70,7 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 
 $remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
 $tasks = $taskDao->getAllIncompleteTasks();
-$equipmentReservationCount = $reservationDao->getReservationCountForAdmin();
-$equipmentFeeCount =  $checkoutFeeDao->getPendingAdminFeesCount();
+$equipmentReservationCount = $equipmentCheckoutDao->getReservationCountForEmployee();
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
 $laserJobs = $laserJobsDao->getLaserJobsRequiringAction();
 $tickets = $ticketDao->getTicketsByStatus(0);
@@ -84,9 +81,6 @@ $dashboardText = "";
 
 if ($equipmentReservationCount != 0)
 	$dashboardText .= "<li>There are $equipmentReservationCount <a href='./pages/employeeEquipment.php'>active equipment reservations</a>.  Students will be coming in soon to pick up the item.</li>";
-
-if ($equipmentFeeCount != 0)
-	$dashboardText .= "<li>There are $equipmentFeeCount <a href='./pages/employeeFees.php'>pending fees</a>!</li>";
 
 if (count($printerJobs) > 1)
 	$dashboardText .= "<li>There are ".count($printerJobs)." <a href='./pages/employeePrintJobList.php'>3D printing jobs</a> that require employee actions.</li>";

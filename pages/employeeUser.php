@@ -1,9 +1,6 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
 use DataAccess\UsersDao;
 use Model\UserAccessLevel;
 use Util\Security;
@@ -29,12 +26,7 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
-
-$equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 
 $users = $userDao->getAllUsers();

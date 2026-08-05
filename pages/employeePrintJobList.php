@@ -7,7 +7,6 @@ include_once '../bootstrap.php';
 
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
@@ -35,7 +34,6 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 // View 3D prints modal
 include_once PUBLIC_FILES . '/modules/view3dPrintModal.php';

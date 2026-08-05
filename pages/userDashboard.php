@@ -2,10 +2,7 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentDao;
 use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
 use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
@@ -35,80 +32,35 @@ $js = array(
 	'assets/Madeleine.js/src/Madeleine.js'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 
 $user = $usersDao->getUserByID($_SESSION['userID']);
 
 if ($user){
-	$uId = $user->getUserID();
-	$uFirstName = $user->getFirstName();
-	$uLastName = $user->getLastName();
-	$uPhone = $user->getPhone();
-	$uEmail = $user->getEmail();
+	$uID = $_SESSION['userID'];
 	$uOnid = $user->getOnid();
-	$uAccessLevel = $user->getAccessLevelID()->getName();
 } else {
 	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
 	echo "Please send us an email <a href='mailto:".$configManager->getWorkerMaillist()."'>here</a> to report the issue.";
 	exit();
 }
 
-$checkoutFeeDao = new EquipmentFeeDao($dbConn, $logger);
-$equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
 $printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
 $laserDao = new LaserDao($dbConn, $logger);
 $boxDao = new BoxDao($dbConn, $logger);
 $kitsDao = new KitEnrollmentDao($dbConn, $logger);
 
-$uID = $_SESSION['userID'];
-$checkoutFees = $checkoutFeeDao->getFeesForUser($uID);
+
 $printerFees = $printerFeeDao->getFeesForUser($uID);
-
-
-
 $studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
 
 
 $feeHTML = '';
-
-$checkoutFeeCount = 0;
-foreach ($checkoutFees as $f){
-    $checkoutID = $f->getCheckoutID();
-    $checkout = $checkoutDao->getCheckout($checkoutID);
-    $feeNotes = $f->getNotes();
-    $feeAmount = $f->getAmount();
-    $feeCreated = $f->getDateCreated();
-    $feeID = $f->getFeeID();
-
-    $isPending = $f->getIsPending();
-	$isPaid = $f->getIsPaid();
-	// Makes sure fee is not pending or paid
-	if ($isPending == FALSE && $isPaid == FALSE){
-		$checkoutFeeCount++;
-	}
-    renderViewCheckoutModal($checkout);
-
-    renderPayFeeModal($f);
-    $payButton = $isPending ? "PENDING APPROVAL" : ($isPaid ? "PAID" : createPayButton($feeID));
-
-    $feeHTML .= "
-    <tr>
-        <td><a href='' data-toggle='modal' 
-		data-target='#viewCheckoutModal$checkoutID'>Checkout</a></td>
-        <td>$feeNotes</td>
-        <td>$feeAmount</td>
-        <td>$payButton</td>
-    </tr>
-    ";
-}
 foreach ($printerFees as $fee){
 	$feeID = $fee->getPrintFeeId();
 	$feeNotes = $fee->getCustomerNotes();
@@ -148,216 +100,6 @@ foreach ($printerFees as $fee){
 }
 
 /*
-This section prepares the contents of the Equipment Tba.
-This includes Reservations and Active Check-Outs
-
-*/
-$reservedEquipment = $reservationDao->getReservationsForUser($uID);
-$checkedoutEquipment = $checkoutDao->getCheckoutsForUser($uID);
-
-
-$reservedEquipmentCount = 0;
-$reservedHTML = '';
-$listNumber = 0;
-if ($reservedEquipment){
-	foreach ($reservedEquipment as $r){
-			$reservationID = $r->getReservationID();
-			$equipmentID = $r->getEquipmentID();
-			$userID = $r->getUserID();
-			$reservationTime = $r->getDatetimeReserved();
-			$latestPickupTime = $r->getDatetimeExpired();
-			$isActive = $r->getIsActive();
-			$equipment = $equipmentDao->getEquipment($equipmentID);
-
-			$equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
-			$equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
-	
-		
-			
-			if ($isActive){
-				$active = "Active";
-				//renderNewHandoutModal($r);
-				//$handoutButton = createReservationHandoutButton($reservationID, $listNumber, $userID, $equipmentID);
-				$cancelButton = createReservationCancelButton($reservationID, $listNumber);
-				$tableIDName = "activeReservation$listNumber";
-				$reservedEquipmentCount++;
-				$reservedHTML .= "
-					<tr id='$tableIDName'>
-						<td>$reservationTime</td>
-						<td>$latestPickupTime</td>
-						<td>$equipmentName</td>
-						<td>$active</td>
-						<td>$cancelButton</td>
-					</tr>
-					";
-				$listNumber++;
-			}
-			else { //Should not display, TODO: Remove
-				$active = "Expired";
-				//$handoutButton = createReserveAsEmployeeBtn($reservationID, $listNumber, $userID, $equipmentID);
-				$handoutButton = "";
-				$cancelButton = "";
-				$tableIDName = "expiredReservation$listNumber";
-			}
-	}
-	
-	$headers = "<table class='table' id='equipmentReservations'>
-			<thead>
-				<tr>
-					<th>Reservation Time</th>
-					<th>Expiration Time</th>
-					<th>Equipment</th>
-					<th>Status</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>";
-			
-	$footers = "</tbody>
-		</table>
-		<script>
-		$('#equipmentReservations').DataTable(
-			{
-				aaSorting: [[0, 'desc']]
-			}
-		);
-
-		</script>";
-		
-	if ($reservedHTML != '')
-		$reservedHTML = $headers . $reservedHTML . $footers;	
-	
-	
-} else {
-	$reservedHTML = "";
-}
-
-$checkedOutEquipmentLateCount = 0;
-$checkedoutEquipmentCount = 0;
-$checkoutHTML = '';
-$activeHTML = '';
-$oldHTML = '';
-$listNumber = 0;
-if ($checkedoutEquipment){
-	foreach ($checkedoutEquipment as $c){
-		$checkoutID = $c->getCheckoutID();
-		$reservationID = $c->getReservationID();
-		$userID = $c->getUserID();
-
-		$pickupTime = $c->getPickupTime();
-		$latestPickupTime = $c->getDeadlineTime();
-		$returnedTime = $c->getReturnTime();
-		$contractName = $c->getContractID();
-		$status = $c->getStatusID()->getName();
-
-		$statusID = $c->getStatusID()->getId();
-		$reservation = $reservationDao->getReservation($reservationID);
-		$equipmentID = $reservation->getEquipmentID();
-		$equipment = $equipmentDao->getEquipment($equipmentID);
-
-		$equipmentName = Security::HtmlEntitiesEncode($equipment->getEquipmentName());
-		$equipmentLocation = Security::HtmlEntitiesEncode($equipment->getLocation());
-
-		if ($statusID == "Late"){
-			$checkedOutEquipmentLateCount++;
-		}
-
-		if ($statusID == "Returned" || $statusID == "Returned Late"){
-			// If equipment has been returned
-			renderViewCheckoutModal($c);
-			renderEquipmentFeesModal($c);
-			//$assignFeeButton = createAssignEquipmentFeesButton($checkoutID, $userID, $reservationID);
-			$returnButton = createViewCheckoutButton($checkoutID);
-			//TODO: View Checkout button
-			$oldHTML .= "
-			<tr id='checkout$listNumber'>
-				<td>$pickupTime</td>
-				<td>$latestPickupTime</td>
-				<td>$returnedTime</td>
-				<td>$equipmentName</td>
-				<td>$status</td>
-				<td>$returnButton</td>
-			</tr>
-			";
-		} else {
-			//renderEquipmentReturnModal($c);
-			$checkedoutEquipmentCount++;
-			$returnButton = "";
-			$assignFeeButton = "";
-			//TODO: Extend checkout button
-			$activeHTML .= "
-			<tr id='checkout$listNumber'>
-				<td>$pickupTime</td>
-				<td>$latestPickupTime</td>
-				<td>$returnedTime</td>
-				<td>$equipmentName</td>
-				<td>$status</td>
-				<td>$returnButton</td>
-			</tr>
-			";
-
-		}
-
-		$listNumber++;
-
-	}
-	$headers = "<table class='table' id='activeCheckouts'>
-			<thead>
-				<tr>
-					<th>Pickup Time</th>
-					<th>Deadline Time</th>
-					<th>Returned Time</th>
-					<th>Equipment</th>
-					<th>Status</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>";
-	$footers = "</tbody>
-		</table>
-		<script>
-		$('#activeCheckouts').DataTable(
-			{
-				'paging':false, 
-				'searching': false, 
-				aaSorting: [[0, 'desc']]
-			}
-		);
-
-		</script>";
-	$checkoutHTML .= "<h3>Current Check-Outs</h3>" . $headers . $activeHTML . $footers;
-	
-	
-	$headers = "<table class='table' id='oldCheckouts'>
-			<thead>
-				<tr>
-					<th>Pickup Time</th>
-					<th>Deadline Time</th>
-					<th>Returned Time</th>
-					<th>Equipment</th>
-					<th>Status</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>";
-	$footers = "</tbody>
-		</table>
-		<script>
-		$('#oldCheckouts').DataTable(
-			{
-				'paging':false, 
-				aaSorting: [[0, 'desc']]
-			}
-		);
-
-		</script>";
-	$checkoutHTML .= "<h3><BR>Previous Check-Outs</h3>" . $headers . $oldHTML . $footers;
-	
-} else {
-	$checkoutHTML = "";
-}
-
-/*
 Laser Cuts Notice
 */
 $laserCutsHtml = '';
@@ -391,7 +133,7 @@ if ($numUnconfirmedPrints > 0) {
 TekBox Notice
 */
 $tekBoxHTML = '';
-$boxes = $boxDao->getBoxByUser($uId);
+$boxes = $boxDao->getBoxByUser($uID);
 if (count($boxes) > 0)
 $tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have an item to pickup from a TekBox!</h5>
@@ -422,6 +164,7 @@ if (sizeof($kits) > 0)
 /*
 Equipment Reservation Notice
 */
+$reservedEquipmentCount = $checkoutDao->getReservationCountForUser($uID);
 $reservationHTML = '';
 if ($reservedEquipmentCount != 0)
 	$reservationHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
@@ -434,8 +177,9 @@ if ($reservedEquipmentCount != 0)
 /*
 Late Equipment Notice
 */
-$lateEquipmentHTML = '';						
-if ($checkedOutEquipmentLateCount != 0)					
+$checkedOutEquipmentLateCount = $checkoutDao->getLateCheckoutCountForUser($uID);
+$lateEquipmentHTML = '';
+if ($checkedOutEquipmentLateCount != 0)
 	$lateEquipmentHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have equipment to be returned that is now late!</h5>
 			<div class='card-body'>
@@ -446,8 +190,9 @@ if ($checkedOutEquipmentLateCount != 0)
 /*
 Checked Out Equipment Notice
 */
+$checkedOutEquipmentCount = $checkoutDao->getCheckoutCountForUser($uID);
 $checkedOutHTML = '';
-if ($checkedoutEquipmentCount != 0)
+if ($checkedOutEquipmentCount != 0)
 	$checkedOutHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
 			<h5 class'card-title'>You have equipment checked out.</h5>
 			<div class='card-body'>

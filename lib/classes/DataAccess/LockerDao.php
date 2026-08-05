@@ -126,10 +126,10 @@ class LockerDao {
     }
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Locker object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\Locker
      */
     public static function ExtractLockerFromRow($row) {
         $locker = new Locker($row['ID']);

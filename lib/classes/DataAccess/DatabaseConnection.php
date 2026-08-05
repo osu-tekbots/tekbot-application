@@ -143,7 +143,7 @@ class DatabaseConnection {
      * @throws \Exception if there is no active database connection or an error occurs while executing the query
      * @return void
      */
-    public function execute($sql, $params = array()) {
+    public function execute($sql, $params = array(), $returnID = false) {
         if (!$this->conn) {
             throw new \Exception('Failed to execute statement: no connection to database established');
         }
@@ -151,6 +151,11 @@ class DatabaseConnection {
             $prepared = $this->conn->prepare($sql);
             $this->bind($prepared, $params);
             $prepared->execute();
+
+            if($returnID===false)
+                return true;
+            else
+                return $this->conn->lastInsertId();
 			
         } catch (\PDOException $e) {
             throw new \Exception('Failed to execute statement: ' . $e->getMessage());

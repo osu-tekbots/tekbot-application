@@ -1,12 +1,8 @@
 <?php
 include_once '../bootstrap.php';
 
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
 use DataAccess\PrinterDao;
 use DataAccess\UsersDao;
-use Model\EquipmentCheckoutStatus;
 use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
@@ -30,19 +26,8 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
-
-$equipmentDao = new EquipmentDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
-$checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$reservationDao = new EquipmentReservationDao($dbConn, $logger);
-$reservedEquipment = $reservationDao->getReservationsForAdmin();
-$checkedoutEquipment = $checkoutDao->getCheckoutsForAdmin();
-
-
 $printerDao = new PrinterDao($dbConn, $logger);
 $printers = $printerDao->getPrinters();
 $printTypes = $printerDao->getPrintTypes();

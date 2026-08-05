@@ -2,17 +2,6 @@
 include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
-use DataAccess\EquipmentFeeDao;
-use DataAccess\EquipmentDao;
-use DataAccess\EquipmentCheckoutDao;
-use DataAccess\EquipmentReservationDao;
-use DataAccess\PrinterFeeDao;
-use DataAccess\PrinterDao;
-use DataAccess\BoxDao;
-use DataAccess\KitEnrollmentDao;
-use Model\KitEnrollmentStatus;
-use Model\EquipmentCheckoutStatus;
-use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
 	session_start();
@@ -36,9 +25,7 @@ $js = array(
 	'assets/Madeleine.js/src/Madeleine.js'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 
 $usersDao = new UsersDao($dbConn, $logger);
 

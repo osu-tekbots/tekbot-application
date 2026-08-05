@@ -1,9 +1,6 @@
 <?php
 namespace Model;
 
-use Util\IdGenerator;
-// Updated 11/5/2019
-
 /**
  * Data structure representing an Equipment Checkout
  */
@@ -13,49 +10,26 @@ class EquipmentCheckout {
     private $checkoutID;
 
     /** @var int */
-	private $userID;
-	
-	/** @var User */
-	private $user;
+	private $reservationID;
 
     /** @var int */
-	private $reservationID;
-	
-	/** @var EquipmentReservation */
-	private $reservation;
+	private $unitID;
 
-	/** @var int */
-	private $equipmentID;
-
-	/** @var Equipment */
-	private $equipment;
-
-	/** @var CheckoutStatus */
-	private $statusID;
-
-	/** @var ContractType */
-	private $contractID;
-
-    /** @var \DateTime */
-    private $pickupTime;
-    
-    /** @var \DateTime */
-    private $returnTime;
-
-    /** @var \DateTime */
-    private $deadlineTime;
-    
     /** @var string */
-    private $notes;
+	private $userID;
+
+    /** @var \DateTime */
+    private $dateCheckedOut;
+
+    /** @var \DateTime */
+    private $dateDue;
+
+	/** @var \Datetime|null */
+	private $dateReturned;
 
     /** @var \DateTime */
     private $dateUpdated;
 
-    /** @var \DateTime */
-    private $dateCreated;
-
-
-    
 
     /**
      * Creates a new instance of an equipment checkout.
@@ -63,16 +37,14 @@ class EquipmentCheckout {
      * If an ID is provided, defaults will not be set. If an ID is not provided, a new ID will be generated and
      * defaults will be set.
      *
-     * @param string|null $id the ID of the checkout. If null, a random ID will be generated.
+     * @param int|null $id the ID of the checkout. If null, a random ID will be generated.
     */
     public function __construct($id = null) {
-        if ($id == null) {
-            $id = IdGenerator::generateSecureUniqueId();
-            $this->setCheckoutID($id);
-            $this->setStatusID(new EquipmentCheckoutStatus());
-            $this->setDateCreated(new \DateTime());
-        } else {
-            $this->setCheckoutID($id);
+        $this->setCheckoutID($id);
+	
+		if ($id == null) {
+            $this->setDateCheckedOut(new \DateTime());
+            $this->setDateUpdated(new \DateTime());
         }
     }
 
@@ -88,22 +60,6 @@ class EquipmentCheckout {
 		$this->checkoutID = $checkoutID;
 	}
 
-	public function getUserID(){
-		return $this->userID;
-	}
-
-	public function setUserID($userID){
-		$this->userID = $userID;
-	}
-
-	public function getUser(){
-		return $this->user;
-	}
-
-	public function setUser($user){
-		$this->user = $user;
-	}
-
 	public function getReservationID(){
 		return $this->reservationID;
 	}
@@ -112,76 +68,44 @@ class EquipmentCheckout {
 		$this->reservationID = $reservationID;
 	}
 
-	public function getReservation(){
-		return $this->reservation;
+	public function getUnitID(){
+		return $this->unitID;
 	}
 
-	public function setReservation($reservation){
-		$this->reservation = $reservation;
-	}
-	
-	public function getEquipmentID(){
-		return $this->equipmentID;
+	public function setUnitID($unitID){
+		$this->unitID = $unitID;
 	}
 
-	public function setEquipmentID($equipmentID){
-		$this->equipmentID = $equipmentID;
+	public function getUserID(){
+		return $this->userID;
 	}
 
-	public function getEquipment(){
-		return $this->equipment;
+	public function setUserID($userID){
+		$this->userID = $userID;
 	}
 
-	public function setEquipment($equipment){
-		$this->equipment = $equipment;
+	public function getDateCheckedOut(){
+		return $this->dateCheckedOut;
 	}
 
-	public function getStatusID(){
-		return $this->statusID;
+	public function setDateCheckedOut($dateCheckedOut){
+		$this->dateCheckedOut = $dateCheckedOut;
 	}
 
-	public function setStatusID($statusID){
-		$this->statusID = $statusID;
+	public function getDateDue(){
+		return $this->dateDue;
 	}
 
-	public function getContractID(){
-		return $this->contractID;
+	public function setDateDue($dateDue){
+		$this->dateDue = $dateDue;
 	}
 
-	public function setContractID($contractID){
-		$this->contractID = $contractID;
+	public function getDateReturned(){
+		return $this->dateReturned;
 	}
 
-	public function getPickupTime(){
-		return $this->pickupTime;
-	}
-
-	public function setPickupTime($pickupTime){
-		$this->pickupTime = $pickupTime;
-	}
-
-	public function getReturnTime(){
-		return $this->returnTime;
-	}
-
-	public function setReturnTime($returnTime){
-		$this->returnTime = $returnTime;
-	}
-
-	public function getDeadlineTime(){
-		return $this->deadlineTime;
-	}
-
-	public function setDeadlineTime($deadlineTime){
-		$this->deadlineTime = $deadlineTime;
-	}
-
-	public function getNotes(){
-		return $this->notes;
-	}
-
-	public function setNotes($notes){
-		$this->notes = $notes;
+	public function setDateReturned($dateReturned){
+		$this->dateReturned = $dateReturned;
 	}
 
 	public function getDateUpdated(){
@@ -191,15 +115,6 @@ class EquipmentCheckout {
 	public function setDateUpdated($dateUpdated){
 		$this->dateUpdated = $dateUpdated;
 	}
-
-	public function getDateCreated(){
-		return $this->dateCreated;
-	}
-
-	public function setDateCreated($dateCreated){
-		$this->dateCreated = $dateCreated;
-	}
-
 }
 
 ?>

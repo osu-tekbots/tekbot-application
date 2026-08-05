@@ -333,10 +333,10 @@ class BoxDao {
     }
 
     /**
-     * Creates a new Equipment object using information from the database row
+     * Creates a new Box object using information from the database row
      *
      * @param mixed[] $row the row in the database from which information is to be extracted
-     * @return \Model\Equipment
+     * @return \Model\EquipmentOld
      */
     public static function ExtractBoxFromRow($row) {
         $box = new Box($row['box_key']);

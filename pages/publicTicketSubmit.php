@@ -25,7 +25,6 @@ $js = array(
 
 
 include_once PUBLIC_FILES . '/modules/header.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/userHtml.php';
 include_once PUBLIC_FILES . '/modules/submissionPage.php';
 

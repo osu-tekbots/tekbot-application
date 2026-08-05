@@ -14,7 +14,7 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 
-$title = 'Employee Equipment View';
+$title = 'Employee Kit Handout';
 $css = array(
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
@@ -28,12 +28,7 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
-include_once PUBLIC_FILES . '/modules/renderBrowse.php';
 include_once PUBLIC_FILES . '/modules/renderTermData.php';
-
-
-// Handout Modal Functionality
-include_once PUBLIC_FILES . '/modules/newHandoutModal.php';
 
 $kitEnrollmentDao = new KitEnrollmentDao($dbConn, $logger);
 $kits = $kitEnrollmentDao->getKitsForAdmin();

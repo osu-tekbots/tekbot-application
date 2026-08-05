@@ -1,12 +1,10 @@
 <?php
 namespace Api;
 
-use Model\Equipment;
-use Model\EquipmentCategory;
-use Model\EquipmentHealth;
-use DataAccess\QueryUtils;
-
-
+use Model\EquipmentHealthLog;
+use Model\EquipmentHealthOption;
+use Model\EquipmentUnit;
+use Model\EquipmentType;
 
 
 /**
@@ -14,27 +12,31 @@ use DataAccess\QueryUtils;
  */
 class EquipmentActionHandler extends ActionHandler {
 
-    /** @var \DataAccess\equipmentDao */
-    private $equipmentDao;
-    /** @var \Email\ProjectMailer */
-    //private $mailer;
+    /** @var \DataAccess\EquipmentTypeDao */
+    private $equipmentTypeDao;
+    /** @var \DataAccess\EquipmentUnitDao */
+    private $equipmentUnitDao;
+    /** @var \DataAccess\EquipmentHealthDao */
+    private $equipmentHealthDao;
     /** @var \Util\ConfigManager */
     private $config;
     
     /**
      * Constructs a new instance of the action handler for requests on equipment resources.
      *
-     * @param \DataAccess\CapstoneProjectsDao $equipmentDao the data access object for equipments
-     * @param \DataAccess\CapstoneProjectsDao $usersDao the data access object for users
-     * @param \Email\ProjectMailer $mailer the mailer used to send equipment related emails
+     * @param \DataAccess\EquipmentTypeDao $equipmentTypeDao the data access object for equipment types
+     * @param \DataAccess\EquipmentUnitDao $equipmentUnitDao the data access object for equipment units
      * @param \Util\ConfigManager $config the configuration manager providing access to site config
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($equipmentDao , $config, $logger) {
+    public function __construct($equipmentTypeDao, $equipmentUnitDao, $equipmentHealthDao, $config, $logger) {
         parent::__construct($logger);
-        $this->equipmentDao = $equipmentDao;
+        $this->equipmentTypeDao = $equipmentTypeDao;
+        $this->equipmentUnitDao = $equipmentUnitDao;
+        $this->equipmentHealthDao = $equipmentHealthDao;
         $this->config = $config;
     }
+
 
     /**
      * Creates a new equipment entry in the database.
@@ -45,24 +47,49 @@ class EquipmentActionHandler extends ActionHandler {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        // Ensure all the requred parameters are present
-        $this->requireParam('title');
+        $title = $this->getFromBody('title');
 
-        $body = $this->requestBody;
-
-        $equipment = new Equipment();
-        $equipment->setEquipmentName($body['title']);
+        $equipment = new EquipmentType();
+        $equipment->setName($title);
         $equipment->setDateCreated(new \DateTime());
 
-        $ok = $this->equipmentDao->addNewEquipment($equipment);
+        $ok = $this->equipmentTypeDao->addEquipment($equipment);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new equipment'));
         }
 
         $this->respond(new Response(
             Response::CREATED, 
-            'Successfully created new equipment resource', 
+            'Successfully created new equipment', 
             array('id' => $equipment->getEquipmentID())
+        ));
+    }
+
+
+    /**
+     * Creates a new equipment unit entry in the database.
+     * 
+     * @return void
+     */
+    public function handleCreateEquipmentUnit() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        $equipmentID = $this->getFromBody('equipmentID');
+
+        $unit = new EquipmentUnit();
+        $unit->setEquipmentID($equipmentID);
+        $unit->setDateCreated(new \DateTime());
+
+        $id = $this->equipmentUnitDao->addUnit($unit);
+        if (!$id) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create equipment unit'));
+        }
+
+        $this->respond(new Response(
+            Response::CREATED, 
+            'Successfully created equipment unit',
+            array('id' => $id)
         ));
     }
 
@@ -77,42 +104,29 @@ class EquipmentActionHandler extends ActionHandler {
         $this->verifyAccessLevel('employee');
 
         $id = $this->getFromBody('equipmentID');
-        $name = $this->getFromBody('equipmentName');
-        //$categoryID = $this->getFromBody('equipmentCategoryID');
-        $healthID = $this->getFromBody('equipmentHealthID');
-        $description = $this->getFromBody('equipmentDescription');
-        $notes = $this->getFromBody('equipmentNotes');
-        $numberparts = $this->getFromBody('equipmentNumberparts');
-        $location = $this->getFromBody('equipmentLocation');
-        $partslist = $this->getFromBody('equipmentPartlist');
-        $usageinstructions = $this->getFromBody('equipmentUsage');
-        $equipmentcheck = $this->getFromBody('equipmentCheck');
-        $instances = $this->getFromBody('instances');
-        $replacecost = $this->getFromBody('replacementCost');
-    
+        $name = $this->getFromBody('name');
+        $description = $this->getFromBody('description');
+        $notes = $this->getFromBody('notes');
+        $parts = $this->getFromBody('parts');
+        $usageInstructions = $this->getFromBody('usageInstructions');
+        $returnCheck = $this->getFromBody('returnCheck');
+        $replacementCost = $this->getFromBody('replacementCost');
       
-        $equipment = $this->equipmentDao->getEquipment($id);
+        $equipment = $this->equipmentTypeDao->getEquipment($id);
         if (empty($equipment)){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain equipment from ID'));
         }
 
-        $equipment->setEquipmentName($name);
+        $equipment->setName($name);
         $equipment->setDescription($description);
         $equipment->setNotes($notes);
-        $equipment->setNumberParts($numberparts);
-        $equipment->setLocation($location);
-        $equipment->setPartList($partslist);
-        $equipment->setUsageInstructions($usageinstructions);
-        $equipment->setReturnCheck($equipmentcheck);
-        $equipment->setInstances($instances);
-        $equipment->setReplacementCost($replacecost);
-
-        $equipment->getHealthID()->setId($healthID);
-        //$equipment->getCategoryID()->setId($categoryID);
-
+        $equipment->setParts($parts);
+        $equipment->setUsageInstructions($usageInstructions);
+        $equipment->setReturnCheck($returnCheck);
+        $equipment->setReplacementCost($replacementCost);
         $equipment->setDateUpdated(new \Datetime);
 
-        $ok = $this->equipmentDao->updateEquipment($equipment);
+        $ok = $this->equipmentTypeDao->updateEquipment($equipment);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save equipment'));
         }
@@ -123,109 +137,88 @@ class EquipmentActionHandler extends ActionHandler {
         ));
     }
 
+
     /**
-     * Sets is_public to true for equipment
+     * Updates the provided equipment unit records
      *
      * @return void
      */
-    public function handleMakePublicEquipment() {
-        // Not in use? -- noticed 8/28/23
-        /* $id = $this->getFromBody('equipmentID');
-
-        $equipment = $this->equipmentDao->getEquipment($id);
-        if (empty($equipment)){
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain equipment from ID'));
-        }
-
-        $equipment->setIsPublic(TRUE);
-
-        $ok = $this->equipmentDao->updateEquipment($equipment);
-        if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to make equipment public'));
-        }
-
-        $this->respond(new Response(
-            Response::OK,
-            'Successfully made equipment public'
-        )); */
-    }
-
-    /**
-     * Sets is_public to false for equipment
-     *
-     * @return void
-     */
-    public function handleMakeHiddenEquipment() {
+    public function handleSaveEquipmentUnit() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $id = $this->getFromBody('equipmentID');
+        $unitId = $this->getFromBody('unitID');
+        $isPublic = $this->getFromBody('isPublic', false);
+        $location = $this->getFromBody('location', false);
+        $notes = $this->getFromBody('notes', false);
 
-        $equipment = $this->equipmentDao->getEquipment($id);
-        if (empty($equipment)){
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain equipment from ID'));
+        $unit = $this->equipmentUnitDao->getUnit($unitId);
+        if (!$unit){
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain unit from ID'));
         }
 
-        $equipment->setIsPublic(FALSE);
-        $equipment->setDateUpdated(new \Datetime);
+        if (isset($isPublic)) $unit->setIsPublic($isPublic);
+        if (isset($location)) $unit->setLocation($location);
+        if (isset($notes)) $unit->setNotes($notes);
+        $unit->setDateUpdated(new \Datetime);
 
-        $ok = $this->equipmentDao->updateEquipmentVisiblity($equipment);
+        $ok = $this->equipmentUnitDao->updateUnit($unit);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to hide equipment'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update unit'));
         }
 
         $this->respond(new Response(
             Response::OK,
-            'Successfully hid equipment'
+            'Successfully updated unit'
         ));
     }
 
+
     /**
-     * Sets is_public to true for equipment
-     *
+     * Creates a new health log entry for the given equipment unit
+     * 
      * @return void
      */
-    public function handleShowEquipment() {
+    public function handleSetEquipmentUnitHealth() {
+        
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $id = $this->getFromBody('equipmentID');
+        $unitID = $this->getFromBody('unitID');
+        $healthOption = $this->getFromBody('healthStatus');
+        $notes = $this->getFromBody('notes');
 
-        $equipment = $this->equipmentDao->getEquipment($id);
-        if (empty($equipment)){
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain equipment from ID'));
-        }
+        $healthLog = new EquipmentHealthLog();
+        $healthLog->setUnitID($unitID);
+        $healthLog->setHealthOption(new EquipmentHealthOption($healthOption));
+        $healthLog->setNotes($notes);
 
-        $equipment->setIsPublic(TRUE);
-        $equipment->setDateUpdated(new \Datetime);
-
-        $ok = $this->equipmentDao->updateEquipmentVisiblity($equipment);
+        $ok = $this->equipmentHealthDao->addHealthLog($healthLog);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to hide equipment'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update unit health'));
         }
 
-        $this->respond(new Response(
-            Response::OK,
-            'Successfully made equipment public'
-        ));
+        $this->respond(new Response(Response::OK, 'Successfully updated unit health'));
     }
+
 
     /**
      * Handles updating the default image for a equipment in the database.
      *
      * @return void
      */
-    public function handleDefaultImageSelected() {
+    public function handleSetDefaultImage() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+    
         $imageId = $this->getFromBody('imageID');
 
-        $image = $this->equipmentDao->getEquipmentImage($imageId);
-        if (empty($image)){
+        $image = $this->equipmentTypeDao->getEquipmentImage($imageId);
+        if (!$image){
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain image from ID'));
         }
 
-        $image->setIsDefault(true);
-
-        $ok = $this->equipmentDao->updateDefaultEquipmentImage($image);
+        $ok = $this->equipmentTypeDao->updateDefaultEquipmentImage($imageId);
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update default equipment image'));
         }
@@ -233,41 +226,102 @@ class EquipmentActionHandler extends ActionHandler {
         $this->respond(new Response(
             Response::OK,
             'Successfully updated default equipment image',
-            array('name' => $image->getImageName())
+            array('name' => $image->getFilename())
         ));
     }
 
- 
+
     /**
-     * Handles archiving an equipment in the database.
+     * Handles archiving an equipment type in the database.
      *
      * @return void
      */
-    public function handleArchiveEquipment() {
+    public function handleDeleteEquipment() {
         // Ensure the user has permission to make the change
         $this->verifyAccessLevel('employee');
 
-        $id = $this->getFromBody('equipmentID');
+        $equipmentID = $this->getFromBody('equipmentID');
 
-        $equipment = $this->equipmentDao->getEquipment($id);
-        if (empty($equipment)){
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to obtain equipment from ID'));
-        }
-
-        $equipment->setIsArchived(true);
-
-        $ok = $this->equipmentDao->updateEquipmentVisiblity($equipment);
+        $ok = $this->equipmentTypeDao->deleteEquipment($equipmentID);
         if (!$ok) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to archive equipment'));
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete equipment'));
         }
 
         $this->respond(new Response(
-            Response::OK,
-            'Successfully removed equipment'
+            Response::OK, 
+            'Successfully deleted equipment'
         ));
     }
 
-    
+
+    /**
+     * Handles archiving an equipment unit in the database.
+     * 
+     * @return void
+     */
+    public function handleDeleteEquipmentUnit() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        $unitID = $this->getFromBody('unitID');
+
+        $ok = $this->equipmentUnitDao->deleteUnit($unitID);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete equipment unit'));
+        }
+
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully deleted equipment unit'
+        ));
+    }
+
+
+    /**
+     * Handles unarchiving an equipment type in the database.
+     *
+     * @return void
+     */
+    public function handleRestoreEquipment() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        $equipmentID = $this->getFromBody('equipmentID');
+
+        $ok = $this->equipmentTypeDao->restoreEquipment($equipmentID);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to restore equipment'));
+        }
+
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully restored equipment'
+        ));
+    }
+
+
+    /**
+     * Handles unarchiving an equipment unit in the database.
+     * 
+     * @return void
+     */
+    public function handleRestoreEquipmentUnit() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        $unitID = $this->getFromBody('unitID');
+
+        $ok = $this->equipmentUnitDao->restoreUnit($unitID);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to restore equipment unit'));
+        }
+
+        $this->respond(new Response(
+            Response::OK, 
+            'Successfully restored equipment unit'
+        ));
+    }
+
 
     /**
      * Handles the HTTP request on the API resource. 
@@ -288,31 +342,36 @@ class EquipmentActionHandler extends ActionHandler {
             case 'createEquipment':
                 $this->handleCreateEquipment();
 
+            case 'createEquipmentUnit':
+                $this->handleCreateEquipmentUnit();
+
             case 'saveEquipment':
                 $this->handleSaveEquipment();
 
-            case 'makeEquipmentHidden':
-                $this->handleMakeHiddenEquipment();
+            case 'saveEquipmentUnit':
+                $this->handleSaveEquipmentUnit();
 
-            case 'makeEquipmentShown':
-                $this->handleShowEquipment();
+            case 'setEquipmentUnitHealth':
+                $this->handleSetEquipmentUnitHealth();
 
-            case 'makeEquipmentArchive':
-                $this->handleArchiveEquipment();
+            case 'setDefaultImage':
+                $this->handleSetDefaultImage();
 
-            // case 'makeEquipmentPublic':
-                // $this->handleMakePublicEquipment();
+            case 'deleteEquipment':
+                $this->handleDeleteEquipment();
 
-            case 'defaultImageSelected':
-                $this->handleDefaultImageSelected();
+            case 'deleteEquipmentUnit':
+                $this->handleDeleteEquipmentUnit();
+
+            case 'restoreEquipment':
+                $this->handleRestoreEquipment();
+
+            case 'restoreEquipmentUnit':
+                $this->handleRestoreEquipmentUnit();
 
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on equipment resource'));
         }
-    }
-
-    private function getAbsoluteLinkTo($path) {
-        return $this->config->getBaseUrl() . $path;
     }
 }

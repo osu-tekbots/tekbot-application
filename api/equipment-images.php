@@ -5,8 +5,8 @@
  * may not include a file upload.
  */
 include_once '../bootstrap.php';
-use DataAccess\EquipmentDao;
-use Model\EquipmentImage;
+use DataAccess\EquipmentTypeDao;
+use Model\EquipmentTypeImage;
 use Api\Response;
 
 if (PHP_SESSION_ACTIVE != session_status())
@@ -15,10 +15,7 @@ if (PHP_SESSION_ACTIVE != session_status())
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$isEmployee = verifyPermissions('employee', $logger);
-
-
-if (!$isEmployee){
+if (!verifyPermissions('employee', $logger)){
     respond(401, 'You do not have permission to make this request');
 }
 
@@ -32,19 +29,21 @@ if (is_null($equipmentID) || empty($equipmentID)) {
     respond(400, 'Must include ID of Equipment in request');
 }
 
-$equipmentDao = new EquipmentDao($dbConn, $logger);
+$equipmentTypeDao = new EquipmentTypeDao($dbConn, $logger);
 //
 // The client making the request has passed all access checks. We can now handle the request based on the action.
 //
 
 switch ($_POST['action']) {
     case 'addEquipmentImage':
-        handleAddNewEquipmentImage($equipmentID, $equipmentDao, $configManager, $logger);
+        handleAddNewEquipmentImage($equipmentID, $equipmentTypeDao, $configManager, $logger);
     case 'deleteEquipmentImage':
-        handleDeleteEquipmentImage($equipmentDao, $configManager, $logger);
+        handleDeleteEquipmentImage($equipmentTypeDao, $configManager, $logger);
     default: 
         respond(400, 'Invalid action on Equipment image resource');
 }
+
+
 /**
  * Simple function that allows us to respond with a response code and a message inside a JSON object.
  *
@@ -59,6 +58,8 @@ function respond($code, $message, $content = null) {
     echo $response->serialize();
     die();
 }
+
+
 /**
  * Fetches the request body parameter with the provided key.
  * 
@@ -76,23 +77,27 @@ function getFromBody($key, $require = true) {
     }
     return $set ? $_POST[$key] : null;
 }
+
+
 /**
  * Handles a request to add an artifact to a Equipment.
  *
  * @param string $equipmentID the ID of the Equipment to add the artifact to
- * @param \DataAccess\ShowcaseProjectsDao $equipmentDao data access object for projects
+ * @param \DataAccess\EquipmentTypeDao $equipmentTypeDao data access object for projects
  * @param \Util\ConfigManager $configManager configuration manager to getting file location information
  * @param \Util\Logger $logger logger for capturing information
  * @return void
  */
-function handleAddNewEquipmentImage($equipmentID, $equipmentDao, $configManager, $logger) {
+function handleAddNewEquipmentImage($equipmentID, $equipmentTypeDao, $configManager, $logger) {
     if (!isset($_FILES['imageFile'])) {
         respond(400, 'Must include file in request to create Equipment image');
     }
+
     $fileSize = $_FILES['imageFile']['size'];
     $fileName = $_FILES['imageFile']['name'];
     $mimeType = $_FILES['imageFile']['type'];
     $fileTmp = $_FILES['imageFile']['tmp_name'];
+
     $fiveMb = 5242880;
     if ($fileSize > $fiveMb) {
         respond(400, 'Equipment image file must be smaller than 5MB');
@@ -101,33 +106,44 @@ function handleAddNewEquipmentImage($equipmentID, $equipmentDao, $configManager,
     if($mimeParts[0] != 'image') {
         respond(400, 'Uploaded file must be an image');
     }
-    $image = new EquipmentImage();
-    $image->setImageName($fileName);
+    
+    $equipment = $equipmentTypeDao->getEquipment($equipmentID);
+
+    $image = new EquipmentTypeImage();
+    $image->setFilename($fileName);
     $image->setEquipmentID($equipmentID);
     $imageId = $image->getImageID();
     $filepath = 
         $configManager->getPrivateFilesDirectory() . '/' .
         $configManager->get('server.upload_project_image_file_path') .
         "/$imageId";
+    if (empty($equipment->getImages())) {
+        $image->setIsDefault(true);
+    }
+    
     $ok = move_uploaded_file($fileTmp, $filepath);
     if (!$ok) {
         respond(500, 'Failed to upload image file');
     }
-    $ok = $equipmentDao->addNewEquipmentImage($image);
+
+    $ok = $equipmentTypeDao->addEquipmentImage($image);
     if (!$ok) {
         respond(500, 'Failed to add Equipment image');
     }
+
     respond(201, 'Successfully added new image', array('id' => $imageId));
 }
+
+
 /**
  * Handles a request to delete an artifact from a Equipment.
  *
- * @param \DataAccess\ShowcaseProjectsDao $equipmentDao data access object for projects
+ * @param \DataAccess\EquipmentTypeDao $equipmentTypeDao data access object for projects
  * @param \Util\ConfigManager $configManager configuration manager to getting file location information
  * @param \Util\Logger $logger logger for capturing information
  * @return void
  */
-function handleDeleteEquipmentImage($equipmentDao, $configManager, $logger) {
+function handleDeleteEquipmentImage($equipmentTypeDao, $configManager, $logger) {
     $imageId = getFromBody('equipmentImageID');
     $filepath = 
             $configManager->getPrivateFilesDirectory() . '/' .
@@ -137,7 +153,7 @@ function handleDeleteEquipmentImage($equipmentDao, $configManager, $logger) {
     if (!$ok) {
         respond(500, 'Failed to delete image');
     }
-    $ok = $equipmentDao->removeEquipmentImage($imageId);
+    $ok = $equipmentTypeDao->deleteEquipmentImage($imageId);
     if (!$ok) {
         respond(500, 'Failed to delete image');
     }

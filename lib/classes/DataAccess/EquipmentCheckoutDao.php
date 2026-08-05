@@ -1,10 +1,8 @@
 <?php
-// Updated 11/5/2019
 namespace DataAccess;
 
 use Model\EquipmentCheckout;
-use Model\EquipmentDao;
-use Model\EquipmentCheckoutStatus;
+use Model\EquipmentReservation;
 
 
 /**
@@ -31,281 +29,468 @@ class EquipmentCheckoutDao {
 
 
     /**
-     * Fetches checkouts associated with a user.
-     *
-     * @param string $userID the ID of the user whose projects to fetch
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * Counts all currently-active reservations
+     * 
+     * @return int|false The number of active reservations, or false if an error occured
      */
-    public function getCheckoutsForUser($userID) {
+    public function getReservationCountForEmployee() {
         try {
-            $sql = '
-            SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, equipment_reservation, contract, user_access_level  
-            WHERE checkout_status_id = equipment_checkout_status.id
-                AND equipment_checkout.user_id = user.user_id 
-                AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.contract_id = contract.contract_id 
-                AND reservation_id = eqreservation_id
-                AND equipment_checkout.user_id = :uid
+            $sql = 'SELECT COUNT(er_id) AS count FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
             ';
-            $params = array(':uid' => $userID);
-            $results = $this->conn->query($sql, $params);
+    
+            $result = $this->conn->query($sql);
 
-            $checkouts = array();
-            foreach ($results as $row) {
-                $checkout = self::ExtractCheckoutFromRow($row, true);
-                $checkouts[] = $checkout;
-            }
-           
-            return $checkouts;
+            return $result[0]['count'];
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get checkouts for user '$userID': " . $e->getMessage());
+            $this->logger->error("Failed to get reservation count: " . $e->getMessage());
             return false;
         }
     }
 
-     /**
-     * Fetches the count of checkouts for a specified user
-     *
-     * @param string $userID the ID of the user whose projects to fetch
-     * @return int on success 
+
+    /**
+     * Counts all currently-active reservations for the given user
+     * 
+     * @return int|false The number of active reservations, or false if an error occured
+     */
+    public function getReservationCountForUser($userID) {
+        try {
+            $sql = 'SELECT COUNT(er_id) AS count FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR
+                    AND er_u_id = :user_id;
+            ';
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get reservation count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Counts all currently-active checkouts for the given user
+     * 
+     * @return int|false The number of active checkouts, or false if an error occured
      */
     public function getCheckoutCountForUser($userID) {
         try {
-            $sql = '
-            SELECT COUNT(*) 
-            FROM equipment_checkout, equipment_checkout_status, user, equipment_reservation, contract, user_access_level  
-            WHERE checkout_status_id = equipment_checkout_status.id
-                AND equipment_checkout.user_id = user.user_id 
-                AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.contract_id = contract.contract_id 
-                AND reservation_id = eqreservation_id
-                AND equipment_checkout.user_id = :uid
+            $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
+                WHERE ec_date_returned IS NULL AND ec_u_id = :user_id;
             ';
-            $params = array(':uid' => $userID);
-            $results = $this->conn->query($sql, $params);
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
 
-            foreach ($results as $row) {
-                return $row['COUNT(*)'];
-            }
-           // $results[0] = $row;
-            //return $row['COUNT(*)'];
+            return $result[0]['count'];
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get checkout counts for user '$userID': " . $e->getMessage());
+            $this->logger->error("Failed to get checkout count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Counts all overdue checkouts for the given user
+     * 
+     * @return int|false The number of active checkouts, or false if an error occured
+     */
+    public function getLateCheckoutCountForUser($userID) {
+        try {
+            $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
+                WHERE ec_date_returned IS NULL AND ec_date_due < NOW() AND ec_u_id = :user_id;
+            ';
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkout count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Gets all non-dismissed reservations for employees to review.
+     * 
+     * @return \Model\EquipmentReservation[]|boolean The active reservations, or false if an error occured
+     */
+    public function getEmployeeReservations() {
+        try {
+            $sql = 'SELECT equipment_reservation.* FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE NOT er_is_employee_dismissed AND ec_id IS NULL AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
+            ';
+    
+            $result = $this->conn->query($sql);
+
+            $reservations = [];
+            foreach ($result as $row) {
+                $reservations[] = self::ExtractReservationFromRow($row);
+            }
+
+            return $reservations;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get reservations: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Gets all checkout history for employees to review.
+     * 
+     * @return \Model\EquipmentCheckout[]|boolean All checkouts, or false if an error occured
+     */
+    public function getEmployeeCheckouts() {
+        try {
+            $sql = 'SELECT * FROM equipment_checkout;';
+
+            $results = $this->conn->query($sql);
+
+            $checkouts = [];
+            foreach ($results as $row) {
+                $checkouts[] = self::ExtractCheckoutFromRow($row);
+            }
+
+            return $checkouts;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkouts: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Gets all checkouts that're overdue for email follow-up.
+     * 
+     * @return \Model\EquipmentCheckout[]|boolean All overdue checkouts, or false if an error occured
+     */
+    public function getLateCheckoutsForEmployee() {
+        try {
+            $sql = 'SELECT * FROM equipment_checkout
+                WHERE ec_date_returned IS NULL AND ec_date_due < NOW();
+            ';
+
+            $results = $this->conn->query($sql);
+
+            $checkouts = [];
+            foreach ($results as $row) {
+                $checkouts[] = self::ExtractCheckoutFromRow($row);
+            }
+
+            return $checkouts;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get late checkouts: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Fetches the equipment checkout with the provided ID
-     *
-     * @param string $id
-     * @return \Model\EquipmentCheckout|boolean the equipment on success, false otherwise
+     * Fetches the reservation with the given ID.
+     * 
+     * @param int $id The ID of the reservation to retrieve
+     * 
+     * @return \Model\EquipmentReservation|false The reservation, or false if an error occured
+     */
+    public function getReservation($id) {
+        try {
+            $sql = 'SELECT * FROM equipment_reservation WHERE er_id = :er_id;';
+            $params = ['er_id' => $id];
+
+            $results = $this->conn->query($sql, $params);
+
+            return self::ExtractReservationFromRow($results[0]);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get active reservation for $id: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Gets the checkout with the given ID.
+     * 
+     * @param int $id The ID of the checkout to retrieve
+     * 
+     * @return \Model\EquipmentCheckout|boolean The matching checkout, or false if an error occured
      */
     public function getCheckout($id) {
         try {
-            $sql = '
-            SELECT * 
-            FROM equipment_checkout, equipment_reservation, user, user_access_level, contract, equipment_checkout_status
-            WHERE equipment_checkout.eqcheckout_id = :id
-            AND equipment_checkout.reservation_id = equipment_reservation.eqreservation_id
-            AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
-            AND equipment_checkout.user_id = user.user_id
-            AND user.access_level_id = user_access_level.user_access_level_id
-            AND equipment_checkout.contract_id = contract.contract_id
+            $sql = 'SELECT * FROM equipment_checkout WHERE ec_id = :ec_id;';
+            $params = ['ec_id' => $id];
+
+            $results = $this->conn->query($sql, $params);
+
+            return self::ExtractCheckoutFromRow($results[0]);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkouts: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Fetches the active reservation for the given equipment unit
+     * 
+     * @param int $id The unit to fetch the active reservation for
+     * 
+     * @return \Model\EquipmentReservation|false The active reservation, or false if
+     * there's no active reservation or an error occured
+     */
+    public function getActiveReservation($id) {
+        try {
+            $sql = 'SELECT equipment_reservation.* FROM equipment_reservation
+                    LEFT JOIN equipment_checkout ON ec_er_id = er_id
+                WHERE 
+                    er_eu_id = :eu_id
+                    AND NOT er_is_employee_dismissed
+                    AND ec_id IS NULL
+                    AND er_date_reserved >= NOW() - INTERVAL 1 HOUR;
             ';
-            $params = array(':id' => $id);
+            $params = ['eu_id' => $id];
+
             $results = $this->conn->query($sql, $params);
             if (\count($results) == 0) {
                 return false;
             }
 
-            $checkout = self::ExtractCheckoutFromRow($results[0]);
-
-            return $checkout;
+            return self::ExtractReservationFromRow($results[0]);
         } catch (\Exception $e) {
-            $this->logger->error("Failed to fetch checkout with id '$id': " . $e->getMessage());
+            $this->logger->error("Failed to get active reservation for $id: " . $e->getMessage());
             return false;
         }
     }
 
+
     /**
-     * Fetches checked out equipment for admin.
-     *
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * Fetches the active checkout for the given equipment unit
+     * 
+     * @param int $id The unit to fetch the active checkout for
+     * 
+     * @return \Model\EquipmentCheckout|false The active checkout, or false if there's no
+     * active checkout or an error occured
      */
-    public function getCheckoutsForAdmin() {
+    public function getActiveCheckout($id) {
         try {
-            $sql = '
-            SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, user_access_level, equipment_reservation, contract 
-            WHERE equipment_checkout.user_id = user.user_id 
-                AND equipment_checkout.contract_id = contract.contract_id 
-                AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
-                AND reservation_id = eqreservation_id
+            $sql = 'SELECT * FROM equipment_checkout WHERE ec_eu_id = :eu_id AND ec_date_returned IS NULL;';
+            $params = ['eu_id' => $id];
 
-            ';
-            $results = $this->conn->query($sql);
-
-            $checkouts = array();
-            foreach ($results as $row) {
-                $checkout = self::ExtractCheckoutFromRow($row, true);
-                $checkouts[] = $checkout;
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
             }
-           
-            return $checkouts;
+
+            return self::ExtractCheckoutFromRow($results[0]);
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get admin checkouts: " . $e->getMessage());
+            $this->logger->error("Failed to get active checkout for $id: " . $e->getMessage());
             return false;
         }
     }
 
+
     /**
-     * Fetches checked out equipment count for admin.
-     *
-     * @return \Model\EquipmentCheckout[]|boolean an array of projects on success, false otherwise
+     * Finds an available (not reserved/checked out) equipment unit of the given type, if
+     * any are available. Only considers public, non-deleted units, making it suitable for
+     * unprivileged use.
+     * 
+     * @return int|boolean The unit ID if one found, false otherwise
      */
-    public function getCheckoutCountForAdmin() {
+    public function getAvailableUnit($typeID) {
         try {
-            $sql = '
-            SELECT * 
-            FROM equipment_checkout, equipment_checkout_status, user, user_access_level, equipment_reservation, contract 
-            WHERE equipment_checkout.user_id = user.user_id 
-                AND equipment_checkout.contract_id = contract.contract_id 
-                AND user.access_level_id = user_access_level.user_access_level_id
-                AND equipment_checkout.checkout_status_id = equipment_checkout_status.id
-                AND reservation_id = eqreservation_id
-
-            ';
-            $results = $this->conn->query($sql);
-
-            $checkouts = array();
-            foreach ($results as $row) {
-                $checkout = self::ExtractCheckoutFromRow($row, true);
-                $checkouts[] = $checkout;
+            $sql = 'SELECT eu_id FROM EquipmentUnitStatusView
+                WHERE et_id = :et_id AND eu_is_public AND NOT eu_is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci
+                LIMIT 1
+            ;';
+            $params = [ 'et_id' => $typeID ];
+    
+            $result = $this->conn->query($sql, $params);
+            
+            if (empty($result)) {
+                return false;
             }
-           
-            return $checkouts;
+
+            return $result[0]['eu_id'];
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get admin checkouts: " . $e->getMessage());
+            $this->logger->error("Failed to get available unit for '$typeID': " . $e->getMessage());
             return false;
         }
     }
-	
-	
+
 
     /**
-     * Adds a new equipment checkout entry into the database.
-     *
-     * @param \Model\EquipmentCheckout $checkout the equipment to add
-     * @return boolean true if successful, false otherwise
+     * Counts available (not reserved/checked out) equipment unit of the given type. Only
+     * considers public, non-deleted units, making it suitable for unprivileged use.
+     * 
+     * @return int|boolean The number of available units; false if an error occurs
      */
-    public function addNewCheckout($checkout) {
+    public function countAvailableUnits($typeID) {
         try {
-            $sql = '
-            INSERT INTO equipment_checkout VALUES (
-                :id,
-                :userid,
-                :reservationid,
-                :equipmentid,
-                :statusid,
-                :contractid,
-                :pickuptime,
-                :returntime,
-                :returndeadline,
-                :notes,
-                :dupdated,
-                :dcreated
-            )
-            ';
-            $params = array(
-                ':id' => $checkout->getCheckoutID(),
-                ':userid' => $checkout->getUserID(),
-                ':reservationid' => $checkout->getReservationID(),
-                ':equipmentid' => $checkout->getEquipmentID(),
-                ':statusid' => $checkout->getStatusID(),
-                ':contractid' => $checkout->getContractID(),
-                ':pickuptime' => QueryUtils::FormatDate($checkout->getPickupTime()),
-                ':returntime' => QueryUtils::FormatDate($checkout->getReturnTime()),
-                ':returndeadline' => $checkout->getDeadlineTime(),
-                ':notes' => $checkout->getNotes(),
-                ':dupdated' => QueryUtils::FormatDate($checkout->getDateUpdated()),
-                ':dcreated' => QueryUtils::FormatDate($checkout->getDateCreated())
-            );
-            $this->conn->execute($sql, $params);
+            $sql = 'SELECT COUNT(eu_id) AS count FROM EquipmentUnitStatusView
+                WHERE et_id = :et_id AND eu_is_public AND NOT eu_is_deleted AND checkout_status = \'Available\' COLLATE utf8mb4_unicode_ci;';
+            $params = [ 'et_id' => $typeID ];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to count available units for '$typeID': " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Saves the given reservation request.
+     * 
+     * TODO: doesn't validate that eu_id is actually available
+     * 
+     * @return boolean Whether the reservation was successfully saved
+     */
+    public function addReservation($reservation) {
+        try {
+            $sql = 'INSERT INTO equipment_reservation(er_eu_id, er_u_id, er_date_reserved, er_is_employee_dismissed)
+                VALUES (:eu_id, :u_id, :date_reserved, :is_employee_dismissed)';
+            $params = [
+                'eu_id' => $reservation->getUnitID(),
+                'u_id' => $reservation->getUserID(),
+                'date_reserved' => QueryUtils::formatDate($reservation->getDateReserved()),
+                'is_employee_dismissed' => $reservation->getIsEmployeeDismissed(),
+            ];
+    
+            $result = $this->conn->execute($sql, $params);
+
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to add new equipment: ' . $e->getMessage());
+            $this->logger->error('Failed to reserve unit: ' . $e->getMessage());
             return false;
         }
     }
 
+
     /**
-     * Updates an equipment entry into the database.
-     *
-     * @param \Model\EquipmentCheckout $checkout the equipment to add
-     * @return boolean true if successful, false otherwise
+     * Creates a new checkout record.
+     * 
+     * TODO: doesn't validate that eu_id is actually available
+     * 
+     * @return boolean Whether the checkout was successfully created
+     */
+    public function addCheckout($checkout) {
+        try {
+            $sql = 'INSERT INTO equipment_checkout(
+                ec_er_id, ec_eu_id, ec_u_id, ec_date_checked_out, ec_date_due, ec_date_returned, ec_date_updated
+            ) VALUES (
+                :er_id, :eu_id, :u_id, :date_checked_out, :date_due, :date_returned, :date_updated
+            );';
+            $params = [
+                'er_id' => $checkout->getReservationID(),
+                'eu_id' => $checkout->getUnitID(),
+                'u_id' => $checkout->getUserID(),
+                'date_checked_out' => QueryUtils::formatDate($checkout->getDateCheckedOut()),
+                'date_due' => QueryUtils::formatDate($checkout->getDateDue()),
+                'date_returned' => QueryUtils::formatDate($checkout->getDateReturned()),
+                'date_updated' => QueryUtils::formatDate($checkout->getDateUpdated()),
+            ];
+    
+            $result = $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to check out unit: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Dismisses a reservation, making it no longer show up in queries. Intended for
+     * employee confirmation that an expired, unfulfilled reservation is no longer
+     * relevant.
+     * 
+     * @param int $reservationID The reservation to dismiss
+     * 
+     * @return boolean Whether the dismissal succeeded
+     */
+    public function dismissReservation($reservationID) {
+        try {
+            $sql = 'UPDATE equipment_reservation
+                SET er_is_employee_dismissed = TRUE
+                WHERE er_id = :er_id;
+            ';
+            $params = ['er_id' => $reservationID];
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to dismiss reservation '$reservationID': " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Updates the checkout record with the matching checkoutID.
+     * 
+     * @param $checkout The checkout to update
+     * 
+     * @return boolean Whether the checkout was successfully updated
      */
     public function updateCheckout($checkout) {
         try {
-            $sql = '
-            UPDATE equipment_checkout SET
-                user_id = :userid,
-                reservation_id = :reservationid,
-                equipment_id = :equipmentid,
-                checkout_status_id = :statusid,
-                contract_id = :contractid,
-                pickup_time = :pickuptime,
-                return_time = :returntime,
-                return_deadline = :deadlinetime,
-                notes = :notes,
-                date_updated = :dupdated
-            WHERE eqcheckout_id = :id
+            $sql = 'UPDATE equipment_checkout
+                SET ec_er_id = :er_id,
+                    ec_eu_id = :eu_id,
+                    ec_u_id = :u_id,
+                    ec_date_due = :date_due,
+                    ec_date_returned = :date_returned,
+                    ec_date_updated = :date_updated
+                WHERE ec_id = :ec_id;
             ';
-            $params = array(
-                ':id' => $checkout->getCheckoutID(),
-                ':userid' => $checkout->getUserID(),
-                ':reservationid' => $checkout->getReservationID(),
-                ':equipmentid' => $checkout->getEquipmentID(),
-                ':statusid' => $checkout->getStatusID(),
-                ':contractid' => $checkout->getContractID(),
-                ':pickuptime' => $checkout->getPickupTime(),
-                ':returntime' => QueryUtils::FormatDate($checkout->getReturnTime()),
-                ':deadlinetime' => $checkout->getDeadlineTime(),
-                ':notes' => $checkout->getNotes(),
-                ':dupdated' => QueryUtils::FormatDate($checkout->getDateUpdated())
-            );
+            $params = [
+                'er_id' => $checkout->getReservationID(),
+                'eu_id' => $checkout->getUnitID(),
+                'u_id' => $checkout->getUserID(),
+                'date_due' => QueryUtils::formatDate($checkout->getDateDue()),
+                'date_returned' => QueryUtils::formatDate($checkout->getDateReturned()),
+                'date_updated' => QueryUtils::formatDate($checkout->getDateUpdated()),
+                'ec_id' => $checkout->getCheckoutID()
+            ];
+    
             $this->conn->execute($sql, $params);
+    
             return true;
         } catch (\Exception $e) {
-            $id = $checkout->getCheckoutID();
-            $this->logger->error("Failed to update checkout with id '$id': " . $e->getMessage());
+            $this->logger->error("Failed to update checkout: " . $e->getMessage());
             return false;
         }
     }
+
 
     /**
-     * Fetches a list of categories for checkout status
+     * Extracts Reservation object using information from the database row
      *
-     * @return \Model\EquipmentCheckoutStatus[]|boolean an array of categories on success, false otherwise
+     * @param mixed[] $row the row in the database from which information is to be extracted
+     * @return \Model\EquipmentReservation
      */
-    public function getCheckoutStatusTypes() {
-        try {
-            $sql = 'SELECT * FROM equipment_checkout_status';
-            $results = $this->conn->query($sql);
+    public static function ExtractReservationFromRow($row, $userInRow = false) {
+        $reservation = new EquipmentReservation($row['er_id']);
+        $reservation->setUnitID($row['er_eu_id']);
+        $reservation->setUserID($row['er_u_id']);
+        $reservation->setDateReserved(new \DateTime($row['er_date_reserved'] ?? 'now'));
+        $reservation->setIsEmployeeDismissed($row['er_is_employee_dismissed']);
 
-            $categories = array();
-            foreach ($results as $row) {
-                $categories[] = self::ExtractCheckoutStatusFromRow($row);
-            }
-
-            return $categories;
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to get checkout status: ' . $e->getMessage());
-            return false;
-        }
+        return $reservation;
     }
+
 
     /**
      * Extracts Checkout object using information from the database row
@@ -314,37 +499,16 @@ class EquipmentCheckoutDao {
      * @return \Model\EquipmentCheckout
      */
     public static function ExtractCheckoutFromRow($row, $userInRow = false) {
-        $checkout = new EquipmentCheckout($row['eqcheckout_id']);
-        $checkout->setUserID($row['user_id']);
-        $checkout->setReservationID($row['reservation_id']);
-        $checkout->setEquipmentID($row['equipment_id']);
-        $checkout->setStatusID(self::ExtractCheckoutStatusFromRow($row, true));
-        $checkout->setContractID($row['contract_id']);
-        $checkout->setPickupTime($row['pickup_time']);
-        $checkout->setReturnTime($row['return_time']);
-        $checkout->setDeadlineTime($row['return_deadline']);
-        $checkout->setNotes($row['notes']);
-        $checkout->setDateUpdated(new \DateTime($row['date_updated'] ?? 'now'));
-        $checkout->setDateCreated(new \DateTime($row['date_created'] ?? 'now'));
+        $checkout = new EquipmentCheckout($row['ec_id']);
+        $checkout->setReservationID($row['ec_er_id']);
+        $checkout->setUnitID($row['ec_eu_id']);
+        $checkout->setUserID($row['ec_u_id']);
+        $checkout->setDateCheckedOut(new \DateTime($row['ec_date_checked_out'] ?? 'now'));
+        $checkout->setDateDue(new \DateTime($row['ec_date_due'] ?? 'now'));
+        $checkout->setDateReturned($row['ec_date_returned'] ? new \DateTime($row['ec_date_returned']) : null);
+        $checkout->setDateUpdated(new \DateTime($row['ec_date_updated'] ?? 'now'));
 
-        if ($userInRow) {
-            $checkout->setUser(UsersDao::ExtractUserFromRow($row));
-        }
         return $checkout;
-    }
-
-    /**
-     * Creates a new checkout status enum object by extracting the necessary information from a row in a database.
-     * 
-     *
-     * @param mixed[] $row the row from the database
-     * @param boolean $userInRow flag indicating whether entries from the user table are in the row or not
-     * @return \Model\CheckoutStatus the user type extracted from the row
-     */
-    public static function ExtractCheckoutStatusFromRow($row, $userInRow = false) {
-        $id = $userInRow ? 'status_name' : 'id';
-        $name = isset($row['status_name']) ? $row['status_name'] : null;
-        return new EquipmentCheckoutStatus($row[$id], $name);
     }
 }
 
