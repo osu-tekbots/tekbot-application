@@ -39,8 +39,6 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     </strong></h2> 
                     <h3>KEC 1110 Hours: </h3>
 					<h2><strong>Summer Term (6/22 - 9/18):<br> 
-					6/22-6/26: M-Th 9am-11:50am<br>
-					6/29-7/3: CLOSED<br>
 					7/6- 8/21: M-Th 9am-11:50am <br>
 					8/24-9/11: CLOSED<br>
 					9/14-9/18: M-Th 9am-11:50am <br>
