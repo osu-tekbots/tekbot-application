@@ -29,6 +29,96 @@ class EquipmentCheckoutDao {
 
 
     /**
+     * Counts all currently-active reservations
+     * 
+     * @return int|false The number of active reservations, or false if an error occured
+     */
+    public function getReservationCountForEmployee() {
+        try {
+            $sql = 'SELECT COUNT(er.er_id) AS count FROM equipment_reservation er
+                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
+                WHERE NOT is_employee_dismissed AND ec.ec_id IS NULL AND date_reserved >= NOW() - INTERVAL 1 HOUR;
+            ';
+    
+            $result = $this->conn->query($sql);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get reservation count: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Counts all currently-active reservations for the given user
+     * 
+     * @return int|false The number of active reservations, or false if an error occured
+     */
+    public function getReservationCountForUser($userID) {
+        try {
+            $sql = 'SELECT COUNT(er.er_id) AS count FROM equipment_reservation er
+                    LEFT JOIN equipment_checkout ec ON ec.er_id = er.er_id
+                WHERE NOT is_employee_dismissed AND ec.ec_id IS NULL AND date_reserved >= NOW() - INTERVAL 1 HOUR
+                    AND er.u_id = :user_id;
+            ';
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get reservation count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Counts all currently-active checkouts for the given user
+     * 
+     * @return int|false The number of active checkouts, or false if an error occured
+     */
+    public function getCheckoutCountForUser($userID) {
+        try {
+            $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
+                WHERE date_returned IS NULL AND u_id = :user_id;
+            ';
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkout count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Counts all overdue checkouts for the given user
+     * 
+     * @return int|false The number of active checkouts, or false if an error occured
+     */
+    public function getLateCheckoutCountForUser($userID) {
+        try {
+            $sql = 'SELECT COUNT(ec_id) AS count FROM equipment_checkout
+                WHERE date_returned IS NULL AND date_due < NOW() AND u_id = :user_id;
+            ';
+            $params = ['user_id' => $userID];
+    
+            $result = $this->conn->query($sql, $params);
+
+            return $result[0]['count'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get checkout count for user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
      * Gets all non-dismissed reservations for employees to review.
      * 
      * @return \Model\EquipmentReservation[]|boolean The active reservations, or false if an error occured
@@ -74,6 +164,32 @@ class EquipmentCheckoutDao {
             return $checkouts;
         } catch (\Exception $e) {
             $this->logger->error("Failed to get checkouts: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Gets all checkouts that're overdue for email follow-up.
+     * 
+     * @return \Model\EquipmentCheckout[]|boolean All overdue checkouts, or false if an error occured
+     */
+    public function getLateCheckoutsForEmployee() {
+        try {
+            $sql = 'SELECT * FROM equipment_checkout
+                WHERE date_returned IS NULL AND date_due < NOW();
+            ';
+
+            $results = $this->conn->query($sql);
+
+            $checkouts = [];
+            foreach ($results as $row) {
+                $checkouts[] = self::ExtractCheckoutFromRow($row);
+            }
+
+            return $checkouts;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get late checkouts: " . $e->getMessage());
             return false;
         }
     }

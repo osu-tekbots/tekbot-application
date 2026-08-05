@@ -291,20 +291,17 @@ class UsersDao {
         }
     }
 
-    //works tested 5/6/25
     public function deleteUserCompletelyByID($id) {
         try {
-            
             $sql = '
-            DELETE FROM `3d_job_fees`                    WHERE `user_id` = :id;
-            DELETE FROM `3d_jobs`                        WHERE `user_id` = :id;
-            DELETE FROM `course_student`                 WHERE `user_id` = :id;
-            DELETE FROM `equipment_checkout_pre_2026`    WHERE `user_id` = :id;
-            DELETE FROM `equipment_fee_pre_2026`         WHERE `user_id` = :id;
-            DELETE FROM `equipment_reservation_pre_2026` WHERE `user_id` = :id;
-            DELETE FROM `laser_jobs`                     WHERE `user_id` = :id;
-            DELETE FROM `voucher_code`                   WHERE `user_id` = :id;
-            DELETE FROM `user`                           WHERE `user_id` = :id
+            DELETE FROM `3d_job_fees`           WHERE `user_id` = :id;
+            DELETE FROM `3d_jobs`               WHERE `user_id` = :id;
+            DELETE FROM `course_student`        WHERE `user_id` = :id;
+            DELETE FROM `equipment_checkout`    WHERE `u_id` = :id;
+            DELETE FROM `equipment_reservation` WHERE `u_id` = :id;
+            DELETE FROM `laser_jobs`            WHERE `user_id` = :id;
+            DELETE FROM `voucher_code`          WHERE `user_id` = :id;
+            DELETE FROM `user`                  WHERE `user_id` = :id
             ';
 
             $params = array(':id' => $id);
@@ -321,7 +318,6 @@ class UsersDao {
         }
     }
 
-    //works tested 5/6/25
     public function deleteUserCompletelyByONID($ONID) {
         try {
             $sql = '
@@ -340,19 +336,14 @@ class UsersDao {
             JOIN `user` ON `course_student`.`user_id` = `user`.`user_id`
             WHERE `user`.`onid` = :onid;
 
-            DELETE `equipment_checkout_pre_2026`
-            FROM `equipment_checkout_pre_2026`
-            JOIN `user` ON `equipment_checkout_pre_2026`.`user_id` = `user`.`user_id`
+            DELETE `equipment_checkout`
+            FROM `equipment_checkout`
+            JOIN `user` ON `equipment_checkout`.`u_id` = `user`.`user_id`
             WHERE `user`.`onid` = :onid;
 
-            DELETE `equipment_fee_pre_2026`
-            FROM `equipment_fee_pre_2026`
-            JOIN `user` ON `equipment_fee_pre_2026`.`user_id` = `user`.`user_id`
-            WHERE `user`.`onid` = :onid;
-
-            DELETE `equipment_reservation_pre_2026`
-            FROM `equipment_reservation_pre_2026`
-            JOIN `user` ON `equipment_reservation_pre_2026`.`user_id` = `user`.`user_id`
+            DELETE `equipment_reservation`
+            FROM `equipment_reservation`
+            JOIN `user` ON `equipment_reservation`.`u_id` = `user`.`user_id`
             WHERE `user`.`onid` = :onid;
 
             DELETE `laser_jobs`

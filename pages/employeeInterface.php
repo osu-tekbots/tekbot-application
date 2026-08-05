@@ -6,8 +6,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use DataAccess\TaskDao; //Added 2/21/2024
-use DataAccess\EquipmentFeeDaoOld;
-use DataAccess\EquipmentReservationDaoOld;
+use DataAccess\EquipmentCheckoutDao;
 use DataAccess\KitEnrollmentDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
@@ -21,7 +20,7 @@ include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
 allowIf(verifyPermissions('employee', $logger));
 
-$reservationDao = new EquipmentReservationDaoOld($dbConn, $logger);
+$equipmentCheckoutDao = new EquipmentCheckoutDao($dbConn, $logger);
 $kitcheckoutDao = new KitEnrollmentDao($dbConn, $logger);
 $printerJobsDao = new PrinterDao($dbConn, $logger);
 $laserJobsDao = new LaserDao($dbConn, $logger);
@@ -59,7 +58,7 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 		return false;
 	}
 
-	// Can I just include equipmentCronjob here?
+	// Including the cronjob script will make it execute, sending the needed emails
 	include 'equipmentCronjob.php';
 
 	// Update last email sent time
@@ -71,7 +70,7 @@ function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $log
 
 $remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
 $tasks = $taskDao->getAllIncompleteTasks();
-$equipmentReservationCount = $reservationDao->getReservationCountForAdmin();
+$equipmentReservationCount = $equipmentCheckoutDao->getReservationCountForEmployee();
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
 $laserJobs = $laserJobsDao->getLaserJobsRequiringAction();
 $tickets = $ticketDao->getTicketsByStatus(0);
