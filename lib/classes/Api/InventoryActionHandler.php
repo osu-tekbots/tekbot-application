@@ -679,13 +679,14 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('stockNumber');
         $body = $this->requestBody;
 
-//TODO: Remove from all existing kits
 //TODO: Locate and delete images and datasheets
 
 //      $part = $this->inventoryDao->getPartByStockNumber($body['stockNumber']);
-//		$ok = $this->inventoryDao->removePartFromAllKits($body['stockNumber']);
-		$ok = $this->inventoryDao->deletePart($body['stockNumber']);
+		$ok = $this->inventoryDao->removePartFromAllKits($body['stockNumber']);
+        if (!$ok)
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete from kits'));
 
+		$ok = $this->inventoryDao->deletePart($body['stockNumber']);
         if (!$ok)
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to Delete'));
         else

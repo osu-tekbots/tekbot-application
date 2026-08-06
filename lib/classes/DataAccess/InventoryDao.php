@@ -344,7 +344,7 @@ class InventoryDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to update quantity: ' . $e->getMessage());
+            $this->logger->error('Failed to remove part from all kits: ' . $e->getMessage());
             return false;
         }
     }
