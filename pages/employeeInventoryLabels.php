@@ -16,6 +16,7 @@ allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 $title = 'Employee Inventory List';
 $css = array(
+	'assets/css/label-print.css',
 	'assets/css/sb-admin.css',
 	'assets/css/admin.css',
 	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
@@ -77,13 +78,23 @@ $locationsHTML .= "</select>
 
 $options = "<div class='form-row'>
 				<div class='form-group col-sm-3'>
-					<select name='labeltype' id='labeltype' class='form-control'>
+					<select name='labeltype' id='labeltype' class='form-control' aria-label='Label type'>
 						<option value='1'>Large Inventory Label</option>
 						<option value='2'>Small Inventory Label</option>
 						<option value='3'>Touchnet Ordering Label</option>
 						<option value='4'>Simple Kit Label</option>
 						<option value='5'>Detailed Kit Label</option>
 					</select>
+				</div>
+				<div class='form-group col-sm-2 d-inline-flex' style='gap: .5rem'>
+						<select name='color' id='color' class='form-control' onchange='$(\"#color-swatch\").removeClass().addClass($(this).val())'>
+							<option value=''>No color</option>
+							<option value='magenta'>Magenta</option>
+							<option value='red'>Red</option>
+							<option value='green'>Green</option>
+							<option value='purple'>Purple</option>
+						</select>
+					<div id='color-swatch' style='border: 1px grey solid;'></div>
 				</div>
 				<div class='form-group col-sm-1'>
 					<button class='btn btn-info' type='submit' form='mainform'>Get Selected Labels</button>
@@ -123,7 +134,7 @@ foreach ($parts as $p) {
 	
 	if ($p->getArchive() == 0)
 		$formHTML .= "<tr>
-		<td><input type='checkbox' id='checkbox$stocknumber' name='$stocknumber' class = 'selectButtons'></td>
+		<td><input type='checkbox' id='checkbox$stocknumber' name='items[]' value='$stocknumber' class = 'selectButtons'></td>
 		<td>$type</td>
 		<td>Stock: $stocknumber<BR>$description</td>
 		<td>$touchnetId</td>

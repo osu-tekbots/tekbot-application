@@ -20,8 +20,8 @@ allowIf(verifyPermissions('employee', $logger), 'index.php');
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
 
-$items = array_keys($_GET);
-if (count($items) < 2) {
+$items = $_GET['items'];
+if (count($items) == 0) {
     echo '<h1>No items selected</h1>';
     die();
 }
@@ -32,41 +32,40 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     $pageCSS = 'size: letter;';
     $labelsHTML .= "<div class='printpagelarge'>";
     foreach ($items AS $i){
-        if ($i != 'labeltype'){
-            $p = $inventoryDao->getPartByStocknumber($i);
-            if ($j == 10){
-                $labelsHTML .= '</div><div class="printpagelarge">';
-                $j=0;
-            }
-            
-            
-            
-            $labelsHTML .= '
-            <div class="printlabellarge">
-                <div style="float:left;width:45%;min-height:130px;margin-top:.5em;"><BR>
-                    <img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
-                </div>
-                <div style="float:right;width:55%;min-height:130px;margin-top:.5em;">
-                    <BR>
-                    <img src="../../../inventory_images/'.$p->getImage().'" style="max-width:1.5in;height:10em;">
-                    <div style="float:right;bottom: 0;">
-                        <span style="font-size:5em;margin-right:1em;margin-top:1em;">' . $p->getLocation() . '</span>
-                    </div>
-                    <BR>
-                    <BR>
-                    <BR>
-                    <div style="position: relative;">
-                        <div style="float:left;">
-                            <span style="font-size:1.5em">' . $i . '</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="padding-top:1em;margin-top:130px;">
-                    <span style="font-size:2em;margin-left:2em;">' . substr($p->getType() . ': ' . $p->getName(),0,37) . '</span>
-                </div>
-            </div>';
-            $j++;
+        $p = $inventoryDao->getPartByStocknumber($i);
+        if ($j == 10){
+            $labelsHTML .= '</div><div class="printpagelarge">';
+            $j=0;
         }
+        
+        
+        
+        $labelsHTML .= '
+        <div class="printlabellarge">
+            <div style="float:left;width:45%;min-height:130px;margin-top:.5em;"><BR>
+                <img style="height:1.25in;display:block;margin-left: auto;margin-right: auto;" src="createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=' . $i . '">
+            </div>
+            <div style="float:right;width:55%;min-height:130px;margin-top:.5em;">
+                <BR>
+                <img src="../../inventory_images/'.$p->getImage().'" style="max-width:1.5in;height:10em;">
+                <div style="float:right;bottom: 0;margin-right:5em;">
+                    <span style="font-size:5em;margin-top:1em;">' . $p->getLocation() . '</span>
+                    <div id="color-swatch" class="'.(isset($_GET['color']) ? $_GET['color'] : '').'" style="margin: auto;"></div>
+                </div>
+                <BR>
+                <BR>
+                <BR>
+                <div style="position: relative;">
+                    <div style="float:left;">
+                        <span style="font-size:1.5em">' . $i . '</span>
+                    </div>
+                </div>
+            </div>
+            <div style="padding-top:1em;margin-top:130px;">
+                <span style="font-size:2em;margin-left:2em;">' . substr($p->getType() . ': ' . $p->getName(),0,37) . '</span>
+            </div>
+        </div>';
+        $j++;
     }
     $labelsHTML .= "</div>";
 } else if ($_GET['labeltype'] == 2) { //Small Labels
@@ -74,28 +73,25 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     $pageCSS = 'size: letter;';
     $labelsHTML .= '<div class="printpagesmall">';
     foreach ($items AS $i){
-        if ($i != 'labeltype'){
-            $p = $inventoryDao->getPartByStocknumber($i);
-            if ($j == 32){
-                $labelsHTML .= '</div><div class="printpagesmall">';
-                $j=0;
-            }		
+        $p = $inventoryDao->getPartByStocknumber($i);
+        if ($j == 32){
+            $labelsHTML .= '</div><div class="printpagesmall">';
+            $j=0;
+        }		
 
-            $j++;
-            $labelsHTML .= "<div class='printlabelsmall'>
-                    <div style='float:left;width:55%;'>
-                        <img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
-                    </div>
-                    <div style='float:left;width:40%;'>
-                        <BR>
-                        <BR>" . $p->getType() . 
-                        "<BR>" . substr($p->getName(),0,30) . 
-                        "<BR>" . $i . 
-                        "<BR><span style='font-size:2em;'>" . $p->getLocation() . "</span>
-                    </div>
-                </div>";
-            
-        }
+        $j++;
+        $labelsHTML .= "<div class='printlabelsmall'>
+                <div style='float:left;width:55%;'>
+                    <img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
+                </div>
+                <div style='float:left;width:40%;'>
+                    <BR>
+                    <BR>" . $p->getType() . 
+                    "<BR>" . substr($p->getName(),0,30) . 
+                    "<BR>" . $i . 
+                    "<BR><span style='font-size:2em;'>" . $p->getLocation() . "</span>
+                </div>
+            </div>";
     }
     $labelsHTML .= "</div>";
 } else if ($_GET['labeltype'] == 3) { //Ordering Labels
@@ -103,53 +99,47 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
     $pageCSS = 'size: letter;';
     $labelsHTML .= "<div class='printpagelarge'>";
     foreach ($items AS $i){
-        if ($i != 'labeltype'){
-            $p = $inventoryDao->getPartByStocknumber($i);
-            if ($j == 10){
-                $labelsHTML .= '</div><div class="printpagelarge">';
-                $j=0;
-            }
-            $labelsHTML .= '
-                <div class="printlabellarge">
-                    <div>
-                        <div style="float:left;width:50%;min-height:130px;margin-top:1em;">
-                            <BR>
-                            '.($p->getTouchnetId() != '' ? '<img style="height:1.4in;display:block;margin-left: auto;margin-right: auto;margin-top:-.2in" src="createqr.php?data=https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=' . $p->getTouchnetId() . '">' : '').'
-                        </div>
-                        <div style="float:right;width:50%;min-height:130px;margin-top:1em;">
-                            <img src="../../../inventory_images/'.$p->getImage().'" style="max-width:1.5in;height:13em;">
-                        </div>
-                    </div>
-                    <div style="padding-top:1em;margin-top:110px;">
-                        <span style="font-size:1.5em;margin-left:1em;">' . substr($p->getName(),0,50) . '</span>
-                    </div>
-                </div>';
-            $j++;
+        $p = $inventoryDao->getPartByStocknumber($i);
+        if ($j == 10){
+            $labelsHTML .= '</div><div class="printpagelarge">';
+            $j=0;
         }
+        $labelsHTML .= '
+            <div class="printlabellarge">
+                <div>
+                    <div style="float:left;width:50%;min-height:130px;margin-top:1em;">
+                        <BR>
+                        '.($p->getTouchnetId() != '' ? '<img style="height:1.4in;display:block;margin-left: auto;margin-right: auto;margin-top:-.2in" src="createqr.php?data=https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=' . $p->getTouchnetId() . '">' : '').'
+                    </div>
+                    <div style="float:right;width:50%;min-height:130px;margin-top:1em;">
+                        <img src="../../inventory_images/'.$p->getImage().'" style="max-width:1.5in;height:13em;">
+                    </div>
+                </div>
+                <div style="padding-top:1em;margin-top:110px;">
+                    <span style="font-size:1.5em;margin-left:1em;">' . substr($p->getName(),0,50) . '</span>
+                </div>
+            </div>';
+        $j++;
     }
     $labelsHTML .= "</div>";
 } else if ($_GET['labeltype'] == 4) { //Simple Kit Labels
     foreach ($items AS $i){
-        if ($i != 'labeltype'){
-            $pageCSS = 'size: letter;';
-            $labelsHTML .= '<div class="printpagesmall">';
-            $p = $inventoryDao->getPartByStocknumber($i);
-            for($j=0;$j<32;$j++){	
-                $labelsHTML .= "<div class='printlabelsmall'>
-                                    <div class='kit-label-sm'>
-                                        <b>" . $p->getName() . "</b>
-                                        <BR>" . date('m-d-Y',time()) . "
-                                    </div>
-                                </div>";
-            }
-            $labelsHTML .= "</div>";
+        $pageCSS = 'size: letter;';
+        $labelsHTML .= '<div class="printpagesmall">';
+        $p = $inventoryDao->getPartByStocknumber($i);
+        for($j=0;$j<32;$j++){	
+            $labelsHTML .= "<div class='printlabelsmall'>
+                                <div class='kit-label-sm'>
+                                    <b>" . $p->getName() . "</b>
+                                    <BR>" . date('m-d-Y',time()) . "
+                                </div>
+                            </div>";
         }
+        $labelsHTML .= "</div>";
     }
     
 } else if ($_GET['labeltype'] == 5) { //Detailed Kit Labels
     foreach ($items AS $i){
-        if ($i == 'labeltype') continue;
-
         $kit = $inventoryDao->getPartByStocknumber($i);
         $contents = $inventoryDao->getKitContentsByStocknumber($i);
         $date = date('m-d-Y', time());
@@ -211,6 +201,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
                 <?= $pageCSS ?>
             }
         </style>
+        <base href="<?= $configManager->getBaseUrl() ?>" />
 	</head>
 	<body>
 
