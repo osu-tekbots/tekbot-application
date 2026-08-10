@@ -10,9 +10,6 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 
 ?>
-<div style="position: relative; top: 25px; padding: 16px; background: black; font-size: 20px; text-align: center; padding-top: 0">
-     Check out our new <a href="publicTekBotsAcademy.php">TekBots Academy seminars</a>!
-</div>
           <!-- Main header -->
           <header class="maincenter">
                <!-- First replaceble image -->
