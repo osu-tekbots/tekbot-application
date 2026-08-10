@@ -49,7 +49,10 @@ $css = array(
 	'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
 );
 $js = array(
-    'https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'
+    'https://code.jquery.com/jquery-3.5.1.min.js',
+	'https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js',
+	'https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.js',
+	'https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.js'
 );
 
 include_once PUBLIC_FILES . '/modules/header.php';
@@ -202,7 +205,7 @@ if (count($item) > 0){ // Order to generate
 						<th>Location</th>
 						<th>Supplier Info</th>
 						<th>Stock</th>
-						<th>Price Paid</th>
+						<th class='no-print'>Price Paid</th>
                     </tr>
                 </thead>";
 	foreach($order AS $key => $need){
@@ -216,70 +219,19 @@ if (count($item) > 0){ // Order to generate
 				$supplierHTML .= "<a target='_blank' href='" . ($s['link'] != '' ? $s['link'] : $s['SupplierPart']) . "'>" . $s['SupplierName'] . "</a><BR>";
 		}
 			$orderHTML .= "<tr class='".($need < 0 ?'nonorder':'')."'><td>".$p->getType()."</td>";
-			$orderHTML .= "<td>".$p->getName()."</td>";
+			$orderHTML .= "<td>".$p->getName()."<br>
+				<a href='https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/pages/employeeInventoryPart.php?stocknumber=".$p->getStocknumber()."' target='_blank'>".$p->getStocknumber()."</a>
+			</td>";
 			$orderHTML .= "<td>Order: $need</td>";
 			$orderHTML .= "<td>".$p->getLocation()."</td>";
 			$orderHTML .= "<td>".($need > 0 ? $supplierHTML : '')."</td>";
 			$orderHTML .= "<td><input class='form-control' type='number' id='quantity$key' value='".$p->getQuantity()."' onchange='updateQuantity(\"$key\")'></td>";
-			$orderHTML .= "<td>$ <input = type='text' id='lastprice$key' onchange='updateLastPrice(\"$key\");' value='".number_format($p->getLastPrice(),2)."'></td></tr>";	
+			$orderHTML .= "<td><div class='input-group'>
+				<div class='input-group-prepend'><div class='input-group-text'>$</div></div>
+				<input class='form-control' type='text' id='lastprice$key' onchange='updateLastPrice(\"$key\");' value='".number_format($p->getLastPrice(),2)."'>
+			</div></td></tr>";	
 	}
 	$orderHTML .= "</table>";
-	
-	
-	
-	
-	/*
-	$kit = $inventoryDao->getPartByStocknumber($stocknumber);
-	$description = $kit->getName();//
-	//$lastPrice = $kit->getLastPrice();//
-	$image = $kit->getImage();//
-		
-	$contents = $inventoryDao->getKitContentsByStocknumber($stocknumber);// Get the list of stocknumbers/quantity of each in the kit
-	
-	$contentsHTML = "<h4>Contents</h4><table id='ContentsTable' style='width:100%;'>
-                <thead>
-                    <tr>
-						<th>Type</th>
-                        <th >Description</th>
-						<th>Quantity</th>
-						<th></th>
-                    </tr>
-                </thead>
-                <tbody>";
-	foreach ($contents AS $key => $value){
-		$p = $inventoryDao->getPartByStocknumber($key);
-		
-		$contentsHTML .= "<tr><td>".$p->getType()."</td><td><a href='./pages/employeeInventoryKits.php?stocknumber=$key'>".$p->getName()."</a></td><td><input type='text' value='$value' id='quantity$stocknumber' onchange='updateKitQuantity(\"$stocknumber\",\"$key\");'></td><td><button class='btn btn-warning' onclick='removeKitContents(\"$stocknumber\",\"$key\");'>Remove</button></td></tr>";	
-	}
-	$contentsHTML .= "</tbody></table>";
-	
-	if ($kit->getTypeId() == 1){ //This is a kit
-	
-	$addHTML = "<form><div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'><div class='form-row'>
-						<div class='form-group col-sm-9'>
-						<HR><h4>Add Item</h4><table>";
-	$addHTML .= "<tr><td>$typeSelect</td><td id='nameselect'></td><td><input type='text' id='newquantity' placeholder='Quantity in Kit'></td><td><button class='btn btn-success' onclick='addKitContents(\"$stocknumber\");'>Add</button></td></tr>";	
-	$addHTML .= "</table></div><div class='col-sm-3'><img src='' class='img-fluid rounded-lg' id='addImage'></div></div></div></form>";
-	}
-	
-	$kitHTML .= "<h3>Stock Number: $stocknumber</h3>
-				<form>
-				<div style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
-					<div class='form-row'>
-						<div class='form-group col-sm-9'>
-						<h3>Kit: $description</h3>
-						$contentsHTML
-						</div>
-						<div class='col-sm-3'>
-							<div class='form-group'><label for='partImage' >Image <a href='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' target='_blank'>".($image != '' ? $image : '')."</a></label><img src='../../inventory_images/".($image != '' ? $image : 'noimage.jpg')."' class='img-fluid rounded-lg' id='partImage'></div>
-						</div>
-					</div>
-				</div>
-				</form>
-				
-				";
-	
-	*/
 } 
 
 ?>
@@ -409,25 +361,45 @@ function updateQuantity(id){
 	
 <script>
 
+var printButtonExtension = {
+    exportOptions: {
+		columns: ':not(.no-print)',
+        format: {
+            body: function ( data, row, column, node ) {
+                //check if type is input using jquery
+                return node.firstElementChild?.tagName === "INPUT" ?
+                        node.firstElementChild.value :
+                        data;
+            }
+        }
+    }
+};
+
 $(document).ready(function() {
 	$('#addImage').hide();
 
 	$('#OrderTable').DataTable({
-			"autoWidth": false,
-			"searching": false,
-			'scrollX':true, 
-			'paging':false, 
-			'order':[[0, 'asc']],
-			"columns": [
-				null,
-				null,
-				{ "orderable": false },
-				null,
-				{ "orderable": false },
-				{ "orderable": false },
-				{ "orderable": false }					
-			  ]
-			});
+		"autoWidth": false,
+		"searching": false,
+		'scrollX':true, 
+		'paging':false, 
+		'order':[[0, 'asc']],
+		"columns": [
+			null,
+			null,
+			{ "orderable": false },
+			null,
+			{ "orderable": false },
+			{ "orderable": false },
+			{ "orderable": false }					
+		],
+		'dom': 'Bft',
+		'buttons': [
+			$.extend( true, {}, printButtonExtension, {
+				extend: 'print'
+			} )
+		], 
+	});
 });
 </script>
 
