@@ -47,14 +47,88 @@ if (isset($_REQUEST['key'])){
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/employee.php';
 
+$TOTAL_BOXES = 9;
+
 $boxDao = new BoxDao($dbConn, $logger);
 $userDao = new UsersDao($dbConn, $logger);
 $boxes = $boxDao->getBoxes();
 
-$options = "<option value=''></option>";
+$userOptions = "<option value=''></option>";
 $users = $userDao->getAllUsers();
 foreach ($users as $user){
-	$options .= "<option value='".$user->getUserID()."'>".$user->getLastName().", ".$user->getFirstName()."</option>";
+	$userOptions .= "<option value='".$user->getUserID()."'>".$user->getLastName().", ".$user->getFirstName()."</option>";
+}
+
+$currentTekboxesHTML = '';
+$newTekboxesHTML = '';
+
+foreach ($boxes as $b) {
+	$boxNumber = $b->getNumber();
+	$boxKey = $b->getBoxKey();
+	$fillDate = $b->getFillDate();
+	$battery = (min(($b->getBattery() - 1248) / (1790-1248), 1)) * 100;
+
+	if ($b->getUserId() != '')
+		$user = $userDao->getUserById($b->getUserId());
+	if ($b->getFillBy() != '')
+		$fillByUser = $userDao->getUserById($b->getFillBy());
+
+	if ($fillDate == '0000-00-00 00:00:00') {
+		// Box is available for use
+		$userHTML = "User: <select id='name$boxKey' class='custom-select' >$userOptions</select>";
+		$contentsHTML = "Contents: <input type='text' class='form-control' id='contents$boxKey'>";
+		$buttonsHTML = "<button id='button$boxKey' onclick='fillBox(\"$boxKey\")' class='btn btn-outline-success'>Fill Box</button>";
+	} else if ($b->getPickupDate() != '0000-00-00 00:00:00') {
+		// This is likely available, but employees need to check & reset it.
+		$userHTML = "User: {$user->getLastName()}, {$user->getFirstName()}<BR>
+			<b>Picked Up: {$b->getPickupDate()}</b><BR>
+			Fullfilled By: {$fillByUser->getLastName()}, {$fillByUser->getFirstName()}";
+		$contentsHTML = "Contents: {$b->getContents()}";
+		$buttonsHTML = "<button onclick='resetBox(\"$boxKey\")' class='btn btn-outline-primary'>Reset Box</button>";
+		if ($b->getLocked() == 1)
+			$buttonsHTML .= "<button onclick='unlockBox(\"$boxKey\")' class='btn btn-outline-danger'>Unlock Box</button>";
+		else
+			$buttonsHTML .= "<button onclick='lockBox(\"$boxKey\")' class='btn btn-outline-danger'>Lock Box</button>";
+	} else {
+		// Box still has something in it (for sure)
+		$userHTML = "User: {$user->getLastName()}, {$user->getFirstName()}<BR>
+			Box Filled: " . ((time() - strtotime($fillDate)) > (2*24*60*60) ? "<span style='font-weight: bold;color:red !important;'>$fillDate</span>" : $fillDate)."<BR>
+			Fullfilled By: {$fillByUser->getLastName()}, {$fillByUser->getFirstName()}";
+		$contentsHTML = "<div class='form-group col-sm-4'>Contents: {$b->getContents()}</div>";
+		$buttonsHTML = "<button onclick='emptyBox(\"$boxKey\")' class='btn btn-outline-danger'>Empty Box</button>";
+		if ($b->getLocked() == 1)
+			$buttonsHTML .= "<button onclick='unlockBox(\"$boxKey\")' class='btn btn-outline-danger'>Unlock Box</button>";
+		else
+			$buttonsHTML .= "<button onclick='lockBox(\"$boxKey\")' class='btn btn-outline-danger'>Lock Box</button>";
+	}
+
+	$boxHTML = "<div class='form-group row' id='row$boxKey' style='padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;'>
+		<div class='col-sm-1 d-flex flex-column justify-content-center' style='gap: .5em;'>
+			<select id='number$boxKey' onchange='moveBoard(\"$boxKey\")' class='custom-select'>
+				<option value=''" . ($boxNumber == '' ? ' selected' : '') . "></option>";
+	for ($i = 1; $i <= $TOTAL_BOXES; $i++) {
+		$boxHTML .= "<option value='$i'" . ($boxNumber == $i ? ' selected' : '') . ">$i</option>";
+	}
+	$boxHTML .= "
+			</select>
+			<a href='pages/employeeBoxes.php?key=$boxKey'>
+				<div class='progress'>
+					<div class='progress-bar " . ($battery < 25 ? 'bg-danger' : 'bg-success') ."' role='progressbar' style='width: $battery%' aria-valuenow='$battery' aria-valuemin='0' aria-valuemax='100'>
+						" . number_format($battery, 0) . "%
+					</div>
+					" . ($battery < 25 ? '&nbsp;&nbsp;Low Battery' : '') . "
+				</div>
+			</a>
+		</div>
+		<div class='form-group col-sm-4'>$userHTML</div>
+		<div class='form-group col-sm-4'>$contentsHTML</div>
+		<div class='col-sm-3 d-flex align-items-center' style='gap: 1em;'>$buttonsHTML</div>
+	</div>";
+
+	// Separate boards with an assigned box from new boards that've powered on and called
+	// home, but haven't yet been assigned a box
+	if ($boxNumber) $currentTekboxesHTML .= $boxHTML;
+	else            $newTekboxesHTML .= $boxHTML;
 }
 
 ?>
@@ -74,8 +148,8 @@ function fillBox(id){
 		}
 		
 		api.post('/boxes.php', content).then(res => {
-			snackbar(res.message, 'Order Filled');
-			$('#row'+id).css({ opacity: 0 });
+			snackbar(res.message, 'success');
+			setTimeout(() => window.location.reload(), 1000);
 		}).catch(err => {
 			snackbar(err.message, 'error');
 		});
@@ -90,8 +164,8 @@ function resetBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'info');
-		$('#row'+id).css({ opacity: 0 });
+		snackbar(res.message, 'success');
+		setTimeout(() => window.location.reload(), 1000);
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -105,8 +179,8 @@ function lockBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'info');
-		$('#row'+id).css({ opacity: 0 });
+		snackbar(res.message, 'success');
+		setTimeout(() => window.location.reload(), 1000);
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -120,8 +194,8 @@ function unlockBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Box Unlocked');
-		$('#row'+id).css({ opacity: 0 });
+		snackbar(res.message, 'success');
+		setTimeout(() => window.location.reload(), 1000);
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
@@ -136,11 +210,37 @@ function emptyBox(id){
 	}
 	
 	api.post('/boxes.php', content).then(res => {
-		snackbar(res.message, 'Order Removed');
-		$('#row'+id).css({ opacity: 0});
+		snackbar(res.message, 'success');
+		setTimeout(() => window.location.reload(), 1000);
 	}).catch(err => {
 		snackbar(err.message, 'error');
 	});
+}
+
+function moveBoard(id){
+	const number = $('#number'+id).val();
+
+	const message = number
+		? 'Are you sure? This will replace the current box '+number+' with this board.'
+		: "Are you sure? This will remove this board's number.";
+	if (!confirm(message)) {
+		$('#number'+id).val('');
+		return;
+	}
+
+	const content = {
+		action: 'moveBoard',
+		boxId: id,
+		newNumber: number
+	};
+
+	api.post('/boxes.php', content).then(res => {
+		snackbar(res.message, 'success');
+		setTimeout(() => window.location.reload(), 1000);
+	}).catch(err => {
+		$('#number'+id).val('');
+		snackbar(err.message, 'error');
+	})
 }
 
 </script>
@@ -157,60 +257,17 @@ function emptyBox(id){
 
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
-			<?php 
-			echo "<div class='admin-paper'>";
-
-			
-			foreach ($boxes as $b) {
-				$boxNumber = $b->getNumber();
-				$boxKey = $b->getBoxKey();
-				$fillDate = $b->getFillDate();
-				$pickupDate = $b->getPickupDate();
-				$locked = $b->getLocked();
-				$userId = $b->getUserId();
-				$contents = $b->getContents();
-				$battery = $b->getBattery();
-				$battery = (min(($battery - 1248)/(1790-1248),1))*100;
-				if ($userId != '')
-					$user = $userDao->getUserById($userId);
-				$fillBy = $b->getFillBy();
-				if ($fillBy != '')
-					$fillByUser = $userDao->getUserById($fillBy);
-
-			 
-					echo '<div class="form-group row" id="row'.$boxKey.'" style="padding-left:4px;padding-right:4px;margin-top:4px;margin-bottom:4px;">
-							<div class="col-sm-1" style="text-align:right;">
-							<h2>'.$boxNumber.':</h2>
-							<a href="./pages/employeeBoxes.php?key='.$boxKey.'"><div class="progress"><div class="progress-bar '.($battery < 25 ? 'bg-danger' :'bg-success').'" role="progressbar" style="width: '.$battery.'%" aria-valuenow="'.$battery.'" aria-valuemin="0" aria-valuemax="100">'.number_format($battery,0).'%</div>'.($battery < 25 ? '&nbsp;&nbsp;Low Battery' :'').'</div></a>
-							</div>';
-							
-					if ($fillDate == '0000-00-00 00:00:00'){ //Box is available for use
-						echo '<div class="form-group col-sm-4">User:<select id="name'.$boxKey.'" class="custom-select" >'.$options.'</select></div>';
-						echo '<div class="form-group col-sm-4">Contents:<input type="text" class="form-control" id="contents'.$boxKey.'"></div>';
-						echo '<button id="button'.$boxKey.'" onclick="fillBox(\''.$boxKey.'\')" class="btn btn-outline-success m-2 col-sm-1">Fill Box</button>';
-					} else {
-						if ($pickupDate != '0000-00-00 00:00:00'){ // This is likely available but we need to check.
-							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR><b>Picked Up: ' .$pickupDate.'</b><BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
-							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
-							echo '<button onclick="resetBox(\''.$boxKey.'\')" class="btn btn-outline-primary m-2 col-sm-1">Reset Box</button>';
-							if ($locked == 1)
-								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Unlock Box</button>';
-							else
-								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Lock Box</button>';
-						} else { // Box still has something in it (for sure)
-							echo '<div class="form-group col-sm-4">User: '.$user->getLastName().", ".$user->getFirstName().'<BR>Box Filled: '.((time() - strtotime($fillDate)) > (2*24*60*60) ? "<span style='font-weight: bold;color:red !important;'>$fillDate</span>" : $fillDate).'<BR>Fullfilled By: '.$fillByUser->getLastName().", ".$fillByUser->getFirstName().'</div>';
-							echo '<div class="form-group col-sm-4">Contents: '.$contents.'</div>';
-							echo '<button onclick="emptyBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Empty Box</button>';
-							if ($locked == 1)
-								echo '<button onclick="unlockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Unlock Box</button>';
-							else
-								echo '<button onclick="lockBox(\''.$boxKey.'\')" class="btn btn-outline-danger m-2 col-sm-1">Lock Box</button>';
-						}
+			<div class='admin-paper'>
+				<?= $currentTekboxesHTML ?>
+			</div>
+			<div class='admin-paper'>
+				<?php
+					if ($newTekboxesHTML != '') {
+						echo '<h3>Other Boards</h3>';
+						echo $newTekboxesHTML;
 					}
-					echo '</div>';
-				}
-				echo "</div>";
-			?>
+				?>
+			</div>
 		</div>
 	</div>
 </div>

@@ -332,6 +332,27 @@ class BoxDao {
         }
     }
 
+    public function changeBoxNumber($id, $number) {
+        try {
+            $sql = '
+            START TRANSACTION;
+            UPDATE tekbots_boxes SET `number` = "" WHERE `number` = :number;
+            UPDATE tekbots_boxes SET `number` = :number WHERE `box_key` = :id;
+            COMMIT;';
+
+            $params = array(
+                ':number' => $number,
+                ':id' => $id 
+            );
+            $this->conn->execute($sql, $params);
+			
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to change box number: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Creates a new Box object using information from the database row
      *

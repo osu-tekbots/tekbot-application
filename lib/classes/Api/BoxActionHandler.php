@@ -191,6 +191,23 @@ class BoxActionHandler extends ActionHandler {
         $this->respond(new Response(Response::OK, 'Box Emptied Sucessful'));
     }
 
+
+    public function handleMoveBoard() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        // Ensure the required parameters exist
+        $boxID = $this->getFromBody('boxId');
+        $newNumber = $this->getFromBody('newNumber');
+
+        $ok = $this->boxDao->changeBoxNumber($boxID, $newNumber);
+		if(!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to move board'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Board successfully moved'));
+    }
+
    
     /**
      * Handles the HTTP request on the API resource. 
@@ -235,6 +252,10 @@ class BoxActionHandler extends ActionHandler {
 			case 'unlock':
                 $this->handleUnlock();
 				break;
+            
+            case 'moveBoard':
+                $this->handleMoveBoard();
+                break;
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on Box resource'));
