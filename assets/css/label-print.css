@@ -148,6 +148,8 @@ div.kit-label-lg * {
     aspect-ratio: 1/1;
     
     border-radius: 2.25rem;
+    
+    print-color-adjust: exact;
 }
 
 /*
