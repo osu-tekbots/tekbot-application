@@ -108,9 +108,17 @@ if (count($items) > 0) { //Need to render labels
 			$labelsHTML .= "
 				<div class='printlabellarge'>
 					<div style='width:1.6in;height:1.8in;float:left;' ><img style='width:100%;height:100%;object-fit:contain;' src='../$imagePath'></div>
-					<div style='float:left;width:2.1in;height:1.8in;padding-left:.05in;padding-top:.1in;'>
-						<div style='height:1.5in;'><span style='font-size:2em;'>$equipmentName<BR></span>Contents:<BR>$parts</div>
-						<span style='height:.2in; font-size: 2em;'>Unit $unitID</span>
+					<div style='float:left;width:2.1in;height:1.8in;padding-left:.05in;padding-top:.1in;position:relative;'>
+						<span style='height:.2in; font-size:2em;'>$equipmentName</span>
+						<div>
+							<div style='width:1.1in;float:left;'>
+								<div style='height:1.3in;'>
+									Contents:<BR>$parts
+								</div>
+								<span style='height:.2in; font-size: 2em;'>Unit $unitID</span>
+							</div>
+							<img style='height:1in;float:right;position:absolute;bottom:0;' src='createqr.php?data=https://eecs.engineering.oregonstate.edu/education/tekbotSuite/tekbot/publicEquipmentDetail.php?id={$e->getEquipmentID()}'>
+						</div>
 					</div>
 				</div>
 			";
