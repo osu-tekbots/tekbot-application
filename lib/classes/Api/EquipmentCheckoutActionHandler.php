@@ -229,6 +229,44 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
 
 
     /**
+     * Extends the due date for an equipment checkout entry in the database.
+     *
+     * @return void
+     */
+    public function handleExtendCheckout() {
+        // Ensure the user has permission to make the change
+        $this->verifyAccessLevel('employee');
+
+        $checkoutID = $this->getFromBody('checkoutID');
+        $dateDue = $this->getFromBody('dateDue');
+
+        if (!$dateDue) $this->respond(new Response(Response::BAD_REQUEST, 'Return deadline must be specified'));
+
+        $checkout = $this->equipmentCheckoutDao->getCheckout($checkoutID);
+        if (!$checkout) {
+            $this->respond(new Response(Response::NOT_FOUND, 'Could not find checkout details'));
+        }
+        $checkout->setDateDue(new \DateTime($dateDue));
+        $checkout->setDateUpdated(new \DateTime());
+
+        $ok = $this->equipmentCheckoutDao->updateCheckout($checkout);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to extend checkout'));
+        }
+
+        // Create email
+        $messageID = 'eThZejYv5bMRAihl';
+
+        $user = $this->userDao->getUserByID($checkout->getUserID());
+        $equipment = $this->equipmentTypeDao->getEquipmentByUnitID($checkout->getUnitID());
+		$message = $this->messageDao->getMessageByID($messageID);
+        $ok = $this->mailer->sendEquipmentEmail($user, $checkout, $equipment, $message);
+
+        $this->respond(new Response(Response::OK, 'Successfully extended checkout'));
+    }
+
+
+    /**
      * Returns an equipment checkout entry in the database.
      *
      * @return void
@@ -322,6 +360,9 @@ class EquipmentCheckoutActionHandler extends ActionHandler {
 
             case 'checkoutEquipment':
                 $this->handleCheckoutEquipment();
+
+            case 'extendCheckout':
+                $this->handleExtendCheckout();
 
             case 'returnEquipment':
                 $this->handleReturnEquipment();

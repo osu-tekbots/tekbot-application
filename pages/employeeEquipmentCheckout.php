@@ -113,10 +113,10 @@ foreach ($checkedOutEquipment as $c){
 			$status = 'Late';
 	}
 
-	$button = '';
+	$buttons = '';
 	if ($status == "Checked Out" || $status == "Late"){
-		$button = "<button
-			class='btn btn-outline-primary capstone-nav-btn' type='button'
+		$buttons = "<button
+			class='btn btn-primary capstone-nav-btn' type='button'
 			data-toggle='modal' data-target='#returnModal'
 			data-checkout-id='$checkoutID'
 			data-equipment-name='{$equipment->getName()}'
@@ -131,6 +131,21 @@ foreach ($checkedOutEquipment as $c){
 			data-unit-health='{$unit->getHealthStatus()}'
 		>
 			Return
+		</button>
+		<button
+			class='btn btn-outline-primary' type='button'
+			data-toggle='modal' data-target='#extendModal'
+			data-checkout-id='$checkoutID'
+			data-checkout-due-date='{$c->getDateDue()->format('Y-m-d')}'
+			data-equipment-name='{$equipment->getName()}'
+			data-equipment-notes='{$equipment->getNotes()}'
+			data-equipment-parts='{$equipment->getParts()}'
+			data-user-name='{$user->getFirstName()} {$user->getLastName()}'
+			data-user-onid='{$user->getOnid()}'
+			data-user-email='{$user->getEmail()}'
+			data-unit-id='{$c->getUnitID()}'
+		>
+			Extend
 		</button>";
 	}
 
@@ -144,7 +159,7 @@ foreach ($checkedOutEquipment as $c){
 		<td>" . Security::HtmlEntitiesEncode($equipment->getName()) . "</td>
 		<td>{$c->getUnitID()}</td>
 		<td>$status</td>
-		<td>$button</td>
+		<td>$buttons</td>
 	</tr>
 	";
 }
@@ -283,6 +298,44 @@ foreach ($checkedOutEquipment as $c){
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-success" data-dismiss="modal" onClick="handoutEquipment();">Handout</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Checkout extension modal -->
+<div class="modal" id="extendModal">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Extend <span class="userName"></span>'s checkout for <span class="equipmentName2"></span></h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+	
+			<div class="modal-body">
+				<h4 class="d-flex justify-content-between">
+					<span class="equipmentName2"></span>
+					<span class="unitID"></span>
+				</h4>
+
+				<p><b>Equipment Notes:</b> <span class="equipmentNotes"></span></p>
+				<p><b>Equipment Parts:</b><br> <span class="equipmentParts"></span></p>
+
+				<input type="hidden" id="extendCheckoutID">
+
+				<div class='input-group mb-2'>
+					<div class='input-group-prepend'><label for="extendDueDate" class='input-group-text'>Return Deadline</label></div>
+					<input id="extendDueDate" type="date" class="form-control">
+				</div>
+
+				<h4 class="userName"></h4>
+				<p><b>ONID:</b> <span class="userOnid"></span></p>
+				<p><b>Email:</b> <span class="userEmail"></span></p>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" data-dismiss="modal" onClick="extendCheckout();">Extend</button>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 			</div>
 		</div>
@@ -494,6 +547,30 @@ foreach ($checkedOutEquipment as $c){
 				.addClass('font-weight-bold');
 	}
 
+	// Populates the checkout extension modal with equipment and user details
+	$('#extendModal').on('show.bs.modal', event => {
+		const modal = $('#extendModal'), button = $(event.relatedTarget);
+		const checkoutId = button.data('checkout-id'),
+			checkoutDueDate = button.data('checkout-due-date'),
+			equipmentName = button.data('equipment-name'),
+			equipmentNotes = button.data('equipment-notes'),
+			equipmentParts = button.data('equipment-parts'),
+			userName = button.data('user-name'),
+			userOnid = button.data('user-onid'),
+			userEmail = button.data('user-email'),
+			unitId = button.data('unit-id');
+
+		modal.find('.equipmentName2').text(equipmentName);
+		modal.find('.equipmentNotes').text(equipmentNotes);
+		modal.find('.equipmentParts').html(equipmentParts);
+		modal.find('.userName').text(userName);
+		modal.find('.userOnid').text(userOnid);
+		modal.find('.userEmail').text(userEmail);
+		modal.find('.unitID').text(`Unit ${unitId}`);
+		modal.find('#extendCheckoutID').val(checkoutId);
+		modal.find('#extendDueDate').val(checkoutDueDate);
+	});
+
 	// Populates the return modal with equipment and user details
 	$('#returnModal').on('show.bs.modal', event => {
 		const modal = $('#returnModal'), button = $(event.relatedTarget);
@@ -557,6 +634,24 @@ foreach ($checkedOutEquipment as $c){
 			unitID: unitId,
 			reservationID: reservationId,
 			dateDue
+		};
+
+		api.post('/equipment-checkout.php', content).then(res => {
+			setTimeout(() => window.location.reload(1), 1000);
+			snackbar(res.message, 'info');
+		}).catch(err => {
+			snackbar(err.message, 'error');
+		});
+	}
+
+	function extendCheckout() {
+		const checkoutId = $('#extendCheckoutID').val(),
+			dueDate = $('#extendDueDate').val();
+
+		const content = {
+			action: 'extendCheckout',
+			checkoutID: checkoutId,
+			dateDue: dueDate
 		};
 
 		api.post('/equipment-checkout.php', content).then(res => {
