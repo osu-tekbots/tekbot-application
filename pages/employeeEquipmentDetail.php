@@ -347,6 +347,9 @@ function renderDefaultImageOption($imageId, $imageName, $selected) {
 												<div class='input-group-prepend'><div class='input-group-text'><i class='fa-solid fa-map-marker-alt'></i></div></div>
 												<input id='unitLocation$unitID' onchange='onUpdateUnitLocation($unitID);' class='form-control input' value='{$unit->getLocation()}'>
 											</div>
+											<small id='unit-location-help' class='form-text text-muted'>
+												Include whether the unit is in the TekBots room or Inventory.
+											</small>
 										</div>
 									</div>
 									<div class='col-sm pt-4'>";
