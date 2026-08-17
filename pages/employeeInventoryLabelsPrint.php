@@ -80,7 +80,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
         }		
 
         $j++;
-        $labelsHTML .= "<div class='printlabelsmall'>
+        $labelsHTML .= "<div class='printlabelsmall' style='position: relative'>
                 <div style='float:left;width:55%;'>
                     <img style='height:1in;display:block;margin-left: auto;margin-right: auto;' src='createqr.php?data=https://eecs.engineering.oregonstate.edu/education/store/Inventory/mobile.php?stocknumber=" . $i . "'>
                 </div>
@@ -91,6 +91,7 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
                     "<BR>" . $i . 
                     "<BR><span style='font-size:2em;'>" . $p->getLocation() . "</span>
                 </div>
+                <div id='color-swatch' class='".(isset($_GET['color']) ? $_GET['color'] : '')."' style='position: absolute; right: .1in; bottom: .1in;'></div>
             </div>";
     }
     $labelsHTML .= "</div>";
@@ -127,10 +128,15 @@ if ($_GET['labeltype'] == 1) { // Larger Labels
         $pageCSS = 'size: letter;';
         $labelsHTML .= '<div class="printpagesmall">';
         $p = $inventoryDao->getPartByStocknumber($i);
+
+        // To reduce errors when handing out similarly-named kits, ecampus kits will have
+        // the kit name's color changed to Beaver Orange.
+        $is_ecampus = preg_match('/\be-?campus\b/i', $p->getName()) === 1;
+
         for($j=0;$j<32;$j++){	
             $labelsHTML .= "<div class='printlabelsmall'>
                                 <div class='kit-label-sm'>
-                                    <b>" . $p->getName() . "</b>
+                                    <b" . ($is_ecampus ? " style='color:#d73f09'" : "") . ">" . $p->getName() . "</b>
                                     <BR>" . date('m-d-Y',time()) . "
                                 </div>
                             </div>";
