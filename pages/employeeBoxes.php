@@ -36,7 +36,15 @@ $js = array(
 
 if (isset($_REQUEST['key'])){
 	$boxDao = new BoxDao($dbConn, $logger);
+	$box = $boxDao->getBoxById($_REQUEST['key']);
 	$levels = $boxDao->getBatteryLevels($_REQUEST['key']);
+
+	echo "<p>
+		<b>Box number:</b> {$box->getNumber()}<br>
+		<b>MAC address:</b> {$box->getBoxKey()}<br>
+		<b>Current battery:</b> {$box->getBattery()}
+	</p>";
+
 	echo "<table><tr><th>Time</th><th>Reading</th></tr>";
 	foreach ($levels AS $l)
 		echo "<tr><td>" . $l['timestamp'] . "</td><td>" . $l['battery'] . "</td></tr>";
@@ -113,8 +121,8 @@ foreach ($boxes as $b) {
 			</select>
 			<a href='pages/employeeBoxes.php?key=$boxKey'>
 				<div class='progress'>
-					<div class='progress-bar " . ($battery < 25 ? 'bg-danger' : 'bg-success') ."' role='progressbar' style='width: $battery%' aria-valuenow='$battery' aria-valuemin='0' aria-valuemax='100'>
-						" . number_format($battery, 0) . "%
+					<div class='progress-bar flex-row align-items-center " . ($battery < 25 ? 'bg-danger' : 'bg-success') ."' role='progressbar' style='width: $battery%' aria-valuenow='$battery' aria-valuemin='0' aria-valuemax='100'>
+						<i class='fas fa-car-battery mr-1'></i>" . number_format($battery, 0) . "%
 					</div>
 					" . ($battery < 25 ? '&nbsp;&nbsp;Low Battery' : '') . "
 				</div>
