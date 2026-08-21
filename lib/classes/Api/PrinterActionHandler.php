@@ -842,6 +842,8 @@ class PrinterActionHandler extends ActionHandler {
 
         foreach($unprocessedJobs as $job) {
             if($job->getPaymentMethod() == 'voucher') {
+                if (!$job->getVoucherCode()) continue; // Employee forced through without a voucher code for reprint
+
                 $voucher = $this->voucherDao->getVoucher($job->getVoucherCode());
                 if(!$voucher) $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to get account code for voucher: '.$job->getVoucherCode()));
                 $job->setAccountCode($voucher->getLinkedAccount());
