@@ -92,7 +92,14 @@ include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
 						<td><a href='./publicInventoryPart.php?stocknumber=$stocknumber' >$description<BR>Stock: $stocknumber </a></td> 
 						<td>".($studentPriceStr)."</td>
 						<td>$quantity</td>".
-						(($cart -> getEditableStatus() == 0)? "":"<td><i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart' onclick='addToCart(\"{$cart -> getIdKey() }\", \"$stocknumber\")'></i></td>")
+						($cart -> getEditableStatus() == 0
+							? ''
+							: "<td>
+								<button type='button' class='btn btn-light' onclick='addToCart(\"{$cart->getIdKey()}\", \"$stocknumber\")'>
+									<i class='fas fa-cart-plus cart-icon' style='font-size: 26px;' title='Add to Cart'></i>
+								</button>
+							</td>"
+						)
 						."<td>".($image != '' ?"<a target='_blank' href='../../inventory_images/$image'>Image</a>":'')."</td>
 						<td>".($datasheet != '' ?"<a target='_blank' href='../../inventory_datasheets/$datasheet'>Datasheet</a>":'')."</td>
 						<td>".($touchnetId != '' ?"<a target ='_blank' href='https://secure.touchnet.net/C20159_ustores/web/product_detail.jsp?PRODUCTID=$touchnetId'>Purchase Item</a>":'')."</td>
