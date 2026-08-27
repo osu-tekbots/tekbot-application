@@ -58,6 +58,7 @@ environment = ; dev|prod
 display_errors = ; yes|no
 display_errors_severity = ; all|warning|error
 auth_providers_config_file = ; auth.ini
+third_party_api_config_file = ; third_party_api.ini
 
 [email]
 subject_tag = ; optional tag to prepend all email subjects with

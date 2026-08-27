@@ -55,7 +55,6 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeInventory.php">Inventory List</a>
                 <a class="dropdown-item" href="pages/employeeInventoryKits.php">Configure Kits</a>
                 <a class="dropdown-item" href="pages/employeeInventoryOrderParts.php">Order Parts</a>
-                <a class="dropdown-item" href="pages/employeeInventoryCarts.php">Access Carts</a>
 
                 <div class="dropdown-divider"></div>
                 <h6 class="dropdown-header">Options:</h6>
@@ -77,6 +76,24 @@ function renderEmployeeSidebar() {
             </div>
         </li>
 
+        <!-- Sales -->
+        <li class="nav-item dropdown">
+            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-fw fa-store-alt"></i>
+                <span>Sales</span>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
+                <a class="dropdown-item" href="pages/employeeTransaction.php">Transactions</a>
+                <a class="dropdown-item" href="pages/employeeInventoryCarts.php">Carts</a>
+                <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales</a>
+
+                <div class="dropdown-divider"></div>
+                <h6 class="dropdown-header">Options:</h6>
+                <a class="dropdown-item" href="pages/employeeTransactionDelivery.php">Delivery Types</a>
+                <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Internal Sales Msgs</a>
+            </div>
+        </li>
+
         <!-- Kit Handout -->
         <li class="nav-item dropdown">
             <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -91,20 +108,6 @@ function renderEmployeeSidebar() {
                 <a class="dropdown-item" href="pages/employeeKitList.php">View Kit List</a>
                 <a class="dropdown-item" href="pages/employeeInsertKitEnrollment.php">Add Kit Enrollments</a>
                 <a class="dropdown-item" href="blank.html">Info</a>
-            </div>
-        </li>
-
-        <!-- Internal Sales -->
-        <li class="nav-item dropdown">
-            <a style="color: lightblue;" class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-fw fa-money-check-alt"></i>
-                <span>Internal Sales</span>
-            </a>
-            <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                <a class="dropdown-item" href="pages/employeeInternalSales.php">Internal Sales Page</a>
-                <div class="dropdown-divider"></div>
-                <h6 class="dropdown-header">Options:</h6>
-                <a class="dropdown-item" href="pages/employeeInternalSalesMessages.php">Edit Messages</a>
             </div>
         </li>
 		

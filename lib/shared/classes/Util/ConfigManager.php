@@ -15,6 +15,7 @@ class ConfigManager {
     private $shouldDisplayErrors = null;
     private $displayErrorSeverity = null;
     private $databaseConfig = null;
+    private $thirdPartyApiConfig = null;
 
     public function __construct($configDir) {
         $this->configDir = $configDir;
@@ -42,6 +43,13 @@ class ConfigManager {
             if (!\is_null($dbConfigFile)) {
                 $dbConfigPath = $this->join($privateDir, $dbConfigFile);
                 $this->databaseConfig = $this->loadIni($dbConfigPath);
+            }
+
+            // Setup the third-party API configurations
+            $apiConfigFile = $this->get('server.third_party_api_config_file');
+            if (!\is_null($apiConfigFile)) {
+                $apiConfigPath = $this->join($privateDir, $apiConfigFile);
+                $this->thirdPartyApiConfig = $this->loadIni($apiConfigPath);
             }
         }
     }
@@ -178,6 +186,20 @@ class ConfigManager {
      */
     public function getDatabaseConfig() {
         return $this->databaseConfig;
+    }
+
+    /**
+     * Fetches the configuration used by the server to communicate with third party APIs.
+     * 
+     * The resulting array will contain the following fields:
+     * - `upay.site_id` : the uPay site ID for sending payments to
+     * - `upay.site_url` : the host IP address or URL for the uPay server
+     * - `upay.validation_key` : the validation key to pass with payment requests
+     *
+     * @return string[]
+     */
+    public function getThirdPartyApiConfig() {
+        return $this->thirdPartyApiConfig;
     }
 
     /**

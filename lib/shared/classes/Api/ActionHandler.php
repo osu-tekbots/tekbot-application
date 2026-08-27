@@ -19,16 +19,31 @@ class ActionHandler {
     /**
      * Constructs a new instance of the action handler.
      * 
-     * The handler will decode the JSON body and the query string associated with the request and store the results
-     * internally.
+     * The handler will decode the JSON/form body and the query string associated with the
+     * request, storing the results internally.
      *
-     * @param [type] $logger
+     * @param \Util\Logger $logger
      */
     public function __construct($logger) {
         $this->logger = $logger;
-        $this->requestBody = \json_decode(\file_get_contents('php://input'), true);
+
         $this->queryString = array();
         \parse_str($_SERVER['QUERY_STRING'], $this->queryString);
+
+        switch ($_SERVER['CONTENT_TYPE']) {
+            case 'application/json': 
+                $this->requestBody = \json_decode(\file_get_contents('php://input'), true);
+                break;
+            
+            case 'application/x-www-form-urlencoded':
+            case 'multipart/form-data':
+                $this->requestBody = $_POST;
+                break;
+            
+            default:
+                $this->logger->warn("Unexpected content type {$_SERVER['CONTENT_TYPE']}");
+                $this->respond(new Response(Response::BAD_REQUEST, 'Unexpected content type'));
+        }
     }
 
     /**
@@ -41,15 +56,14 @@ class ActionHandler {
      * @return void
      */
     public function requireParam($name, $message = null) {
-        if (is_array($this->requestBody)){
-			if (!\array_key_exists($name, $this->requestBody)) {
-				$message = $message == null ? "Missing required request body parameter: $name" : $message;
-				$this->respond(new Response(Response::BAD_REQUEST, $message));
-			}
-		} else {
-			$message = "Empty POST";
-			$this->respond(new Response(Response::BAD_REQUEST, $message));
-		}
+        if (!is_array($this->requestBody)) {
+            $this->respond(new Response(Response::BAD_REQUEST, 'Empty POST'));
+        }
+
+        if (!\array_key_exists($name, $this->requestBody)) {
+            $message = $message ?? "Missing required request body parameter: $name";
+            $this->respond(new Response(Response::BAD_REQUEST, $message));
+        }
 	}
 	
     /**
@@ -69,8 +83,7 @@ class ActionHandler {
             $this->requireParam($param);
             return $this->requestBody[$param];
         } else {
-            // Still check so that we don't get an error
-            return isset($this->requestBody[$param]) ? $this->requestBody[$param] : null;
+            return $this->requestBody[$param] ?? null;
         }
         
     }

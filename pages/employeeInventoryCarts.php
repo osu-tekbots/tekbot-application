@@ -35,6 +35,7 @@ $js = array(
 );
 
 include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
+include_once PUBLIC_FILES . '/modules/receipt.php';
 
 $cart = false;
 $cartControlHTML = '';
@@ -64,21 +65,19 @@ if(isset($_REQUEST['action'])){
 	}
 }
 
-if (isset($_GET['cartID'])) {
-	if(!empty($_GET['cartID'])) {
-		$cart = $inventoryDao -> getCartByID($_GET['cartID']);
+if (isset($_GET['id'])) {
+	if(!empty($_GET['id'])) {
+		$cart = $inventoryDao -> getCartByID($_GET['id']);
 		if(!$cart) {
 			$logger->error('Invald cart ID provided');
 			$tableHTML.= "<p class='error'>Invalid Cart ID provided.</p>";
 		}
-		//Should session variable be set to cart here? Employees carts may be accessibe on public page
-		//$_SESSION['cart'] = $cart;
 	}
 } else if(isset($_SESSION['cart'])) {
 	$cart = $_SESSION['cart'];
 
 	echo "<script>
-        window.location.href = './employeeInventoryCarts.php?cartID=" . urlencode($cart -> getIdKey()) . "';
+        window.location.href = './employeeInventoryCarts.php?id=" . urlencode($cart -> getIdKey()) . "';
     </script>";
 }
 //Cart status HTML, part of the cart input
@@ -124,8 +123,8 @@ $cartInput = '
 <div class="table-responsive col-md-8 col-7">
     <form method="GET" action="./employeeInventoryCarts.php" >
         <div class="d-flex mb-3 justify-content-end" style="gap: 20px;">
-            <label for="cartID">Enter Cart ID:</label>
-            <input type="text" id="cartID" name="cartID" value = "'.$cartId.'" required>
+            <label for="id">Enter Cart ID:</label>
+            <input type="text" id="id" name="id" value = "'.$cartId.'" required>
             <button type="submit" class = "btn btn-primary">Search</button>
         </div>
     </form>
@@ -133,89 +132,17 @@ $cartInput = '
 
 //If cart found display table
 if ($cart) {
-	$tableHTML.="
-			<table class='table ' id='InventoryTable' style='width: 100%; max-width: 100%; table-layout:fixed;'>
-					<thead>
-						<tr>
-							<th style = 'width:30%'>Item</th>
-							<th style = 'width:15%'>Loc</th>
-							<th style = 'width:15%'class='d-none d-md-table-cell'>Price</th>
-							<th style = 'width:15%'>QTY</th>
-							<th style = 'width:15%'>Stock</th>
-							<th style = 'width:10%' class='d-none d-md-table-cell'>Reduce Stock</th>
-							<th class = 'd-none'>Item</th>
-							<th class ='d-none'>Item Info</th>
-						</tr>
-					</thead>
-					<tbody>";
-							
-    $contents = $cart->getContents();
+	$tableHTML = createCartReceiptTable($cart, true);
+
     $totalCount = 0;
     $totalPrice = 0;    
-    foreach ($contents as $c) {
-    	$p = $c['part']; //Get the Part object
-                    
-       
-		if ($c['quantity'] > 0 && $p->getArchive() == 0){
-
-			$stocknumber = $p->getStocknumber();
-			$type = $p->getType();
-			$description = $p->getName();
-
-			$marketPrice = $p->getMarketPrice();
-			$studentPrice = $marketPrice == 0 ? getStudentPrice($p->getLastPrice()) : $marketPrice;
-			$studentPriceStr = numberToDollarString($studentPrice);
-			$totalPrice += $studentPrice * $c['quantity'];
-
-			$location = $p->getLocation();
-			$quantity = $p->getQuantity(); //The instock qty
-            $cartQuantity = $c['quantity']; //The qty in the cart of a part
-			$totalCount += $cartQuantity;
-			$touchnetId = $p->getTouchnetId();
-
-				
-			$tableHTML .= "<tr>
-			
-				<td>
-					<a href='./pages/publicInventoryPart.php?stocknumber=$stocknumber' style='text-decoration:none;'>$type: <BR>$description</a>
-				</td>
-				<td>$location</td>
-				<td class='d-none d-md-table-cell'>$studentPriceStr</td>
-                <td>
-					<input 
-						type= number
-						min= 0
-						value=$cartQuantity
-						class='form-control cart-quantity-input'
-						style='width: 80px;'
-						onchange=\"(function() {
-								setPartQuantityInCart(
-									'{$cart->getIdKey()}',
-									'{$stocknumber}',
-									this.value,
-									(Number('{$quantity}') < Number(this.value) ? Number('{$quantity}') : false)
-								);
-								
-								const row = this.closest('tr');
-								const hiddenQty = row.querySelector('.hiddenCartQty'); 
-								hiddenQty.innerText = this.value;
-							}
-						).call(this)\"
-      				/>
-				</td>
-                <td class = 'inventory-stock'>$quantity</td>
-				<td class='d-none d-md-table-cell'>
-					<button type = 'button' class='btn btn-primary' onclick=\"removeInventoryStock(this, '{$stocknumber}', '{$quantity}')\"> Remove Stock </button>
-				</td>
-				<td class='d-none'><div style = 'font-size: 18px;'>$type: <BR><span style = 'font-weight: bold;'>$description</span></div></td>
-				<td class='d-none'><div style = 'font-size: 18px;'>Cart Quantity: <span style = 'font-weight: bold;' class = 'hiddenCartQty'>$cartQuantity</span><br>Location: <span style = 'font-weight: bold;'>$location</span><br>In-Stock: <span class = 'hidden-inventory-stock'>$quantity</span></div></td>
-            </tr>";
+    foreach ($cart->getContents() as ['quantity' => $quantity, 'part' => $p]) {
+		if ($quantity > 0 && $p->getArchive() == 0){
+			$studentPrice = $p->getMarketPrice() ?: getStudentPrice($p->getLastPrice());
+			$totalPrice += $studentPrice * $quantity;
+			$totalCount += $quantity;
 		}
 	}
-        
-    $tableHTML.= "</tbody>
-		</table>
-    ";  
 } 
 
 //Add to cart logic:
@@ -312,48 +239,6 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 </div>
 
 <script type='text/javascript'>
-
-function removeInventoryStock(button, stocknumber){
-	
-	const row = button.closest("tr");
-	const stockData = row.querySelector(".inventory-stock"); 
-	const quantity = Number(stockData.innerText);
-	
-	const cartQtyInput = row.querySelector(".cart-quantity-input"); 
-	let removeQty = Number(cartQtyInput.value);
-
-	if(removeQty > quantity){
-		removeQty = quantity
-	}
-
-	updateInventoryQuantityByAmount(stocknumber, -removeQty);
-
-	const newInventoryQty = Number(quantity) - Number(removeQty);	
-	//Redundant if window reloads, but  one in 5 refreshes dont actually
-	//refresh the page (chrome caching issue)
-	stockData.innerText = newInventoryQty;
-						
-	const hiddenStockData = row.querySelector(".hidden-inventory-stock");
-	hiddenStockData.innerText = newInventoryQty;
-	
-}
-
-//updateInventoryQuantityByAmount()
-function updateInventoryQuantityByAmount(id, amount){
-	
-	
-	let content = {
-		action: 'updateInventoryQuantityByAmount',
-		stockNumber: id,
-		amount: amount
-	}
-	
-	api.post('/inventory.php', content).then(res => {
-		snackbar(res.message, 'info');
-	}).catch(err => {
-		snackbar(err.message, 'error');
-	});
-}
 
 function setTotals(cartID){
 	let data = {
@@ -483,108 +368,20 @@ function addToCart(cartID, partID, quantity = 1) {
 	});
 }
 
-var printButtonExtension = {
-	text: 'Print Cart',
-	exportOptions: {
-		columns: [6, 7],
-		modifier: {
-            search: 'applied', // only export filtered rows
-            order: 'applied'   // respect current sort order
-        },
-        format: {
-            body: function ( data, row, column, node ) {
-                //check if type is input using jquery
-                return node.firstChild.tagName === "INPUT" ?
-                        node.firstElementChild.value :
-                        data;
-
-            }
-        }
-    }
-};
-const printThickness = 4; // Thickness in in
-const margin = 0.25; // Margin in in
-$('#InventoryTable').DataTable({
-		'dom': ((window.innerWidth < 768) ? 't' : 'Bft'),
-		buttons: [
-			$.extend(true, {}, printButtonExtension, {
-				extend: 'print',
-				action: function (e, dt, button, config) {
-					
-					// Custom logic before the print action
-					dt.rows().invalidate('dom').draw(); 
-					// Ensure data is up to date the hidden qty row was updated so this needs to be refreshed)
-
-					
-					// Call the default print action
-					$.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
-					
-				},
-				customize: function (win) {
-					// Remove the automatically added <h1> title
-					$(win.document.body).find('h1').remove();
-
-					// Add heading with cart code and date, aligned with table
-					var urlParams = new URLSearchParams(window.location.search);
-					var cartCode = urlParams.get('cartID') || '';
-					var today = new Date();
-					var dateString = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-					var timeString = String(today.getHours()).padStart(2, '0') + ':' + String(today.getMinutes()).padStart(2, '0');
-					var headingHtml = '<div style="font-size:16pt; font-weight:bold; margin-top:'+margin+'in; width:'+printThickness+'in; margin-left:'+margin+'in; margin-right:'+margin+'in; text-align:center;">Cart Code: ' + cartCode + ' &nbsp; | &nbsp; ' + dateString + ' ' + timeString + '</div>';
-					$(win.document.body).prepend(headingHtml);
-
-					// Set column widths
-					$(win.document.body).find('table tr td.item-print-col, table tr th.item-print-col')
-						.css('width', printThickness*0.6+'in');
-					$(win.document.body).find('table tr td.info-print-col, table tr th.info-print-col')
-						.css('width', printThickness*0.4+'in');
-
-					// Force table to 4in wide, centered
-					$(win.document.body).find('table')
-						.css('table-layout', 'fixed !important')
-						.css('width', printThickness+'in')
-						.css('margin', '0 '+margin+'in '+margin+'in '+margin+'in');
-
-					//shrink text to fit
-					$(win.document.body).find('table td, table th')
-						.css('white-space', 'pre-wrap')
-						.css('word-wrap', 'break-word');
-					
-					
-
-					// Inject CSS for print width (unused)
-					var style = `
-						<style>
-						
-						body {
-
-						}
-						table {
-                            
-						}
-						</style>
-					`;
-
-					$(win.document.head).append(style);
-				}
-			})
-		],
-		"autoWidth": true,
-		'scrollX':false, 
-		'paging':false, 
-		'order':[[1, 'asc']],
-		"columns": [
+	<?= createReceiptDatatable(
+		'Cart Code',
+		'[
 			null,
 			null,
 			null,
-			{ "orderable": false },
+			{ orderable: false },
 			null,
-			{ "orderable": false },
-			{ className: 'item-print-col' },
-			{ className: 'info-print-col' }
-		  ]
-		});
-
+			{ orderable: false },
+			{ className: "item-print-col" },
+			{ className: "info-print-col" }
+		]',
+		'[6, 7]'
+	) ?>
 </script>
 
 <?php 
