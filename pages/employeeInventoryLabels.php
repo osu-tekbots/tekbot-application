@@ -191,9 +191,7 @@ $formHTML .= "</tbody>
             <?php 
 				echo $locationsHTML;
 				
-				echo $formHTML;   
-				echo $labelsHTML;
-				
+				echo $formHTML;
             ?>                
 			</div>
         </div>
