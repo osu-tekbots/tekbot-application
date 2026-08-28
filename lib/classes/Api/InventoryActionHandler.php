@@ -725,24 +725,7 @@ class InventoryActionHandler extends ActionHandler {
 
         // Ensure the required parameters exist
         $this->requireParam('cartID');
-        /*
-        Problem?
-        Old way of adding to cart object, doesnt update quantities/values in real time 
-        as this new cart isnt asigned to the session
-
-        $cart = $this -> inventoryDao -> getCartByID($this->requestBody['cartID']);
-        */ 
-        $this -> logger->info('Session var ' . isset($_SESSION['cart']));
-
-        if(isset($_SESSION['cart'])) {
-            if($_SESSION['cart'] != ''  && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
-                $cart = $_SESSION['cart'];
-            } else {
-                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-            }
-        } else {
-            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-        }
+        $cart = $this->getCart();
 
         $this->requireParam('partID');
         $part = $this->inventoryDao->getPartByStocknumber($this->requestBody['partID']);
@@ -767,16 +750,7 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('partID');
         $this->requireParam('qty');
         
-        if(isset($_SESSION['cart'])) {
-            if($_SESSION['cart'] != ''  && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
-                $cart = $_SESSION['cart'];
-                
-            } else {
-                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-            }
-        } else {
-            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-        }
+        $cart = $this->getCart();
         /* This is a backend check to prevent locked carts from being edited
         Everythings done in the front end, but this is just a backup
         might want to change later
@@ -806,15 +780,7 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('cartID');
         $this ->requireParam('cartEditableStatus');
         
-        if(isset($_SESSION['cart'])) {
-            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
-                $cart = $_SESSION['cart'];
-            } else {
-                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-            }
-        } else {
-            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-        }
+        $cart = $this->getCart();
 
         $ok = $this->inventoryDao->changeCartEditableStatus($cart, $this->requestBody['cartEditableStatus']);
 
@@ -831,15 +797,7 @@ class InventoryActionHandler extends ActionHandler {
         $this->requireParam('cartID');
         $this ->requireParam('cartPermanenceStatus');
         
-        if(isset($_SESSION['cart'])) {
-            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
-                $cart = $_SESSION['cart'];
-            } else {
-                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-            }
-        } else {
-            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-        }
+        $cart = $this->getCart();
 
         $ok = $this->inventoryDao->changeCartPermanence($cart, $this->requestBody['cartPermanenceStatus']);
 
@@ -862,15 +820,7 @@ class InventoryActionHandler extends ActionHandler {
         // Ensure the required parameters exist
         $this->requireParam('cartID');
         
-        if(isset($_SESSION['cart'])) {
-            if($_SESSION['cart'] != '' && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']) {
-                $cart = $_SESSION['cart'];
-            } else {
-                $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-            }
-        } else {
-            $cart = $this->inventoryDao->getCartByID($this->requestBody['cartID']);
-        }
+        $cart = $this->getCart();
 
         $totals = $this->inventoryDao->getCartTotals($cart);
 
@@ -1065,4 +1015,16 @@ class InventoryActionHandler extends ActionHandler {
         }
     }
 
+
+    protected function getCart() {
+        if(
+            isset($_SESSION['cart'])
+            && $_SESSION['cart'] != ''
+            && $_SESSION['cart'] -> getIdKey() == $this->requestBody['cartID']
+        ) {
+            return $_SESSION['cart'];
+        }
+
+        return $this->inventoryDao->getCartByID($this->requestBody['cartID']);
+    }
 }

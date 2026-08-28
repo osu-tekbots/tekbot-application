@@ -35,6 +35,7 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
+include_once PUBLIC_FILES . '/lib/cookies.php';
 
 
 if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
@@ -44,19 +45,8 @@ if (isset($_REQUEST['stocknumber']) && $_REQUEST['stocknumber'] != ''){
 allowIf($stocknumber, $configManager->getBaseUrl() . 'pages/index.php');
 
 $inventoryDao = new InventoryDao($dbConn, $logger);
-//Cart feature cookie and id storage:
-if (!isset($_SESSION['cart']) || ($_SESSION['cart'] === false)) {
-	if (isset($_COOKIE['cartId'])) {
-		$_SESSION['cart'] = $inventoryDao -> getCartByID($_COOKIE['cartId']); // Sync cookie to session
-		$inventoryDao -> refreshCartInDatabase($_SESSION['cart']); 
-		// Refresh the cart's date last accessed in the database
-	} else {
-		//create a new cart obj and get it     
-		$_SESSION['cart'] = $inventoryDao -> createCartInDatabase();
-		//Store in cookie (30 days)
-		setcookie('cartId', $_SESSION['cart'] -> getIdKey(), time() + (86400 * 30), "/");
-	}
-}
+
+refreshCartSession($inventoryDao);
 $cart = $_SESSION['cart'];
 
 

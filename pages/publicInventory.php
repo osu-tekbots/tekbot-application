@@ -13,25 +13,6 @@ if (PHP_SESSION_ACTIVE != session_status()) {
 // Make sure the user is logged in and allowed to be on this page
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
 
-$inventoryDao = new InventoryDao($dbConn, $logger);
-$parts = $inventoryDao->getInventory();
-
-//Cart feature cookie and id storage:
-
-if (!isset($_SESSION['cart']) || ($_SESSION['cart'] === false)) {
-	if (isset($_COOKIE['cartId'])) {
-		$_SESSION['cart'] = $inventoryDao -> getCartByID($_COOKIE['cartId']); // Sync cookie to session
-		$inventoryDao -> refreshCartInDatabase($_SESSION['cart']); 
-		// Refresh the cart's date last accessed in the database
-	} else {
-		//create a new cart obj and get it     
-		$_SESSION['cart'] = $inventoryDao -> createCartInDatabase();
-		//Store in cookie (30 days)
-		setcookie('cartId', $_SESSION['cart'] -> getIdKey(), time() + (86400 * 30), "/");
-	}
-}
-$cart = $_SESSION['cart'];
-
 $title = 'Public Inventory List';
 $css = array(
 	'assets/css/sb-admin.css',
@@ -44,6 +25,13 @@ $js = array(
 
 include_once PUBLIC_FILES . '/modules/header.php';
 include_once PUBLIC_FILES . '/modules/inventoryFunctions.php';
+include_once PUBLIC_FILES . '/lib/cookies.php';
+
+$inventoryDao = new InventoryDao($dbConn, $logger);
+$parts = $inventoryDao->getInventory();
+
+refreshCartSession($inventoryDao);
+$cart = $_SESSION['cart'];
 
 ?>
 

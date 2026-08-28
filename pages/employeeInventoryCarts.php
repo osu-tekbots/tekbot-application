@@ -74,11 +74,10 @@ if (isset($_GET['id'])) {
 		}
 	}
 } else if(isset($_SESSION['cart'])) {
-	$cart = $_SESSION['cart'];
-
 	echo "<script>
-        window.location.href = './employeeInventoryCarts.php?id=" . urlencode($cart -> getIdKey()) . "';
+        window.location.href = './employeeInventoryCarts.php?id=" . urlencode($_SESSION['cart']->getIdKey()) . "';
     </script>";
+	die();
 }
 //Cart status HTML, part of the cart input
 $cartControlHTML .= "
