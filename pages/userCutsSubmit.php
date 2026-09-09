@@ -213,6 +213,9 @@ include_once PUBLIC_FILES . '/modules/submissionPage.php';
 			let employeeNotes = '';
 			if (selectedPayment == 'account') {
 				accountVal = $("#accountInput").val();
+				
+				if ($("#activityInput").val())
+					accountVal += '-' + $("#activityInput").val();
 			}
 
 			let filePath = $('#uploadFileInput').val();

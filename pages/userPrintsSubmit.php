@@ -283,7 +283,9 @@ $printTypeIdGetter = function ($printType) {
 			// let employeeNotes = '';
 			if (selectedPayment == 'account') {
 				accountVal = $("#accountInput").val();
-			// 	employeeNotes = 'Account code: ' + $("#accountInput").val(); // Won't need after this update
+				
+				if ($("#activityInput").val())
+					accountVal += '-' + $("#activityInput").val();
 			}
 
 			let filePath = $('#uploadFileInput').val();

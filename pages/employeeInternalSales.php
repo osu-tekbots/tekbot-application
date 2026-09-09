@@ -54,42 +54,71 @@ $sales = $internalSalesDao->getSales();
     <div class="admin-content" id="content-wrapper">
         <div class="container-fluid">
 			<!-- Form for data entry -->
-			<?php 
-			echo "
-				<div class='admin-paper w-35 p-10 h-25 d-inline-block'>
-				<h3>New Transaction: </h3> 
-							<input type='hidden' value='add' name='action'>
-							Buyer:<input type='text' class='row mb-3 ml-5 mr-5' id='addbuyer' name='buyer' required placeholder='Enter Buyer Name' size='40'>
-							Buyer Email: <input type='email' class='row mb-3 ml-5' id='addemail' name='email' size='40' required placeholder='Enter a valid email address'>
-							Account Number: <input type='text' class='row mb-3 ml-5' id='addaccount' name='account' size='12' required placeholder='XXXXX-XXXX' oninput='this.value = this.value.toUpperCase();'><p>If purchasing for ENGR201 or ENGR202 use the account code: ESE025</p>
-							Amount: $<input size='7' type='text'  class='row mb-3 ml-5' id='addamount' name='amount' required pattern='\d+(\.\d{2})?' placeholder='X.XX'>
-							Description of Purchased Items:<BR><textarea id='adddescription' class='row mb-3 ml-5' name='description' ROWS='6' COLS='40' required placeholder='Please be detailed in your description.'></textarea>
-							Seller: <input type='text' id='addseller' class='row ml-5' name='seller' required placeholder='Enter Your (Seller) Name' size='40'>
-							<button id='addSale' class='btn btn-primary btn-lg row mt-3 ml-5'onclick='addSale();'>Add</button>
+			<div class="admin-paper col-lg-5">
+				<h3>New Transaction:</h3>
+				<input type="hidden" value="add" name="action">
+				<div class="form-group">
+					<label>Buyer</label>
+					<input class="form-control" type="text" id="addbuyer" name="buyer" required placeholder="Enter Buyer Name" size="40">
 				</div>
-			";
-			echo "
-			<div class='admin-paper' style='overflow-x: scroll'>
-				<h3>Transactions:</h3><button id='billAllInternalSales' class= 'btn btn-primary btn-lg float-right mb-2' onclick='billAllInternalSales();'>Bill All</button>
-					<table class='table' id='internalSales'>
-						<thead>
-							<tr>
-								<th>Id</th>
-								<th>Date</th>
-								<th>Email</th>
-								<th>Account</th>
-								<th>Amount</th>
-								<th>Buyer</th>
-								<th>Seller</th>
-								<th>Description</th>
-								<th>Bill Date</th>
-								<th>Delete</th>
-							</tr>
-						</thead>
-						<tbody>
-			</div>	
-			";
+				<div class="form-group">
+					<label>Buyer Email</label>
+					<input class="form-control" type="email" id="addemail" name="email" size="40" required placeholder="Enter a valid email address">
+				</div>
+				<div class="row">
+					<div class="col-6">
+						<div class="form-group mb-0">
+							<label>Workday ID</label>
+							<input class="form-control" type="text" id="addaccount" name="account" size="12" required placeholder="XXXXX" oninput="this.value = this.value.toUpperCase();">
+						</div>
+					</div>
+					<div class="col-6">
+						<div class="form-group mb-0">
+							<label>Activity ID</label>
+							<input class="form-control" type="text" id="addactivity" name="account" size="12" required placeholder="XXXXX" oninput="this.value = this.value.toUpperCase();">
+						</div>
+					</div>
+				</div>
+				<small class="text-muted">If purchasing for ENGR201 or ENGR202, use the account code <code>ESE025</code>.</small>
+				
+				<div class="form-group">
+					<label>Amount</label>
+					<div class="input-group">
+						<div class="input-group-prepend"><div class="input-group-text">$</div></div>
+						<input class="form-control" size="7" type="text"  id="addamount" name="amount" required pattern="\d+(\.\d{2})?" placeholder="X.XX">
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Description of Purchased Items</label>
+					<textarea class="form-control" id="adddescription" name="description" ROWS="6" COLS="40" required placeholder="Please be detailed in your description."></textarea>
+				</div>
+				<div class="form-group">
+					<label>Seller</label>
+					<input class="form-control" type="text" id="addseller" name="seller" required placeholder="Enter Your (Seller) Name" size="40">
+				</div>
+				<button id="addSale" class="btn btn-primary btn-lg"onclick="addSale();">Add</button>
+			</div>
+			<div class="admin-paper" style="overflow-x: scroll">
+				<h3>Transactions:</h3>
+				<button id="billAllInternalSales" class="btn btn-primary btn-lg float-right mb-2" onclick="billAllInternalSales();">Bill All</button>
+				<table class="table" id="internalSales">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Date</th>
+							<th>Email</th>
+							<th>Account</th>
+							<th>Amount</th>
+							<th>Buyer</th>
+							<th>Seller</th>
+							<th>Description</th>
+							<th>Bill Date</th>
+							<th>Delete</th>
+						</tr>
+					</thead>
+					<tbody>
 			
+			<?php
 			/********************************
 			This creates the transaction table 
 			for each piece of transaction information 
@@ -139,6 +168,9 @@ $sales = $internalSalesDao->getSales();
 					let amount =  $('#addamount').val().trim();
 					let seller =  $('#addseller').val().trim();
 					let description =  $('#adddescription').val().trim();
+					if ($('#addactivity').val().trim())
+						account += '-' + $('#addactivity').val().trim();
+
 					let data = {
 						buyer: buyer,
 						email: email,

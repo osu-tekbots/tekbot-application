@@ -48,8 +48,10 @@ function renderPaymentForm()
 			</div>
 			<div class="form-check">
 				<input class="form-check-input" id="accountRadio" type="radio" name="accounttype" value="account">
-				OSU Account Code:
+				Workday ID:
 				<input class="fi" id="accountInput" type="text" size=30 name="account" value="">
+				Activity ID:
+				<input class="fi" id="activityInput" type="text" size=30 name="activity" value="">
 			</div>
 			<div class="form-check">
 				<input id="paymentradio1" class="form-check-input" type="radio" name="accounttype" value="cc">
@@ -68,6 +70,10 @@ HTML;
 	});
 
 	$('#accountInput').focus(function() {
+		$('#accountRadio').prop("checked", true);
+	});
+
+	$('#activityInput').focus(function() {
 		$('#accountRadio').prop("checked", true);
 	});
 
