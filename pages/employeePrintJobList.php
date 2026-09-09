@@ -159,7 +159,7 @@ $printJobs = $printerDao->getPrintJobs();
 
                     
                     $printJobsHTML .= "
-                    <tr>
+                    <tr id='print$printJobID'>
 
                     <td>
                         <a href='#' onclick='toggleEmailField(\"$printJobID\"); return false;'>$name</a><BR>
@@ -429,7 +429,7 @@ $printJobs = $printerDao->getPrintJobs();
                     }
                     api.post('/printers.php', data).then(res => {
                         snackbar(res.message, 'success');
-                        setTimeout(function(){window.location.reload()}, 1000);
+                        document.getElementById(`print${printJobID}`).remove();
                     }).catch(err => {
                         snackbar(err.message, 'error');
                     });

@@ -155,7 +155,7 @@ $printJobs = $laserDao->getLaserJobs();
 
                     
                     $jobsHTML .= "
-                    <tr>
+                    <tr id='cut$laserJobID'>
 
                     <td>
                         <a href='#' onclick='toggleEmailField(\"$laserJobID\"); return false;'>$name</a><BR>
@@ -425,7 +425,7 @@ $printJobs = $laserDao->getLaserJobs();
                     }
                     api.post('/lasers.php', data).then(res => {
                         snackbar(res.message, 'success');
-                        setTimeout(function(){window.location.reload()}, 1000);
+                        document.getElementById(`cut${laserJobID}`).remove();
                     }).catch(err => {
                         snackbar(err.message, 'error');
                     });
