@@ -121,7 +121,8 @@ class EquipmentUnitDao {
                 'date_updated' => QueryUtils::formatDate($unit->getDateUpdated())
             ];
 
-            $unitID = $this->conn->execute($sql, $params, true);
+            $this->conn->execute($sql, $params);
+            $unitID = $this->conn->lastInsertId();
 
             // NOTE: health status (eho_id) `1` means "Fully Functional"
             $sql = 'INSERT INTO equipment_health_log (ehl_eu_id, ehl_eho_id)

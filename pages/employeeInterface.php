@@ -17,6 +17,7 @@ if (PHP_SESSION_ACTIVE != session_status())
 	session_start();
 
 include_once PUBLIC_FILES . '/lib/shared/authorize.php';
+include_once PUBLIC_FILES . '/lib/cronjobs.php';
 
 allowIf(verifyPermissions('employee', $logger));
 
@@ -28,45 +29,6 @@ $ticketDao = new TicketDao($dbConn, $logger);
 $taskDao = new TaskDao($dbConn, $logger);
 $configurationDao = new ConfigurationDao($dbConn, $logger);
 
-/**
- * Uses the ConfigurationDao to check when the last cron emails were sent, & if it's time to send more
- * 
- * @param Model\Configuration $configuration  The config object from the DB
- * 
- * @return bool If emails still need to be sent today
- */
-function checkDaysSinceCronEmails($configuration, $configManager) {
-	$today = new DateTime("today"); // Creates DateTime with date set to midnight
-	$lastSent = new DateTime($configuration->getLastCronEmailTime() ?? '0-0-0 0:0:0');
-	$lastSent->setTime(0, 0, 0); // Set time part to midnight for accurate comparison
-
-	$daysSinceLastSent = (int) $lastSent->diff($today)->format("%R%a");
-
-	return $daysSinceLastSent < (int)$configManager->get('email.cron_frequency');
-}
-
-/**
- * Sends automatic reminder emails if they haven't been sent yet today
- * 
- * @return int|bool How many reminder emails were sent or false if emails were already sent today
- */
-function sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $logger) {
-	$configuration = $configurationDao->getConfiguration();
-
-	// Don't do anything if emails were already sent today
-	if(checkDaysSinceCronEmails($configuration, $configManager)) {
-		return false;
-	}
-
-	// Including the cronjob script will make it execute, sending the needed emails
-	include 'equipmentCronjob.php';
-
-	// Update last email sent time
-	$configuration->setLastCronEmailTime(new DateTime());
-	$configurationDao->updateConfiguration($configuration);
-	
-	return $emailsSent;
-}
 
 $remainingKitCount = $kitcheckoutDao->getRemainingKitsCountForAdmin();
 $tasks = $taskDao->getAllIncompleteTasks();
@@ -74,7 +36,8 @@ $equipmentReservationCount = $equipmentCheckoutDao->getReservationCountForEmploy
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
 $laserJobs = $laserJobsDao->getLaserJobsRequiringAction();
 $tickets = $ticketDao->getTicketsByStatus(0);
-$cronEmails = sendCronEmailsIfNeeded($configurationDao, $configManager, $dbConn, $logger);
+$cronEmails = sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, $messageDao, $userDao, $configManager, $mailer);
+$cronCarts = purgeOldCartsIfNeeded($configurationDao, $inventoryDao, $configManager);
 //added getOpenTicket @param 0 = unresolved status
 
 $dashboardText = "";
@@ -173,70 +136,67 @@ include_once PUBLIC_FILES . '/modules/employee.php';
 
 
 <div id="page-top">
-
 	<div id="wrapper">
-
-		<?php
-			renderEmployeeSidebar();
-		?>
+		<?php renderEmployeeSidebar(); ?>
 
 		<div id="content-wrapper">
-
 			<div class="container-fluid">
-			<div class="row">
-				<div class="col">
-					<a class="btn btn-danger" href="https://wd501.myworkday.com/oregonstate" target="_blank">Go To My Timeclock</a>
+				<div class="row">
+					<div class="col">
+						<a class="btn btn-danger" href="https://wd501.myworkday.com/oregonstate" target="_blank">Go To My Timeclock</a>
+					</div>
 				</div>
-			</div>
 
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
-				<h2>Automated To-Do List</h2>
-				<?php 
-					echo (($dashboardText != "") ? "<ul>".$dashboardText."</ul>" : "Nothing curently on the to-do list.");
-				?>
-			</div></div>
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
-				<h2>Assigned Tasks</h2>
-				<?php 
-					echo ($tasksText);
-				?>
-			</div></div>
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
-				<h2>Automatic Updates Status</h2>
-				<?php 
-					echo $cronEmails > 0 ? 
-						"Sent $cronEmails automatic email".($cronEmails > 1 ? "s" : "")." for today's reminders." 
-						: ($cronEmails === false ? 
-							"Automatic reminder emails were already sent recently." 
-							: "No automatic reminder emails to send today.");
-				?>
-			</div></div>
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
-				<div class='col-lg-4'><h2>Completed Tasks</h2></div>
-				<div class='col-lg form-inline justify-content-end'>
-					<label for='completedStartDate' class='mr-2'>Start Date</label>
-					<input id='completedStartDate' type='date' value='<?= $_REQUEST['start'] ?? null ?>' class='form-control'>
-					
-					<span class='ml-4'></span>
-					<label for='completedEndDate' class='mr-2'>End Date</label>
-					<input id='completedEndDate' type='date' value='<?= $_REQUEST['end'] ?? null ?>' class='form-control'>
-					
-					<span class='ml-5'></span>
-					<button onclick='setDates();' class='btn btn-outline-primary'>Filter</button>
+				<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
+					<h2>Automated To-Do List</h2>
+					<?php 
+						echo (($dashboardText != "") ? "<ul>".$dashboardText."</ul>" : "Nothing curently on the to-do list.");
+					?>
+				</div></div>
+				<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
+					<h2>Assigned Tasks</h2>
+					<?php 
+						echo ($tasksText);
+					?>
+				</div></div>
+				<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'><div class='col'>
+					<h2>Automatic Updates Status</h2>
+					<?php 
+						echo $cronEmails > 0 ? 
+							"Sent $cronEmails automatic email".($cronEmails > 1 ? "s" : "")." for today's reminders." 
+							: ($cronEmails === false ? 
+								"Automatic reminder emails were already sent recently." 
+								: "No automatic reminder emails to send today.");
+
+						echo ' ';
+
+						echo $cronCarts > 0
+							? "Purged $cronCarts old cart".($cronCarts > 1 ? 's' : '').' today.'
+							: ($cronCarts === false
+								? 'Old carts were already purged recently.'
+								: 'No old carts to purge today.'
+							);
+					?>
+				</div></div>
+				<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
+					<div class='col-lg-4'><h2>Completed Tasks</h2></div>
+					<div class='col-lg form-inline justify-content-end'>
+						<label for='completedStartDate' class='mr-2'>Start Date</label>
+						<input id='completedStartDate' type='date' value='<?= $_REQUEST['start'] ?? null ?>' class='form-control'>
+						
+						<span class='ml-4'></span>
+						<label for='completedEndDate' class='mr-2'>End Date</label>
+						<input id='completedEndDate' type='date' value='<?= $_REQUEST['end'] ?? null ?>' class='form-control'>
+						
+						<span class='ml-5'></span>
+						<button onclick='setDates();' class='btn btn-outline-primary'>Filter</button>
+					</div>
 				</div>
-			</div>
-			<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
-				<div class='col'>
-					<?php echo ($tasksCompletedText); ?>
+				<div class='row' style='margin-left:2em;margin-right:2em; margin-top: 1em;'>
+					<div class='col'>
+						<?php echo ($tasksCompletedText); ?>
+					</div>
 				</div>
-			</div>
-			<BR><BR>
-			<!-- <div class='row' style='margin-left:2em;margin-right:2em;'><div class='col-6'><h2>Special Links</h2>
-				<a href='https://docs.google.com/spreadsheets/d/1GnwYpOxxhOTz1xppm4-5vOdpuhsF5Rh4GB75oPCFSP4/edit#gid=436106946' target='_blank'>ECE272 Spring 2021 Kits to be shipped</a><BR>
-				For any of the kits above, step 1 is to verify the student is enrolled by checking their ID number. If they are enrolled, be sure to mark them as handed out on the kit handout form and highlight the row in the spreadsheet when completed. Each package needs to be labeled with recipient address. Printed is preferred, but neatly hand written is fine.<BR>
-				<BR><a href='https://docs.google.com/document/d/1iE-7fJOXA23DS68VmAgGwSxUjpfvsF8-KHcBa3PDg44/edit' target='_blank'>Shipping Contents Document</a><BR>This document needs to be updated with the correct contents and shipping information for each item to be shipped if it is going international. It needs to then be printed out and taped (blue tape) to the package to be sent. Print a second copy and file it in TekBots.<BR>
-			</div></div> -->
-			
 			</div>
 		</div>
 	</div>
@@ -336,7 +296,4 @@ function setDates() {
 
 </script>
 
-<?php 
-include_once PUBLIC_FILES . '/modules/footer.php' ; 
-?>
-
+<?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>

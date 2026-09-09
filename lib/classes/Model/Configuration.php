@@ -13,6 +13,8 @@ class Configuration {
 	private $id;
 	/** @var string */
 	private $lastCronEmailTime;
+	/** @var string */
+	private $lastCartPurgeTime;
 		
     /**
      * Creates a new instance of the configuration.
@@ -45,6 +47,18 @@ class Configuration {
             $this->lastCronEmailTime = $data;
         else if(is_a($data, 'DateTime'))
             $this->lastCronEmailTime = QueryUtils::FormatDate($data);
+	}
+
+    public function getLastCartPurgeTime(){
+        return $this->lastCartPurgeTime;
+    }
+
+	public function setLastCartPurgeTime($data){
+
+        if(gettype($data) == 'string')
+            $this->lastCartPurgeTime = $data;
+        else if(is_a($data, 'DateTime'))
+            $this->lastCartPurgeTime = QueryUtils::FormatDate($data);
 	}
 }
 ?>

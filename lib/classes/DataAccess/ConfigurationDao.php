@@ -34,7 +34,7 @@ class ConfigurationDao {
     public function getConfiguration() {
         try {
             $sql = '
-            SELECT MAX(id), `last_cron_email`
+            SELECT MAX(id) AS `id`, `last_cron_email`, `last_cart_purge`
 			FROM `configuration`
 			';
             $results = $this->conn->query($sql);
@@ -58,12 +58,14 @@ class ConfigurationDao {
         try {
             $sql = '
             UPDATE configuration SET
-                last_cron_email = :last_cron_email
+                last_cron_email = :last_cron_email,
+                last_cart_purge = :last_cart_purge
             WHERE id = :id
             ';
             $params = array(
 				':id' => $configuration->getId(),
-                ':last_cron_email' => $configuration->getLastCronEmailTime()
+                ':last_cron_email' => $configuration->getLastCronEmailTime(),
+                ':last_cart_purge' => $configuration->getLastCartPurgeTime(),
             );
             $this->conn->execute($sql, $params);
 			
@@ -84,11 +86,16 @@ class ConfigurationDao {
     public function overwriteConfiguration($configuration) {
         try {
             $sql = '
-            INSERT INTO configuration 
-			(last_cron_email) VALUES
-			(:last_cron_email)
+            INSERT INTO configuration (last_cron_email, last_cart_purge)
+            VALUES (
+                :last_cron_email,
+                :last_cart_purge
+            )
 			';
-            $params = array(':last_cron_email' => $configuration->getLastCronEmailTime());
+            $params = array(
+                ':last_cron_email' => $configuration->getLastCronEmailTime(),
+                ':last_cart_purge' => $configuration->getLastCartPurgeTime(),
+            );
             $results = $this->conn->execute($sql, $params);
 
 			return true;
@@ -106,10 +113,11 @@ class ConfigurationDao {
      * @return \Model\Configuration
      */
     public static function ExtractConfigurationFromRow($row) {
-        $configuration = new Configuration($row['id'] ?? $row['MAX(id)']);
+        $configuration = new Configuration($row['id']);
 
 		if(isset($row['last_cron_email'])){
 			$configuration->setLastCronEmailTime($row['last_cron_email']);
+			$configuration->setLastCartPurgeTime($row['last_cart_purge']);
 		}
        
         return $configuration;

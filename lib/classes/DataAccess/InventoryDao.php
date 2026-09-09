@@ -905,6 +905,23 @@ class InventoryDao {
     }
 
     
+    /**
+     * Deletes non-permanent carts that haven't been touched for >90 days
+     */
+    public function deleteOldCarts() {
+        try {
+            $sql = 'DELETE FROM carts
+            WHERE NOT is_permanent AND last_accessed < NOW() - INTERVAL 90 DAY;
+            ';
+
+            return $this->conn->execute($sql, [], true);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete old carts: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    
     public function getCartTotals($cart) {
         $cartContents = $cart->getContents();
         $totals = array(

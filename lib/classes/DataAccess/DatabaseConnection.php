@@ -140,10 +140,12 @@ class DatabaseConnection {
      *
      * @param string $sql the SQL query to execute
      * @param mixed[] $params an array of the paramters to safely insert into the SQL query
+     * @param bool $returnAffected if `true`, returns the number of affected rows on success. Otherwise, returns
+     *                                `true` on success
      * @throws \Exception if there is no active database connection or an error occurs while executing the query
-     * @return void
+     * @return bool|int
      */
-    public function execute($sql, $params = array(), $returnID = false) {
+    public function execute($sql, $params = array(), $returnAffected = false) {
         if (!$this->conn) {
             throw new \Exception('Failed to execute statement: no connection to database established');
         }
@@ -152,10 +154,7 @@ class DatabaseConnection {
             $this->bind($prepared, $params);
             $prepared->execute();
 
-            if($returnID===false)
-                return true;
-            else
-                return $this->conn->lastInsertId();
+            return !$returnAffected ?: $prepared->rowCount();
 			
         } catch (\PDOException $e) {
             throw new \Exception('Failed to execute statement: ' . $e->getMessage());
