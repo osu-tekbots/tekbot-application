@@ -24,8 +24,6 @@ include_once PUBLIC_FILES . '/modules/header.php';
                          <a href="./pages/userCuts.php" target="_blank">Laser Cutting</a>
                          <span style="font-size:35px;">·</span>
                          <a href="./pages/publicInventory.php" target="_blank">Inventory</a>
-                         <span style="font-size:35px;">·</span>
-                         <a href="./pages/publicTekBotsAcademy.php">TekBots Academy</a>
                     </strong></h2>
                     <h2><strong>
                          <a href="https://secure.touchnet.net/C20159_ustores/web/classic/store_main.jsp?STOREID=8" target="_blank">Marketplace</a>
