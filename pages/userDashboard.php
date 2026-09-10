@@ -3,12 +3,10 @@ include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 use DataAccess\EquipmentCheckoutDao;
-use DataAccess\PrinterFeeDao;
 use DataAccess\PrinterDao;
 use DataAccess\LaserDao;
 use DataAccess\BoxDao;
 use DataAccess\KitEnrollmentDao;
-use Util\Security;
 
 if (PHP_SESSION_ACTIVE != session_status())
 	session_start();
@@ -40,6 +38,8 @@ $user = $usersDao->getUserByID($_SESSION['userID']);
 
 if ($user){
 	$uID = $_SESSION['userID'];
+	$uFirstName = $user->getFirstName();
+	$uLastName = $user->getLastName();
 	$uOnid = $user->getOnid();
 } else {
 	echo "<br><br><h1>You are not in the database. You should never have seen this.</h1>";
@@ -47,57 +47,12 @@ if ($user){
 	exit();
 }
 
-$userDao = new UsersDao($dbConn, $logger);
 $checkoutDao = new EquipmentCheckoutDao($dbConn, $logger);
-$printerFeeDao = new PrinterFeeDao($dbConn, $logger);
 $printerDao = new PrinterDao($dbConn, $logger);
 $laserDao = new LaserDao($dbConn, $logger);
 $boxDao = new BoxDao($dbConn, $logger);
 $kitsDao = new KitEnrollmentDao($dbConn, $logger);
 
-
-$printerFees = $printerFeeDao->getFeesForUser($uID);
-$studentPrintJobs = $printerDao->getPrintJobsForUser($uID);
-
-
-$feeHTML = '';
-foreach ($printerFees as $fee){
-	$feeID = $fee->getPrintFeeId();
-	$feeNotes = $fee->getCustomerNotes();
-	$feeAmount = $fee->getAmount();
-	$isPaid = $fee->getIsPaid();
-	$isPending = $fee->getIsPending();
-	$dateCreated = $fee->getDateCreated();
-	$dateUpdated = $fee->getDateUpdated();
-
-	// Print is verified and prints needs to be paid for
-	if ($fee->getIsVerified() == 1 && $fee->getIsPending() == 0) {
-		$actions = 'Pay button';
-	}
-	// Print is verified and payment is submitted
-	if ($fee->getIsVerified() == 1 && $fee->getIsPending() == 1) {
-		$actions = 'Pending Employee Verification';
-	}
-	// Print needs to be verified by employee before charging student
-	if ($fee->getIsVerified() == 0){
-		$actions = 'Pending Print Check';
-	}
-
-	if ($fee->getIsPaid() == 1){
-		$actions = 'PAID';
-	}
-
-
-	$feeHTML .= "
-    <tr>
-        <td>Related Print</td>
-        <td>$feeNotes</td>
-        <td>$feeAmount</td>
-        <td>$actions</td>
-    </tr>
-    ";
-
-}
 
 /*
 Laser Cuts Notice
@@ -106,11 +61,12 @@ $laserCutsHtml = '';
 $unconfirmedCuts = $laserDao->getUnconfirmedLaserJobsForUser($uID);
 $numUnconfirmedCuts = count($unconfirmedCuts);
 if ($numUnconfirmedCuts > 0) {
-	$laserCutsHtml = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-	<h5 class'card-title'>You have $numUnconfirmedCuts unconfirmed cut(s)!</h5>
-	<div class='card-body'>
-	<a href='./pages/userCuts.php'><span class='lead mb-0'>Laser Cuts Webpage →</span></a>
-	</div>
+	$laserCutsHtml = "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>$numUnconfirmedCuts laser cut".($numUnconfirmedCuts > 1 ? 's' : '')." waiting for confirmation</h5>
+			<a href='./pages/userCuts.php'>Laser Cuts Webpage →</a>
+		</div>
 	</div>";
 }
 
@@ -121,26 +77,30 @@ $printsHtml = '';
 $unconfirmedPrints = $printerDao->getUnconfirmedPrintJobsForUser($uID);
 $numUnconfirmedPrints = count($unconfirmedPrints);
 if ($numUnconfirmedPrints > 0) {
-	$laserCutsHtml = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-	<h5 class'card-title'>You have $numUnconfirmedPrints unconfirmed print(s)!</h5>
-	<div class='card-body'>
-	<a href='./pages/userPrints.php'><span class='lead mb-0'>3D Prints Webpage →</span></a>
-	</div>
+	$printsHtml = "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>$numUnconfirmedPrints 3D print".($numUnconfirmedPrints > 1 ? 's' : '')." waiting for confirmation</h5>
+			<a href='./pages/userPrints.php'>3D Prints Webpage →</a>
+		</div>
 	</div>";
 }
 
+// TODO: only show if locked
 /*
 TekBox Notice
 */
 $tekBoxHTML = '';
 $boxes = $boxDao->getBoxByUser($uID);
-if (count($boxes) > 0)
-$tekBoxHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-			<h5 class'card-title'>You have an item to pickup from a TekBox!</h5>
-			<div class='card-body'>
-			<a href='./pages/userTekbox.php'><span class='lead mb-0'>TekBox Webpage →</span></a>
-			</div>
-			</div>";
+if (count($boxes) > 0) {
+	$tekBoxHTML .= "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>Items waiting for contactless pickup</h5>
+			<a href='./pages/userTekbox.php'>TekBox Webpage →</a>
+		</div>
+	</div>";
+}
 			
 /*
 Kit Handout Notice
@@ -153,12 +113,13 @@ foreach ($tempkits AS $t)
 		$kits[] = $t;
 	
 if (sizeof($kits) > 0)
-	$kitsHTML .= "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-			<h5 class'card-title'>You have a kit to pickup from TekBots!</h5>
-			<div class='card-body'>
-			<a href='./pages/userKits.php'><span class='lead mb-0'>Kit Pickup Webpage →</span></a>
-			</div>
-			</div>";
+	$kitsHTML .= "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>Course kits ready to pick up from TekBots</h5>
+			<a href='./pages/userKits.php'>Kit Pickup Webpage →</a>
+		</div>
+	</div>";
 
 
 /*
@@ -167,25 +128,13 @@ Equipment Reservation Notice
 $reservedEquipmentCount = $checkoutDao->getReservationCountForUser($uID);
 $reservationHTML = '';
 if ($reservedEquipmentCount != 0)
-	$reservationHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-			<h5 class'card-title'>You have an active equipment reservation!</h5>
-			<div class='card-body'>
-			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
-			</div>
-			</div>";
-
-/*
-Late Equipment Notice
-*/
-$checkedOutEquipmentLateCount = $checkoutDao->getLateCheckoutCountForUser($uID);
-$lateEquipmentHTML = '';
-if ($checkedOutEquipmentLateCount != 0)
-	$lateEquipmentHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-			<h5 class'card-title'>You have equipment to be returned that is now late!</h5>
-			<div class='card-body'>
-			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
-			</div>
-			</div>";
+	$reservationHTML = "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>Equipment reserved for pickup</h5>
+			<a href='./pages/publicEquipmentList.php'>Borrowed Equipment Webpage →</a>
+		</div>
+	</div>";
 					
 /*
 Checked Out Equipment Notice
@@ -193,30 +142,64 @@ Checked Out Equipment Notice
 $checkedOutEquipmentCount = $checkoutDao->getCheckoutCountForUser($uID);
 $checkedOutHTML = '';
 if ($checkedOutEquipmentCount != 0)
-	$checkedOutHTML = "<div class='card col-3' style='padding-top:1em;padding-bottom:1em;margin:1em;'>
-			<h5 class'card-title'>You have equipment checked out.</h5>
-			<div class='card-body'>
-			<a href='./pages/publicEquipmentList.php'><span class='lead mb-0'>Borrowed Equipment Webpage →</span></a>
-			</div>
-			</div>";
+	$checkedOutHTML = "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'>Equipment checked out</h5>
+			<a href='./pages/publicEquipmentList.php'>Borrowed Equipment Webpage →</a>
+		</div>
+	</div>";
+
+/*
+Late Equipment Notice: override checkout notice
+*/
+$checkedOutEquipmentLateCount = $checkoutDao->getLateCheckoutCountForUser($uID);
+if ($checkedOutEquipmentLateCount != 0)
+	$checkedOutHTML = "
+	<div class='card'>
+		<div class='card-body'>
+			<h5 class'card-title'><span class='text-danger'>Overdue</span> equipment checked out</h5>
+			<a href='./pages/publicEquipmentList.php'>Borrowed Equipment Webpage →</a>
+		</div>
+	</div>";
 ?>
 
 <br><br>
-<a href="./pages/myProfile.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">User Information</button></a>
-<a href="./pages/userKits.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Course Kits</button></a>
-<a href="./pages/userPrints.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">3D Prints</button></a>
-<a href="./pages/publicInventory.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">TekBots Inventory</button></a>
-<a href="./pages/userCuts.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Laser Cuts</button></a>
-<a href="./pages/publicEquipmentList.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Equipment for Loan</button></a>
-<a href="./pages/userTekbox.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">TekBox Pickup System</button></a>
-<a href="./pages/publicTicketSubmit.php"><button class="btn btn-lg btn-outline-primary capstone-nav-btn" type="button">Lab Ticket Submission</button></a>
-<BR>
-<?php echo $laserCutsHtml;?>
-<?php echo $printsHtml;?>
-<?php echo $tekBoxHTML;?>
-<?php echo $kitsHTML;?>
-<?php echo $reservationHTML;?>
-<?php echo $lateEquipmentHTML;?>
-<?php echo $checkedOutHTML;?>
+
+<div class="container">
+	<h1 class="h3 mt-3">Welcome<?= $_SESSION['newUser'] ? '' : ' back' ?>, <?= $uFirstName ?>!</h1>
+
+	<div class="mt-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(max(14rem, calc(33% - 1rem)), 1fr)); gap: 1rem;">
+		<?= $laserCutsHtml ?>
+		<?= $printsHtml ?>
+		<?= $tekBoxHTML ?>
+		<?= $kitsHTML ?>
+		<?= $reservationHTML ?>
+		<?= $checkedOutHTML ?>
+	</div>
+
+
+	<div class="row mt-1 mb-4">
+		<div class="col-sm mt-3">
+			<h2 class="h5">Shop</h2>
+			<a class="d-block" style="width: fit-content;" href="./pages/publicCart.php">My Cart</a>
+			<a class="d-block" style="width: fit-content;" href="./pages/publicInventory.php">TekBots Inventory</a>
+			<a class="d-block" style="width: fit-content;" href="./pages/publicEquipmentList.php">Equipment for Loan</a>
+		</div>
+		<div class="col-sm mt-3">
+			<h2 class="h5">Fabrication</h2>
+			<a class="d-block" style="width: fit-content;" href="./pages/userPrints.php">3D Prints</a>
+			<a class="d-block" style="width: fit-content;" href="./pages/userCuts.php">Laser Cuts</a>
+		</div>
+		<div class="col-sm mt-3">
+			<h2 class="h5">Lab Rooms</h2>
+			<a class="d-block" style="width: fit-content;" href="./pages/publicTicketSubmit.php">Submit Ticket</a>
+		</div>
+		<div class="col-sm mt-3">
+			<h2 class="h5">Personal</h2>
+			<a class="d-block" style="width: fit-content;" href="./pages/myProfile.php">My Profile</a>
+		</div>
+	</div>
+</div>
 
 <?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>
