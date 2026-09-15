@@ -260,10 +260,10 @@ class TransactionDao {
             foreach ($transactionItems as $item) {
                 $sql = 'INSERT INTO `transaction_item` (
                     `ti_id`, `ti_t_id`, `ti_type`, `ti_name`, `ti_stocknumber`, `ti_price`,
-                    `ti_quantity`, `ti_quantity_refunded`, `ti_date_created`, `ti_date_updated`
+                    `ti_quantity`, `ti_date_created`, `ti_date_updated`
                 ) VALUES (
                     :id, :t_id, :type, :name, :stocknumber, :price, :quantity,
-                    :quantity_refunded, :date_created, :date_updated
+                    :date_created, :date_updated
                 );';
                 $params = [
                     'id' => $item->getItemID(),
@@ -273,7 +273,6 @@ class TransactionDao {
                     'stocknumber' => $item->getStocknumber(),
                     'price' => $item->getPrice(),
                     'quantity' => $item->getQuantity(),
-                    'quantity_refunded' => $item->getQuantityRefunded(),
                     'date_created' => QueryUtils::FormatDate($item->getDateCreated()),
                     'date_updated' => QueryUtils::FormatDate($item->getDateUpdated()),
                 ];
@@ -376,36 +375,6 @@ class TransactionDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to update transaction: ' . $e->getMessage());
-
-            return false;
-        }
-    }
-
-
-    /**
-     * Updates a transaction item's refund quantity in the database. Adds to the refund
-     * amount instead of overwriting it.
-     *
-     * @param string $id
-     * @param int $quantity
-     *
-     * @return boolean Whether updating the transaction item succeeded
-     */
-    public function refundItem($id, $quantity) {
-        try {
-            $sql = 'UPDATE `transaction_item`
-                SET ti_quantity_refunded = :quantity
-                WHERE ti_id = :id;
-            ';
-            $params = [
-                'quantity' => $quantity,
-                'id' => $id,
-            ];
-            $result = $this->conn->execute($sql, $params);
-
-            return true;
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to refund transaction item: ' . $e->getMessage());
 
             return false;
         }
@@ -530,7 +499,6 @@ class TransactionDao {
         $item->setStocknumber($row['ti_stocknumber']);
         $item->setPrice($row['ti_price']);
         $item->setQuantity($row['ti_quantity']);
-        $item->setQuantityRefunded($row['ti_quantity_refunded']);
         $item->setDateCreated(new \DateTime($row['ti_date_created']));
         $item->setDateUpdated(new \DateTime($row['ti_date_updated']));
         

@@ -139,7 +139,6 @@ function createTransactionReceiptTable($inventoryDao, $items) {
                 <th style="width:15%">Loc</th>
                 <th style="width:15%; display: none;" class="d-md-table-cell">Price</th>
                 <th style="width:10%">QTY</th>
-                <th style="width:10%; display: none;" class="d-md-table-cell">Refund</th>
                 <th style="width:15%">Stock</th>
                 <th style="width:10%; display: none;" class="d-md-table-cell">Reduce Stock</th>
                 <th class="d-none">Item</th>
@@ -154,7 +153,6 @@ function createTransactionReceiptTable($inventoryDao, $items) {
 
         $part = $inventoryDao->getPartByStocknumber($stocknumber) ?: null;
 
-        $quantity = $i->getQuantity() - $i->getQuantityRefunded();
         $table .= "<tr class='item'>
             <td>
                 <a
@@ -167,20 +165,11 @@ function createTransactionReceiptTable($inventoryDao, $items) {
             </td>
             <td>{$part?->getLocation()}</td>
             <td class='d-md-table-cell' style='display: none;'>$finalPriceStr</td>
-            <td class='current-quantity'>$quantity</td>
-            <td class='d-md-table-cell' style='display: none;'>
-                <input
-                    type='number'
-                    class='form-control item-refund-input'
-                    value='{$i->getQuantityRefunded()}'
-                    data-item-id='{$i->getItemID()}'
-                    min='{$i->getQuantityRefunded()}' max='{$i->getQuantity()}'
-                >
-            </td>
+            <td class='current-quantity'>{$i->getQuantity()}</td>
             <td class='inventory-stock'>{$part->getQuantity()}</td>
             <td class='d-md-table-cell' style='display: none;'>
                 <button
-                    ".($quantity ? '' : 'disabled')."
+                    ".($i->getQuantity() ? '' : 'disabled')."
                     class='btn btn-outline-primary'
                     type='button' onclick=\"removeInventoryStock(this, '{$stocknumber}')\"
                 >
@@ -191,7 +180,7 @@ function createTransactionReceiptTable($inventoryDao, $items) {
                 {$i->getType()}: <BR><b>{$i->getName()}</b>
             </td>
             <td class='d-none' style='font-size: 18px; white-space: normal !important;'>
-                Quantity: <b class='hiddenCartQty'>{$quantity}</b><br>Location: <span style='font-weight: bold;'>{$part->getLocation()}</span><br>In-Stock: <span class='hidden-inventory-stock'>{$part->getQuantity()}</span>
+                Quantity: <b class='hiddenCartQty'>{$i->getQuantity()}</b><br>Location: <span style='font-weight: bold;'>{$part->getLocation()}</span><br>In-Stock: <span class='hidden-inventory-stock'>{$part->getQuantity()}</span>
             </td>
         </tr>";
 	}

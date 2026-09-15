@@ -238,35 +238,6 @@ class TransactionActionHandler extends ActionHandler {
 
 
     /**
-     * Marks the given quantity of specified items as refunded for internal tracking.
-     * Does **NOT** handle anything on Touchnet's side since there is no refund API.
-     * 
-     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
-     *
-     * @return void
-     */
-    public function handleRefundItems() {
-        $this->verifyAccessLevel('employee');
-
-        $transactionId = $this->getFromBody('id');
-        $items = $this->getFromBody('items');
-
-        foreach ($items as $item) {
-            if (!isset($item['id']) || !isset($item['quantity'])) {
-                $this->respond(new Response(Response::BAD_REQUEST, 'Invalid items format'));
-            }
-
-            $ok = $this->transactionDao->refundItem($item['id'], $item['quantity']);
-            if (!$ok) {
-                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to update all refunded items'));
-            }
-        }
-
-        $this->respond(new Response(Response::OK, 'Updated refunded items'));
-    }
-
-
-    /**
      * Adds a new delivery method that users can select when paying
      * 
      * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
@@ -429,10 +400,6 @@ class TransactionActionHandler extends ActionHandler {
 
             case 'fulfillTransaction':
                 $this->handleFulfillTransaction();
-                break;
-
-            case 'refundItems':
-                $this->handleRefundItems();
                 break;
 
             case 'addDeliveryMethod':

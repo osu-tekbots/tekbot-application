@@ -29,9 +29,6 @@ class TransactionItem {
     /** @var int */
     private $quantity;
 
-    /** @var int */
-    private $quantityRefunded;
-
     /** @var \DateTime */
     private $dateCreated;
 
@@ -46,7 +43,6 @@ class TransactionItem {
     public function __construct($id = null) {
         if ($id == null) {
 			$id = IdGenerator::generateSecureUniqueId();
-            $this->setQuantityRefunded(0);
             $this->setDateCreated(new \DateTime);
             $this->setDateUpdated(new \DateTime);
         }
@@ -112,14 +108,6 @@ class TransactionItem {
 
     public function setQuantity($quantity) {
         $this->quantity = $quantity;
-    }
-
-    public function getQuantityRefunded() {
-        return $this->quantityRefunded;
-    }
-
-    public function setQuantityRefunded($quantityRefunded) {
-        $this->quantityRefunded = $quantityRefunded;
     }
 
     public function getDateCreated() {

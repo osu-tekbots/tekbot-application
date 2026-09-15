@@ -44,18 +44,8 @@ if (!empty($transactionID)) {
     $tpgTransId = $transaction->getTpgTransId() ?? '';
     $sysTrackingId = $transaction->getSysTrackingId() ?? '';
 
-    $initialItems = $refundedItems = 0;
-    $refundedCost = 0;
-    foreach ($items as $item) {
-      $initialItems += $item->getQuantity();
-      $refundedItems += $item->getQuantityRefunded();
-
-      $refundedCost += $item->getPrice() * $item->getQuantityRefunded();
-    }
-    $totalItems = $initialItems - $refundedItems;
-    $totalCost = numberToDollarString($transaction->getAmount() - $refundedCost);
-    $initialCost = numberToDollarString($transaction->getAmount());
-    $refundedCost = numberToDollarString($refundedCost);
+    $totalItems = array_reduce($items, fn ($prev, $item) => $prev + $item->getQuantity());
+    $totalCost = numberToDollarString($transaction->getAmount());
     
     $tableHTML = createTransactionReceiptTable($inventoryDao, $items);
 
@@ -75,37 +65,13 @@ if (!empty($transactionID)) {
           <span class='text-muted'>".(
             $transaction->getDatePaid()?->format('(\P\a\i\d \o\n m/d/Y)') ?? ''
           )."</span>
+        </p>
+        <p>Total items: $totalItems</p>
+        <p>Total price: $totalCost</p>
+        <p style='white-space: normal'>
+          Delivery method: {$transaction->getDeliveryMethod()->getName()}<br>
+          Fulfilled: ".($transaction->getDateFulfilled()?->format('m/d/Y \a\t g:ia') ?? 'No')."
         </p>";
-    
-    if ($refundedItems > 0) {
-      $transactionSummaryHTML .= "
-        <div class='d-flex justify-content-between'>
-          <p>Initial items: $initialItems</p>
-          <p>Refunded items: $refundedItems</p>
-          <p>Total items: $totalItems</p>
-        </div>
-        <div>
-          <div class='d-flex justify-content-between'>
-            <span>Initial amount paid</span><span>$initialCost</span>
-          </div>
-          <div class='d-flex justify-content-between'>
-            <span>Refunded amount</span><span>- $refundedCost</span>
-          </div>
-          <div class='border-top d-flex justify-content-between'>
-            <p>Current amount paid</p><p>$totalCost</p>
-          </div>
-        </div>";
-    } else {
-      $transactionSummaryHTML .= "
-        <p>Total items: $initialItems</p>
-        <p>Total price: $initialCost</p>
-      ";
-    }
-
-    $transactionSummaryHTML .= "<p style='white-space: normal'>
-      Delivery method: {$transaction->getDeliveryMethod()->getName()}<br>
-      Fulfilled: ".($transaction->getDateFulfilled()?->format('m/d/Y \a\t g:ia') ?? 'No')."
-    </p>";
 
     if ($transaction->getDeliveryMethod()->getID() != TransactionDelivery::PICKUP) {
       $transactionSummaryHTML .= "
@@ -174,10 +140,6 @@ $transactions = $transactionDao->getAllTransactions();
                         Mark fulfilled
                       </button>';
                     }
-                    echo '<button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#refundModal">
-                      <i class="fas fa-undo"></i>
-                      Refund
-                    </button>';
                   } 
                 ?>
               </div>
@@ -226,37 +188,6 @@ $transactions = $transactionDao->getAllTransactions();
   </div>
 </div>
 
-<!-- Refund modal -->
-<div class="modal fade" id="refundModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Refund Items</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-
-        <!-- Modal body -->
-        <div id="body" class="modal-body">
-          <p style="white-space: normal">
-            Are you sure you wish to mark these items as refunded? This should only be
-            done <b>after</b> the refund is processed in Touchnet <b>cannot be undone</b>.
-          </p>
-          <h5>Refunded Items</h5>
-          <div id="refundModalItems"></div>
-        </div>
-
-      <!-- Modal footer -->
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-          <button id="confirmRefundBtn" type="button" class="btn btn-danger" data-dismiss="modal" onclick="refundItems()">
-            Confirm
-          </button>
-        </div>
-    </div>
-  </div>
-</div>
-
 <script type='text/javascript'>
   function fulfillTransaction() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -272,81 +203,6 @@ $transactions = $transactionDao->getAllTransactions();
       snackbar(err.message, 'error');
     });
   }
-
-
-  function refundItems() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const items = getRefundItems()
-      .map((_, elmt) => ({
-        id: $(elmt).find('.item-refund-input').data('item-id'),
-        quantity: $(elmt).find('.item-refund-input').val() - $(elmt).find('.item-refund-input').attr('min')
-      }))
-      .get();
-
-    const data = {
-      action: 'refundItems',
-      id: urlParams.get('id'),
-      items
-    };
-
-    api.post('/transactions.php', data).then(res => {
-      snackbar(res.message, 'success');
-    }).catch(err => {
-      snackbar(err.message, 'error');
-    }).finally(() => {
-      // Might have partially succeeded before failure, so always reload
-      setTimeout(() => window.location.reload(), 1000);
-    });
-  }
-
-
-  function getRefundItems() {
-    const items = $('.item');
-
-    items.each((_, item) => {
-      const refundElmt = $(item).find('.item-refund-input');
-
-      const inputVal = Math.max(
-        Math.min(refundElmt.val(), refundElmt.attr('max')),
-        refundElmt.attr('min')
-      );
-
-      if (inputVal != refundElmt.val()) refundElmt.val(inputVal);
-    });
-
-    return items.filter((_, item) => (
-      $(item).find('.item-refund-input').val() > $(item).find('.item-refund-input').attr('min')
-    ));
-  }
-
-
-  $('#refundModal').on('show.bs.modal', function (e) {
-    const items = getRefundItems();
-    const itemsList = $('#refundModalItems');
-
-    itemsList.empty();
-    
-    if (items.length === 0) {
-      $('#confirmRefundBtn').prop('disabled', true);
-
-      itemsList.append($('<small>', {
-        text: 'No items marked for refund. Increment the "Refund" column\'s inputs to mark items for refund.',
-        class: 'text-muted'
-      }));
-    } else {
-      $('#confirmRefundBtn').prop('disabled', false);
-
-      items.each((_, item) => {
-        const refundElmt = $(item).find('.item-refund-input');
-        const refundQty = refundElmt.val() - refundElmt.attr('min');
-  
-        const e = $('<p>', {class: 'ml-2', style: 'white-space: normal;'});
-        e.append($('<b>', { text: `${refundQty} \u2013 ` }));
-        e.append($(item).find('.item-name').text());
-        itemsList.append(e);
-      });
-    }
-  });
 
 
   <?= createReceiptDatatable(
