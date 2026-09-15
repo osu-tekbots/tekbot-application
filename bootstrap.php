@@ -26,7 +26,7 @@ $configManager = $_SESSION['configManager'];
 try {
     $dbConn = DataAccess\DatabaseConnection::FromConfig($configManager->getDatabaseConfig());
 } catch (\Exception $e) {
-    echo 'There is an irresolvable issue with our database connection right now. Please try again later.';
+    echo 'There is an issue with our database connection right now. Please try again later.';
     die();
 }
 

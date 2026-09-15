@@ -36,7 +36,7 @@ $equipmentReservationCount = $equipmentCheckoutDao->getReservationCountForEmploy
 $printerJobs = $printerJobsDao->getPrintJobsRequiringAction();
 $laserJobs = $laserJobsDao->getLaserJobsRequiringAction();
 $tickets = $ticketDao->getTicketsByStatus(0);
-$cronEmails = sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, $messageDao, $userDao, $configManager, $mailer);
+$cronEmails = sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, $messageDao, $userDao, $configManager, $mailer, $logger);
 $cronCarts = purgeOldCartsIfNeeded($configurationDao, $inventoryDao, $configManager);
 //added getOpenTicket @param 0 = unresolved status
 

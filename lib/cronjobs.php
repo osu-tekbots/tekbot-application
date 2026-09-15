@@ -27,7 +27,7 @@ $mailer = new TekBotsMailer($configManager->getWorkerMaillist(), $configManager-
  * 
  * @return int|bool How many reminder emails were sent or false if emails were already sent today
  */
-function sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, $messageDao, $userDao, $configManager, $mailer) {
+function sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, $messageDao, $userDao, $configManager, $mailer, $logger) {
     $configuration = $configurationDao->getConfiguration();
 
     // Don't do anything if emails were already sent today
@@ -35,7 +35,7 @@ function sendCronEmailsIfNeeded($checkoutDao, $configurationDao, $equipmentDao, 
         return false;
     }
 
-    $emailsSent = sendOverdueEquipmentEmails($checkoutDao, $equipmentDao, $messageDao, $userDao, $mailer);
+    $emailsSent = sendOverdueEquipmentEmails($checkoutDao, $equipmentDao, $messageDao, $userDao, $mailer, $logger);
 
     // Update last email sent time
     $configuration->setLastCronEmailTime(new DateTime());
@@ -108,7 +108,7 @@ function checkDaysSinceCartPurge($configuration, $configManager) {
 }
 
 
-function sendOverdueEquipmentEmails($checkoutDao, $equipmentDao, $messageDao, $userDao, $mailer) {
+function sendOverdueEquipmentEmails($checkoutDao, $equipmentDao, $messageDao, $userDao, $mailer, $logger) {
     $overdueEquipment = $checkoutDao->getLateCheckoutsForEmployee();
     $overdueMessage = $messageDao->getMessageByID('vwbF4elQwhGP8TQm');
     
