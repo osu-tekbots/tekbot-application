@@ -66,8 +66,14 @@ if (!empty($transactionID)) {
             $transaction->getDatePaid()?->format('(\P\a\i\d \o\n m/d/Y)') ?? ''
           )."</span>
         </p>
-        <p>Total items: $totalItems</p>
-        <p>Total price: $totalCost</p>
+        <p style='white-space: normal'>
+          Total items: $totalItems<br>
+          Total price: $totalCost
+        </p>
+        <div class='form-group'>
+          <label for='employeeNotes' class='mb-0'>Employee Notes</label>
+          <textarea id='employeeNotes' class='form-control' onchange='updateEmployeeNotes()' >{$transaction->getEmployeeNotes()}</textarea>
+        </div>
         <p style='white-space: normal'>
           Delivery method: {$transaction->getDeliveryMethod()->getName()}<br>
           Fulfilled: ".($transaction->getDateFulfilled()?->format('m/d/Y \a\t g:ia') ?? 'No')."
@@ -199,6 +205,22 @@ $transactions = $transactionDao->getAllTransactions();
     api.post('/transactions.php', data).then(res => {
       snackbar(res.message, 'success');
       setTimeout(() => window.location.reload(), 1000);
+    }).catch(err => {
+      snackbar(err.message, 'error');
+    });
+  }
+
+
+  function updateEmployeeNotes() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = {
+      action: 'updateEmployeeNotes',
+      id: urlParams.get('id'),
+      notes: $('#employeeNotes').val()
+    };
+
+    api.post('/transactions.php', data).then(res => {
+      snackbar(res.message, 'success');
     }).catch(err => {
       snackbar(err.message, 'error');
     });

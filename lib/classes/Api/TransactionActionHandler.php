@@ -208,6 +208,37 @@ class TransactionActionHandler extends ActionHandler {
 
 
     /**
+     * Updates the employee note for a transaction, allowing employees to keep track of
+     * unusual situations like partial refunds.
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handleUpdateEmployeeNotes() {
+        $this->verifyAccessLevel('employee');
+
+        $transactionId = $this->getFromBody('id');
+        $notes = $this->getFromBody('notes');
+
+        $transaction = $this->transactionDao->getTransaction($transactionId);
+        if (!$transaction) {
+            $this->respond(new Response(Response::BAD_REQUEST, 'Failed to find transaction'));
+        }
+
+        $transaction->setEmployeeNotes($notes);
+        $transaction->setDateUpdated(new \DateTime);
+
+        $ok = $this->transactionDao->updateTransaction($transaction);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to update transaction'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Updated employee notes'));
+    }
+
+
+    /**
      * Marks a transaction as fulfilled, indicating that the materials paid for have been
      * picked up/shipped.
      * 
@@ -396,6 +427,10 @@ class TransactionActionHandler extends ActionHandler {
 
             case 'updateTransaction':
                 $this->handleUpdateTransaction();
+                break;
+
+            case 'updateEmployeeNotes':
+                $this->handleUpdateEmployeeNotes();
                 break;
 
             case 'fulfillTransaction':

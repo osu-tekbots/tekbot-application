@@ -205,6 +205,7 @@ class TransactionDao {
                 t_tpg_trans_id,
                 t_sys_tracking_id,
                 t_card_type,
+                t_employee_notes,
                 t_date_paid,
                 t_date_fulfilled,
                 t_date_created,
@@ -227,6 +228,7 @@ class TransactionDao {
                 :tpg_trans_id,
                 :sys_tracking_id,
                 :card_type,
+                :employee_notes,
                 :date_paid,
                 :date_fulfilled,
                 :date_created,
@@ -250,6 +252,7 @@ class TransactionDao {
                 'tpg_trans_id' => $transaction->getTpgTransId(),
                 'sys_tracking_id' => $transaction->getSysTrackingId(),
                 'card_type' => $transaction->getCardType(),
+                'employee_notes' => $transaction->getEmployeeNotes(),
                 'date_paid' => QueryUtils::FormatDate($transaction->getDatePaid()),
                 'date_fulfilled' => QueryUtils::FormatDate($transaction->getDateFulfilled()),
                 'date_created' => QueryUtils::FormatDate($transaction->getDateCreated()),
@@ -341,6 +344,7 @@ class TransactionDao {
                     t_tpg_trans_id = :tpg_trans_id,
                     t_sys_tracking_id = :sys_tracking_id,
                     t_card_type = :card_type,
+                    t_employee_notes = :employee_notes,
                     t_date_paid = :date_paid,
                     t_date_fulfilled = :date_fulfilled,
                     t_date_created = :date_created,
@@ -364,6 +368,7 @@ class TransactionDao {
                 'tpg_trans_id' => $transaction->getTpgTransId(),
                 'sys_tracking_id' => $transaction->getSysTrackingId(),
                 'card_type' => $transaction->getCardType(),
+                'employee_notes' => $transaction->getEmployeeNotes(),
                 'date_paid' => QueryUtils::FormatDate($transaction->getDatePaid()),
                 'date_fulfilled' => QueryUtils::FormatDate($transaction->getDateFulfilled()),
                 'date_created' => QueryUtils::FormatDate($transaction->getDateCreated()),
@@ -459,6 +464,7 @@ class TransactionDao {
         $transaction->setTpgTransId($row['t_tpg_trans_id']);
         $transaction->setSysTrackingId($row['t_sys_tracking_id']);
         $transaction->setCardType($row['t_card_type']);
+        $transaction->setEmployeeNotes($row['t_employee_notes']);
         $transaction->setDatePaid($row['t_date_paid'] ? new \DateTime($row['t_date_paid']) : null);
         $transaction->setDateFulfilled($row['t_date_fulfilled'] ? new \DateTime($row['t_date_fulfilled']) : null);
         $transaction->setDateCreated(new \DateTime($row['t_date_created']));

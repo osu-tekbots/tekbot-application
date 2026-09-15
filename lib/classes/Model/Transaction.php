@@ -65,6 +65,9 @@ class Transaction {
     /** @var string|null */
     private $cardType;
 
+    /** @var string */
+    private $employeeNotes;
+
     /** @var \DateTime|null */
     private $datePaid;
 
@@ -231,6 +234,14 @@ class Transaction {
 
     public function setCardType($cardType) {
         $this->cardType = $cardType;
+    }
+
+    public function getEmployeeNotes() {
+        return $this->employeeNotes;
+    }
+
+    public function setEmployeeNotes($employeeNotes) {
+        $this->employeeNotes = $employeeNotes;
     }
 
     public function getDatePaid() {
