@@ -201,8 +201,8 @@ foreach ($shippingOptions as $option) {
                   </ul>
                   <div class="tab-content mt-3">
                     <div class="tab-pane fade show active" id="pickup" role="tabpanel" aria-labelledby="pickupTab">
-                      To pay when you pick up your items, provide your cart code to a TekBots employee in-person at
-                      KEC 1110 during store hours, posted <a href="./pages/index.php">here</a>.
+                      To pay when you pick up your items, bring your laptop with this cart code to a TekBots employee
+                      in-person at KEC 1110 during store hours, posted <a href="./pages/index.php">here</a>.
                       If you would like to pay ahead of time, press the button below and provide your receipt during
                       pickup instead.
                       
@@ -233,17 +233,23 @@ foreach ($shippingOptions as $option) {
                         </div>
 
                         <div class="form-row">
-                          <div class="form-group col-md-4">
+                          <div class="form-group col-md">
                             <label for="name">Name <span class="text-danger">*</span></label>
                             <input name="name" id="name" class="form-control" type="text" autocomplete="name" required value="<?= $user ? $user->getFirstName().' '.$user->getLastName() : '' ?>">
                           </div>
-                          <div class="form-group col-md-5">
+                          <div class="form-group col-md">
+                            <label for="phone">Phone Number <span class="text-danger">*</span></label>
+                            <input name="phone" id="phone" class="form-control" type="tel" autocomplete="tel" required value="<?= $user ? $user->getPhone() : '' ?>">
+                          </div>
+                        </div>
+                        <div class="form-row">
+                          <div class="form-group col-md">
                             <label for="email">Email Address <span class="text-danger">*</span></label>
                             <input name="email" id="email" class="form-control" type="email" autocomplete="email" required value="<?= $user ? $user->getEmail() : '' ?>">
                           </div>
-                          <div class="form-group col-md-3">
-                            <label for="phone">Phone Number <span class="text-danger">*</span></label>
-                            <input name="phone" id="phone" class="form-control" type="tel" autocomplete="tel" required value="<?= $user ? $user->getPhone() : '' ?>">
+                          <div class="form-group col-md">
+                            <label for="email2">Confirm Email <span class="text-danger">*</span></label>
+                            <input name="email2" id="email2" class="form-control" type="email" autocomplete="email" required value="<?= $user ? $user->getEmail() : '' ?>">
                           </div>
                         </div>
                         <div class="form-row">
@@ -350,6 +356,11 @@ foreach ($shippingOptions as $option) {
       action: 'checkout',
       ...params
     };
+
+    if (params.email !== params.email2) {
+      alert('Email addresses do not match');
+      return;
+    }
 
     api.post('/transactions.php', body)
       .then(res => handleUpaySubmit(res.content, params))
