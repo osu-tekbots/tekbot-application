@@ -65,6 +65,12 @@ class Transaction {
     /** @var string|null */
     private $cardType;
 
+    /** @var string|null */
+    private $cardName;
+
+    /** @var string|null */
+    private $receiptEmail;
+
     /** @var string */
     private $employeeNotes;
 
@@ -234,6 +240,22 @@ class Transaction {
 
     public function setCardType($cardType) {
         $this->cardType = $cardType;
+    }
+
+    public function getCardName() {
+        return $this->cardName;
+    }
+
+    public function setCardName($cardName) {
+        $this->cardName = $cardName;
+    }
+
+    public function getReceiptEmail() {
+        return $this->receiptEmail;
+    }
+
+    public function setReceiptEmail($receiptEmail) {
+        $this->receiptEmail = $receiptEmail;
     }
 
     public function getEmployeeNotes() {

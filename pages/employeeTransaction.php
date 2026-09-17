@@ -34,6 +34,13 @@ include_once PUBLIC_FILES . '/modules/receipt.php';
 $inventoryDao = new InventoryDao($dbConn, $logger);
 $transactionDao = new TransactionDao($dbConn, $logger);
 
+$statusDescriptions = [
+  'Fulfilled' => 'The order&apos;s items have already been distributed',
+  'Success' => 'Payment was successful and the order&apos;s items should be distributed',
+  'Pending' => 'The user was sent to TouchNet but has not paid',
+  'Canceled' => 'The user clicked "cancel" instead of paying on on TouchNet',
+];
+
 $transactionID = $_GET['id'] ?? '';
 if (!empty($transactionID)) {
   $transaction = $transactionDao->getTransaction($transactionID);
@@ -47,7 +54,7 @@ if (!empty($transactionID)) {
     $totalItems = array_reduce($items, fn ($prev, $item) => $prev + $item->getQuantity());
     $totalCost = numberToDollarString($transaction->getAmount());
     
-    $tableHTML = createTransactionReceiptTable($inventoryDao, $items);
+    $transactionItemsHTML = createTransactionReceiptTable($inventoryDao, $items);
 
     $transactionSummaryHTML = "
       <div class='card p-3 shadow-sm' style='height: fit-content !important'>
@@ -76,7 +83,11 @@ if (!empty($transactionID)) {
         </div>
         <p style='white-space: normal'>
           Delivery method: {$transaction->getDeliveryMethod()->getName()}<br>
-          Fulfilled: ".($transaction->getDateFulfilled()?->format('m/d/Y \a\t g:ia') ?? 'No')."
+          Fulfilled: ".(
+            $transaction->getDateFulfilled()
+              ? '<span class="text-danger">'.$transaction->getDateFulfilled()?->format('m/d/Y \a\t g:ia').'</span'
+              : 'No'
+          )."
         </p>";
 
     if ($transaction->getDeliveryMethod()->getID() != TransactionDelivery::PICKUP) {
@@ -92,12 +103,60 @@ if (!empty($transactionID)) {
 
     $transactionSummaryHTML .= '</div>';
   } else {
-    $tableHTML = '<small class="text-muted">No transaction found</small>';
+    $transactionItemsHTML = '<small class="text-muted">No transaction found</small>';
     $transactionSummaryHTML = '';
   }
+  $transactionsTableHTML = '';
 } else {
-  $tableHTML = '';
+  $transactionItemsHTML = '';
   $transactionSummaryHTML = '';
+  $transactionsTableHTML = '<table class="table" id="TransactionTable">
+    <thead>
+      <tr>
+        <th>EXT_TRANS_ID</th>
+        <th>Paid By</th>
+        <th style="display: none;" class="d-md-table-cell">Items</th>
+        <th style="display: none;" class="d-md-table-cell">Amount ($)</th>
+        <th style="display: none;" class="d-md-table-cell">Status</th>
+        <th>Date Paid</th>
+        <th style="display: none;" class="d-md-table-cell">Shipping</th>
+      </tr>
+    </thead>
+    <tbody>';
+  
+  $transactions = $transactionDao->getAllTransactions();
+
+  foreach ($transactions as $transaction) {
+    $items = count($transactionDao->getTransactionItems($transaction->getTransactionID()));
+    $status = $transaction->getDateFulfilled()
+      ? 'Fulfilled'
+      : $transaction->getStatus();
+    $statusClass = $status === 'Success'
+      ? 'text-success'
+      : ($status === 'Fulfilled'
+        ? 'text-warning'
+        : 'text-danger font-weight-bold'
+      );
+
+    $transactionsTableHTML .= "<tr>
+      <td><a href='pages/employeeTransaction.php?id={$transaction->getTransactionID()}'>
+        {$transaction->getTransactionID()}
+      </a></td>
+      <td>{$transaction->getCardName()}</td>
+      <td style='display: none;' class='d-md-table-cell'>{$items}</td>
+      <td style='display: none;' class='d-md-table-cell'>{$transaction->getAmount()}</td>
+      <td style='display: none;' class='d-md-table-cell'>
+        <span class='$statusClass'>{$status}</span>
+        <i class='fas fa-question-circle float-right text-muted' data-toggle='tooltip' title='{$statusDescriptions[$status]}'></i>
+      </td>
+      <td>{$transaction->getDatePaid()?->format('Y-m-d')}</td>
+      <td style='display: none;' class='d-md-table-cell'>{$transaction->getDeliveryMethod()->getName()}</td>
+    </tr>";
+  }
+  
+  $transactionsTableHTML .='
+    </tbody>
+  </table>';
 }
 
 $transactions = $transactionDao->getAllTransactions();
@@ -116,7 +175,6 @@ $transactions = $transactionDao->getAllTransactions();
                 <div class="form-group col-sm-10 flex-shrink-1">
                   <label for="id">External Transaction ID:</label>
                   <input
-                    required
                     id="id" name="id" class="form-control"
                     type="text" value="<?= $transactionID ?>" list="idList"
                     oninput="getTransactionCount(this.value)"
@@ -155,10 +213,16 @@ $transactions = $transactionDao->getAllTransactions();
 
           <div class="row">
             <div class="col-md-8">
-              <?= $tableHTML ?>
+              <?= $transactionItemsHTML ?>
             </div>
             <div class="col-md-4">
               <?= $transactionSummaryHTML ?>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <?= $transactionsTableHTML ?>
             </div>
           </div>
         </div>
@@ -241,6 +305,20 @@ $transactions = $transactionDao->getAllTransactions();
     ]',
     '[6, 7]'
   ) ?>
+
+
+  $('#TransactionTable').DataTable({
+    lengthMenu: [[10, 20, -1], [10, 20, 'All']],
+    aaSorting: [[5, 'desc']],
+    initComplete: function () {
+      // Make search input match Bootstrap style
+      const searchInput = $(this.DataTable().table().container()).find('div.dataTables_filter');
+      searchInput.addClass('form-inline mb-2');
+      searchInput.find('input').addClass('form-control form-control-sm');
+    },
+  });
+
+  $('[data-toggle="tooltip"]').tooltip();
 </script>
 
 <?php include_once PUBLIC_FILES . '/modules/footer.php'; ?>

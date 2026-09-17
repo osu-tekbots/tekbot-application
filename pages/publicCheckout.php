@@ -33,9 +33,15 @@ if (isset($_REQUEST['EXT_TRANS_ID'])) {
   if ($transaction) {
     if ($transaction->getStatus() == Transaction::SUCCESS) {
       generateNewCartSession($inventoryDao); // Don't let the user see their old cart now that it's paid for
-      $alertMessage = '<div class="alert alert-success"><i class="fas fa-check mr-2"></i>Your payment was successfully processed.</div>';
+      $alertMessage = "<div class='alert alert-success'>
+        <i class='fas fa-check mr-2'></i>Your payment of \${$transaction->getAmount()} was
+        successfully processed. A receipt has been sent to ${$transaction->getReceiptEmail()}.
+      </div>";
     } else {
-      $alertMessage = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle mr-2"></i>Your payment was not processed. Please try again or contact a site administrator if this is unexpected.</div>';
+      $alertMessage = '<div class="alert alert-warning">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        Your payment was not processed. Please try again or contact a site administrator if this is unexpected.
+      </div>';
     }
   }
 }

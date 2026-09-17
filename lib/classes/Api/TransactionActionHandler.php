@@ -186,6 +186,8 @@ class TransactionActionHandler extends ActionHandler {
                 $transaction->setTpgTransId   ($this->getFromBody('tpg_trans_id'));
                 $transaction->setSysTrackingId($this->getFromBody('sys_tracking_id'));
                 $transaction->setCardType     ($this->getFromBody('card_type'));
+                $transaction->setCardName     ($this->getFromBody('name_on_acct'));
+                $transaction->setReceiptEmail ($this->getFromBody('acct_email_address'));
                 $transaction->setDatePaid     (new \DateTime($this->getFromBody('pmt_date')));
                 break;
             
