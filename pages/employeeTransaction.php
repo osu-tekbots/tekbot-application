@@ -234,13 +234,12 @@ $transactions = $transactionDao->getAllTransactions();
       null,
       null,
       null,
-      { orderable: false },
       null,
       { orderable: false },
       { className: "item-print-col" },
       { className: "info-print-col" }
     ]',
-    '[7, 8]'
+    '[6, 7]'
   ) ?>
 </script>
 
