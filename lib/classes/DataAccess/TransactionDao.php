@@ -451,6 +451,36 @@ class TransactionDao {
 
 
     /**
+     * Deletes old transactions in cancelled/pending state (i.e. that were never paid for).
+     * 
+     * @return boolean Whether purging old transactions succeeded
+     */
+    public function purgeIncompleteTransactions() {
+        try {
+            $this->conn->startTransaction();
+            
+            $this->conn->execute('DELETE `ti` FROM `transaction_item` AS `ti`
+                    LEFT JOIN `transaction` AS `t` ON `ti`.`ti_t_id` = `t`.`t_id`
+                WHERE `t_status` IN ("Pending", "Canceled")
+                    AND `t_date_created` < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            ');
+            $this->conn->execute('DELETE FROM `transaction`
+                WHERE `t_status` IN ("Pending", "Canceled")
+                    AND `t_date_created` < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            ');
+
+            $this->conn->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->conn->rollback();
+            $this->logger->error('Failed to purge incomplete transactions: ' . $e->getMessage());
+
+            return false;
+        }
+    }
+
+
+    /**
      * Creates a new Transaction object by extracting the information from a row in the database.
      *
      * @param string[] $row a row from the database containing transaction information

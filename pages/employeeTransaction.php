@@ -156,7 +156,19 @@ if (!empty($transactionID)) {
   
   $transactionsTableHTML .='
     </tbody>
-  </table>';
+  </table>
+  <div class="row mt-3">
+    <div class="col text-right">
+      <button
+        class="btn btn-outline-danger"
+        type="button" onclick="purgeIncompleteTransactions()"
+        data-toggle="tooltip" title="Deletes pending/canceled transactions from >30 days ago"
+      >
+        <i class="fas fa-trash-fill"></i>
+        Purge Incomplete
+      </button>
+    </div>
+  </div>';
 }
 
 $transactions = $transactionDao->getAllTransactions();
@@ -220,11 +232,7 @@ $transactions = $transactionDao->getAllTransactions();
             </div>
           </div>
 
-          <div class="row">
-            <div class="col">
-              <?= $transactionsTableHTML ?>
-            </div>
-          </div>
+          <?= $transactionsTableHTML ?>
         </div>
       </div>
     </div>
@@ -285,6 +293,20 @@ $transactions = $transactionDao->getAllTransactions();
 
     api.post('/transactions.php', data).then(res => {
       snackbar(res.message, 'success');
+    }).catch(err => {
+      snackbar(err.message, 'error');
+    });
+  }
+
+
+  function purgeIncompleteTransactions() {
+    const data = {
+      action: 'purgeIncompleteTransactions'
+    };
+
+    api.post('/transactions.php', data).then(res => {
+      snackbar(res.message, 'success');
+      setTimeout(() => window.location.reload(), 1000);
     }).catch(err => {
       snackbar(err.message, 'error');
     });

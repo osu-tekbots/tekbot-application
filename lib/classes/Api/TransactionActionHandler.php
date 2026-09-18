@@ -271,6 +271,25 @@ class TransactionActionHandler extends ActionHandler {
 
 
     /**
+     * Deletes old transactions in cancelled/pending state (i.e. that were never paid for).
+     * 
+     * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
+     *
+     * @return void
+     */
+    public function handlePurgeIncompleteTransactions() {
+        $this->verifyAccessLevel('employee');
+
+        $ok = $this->transactionDao->purgeIncompleteTransactions();
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Unable to purge transactions'));
+        }
+
+        $this->respond(new Response(Response::OK, 'Purged transactions'));
+    }
+
+
+    /**
      * Adds a new delivery method that users can select when paying
      * 
      * This function, after invocation is finished, will exit the script via the `ActionHandler\respond()` function.
@@ -437,6 +456,10 @@ class TransactionActionHandler extends ActionHandler {
 
             case 'fulfillTransaction':
                 $this->handleFulfillTransaction();
+                break;
+
+            case 'purgeIncompleteTransactions':
+                $this->handlePurgeIncompleteTransactions();
                 break;
 
             case 'addDeliveryMethod':
